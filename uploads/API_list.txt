@@ -1,0 +1,66 @@
+Basic api list for 4 apps
+
+1. Makeituser - done
+2. Moveituser - done
+3. Eatusers - done
+4. localities - done
+5. Moveit_hubs - Not required for phase 1
+6. Moveit_employees - Not required for phase 1
+7. Orders - Yet to be done
+8. Sales_qa_employees - done
+10. Menuitem - done
+10. Product - done
+11. Questions - done
+12. Documents - Paritally done
+13. Fav - done
+14. Allocation - done
+
+Others base api list and second layer list will be written only based on UI
+
+Registration api
+OTP api - third party
+appointment api
+
+
+Makeit APi
+
+1. Login - done
+2. Registration - done
+3. Account info page api (account no , name, ifsc, bankname) - done
+4. Item create, list, update, delete - done
+5. Book appointment api - done
+6. Splash api (status) to handle to show which screen (approved/home page/Waiting for Approval) - Pending
+7. Product Create, List, delete, update (Filter: Live, all)
+
+
+Make
+
+Admin
+
+Eat User
+1. Create User (virtual)
+2. Login Virtual
+3. Virutal order
+
+Moveit
+1. Assign it to order
+2. User creation
+
+Sales
+1. User creation
+2. Appointment with Makeit user and Sales man.
+2. Makeit User details
+
+
+Sales app
+
+Q/A flow no needed in Sales app
+No Charts needed in home page in phase 1
+
+
+Moveit 
+
+Login - done
+Registration - done
+Order, All orders
+Direction
