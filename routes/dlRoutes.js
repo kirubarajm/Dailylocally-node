@@ -2,22 +2,9 @@
 module.exports = function(app) {
   var routesVersioning = require('express-routes-versioning')();
   var dluser = require("../controllers/dluser/DlUserController");
-  var makeituser = require("../controllers/makeit/MakeitUserController");
-  var fav = require("../controllers/dluser/FavController");
-  var orders = require("../controllers/common/OrderController");
   var useraddress = require("../controllers/dluser/UserAddressController");
-  var orderrating = require("../controllers/common/OrderratingController");
-  var quicksearch = require("../controllers/common/QuickSearchController");
-  var refundcoupon = require("../controllers/common/RefundCouponController");
-  var coupon = require("../controllers/common/CouponController");
-  var Stories = require("../controllers/common/StoryController");
-  var feedback = require("../controllers/common/EatfeedbackController");
-  var collection = require("../controllers/common/CollectionController");
-  let jwt = require('jsonwebtoken');
-  let config = require('../model/config.js');
   let middleware = require('../model/middleware.js');
-  var Promotion = require("../controllers/common/PromotionController");
-  var Zendeskissues = require("../controllers/common/ZendeskissuesController");
+
 
 
 

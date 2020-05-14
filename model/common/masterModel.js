@@ -1,7 +1,7 @@
 "user strict";
 //var sql = require('../db.js');
 var masters_comm = require("../master.js");
-var masters_eat = require("../master_eat.js");
+// var masters_eat = require("../master_eat.js");
 //Task object constructor
 var masters= function() {};
 masters.read_a_masters = function read_a_masters(req, result) {
