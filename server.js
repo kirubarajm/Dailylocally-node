@@ -22,9 +22,11 @@ app.use(fileUpload());
 app.use(express.static(__dirname));
 
 var routes = require("./routes/appRoutes"); //importing route
-var dlRoutes = require("./routes/dlRoutes"); //importing eat route
+var dlRoutes = require("./routes/dlRoutes"); //importing route
 var webhookRoutes = require("./routes/webhookRoutes"); //importing webhook route
+var categoryRoutes = require("./routes/categoryRoutes");
 
 routes(app); //register the routes
-dlRoutes(app); //register the eat routes
-webhookRoutes(app); //register the admin routes
+dlRoutes(app); //register the dailyLocally routes
+webhookRoutes(app); //register the webhookRoutes routes
+categoryRoutes(app); //register the categoryRoutes routes

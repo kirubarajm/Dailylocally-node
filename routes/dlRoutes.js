@@ -4,7 +4,7 @@ module.exports = function(app) {
   var dluser = require("../controllers/dluser/DlUserController");
   var useraddress = require("../controllers/dluser/UserAddressController");
   let middleware = require('../model/middleware.js');
-
+  var category = require("../controllers/category/CategoryController");
 
 
 
@@ -24,6 +24,10 @@ app.route("/user/address/:userid").get(middleware.checkToken,routesVersioning({"
 app.route("/user/addresslist/:aid").get(middleware.checkToken,routesVersioning({"1.0.0":useraddress.read_a_user_address_aid}));
 app.route("/user/addressdelete").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_delete_status}));
 app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.user_default_address_update}));
+
+
+ // category
+ app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list}));
 
 // app.route("/eat/address").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.list_all_address})).post(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.create_a_address}));
 // app.route("/eat/addresslist/:aid").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.read_a_user_address_aid}));
