@@ -45,7 +45,8 @@ var Dluser = function(dluser) {
   this.gender = dluser.gender 
   this.pushid_android = dluser.pushid_android;
   this.pushid_ios = dluser.pushid_ios;
-  this.token=dluser.token;
+  this.userclusterid=dluser.userclusterid || 0;
+
 };
 
 
