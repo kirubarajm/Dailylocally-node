@@ -11,12 +11,13 @@ var moment = require("moment");
 const query = util.promisify(sql.query).bind(sql);
 
 
-var Category = function(category) {
-  this.name = category.name;
-  this.image = category.image;
+var Sub_Category_L2 = function(sub_Category_L2) {
+  this.name = sub_Category_L2.name;
+  this.image = sub_Category_L2.image;
+  this.scl1_id = sub_Category_L2.scl1_id;
 };
 
-Category.get_category_list =async function get_category_list(req,result) {
+Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Category_L2_listategory_L1_list(req,result) {
   
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
@@ -60,11 +61,11 @@ Category.get_category_list =async function get_category_list(req,result) {
       }
     }
 
-    var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
+    var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
 
 
         
-  sql.query(category_query, function(err, res) {
+  sql.query(sub_l2_category_query,async function(err, res) {
     if (err) {
       result(err, null);
     } else {
@@ -75,6 +76,9 @@ Category.get_category_list =async function get_category_list(req,result) {
         res[i].servicable_status=servicable_status;
         
       }
+
+      var product_list = await query("select * from ProductMaster pm left join Product_live pl on pl.pid=pm.pid where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl2_id=0  and pm.scl1_id=  '"+req.scl1_id+"'");
+  
 
       let resobj = {
         success: true,
@@ -87,7 +91,8 @@ Category.get_category_list =async function get_category_list(req,result) {
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Categories",
+        category_title :"Sub_Categories_L2",
+        product_list:product_list,
         result: res
       };
       result(null, resobj);
@@ -96,4 +101,4 @@ Category.get_category_list =async function get_category_list(req,result) {
 }
 };
 
-module.exports = Category;
+module.exports = Sub_Category_L2;

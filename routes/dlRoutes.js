@@ -5,6 +5,8 @@ module.exports = function(app) {
   var useraddress = require("../controllers/dluser/UserAddressController");
   let middleware = require('../model/middleware.js');
   var category = require("../controllers/category/CategoryController");
+  var sub_category_L1 = require("../controllers/category/Subcategoryl1Controller");
+  var sub_category_L2 = require("../controllers/category/Subcategoryl2Controller");
 
 
 
@@ -28,6 +30,17 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 
  // category
  app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list}));
+
+  // sub_category_L1
+  app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
+
+
+
+ // sub_category_L2
+ app.route("/user/subcategoryL2").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L2.get_Sub_Category_L2_list}));
+
+ //promotions
+//  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
 // app.route("/eat/address").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.list_all_address})).post(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.create_a_address}));
 // app.route("/eat/addresslist/:aid").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.read_a_user_address_aid}));

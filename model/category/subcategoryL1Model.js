@@ -11,12 +11,13 @@ var moment = require("moment");
 const query = util.promisify(sql.query).bind(sql);
 
 
-var Category = function(category) {
-  this.name = category.name;
-  this.image = category.image;
+var Sub_Category_L1 = function(sub_Category_L1) {
+  this.name = sub_Category_L1.name;
+  this.image = sub_Category_L1.image;
+  this.catid = sub_Category_L1.catid;
 };
 
-Category.get_category_list =async function get_category_list(req,result) {
+Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_list(req,result) {
   
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
@@ -60,11 +61,11 @@ Category.get_category_list =async function get_category_list(req,result) {
       }
     }
 
-    var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
+    var sub_category_query= "Select * from SubcategoryL1 where catid=  '"+req.catid+"' ";
 
 
         
-  sql.query(category_query, function(err, res) {
+  sql.query(sub_category_query, function(err, res) {
     if (err) {
       result(err, null);
     } else {
@@ -87,7 +88,7 @@ Category.get_category_list =async function get_category_list(req,result) {
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Categories",
+        category_title :"Sub_Categories_L1",
         result: res
       };
       result(null, resobj);
@@ -96,4 +97,4 @@ Category.get_category_list =async function get_category_list(req,result) {
 }
 };
 
-module.exports = Category;
+module.exports = Sub_Category_L1;
