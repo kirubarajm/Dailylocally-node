@@ -96,4 +96,368 @@ Category.get_category_list =async function get_category_list(req,result) {
 }
 };
 
+
+//cart details for ear user
+Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,isMobile,result) {
+
+  //console.log("122",userzoneid+","+zoneName);
+  var tempmessage = "";
+  var coupon__error_message = "";
+  var gst = 0;
+  var delivery_charge =constant.deliverycharge;
+  const productdetails = [];
+  var totalamount = 0;
+  var product_orginal_price = 0;
+  var amount = 0;
+  var refund_coupon_adjustment = 0;
+  var coupon_discount_amount = 0;
+  var isAvaliableItem = true;
+  var calculationdetails = {};
+  var couponstatus = true;
+  var isAvaliablekitchen = true;
+  var isAvaliablezone = true;
+  var day = moment().format("YYYY-MM-DD HH:mm:ss");
+  var startdate =  moment().format("YYYY-MM-DD");
+  var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
+  var currenthour  = moment(day).format("HH");
+  var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+  var convenience_charge = 0;
+  var product_cost_limit_status = true;
+  var product_gst = 0;
+  var product_weight = 0;
+  var product_total_weight = 0;
+  var radiuslimit = constant.radiuslimit;
+  var product_discount_price=0;
+ 
+
+    if (currenthour < 21) {
+      var order_delivery_day_message = "Your Order delivery will be Tomorrow 12 pm";
+      var order_delivery_day = tomorrow;
+    } else {
+      var order_delivery_day_message = "Your Order delivery will be day after Tomorrow "+dayafertomorrow
+      var order_delivery_day= dayafertomorrow;
+    }
+  
+  // var orderlist = await query("Select * From Orders where userid = '" +req.userid +"' and orderstatus >= 6");
+  var ordercount = 0
+  var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+
+  if (userdetails.length !==0) {   
+  
+  
+   
+    for (let i = 0; i < orderitems.length; i++) {
+      // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
+      
+      var res1 = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +orderitems[i].pid +"' ");
+      // if (res1[0].quantity < orderitems[i].quantity) {
+      //   res1[0].availablity = false;
+      //   tempmessage = tempmessage + res1[0].product_name + ",";
+      //   isAvaliableItem = false;
+      // }else if (res1[0].approved_status != 2) {
+      //   // console.log("approved_status");
+      //   res1[0].availablity = false;
+      //   tempmessage = tempmessage + res1[0].product_name + ",";
+      //   isAvaliableItem = false;
+      // }else if (res1[0].delete_status !=0) {
+      //   // console.log("delete_status");
+      //   res1[0].availablity = false;
+      //   tempmessage = tempmessage + res1[0].product_name + ",";
+      //   isAvaliableItem = false;
+      // }else
+      
+
+      if (res1[0].live_status == 0) {
+        // console.log("active_status");
+        res1[0].availablity = false;
+        tempmessage = tempmessage + res1[0].Productname + ",";
+        isAvaliableItem = false;
+      } else {
+        res1[0].availablity = true;
+      }
+
+      ///get amount each product
+      amount = res1[0].mrp * orderitems[i].quantity;
+     
+      product_discount_price = res1[0].discount_cost * orderitems[i].quantity;
+     
+      amount=  amount - product_discount_price ;
+  
+      product_weight  = res1[0].Weight * orderitems[i].quantity;
+      product_gst = Math.round((amount / 100) * res1[0].gst );
+    
+     
+      res1[0].amount = amount;
+      res1[0].product_gst = product_gst;
+      res1[0].cartquantity = orderitems[i].quantity;
+      res1[0].product_weight = product_weight;
+      res1[0].product_discount_price = product_discount_price;
+
+      //total product cost
+      totalamount = totalamount + amount;
+      gst = gst + product_gst;
+      product_total_weight = product_total_weight + product_weight;
+
+      productdetails.push(res1[0]);
+    }
+   
+    var query1 ="select *, ROUND( 3959 * acos( cos( radians('" +
+    req.lat +
+    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+    req.lon +
+    "') ) + sin( radians('" +
+    req.lat +
+    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1";
+   
+  
+    sql.query(query1,async function(err,res2) {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+      } else {
+       
+        if (res2[0].length==0) {
+          isAvaliablekitchen = false;
+          isAvaliablezone=false;
+      
+          let resobj = {
+            success: true,
+            status: false,
+            message: "Your Zone is not serviceable"
+          };
+          result(null, resobj);
+        }else{
+        
+         
+          if (res2[0].distance > radiuslimit) {
+            isAvaliablezone =false;
+          }
+
+          
+        
+              distance=Math.ceil(res2[0].distance * 1.6);   
+
+              if (distance > 5 && distance < 7.5) {
+                delivery_charge=delivery_charge + 20;
+              }else if(distance >=7.5){
+                delivery_charge=delivery_charge + 40;
+              }
+   
+       
+            
+          res2[0].isAvaliablekitchen = isAvaliablekitchen;
+          res2[0].isAvaliablezone=isAvaliablezone;
+         
+          
+       
+          product_orginal_price = totalamount;
+
+            //offer coupon amount detection algorithm
+          if (req.cid) {
+              var couponlist = await query("Select * From Coupon where cid = '" +req.cid +"' and active_status = 1 and expiry_date >= CURDATE()" );
+          
+              if (couponlist.length != 0) {
+                var maxdiscount = couponlist[0].maxdiscount;
+                var numberoftimes = couponlist[0].numberoftimes;
+                var discount_percent = couponlist[0].discount_percent;
+                var minprice_limit = couponlist[0].minprice_limit
+                var CouponsUsedlist = await query("Select * From CouponsUsed where cid = '" +req.cid +"' and userid = '" +req.userid +"' and active_status = 1");
+                var couponusedcount = CouponsUsedlist.length;
+
+                if (totalamount >=minprice_limit) {                
+                  minprice_limit_status = true
+                  if (couponusedcount < numberoftimes) {                
+                    var discount_amount = (totalamount / 100) * discount_percent;
+                    discount_amount = Math.round(discount_amount);                            
+                    if (discount_amount >= maxdiscount) {
+                      discount_amount = maxdiscount;
+                    }
+
+                    if (totalamount >= discount_amount) {                  
+                      totalamount = totalamount - discount_amount;
+                      coupon_discount_amount = discount_amount;
+                    }else{
+                      couponstatus = false;
+                      coupon__error_message = "coupon amount is too high";
+                    }
+                  }else{
+                    couponstatus = false;
+                    coupon__error_message = "coupon has been expired";
+                  }
+                }else{
+                  couponstatus = false;
+                  coupon__error_message = "Product value should be "+ minprice_limit+" to apply this coupons " ;
+                }
+              }else{
+                couponstatus = false;
+                coupon__error_message = "Coupon is not available";
+              }
+          }
+          
+         var gstcharge = (delivery_charge / 100) * constant.gst;
+         gstcharge = Math.round(gstcharge);
+        
+        
+       var grandtotal = gstcharge + totalamount + delivery_charge + convenience_charge;
+          // console.log("delivery_charge",delivery_charge);
+
+          if (grandtotal < constant.minimum_cart_value) {
+            product_cost_limit_status = false;//if false don't show message an 
+            
+          }
+          
+          if (userdetails[0].premium_user==1) {
+            product_cost_limit_status = true;//if false don't show message           
+          }
+
+          /////Premum user 
+          
+          calculationdetails.grandtotaltitle = "To Pay";
+          calculationdetails.grandtotal = grandtotal;
+          calculationdetails.gstcharge = gstcharge;
+          calculationdetails.product_total_weight=product_total_weight
+          calculationdetails.delivery_charge = delivery_charge;
+          calculationdetails.refund_coupon_adjustment = refund_coupon_adjustment;
+          calculationdetails.product_orginal_price = product_orginal_price;
+          calculationdetails.totalamount = totalamount;
+          calculationdetails.coupon_discount_amount = coupon_discount_amount;
+          calculationdetails.couponstatus = false;
+          calculationdetails.product_cost_limit_status = product_cost_limit_status;
+          calculationdetails.product_cost_limit_message = constant.product_cost_limit_message;
+          calculationdetails.product_cost_limit_short_message = constant.product_cost_limit_short_message+constant.minimum_cart_value;
+          calculationdetails.order_delivery_day_message=order_delivery_day_message;
+          calculationdetails.order_delivery_day=order_delivery_day;
+          calculationdetails.minimum_cart_value=constant.minimum_cart_value;
+
+          //  console.log(calculationdetails.order_delivery_day);
+          if (req.cid && couponstatus) {
+            calculationdetails.couponstatus = couponstatus;
+            calculationdetails.cid = req.cid;
+          }
+         
+
+          var cartdetails = [];
+          var totalamountinfo = {};
+          var couponinfo = {};
+          var gstinfo = {};
+          var deliverychargeinfo = {};
+          var other_charges_info = {};
+          deliverychargeinfo.low_cost_status=false//show low cost 30
+          deliverychargeinfo.default_cost_status = false;//default cost 30
+          deliverychargeinfo.infostatus = true;
+          deliverychargeinfo.infodetails = [];
+
+          //var grandtotalinfo = {};
+
+          totalamountinfo.title = "Total Amount";
+          totalamountinfo.charges = product_orginal_price;
+          totalamountinfo.status = true;
+          totalamountinfo.infostatus = false;
+          totalamountinfo.color_code = "#ff444444";
+          totalamountinfo.low_cost_status = false;
+          totalamountinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+          totalamountinfo.default_cost=constant.convenience_charge;
+          totalamountinfo.default_cost_status=false;
+          totalamountinfo.infodetails = [];            
+          cartdetails.push(totalamountinfo);
+
+          if (req.cid && couponstatus) {
+            couponinfo.title = "Discount (-)";
+            couponinfo.charges = coupon_discount_amount;
+            couponinfo.status = true;
+            couponinfo.infostatus = false;
+            couponinfo.color_code = "#129612";
+            couponinfo.low_cost_status = false;
+            couponinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+            couponinfo.default_cost=constant.convenience_charge;
+            couponinfo.default_cost_status=false;
+            couponinfo.infodetails = [];
+            cartdetails.push(couponinfo);
+          }
+
+          if (gstcharge !==0) {
+            gstinfo.title = "Taxes ";//gst modified taxes 13-jan-2020
+          gstinfo.charges = gstcharge;
+          gstinfo.status = true;
+          gstinfo.infostatus = false;
+          gstinfo.color_code = "#ff444444";
+          gstinfo.low_cost_status = false;
+          gstinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+          gstinfo.default_cost=constant.convenience_charge;
+          gstinfo.default_cost_status=false;
+          gstinfo.infodetails = [];
+          cartdetails.push(gstinfo);
+          }
+          
+
+          // //this code is modified 23-09-2019
+          if (delivery_charge !==0) {
+           
+            deliverychargeinfo.title = "Delivery charge";
+            deliverychargeinfo.charges = delivery_charge;
+            deliverychargeinfo.status = true;
+            cartdetails.push(deliverychargeinfo);
+          }    
+          
+          if (delivery_charge) {      
+            other_charges_info.name="Delivery charge";
+            other_charges_info.price=delivery_charge;
+            deliverychargeinfo.infodetails.push(other_charges_info);
+          }
+
+        
+          res2[0].amountdetails = calculationdetails;
+          res2[0].item = productdetails;
+          res2[0].ordercount = ordercount;
+          res2[0].cartdetails = cartdetails;
+          res2[0].first_tunnel = userdetails[0].first_tunnel;
+          res2[0].minimum_cart_value = constant.minimum_cart_value;
+         
+
+          let resobj = {
+            success: true,
+            status: isAvaliableItem,
+            distance:distance,
+          };
+            
+          if(!couponstatus){
+            resobj.message = coupon__error_message;
+            resobj.status = couponstatus
+          }
+
+
+          if (!isAvaliablezone){
+            resobj.message = " Service is not available! for your following address";
+            resobj.status = isAvaliablezone
+          }
+          if (!product_cost_limit_status){
+            resobj.message = constant.product_cost_limit_short_message+constant.minimum_cart_value;
+            resobj.status = product_cost_limit_status;
+            resobj.product_cost_limit_status=product_cost_limit_status;
+          }
+
+          resobj.product_cost_limit_status=product_cost_limit_status;
+
+          resobj.result = res2; 
+          result(null, resobj);
+      
+          
+      } 
+      }
+    });
+
+  
+
+
+    
+    
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "user is not found"
+    };
+    result(null, resobj);
+  } 
+};
 module.exports = Category;

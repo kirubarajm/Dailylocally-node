@@ -7,6 +7,7 @@ module.exports = function(app) {
   var category = require("../controllers/category/CategoryController");
   var sub_category_L1 = require("../controllers/category/Subcategoryl1Controller");
   var sub_category_L2 = require("../controllers/category/Subcategoryl2Controller");
+  var productmaster = require("../controllers/category/ProductMasterController");
 
 
 
@@ -35,9 +36,16 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
   app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
 
 
-
  // sub_category_L2
  app.route("/user/subcategoryL2").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L2.get_Sub_Category_L2_list}));
+
+
+
+ // products
+ app.route("/user/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_ProductMaster_list}));
+
+ //cart 
+ app.route("/user/cartdetails").post(middleware.checkToken,routesVersioning({"1.0.0":category.read_a_cartdetails}));
 
  //promotions
 //  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));

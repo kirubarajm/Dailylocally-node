@@ -26,3 +26,21 @@ exports.get_category_list = function(req, res) {
       });
     }
   };
+
+  exports.read_a_cartdetails = function(req, res) {
+    var orderitems = req.body.orderitems;
+   if (!req.body.lat) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lat" });
+    } else if (!req.body.lon) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lan" });
+    }else {
+      Category.read_a_cartdetails(req.body, orderitems, true,function(err,user) {
+        if (err) res.send(err);
+        res.json(user);
+      });
+    }
+  };

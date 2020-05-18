@@ -2,42 +2,42 @@
 
 
 const calculate = {
-  gst: 5, // percentage
+  gst: 18, // percentage
   food_gst: 5, // percentage
   food_commission_cost: 18,
-  deliverycharge: 0, // cost made changes 10-jan-2020
-  applink: "http://bit.ly/2ZcGL95",
+  deliverycharge: 20, // cost made changes 27-Apr-2020
+  applink: "https://bit.ly/2xCD6JM",
   iosapplink: "https://apple.co/2lna3n9",
-  refferalcontent:"Welcome to DailyLocally. Click the link to download the DailyLocally app from play store",
-  radiuslimit: 2.37,
+  refferalcontent:"Order groceries and get them delivered to your doorstep. Click the link below to download the Daily Locally app!",
+  radiuslimit: 6.5,
   foodpreparationtime: 15, //min
   onekm: 3,
   servicecharge: 0,
   cancellationmessage: "Are you sure! you want to cancel the order?",
   makeit_nearby_moveit_radius: 4, // in kilometers
-  dlversioncodenew: 7, //normal update
-  dlversionforceupdate: 7, //forceupdate version
-  dlforceupdate: 1,
+  eatversioncodenew: 1, //normal update
+  eatversionforceupdate: 5, //forceupdate version
+  eatforceupdate: 5,
   eat_delivery_min: 60,
   product_commission_percentage: 50, // percentage
   breatfastcycle: 8, //8 -12
   lunchcycle: 12, //12 - 4
   dinnercycle: 16, //4 - 11
-  dinnerend: 21,
+  dinnerend: 22,
   dinnerstart: 4,
   max_order_rating_skip: 2,
   tunnel_refund_amout: 100,
   //  moveitversioncode : 1,
-  moveitversioncodenew: 7, //normal update
-  moveitversionforceupdate: 7, //forceupdate version
-  moveitforceupdate: 7,
+  moveitversioncodenew: 1, //normal update
+  moveitversionforceupdate: 1, //forceupdate version
+  moveitforceupdate: 1,
 
-  makeitversioncodenew: 4, //normal update
-  makeitversionforceupdate: 4, //forceupdate version
+  makeitversioncodenew: 1, //normal update
+  makeitversionforceupdate: 1, //forceupdate version
   makeitforceupdate: 1,
 
-  salesversioncodenew: 2, //normal update
-  salesversionforceupdate: 2, //forceupdate version
+  salesversioncodenew: 1, //normal update
+  salesversionforceupdate: 1, //forceupdate version
   salesforceupdate: 1,
 
   eatiosversioncodenew: 1, //normal update
@@ -56,12 +56,20 @@ const calculate = {
   makeit_customer_support: 7358531315,
 
   //Live Razorpay Details
-  razorpay_key_id: "rzp_live_bCMW6sG1GWp36Q",
-  razorpay_key_secret: "2VAma7EVApDnLuOMerwX3ODu",
+  // razorpay_key_id: "rzp_live_bCMW6sG1GWp36Q",
+  // razorpay_key_secret: "2VAma7EVApDnLuOMerwX3ODu",
 
   //Test Razorpay Details
-  //razorpay_key_id: "rzp_test_3cduMl5T89iR9G",
-  //razorpay_key_secret: "BSdpKV1M07sH9cucL5uzVnol",
+  // razorpay_key_id: "rzp_test_3cduMl5T89iR9G",
+  // razorpay_key_secret: "BSdpKV1M07sH9cucL5uzVnol",
+  
+  //EAT-Clone Live Razorpay Details
+   razorpay_key_id : 'rzp_live_kelnGLZvTecvPV',
+   razorpay_key_secret : 'GX0bqRNINZwCqp01M8p4xDQh',
+
+  //EAT-Clone Demo Testing Razorpay Details
+  // razorpay_key_id : 'rzp_test_8ZBt2J9hAsxH9Q',
+  // razorpay_key_secret : 'hvaGojdH4IwolHeDh246ibjz',
 
   Xfactor_value:1.9,
   Xfactor_subtraction_value:1,
@@ -73,7 +81,7 @@ const calculate = {
     //Miles to km
     onemile : 1.6,
 
-    order_assign_status:true,
+    order_assign_status:false,
 
     //Hub circle radius 3 km.
     hub_radius:3,
@@ -110,12 +118,12 @@ const calculate = {
     infinity_repeat_switch_loop:1,    
     infinity_first_collection_details_cid:24,
     cart_demand_value:70, /// ruppes
-    minimum_cart_value:30,
+    minimum_cart_value:250,
     home_gst:18,//%
     cater_gst:5,
     convenience_charge:20,
     convenience_charge_status:false,
-    product_cost_limit_message:"We are sorry. We can't process this order. Kindly order above the minimun cart value of Rs.30 to proceed.",
+    product_cost_limit_message:"We are sorry. We can't process this order. Kindly order above the minimum cart value of Rs.250 to proceed.",
     product_cost_limit_short_message:"Minimum cart value is Rs.",
     Makeit_monthly_expect_earning :10000,
 
@@ -144,9 +152,9 @@ const calculate = {
     Xfactor_status:false,
     Xfactor_moveit_count:5,
     order_waiting_min:30, //min
-    zendesk_url:"https://tovogroup.zendesk.com/",
-    Username:"tovologies@gmail.com",
-    Password:"Temptovo",
+    zendesk_url:"https://dailylocallyapp.zendesk.com/",
+    Username:"dailylocally@gmail.com",
+    Password:"Dailylocally12!",
     isCronStart:false,
     zoho_refresh_token:"1000.86b2dd470174b25acacf0817f4353584.5f33e9df83931f63717d24fa1a022198",
     zoho_client_id:"1000.86b2dd470174b25acacf0817f4353584.5f33e9df83931f63717d24fa1a022198",
@@ -159,6 +167,12 @@ const calculate = {
 
     makeit_package_alert_count:25,
     makeit_live_quantity_restrict_count:10,
+
+    email_user:'dailylocally@gmail.com',
+    email_pass:'Dailylocally12!',
+
+    virtual_order_sms_contact_number:'9150265900',
+    Real_order_sms_link:'https://bit.ly/2WIHsYs',
 }
 
 
