@@ -3,7 +3,7 @@ var sql = require("../db.js");
 var request = require('request');
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
-
+var constant = require('../constant.js');
 //Task object constructor
 var SMS = function(Sms) {
   this.faqid = Sms.faqid;
@@ -14,49 +14,35 @@ var SMS = function(Sms) {
 };
 
 
-SMS.send_sms_makeit =async function send_sms_makeit(orderid, result) {
-  
-    var phonenumber = '';
-    var get_phone_number =await query("select mk.phoneno,mk.virtualkey,mh.phone_number from Orders ors join MakeitUser mk on mk.userid=ors.makeit_user_id join Makeit_hubs mh on mh.makeithub_id=mk.makeithub_id  where orderid="+orderid+" ");
-    
-    if (get_phone_number[0].virtualkey==0) {
-      phonenumber= get_phone_number[0].phoneno;
-
-      var otpurl =
-      "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
-      phonenumber +
-      "&senderId=EATHOM&message=You have received an order from EAT. orderid "+orderid+" -. Please check EAT Home app for further details. ";
-  
-      console.log(otpurl);
-      request({
-          method: "GET",
-          rejectUnauthorized: false,
-          url: otpurl
-        },
-        function(error, response, body) {
-          if (error) {
-            console.log("error: ", err);
-            result(null, err);
-          } else {
-             console.log(response.statusCode, body);
-             var responcecode = body.split("#");
-             console.log(responcecode);
-  
-            
-     
-            }
-          }
-        
-      );
 
 
-    }else{
-      
-      phonenumber= get_phone_number[0].phone_number;
+//////Order Success SMS TO Customers//////////////////////
+SMS.ordersuccess_send_sms =async function ordersuccess_send_sms(orderid,phoneno, result){
+  var otpurl = "";  
+  // if(ordertype==1){    
+  //   otpurl = "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=EATHOM&dest=" +phoneno+ "&msg=Your order with id "+orderid+" has been successfully placed with Daily Locally. \n Due to the prevailing pandemic, we are facing brief delays in deliveries. However, for any queries about your order, please get in touch through the following contact " +constant.virtual_order_sms_contact_number;    
+  // }else{
+    otpurl = "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=EATHOM&dest=" +phoneno+ "&msg=Your order with id "+orderid+" has been successfully placed with Daily Locally. \n Due to the prevailing pandemic, we are facing brief delays in deliveries. However, for any queries about your order, please get in touch through the following link " +constant.Real_order_sms_link;    
+  // }
+
+  console.log(otpurl);
+  request({
+    method: "GET",
+    rejectUnauthorized: false,
+    url: otpurl
+  },
+  function(error, response, body) {
+    if (error) {
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+      console.log("response -->",response.statusCode, body);
+      var responcecode = body.split("#");
+      console.log("response -->",responcecode);        
     }
-   
+  }      
+  );
+
 };
-
-
 
 module.exports = SMS;

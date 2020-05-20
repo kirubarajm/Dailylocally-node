@@ -99,8 +99,10 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                       req.cus_pincode = address_data[0].pincode;
                       req.delivery_charge = amountdata.delivery_charge;
 
+                      var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
-                      Order.OrderOnline(req, res3.result[0].item,res3.result[0].subscription_item,function(err,res){
+                      console.log("Other_Item_list0",Other_Item_list);
+                      Order.OrderOnline(req,Other_Item_list,function(err,res){
                         if (err) {
                           result(err, null);
                         } else {
@@ -128,9 +130,9 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
   
 };
 
-Order.OrderOnline = async function OrderOnline(req,orderitems,subscription_item,result) {
+Order.OrderOnline = async function OrderOnline(req,Other_Item_list,result) {
 
-  var Other_Item_list = orderitems.concat(subscription_item);
+  
   var customerid = await Order.create_customerid_by_razorpay(req.userid);
   if (customerid.statusCode === 400) {
     let resobj = {
@@ -144,7 +146,7 @@ Order.OrderOnline = async function OrderOnline(req,orderitems,subscription_item,
   return
 }
 
-  Order.OrderInsert(req, Other_Item_list,subscription_item,function(err,result){
+  Order.OrderInsert(req, Other_Item_list,true,true,function(err,res){
     if (err) {
       result(err, null);
     } else {
@@ -157,7 +159,7 @@ Order.OrderOnline = async function OrderOnline(req,orderitems,subscription_item,
   });
 }
 
-Order.OrderInsert = async function OrderInsert(req, Other_Item_list,subscription_item,result) {
+Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isOnlineOrder,result) {
 
   var new_Order = new Order(req);
 
@@ -222,7 +224,16 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,subscription
           message: "Order Created successfully",
           orderid: orderid
         };
-        result(null, resobj);
+        sql.commit(async function(err) {
+          if (err) { 
+            sql.rollback(function() {
+              //result.send(err);
+              result(err, null);
+            });
+          }
+          
+          result(null, resobj);
+        });
       }
     });
   });
@@ -316,40 +327,33 @@ Order.online_order_place_conformation = async function(order_place, result) {
   
   var transaction_time = moment().format("YYYY-MM-DD HH:mm:ss");
   var transaction_status= order_place.payment_status === 1? 'success':'failed';
-  var orderUpdateQuery =
-  "update Orders set payment_status = '" +
-  order_place.payment_status +
-  "', lock_status = 0,transactionid='" +
-  order_place.transactionid +
-  "',transaction_status='"+transaction_status+"', transaction_time= '" +
-  transaction_time +
-  "' WHERE orderid = '" +
+  var orderUpdateQuery ="update Orders set payment_status = '" +order_place.payment_status +"',tsid='" + order_place.transactionid +"',transaction_status='"+transaction_status+"', transaction_time= '" +transaction_time +"' WHERE orderid = '" +
   order_place.orderid +
   "' ";
 
   //////////= Razorpay caption =////////// 
-if(order_place.payment_status === 1){
-  const getprice = await query("select price from Orders where orderid ='"+order_place.orderid+"'");
-  if (getprice.err) {
+// if(order_place.payment_status === 1){
+//   const getprice = await query("select price from Orders where orderid ='"+order_place.orderid+"'");
+//   if (getprice.err) {
  
-  }else{
-    var paymentid  = order_place.transactionid;
-    var amount     = getprice[0].price*100;
-    instance.payments.capture(paymentid, parseInt(amount))
-    .then((data)=>{
-      captionupdate = "update Orders set captured_status=1 where transactionid='"+order_place.transactionid+"'";
-      sql.query(captionupdate, async function(err, captionresult) {
-        if (err) {
-          result(err, null);
-        }else{
-          console.log(captionresult);
-        }
-      });
-    }).catch((err)=>{
-      console.log(err);      
-    });
-  }
-}
+//   }else{
+//     var paymentid  = order_place.transactionid;
+//     var amount     = getprice[0].price*100;
+//     instance.payments.capture(paymentid, parseInt(amount))
+//     .then((data)=>{
+//       captionupdate = "update Orders set captured_status=1 where transactionid='"+order_place.transactionid+"'";
+//       sql.query(captionupdate, async function(err, captionresult) {
+//         if (err) {
+//           result(err, null);
+//         }else{
+//           console.log(captionresult);
+//         }
+//       });
+//     }).catch((err)=>{
+//       console.log(err);      
+//     });
+//   }
+// }
 ///////////////////////////////////
 
   sql.query(orderUpdateQuery, async function(err, res1) {
@@ -358,19 +362,15 @@ if(order_place.payment_status === 1){
     } else {
       if (order_place.payment_status === 1) {
        
-        // const orderdetails = await query("select * from Orders where orderid ='" +order_place.orderid +"'");
-        // if (orderdetails.err) {
-        //   let resobj = {
-        //     success: true,
-        //     status: false,
-        //     result: orderdetails.err
-        //   };
-        //   result(null, resobj);
-        // }else{
+       
 
-        //   if (orderdetails[0].coupon || order_place.cid) {
-            
-        //        var new_createCouponUsed = new CouponUsed(order_place); 
+        // if (order_place.cid) {
+        //   const orderdetailsquery = "select * from Orders where orderid ='" +order_place.orderid +"'";
+        //   sql.query(orderdetailsquery, async function(err, orderdetails) {
+        //     if (err) {
+        //       result(err, null);
+        //     }else{
+        //       var new_createCouponUsed = new CouponUsed(order_place); 
         //       new_createCouponUsed.after_discount_cost = orderdetails[0].price
         //       new_createCouponUsed.order_cost = orderdetails[0].original_price
         //       new_createCouponUsed.userid = orderdetails[0].userid
@@ -381,96 +381,33 @@ if(order_place.payment_status === 1){
         //           return;
         //         }
         //       });
-        //   } 
-
-        //   if (order_place.refund_balance !== 0 || order_place.rcid || orderdetails[0].refund_amount) {
-        //     var updateRefundCoupon = await RefundCoupon.updateByRefundCouponId(
-        //       order_place.rcid,
-        //       order_place.refund_balance,
-        //       order_place.orderid
-        //     );
-        //   }
-
-        // }
-
-        if (order_place.cid) {
-          const orderdetailsquery = "select * from Orders where orderid ='" +order_place.orderid +"'";
-          sql.query(orderdetailsquery, async function(err, orderdetails) {
-            if (err) {
-              result(err, null);
-            }else{
-              var new_createCouponUsed = new CouponUsed(order_place); 
-              new_createCouponUsed.after_discount_cost = orderdetails[0].price
-              new_createCouponUsed.order_cost = orderdetails[0].original_price
-              new_createCouponUsed.userid = orderdetails[0].userid
-          
-              CouponUsed.createCouponUsed(new_createCouponUsed, function(err, res2) {
-                if (err) {
-                  result(err, null);
-                  return;
-                }
-              });
-            }
-          });
-         }
+        //     }
+        //   });
+        //  }
          
-   
-        if (order_place.refund_balance !== 0 || order_place.rcid ) {
-          var updateRefundCoupon = await RefundCoupon.updateByRefundCouponId(
-            order_place.rcid,
-            order_place.refund_balance,
-            order_place.orderid
-          );
-        }
+        var getordertypequery = "select us.phoneno from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
+        var getordertype = await query(getordertypequery);
+               
+          sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);          
+     
 
-        var deletequery ="delete from Lock_order where orderid ='" + order_place.orderid + "' ";
-        sql.query(deletequery, async function(err, deleteres) {
-          if (err) {
-            result(err, null);
-          } else {
-            await Notification.orderMakeItPushNotification(
-              order_place.orderid,
-              null,
-              PushConstant.pageidMakeit_Order_Post
-            );
-            sendsms.send_sms_makeit(order_place.orderid);
-            let resobj = {
-              success: true,
-              status: true,
-              message: "Your order placed successfully"
-            };
-            result(null, resobj);
-          }
-        });
+         let resobj = {
+           success: true,
+           status: true,
+           message: "Your order placed successfully"
+         };
+         result(null, resobj);
+     
+
+       
       }else if (order_place.payment_status === 2) {
-        var releasequantityquery = "select * from Lock_order where orderid ='" + order_place.orderid + "' ";
-        sql.query(releasequantityquery, function(err, res2) {
-          if (err) {
-            result(err, null);
-          } else {
-            for (let i = 0; i < res2.length; i++) {
-              var productquantityadd =
-                "update Product set quantity = quantity+" +
-                res2[i].quantity +
-                " where productid =" +
-                res2[i].productid +
-                "";
-              sql.query(productquantityadd, function(err, res2) {
-                if (err) {
-                  result(err, null);
-                }
-              });
-            }
-
-            let resobj = {
-              success: true,
-              message: "Sorry payment not yet be paid following order",
-              status: false,
-              orderid: order_place.orderid
-            };
-            result(null, resobj);
-          }
-        });
+        let resobj = {
+          success: true,
+          message: "Sorry payment not yet be paid following order",
+          status: false,
+          orderid: order_place.orderid
+        };
+        result(null, resobj);
       }
     }
   });

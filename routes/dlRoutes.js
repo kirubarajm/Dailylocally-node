@@ -51,7 +51,8 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  //// proceedtopay
  app.route("/user/proceedtopay").post(middleware.checkToken,routesVersioning({"1.0.0":orders.read_a_proceed_to_pay}));
 
-
+//online order conformation
+ app.route("/user/orderplace").post(middleware.checkToken,routesVersioning({"1.0.0":orders.online_order_place_conformation}));
 
 
  //promotions
@@ -75,7 +76,6 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 // app.route("/eat/order/:orderid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.order_view_eatuser}));
 // app.route("/eat/orders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_eatuser}));
 // app.route("/eat/makeituser/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":makeituser.read_a_user}));
-// app.route("/eat/orderplace").post(middleware.checkToken,routesVersioning({"1.0.0":orders.online_order_place_conformation}));
 // app.route("/eat/cartdetails").post(middleware.checkToken,routesVersioning({"1.0.0":makeituser.read_a_cartdetails}));
 // app.route("/eat/dishlist").post(middleware.checkToken,routesVersioning({"1.0.0":eatuser.eat_dish_sort_filter}));
 // app.route("/eat/kitchenlist").post(middleware.checkToken,routesVersioning({"1.0.0":eatuser.eat_kitchen_sort_filter,"2.0.0":eatuser.eat_kitchen_sort_filter_v2,"2.0.1":eatuser.eat_kitchen_sort_filter_v_2_1,"2.0.2":eatuser.eat_kitchen_sort_filter_v_2_2}));
