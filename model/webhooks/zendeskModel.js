@@ -7,7 +7,6 @@ var constant = require('../constant');
 var Notification = require('../common/notificationModel');
 var PushConstant = require("../../push/PushConstant.js");
 var Razorpay = require("razorpay");
-var Onlineautorefund = require('../common/Online_autorefundModel.js');
 var request = require('request');
 //Task object constructor
 var ZendeskWebhook = function(zendeskWebhook){

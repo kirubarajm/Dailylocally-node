@@ -8,6 +8,7 @@ module.exports = function(app) {
   var sub_category_L1 = require("../controllers/category/Subcategoryl1Controller");
   var sub_category_L2 = require("../controllers/category/Subcategoryl2Controller");
   var productmaster = require("../controllers/category/ProductMasterController");
+  var orders = require("../controllers/common/OrderController");
 
 
 
@@ -47,6 +48,12 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  //cart 
  app.route("/user/cartdetails").post(middleware.checkToken,routesVersioning({"1.0.0":category.read_a_cartdetails}));
 
+ //// proceedtopay
+ app.route("/user/proceedtopay").post(middleware.checkToken,routesVersioning({"1.0.0":orders.read_a_proceed_to_pay}));
+
+
+
+
  //promotions
 //  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
@@ -78,7 +85,6 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 // app.route("/eat/fav/dishlist/:id").get(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_fav_dishlist,"2.0.0":fav.read_a_fav_dishlist_v2}));
 // app.route("/eat/fav/kitchenlist/:id").get(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_fav_kitchenlist,"2.0.0":fav.read_a_fav_kitchenlist_v2}));
 // app.route("/eat/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byeatuser}));
-// app.route("/eat/proceedtopay").post(middleware.checkToken,routesVersioning({"1.0.0":orders.read_a_proceed_to_pay}));
 // app.route("/eat/forgot").post(routesVersioning({"1.0.0":eatuser.eat_user_forgot_password}));
 // app.route("/eat/password").put(middleware.checkToken,routesVersioning({"1.0.0":eatuser.eat_user_forgot_password_update}));
 // app.route("/eat/rating").post(middleware.checkToken,routesVersioning({"1.0.0":orderrating.createorderrating}));

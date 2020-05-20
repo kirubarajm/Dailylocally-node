@@ -9,13 +9,10 @@ var moment = require("moment");
 const Razorpay = require("razorpay");
 var Locationtracking = require("../../model/common/usersfirstlocationtrackingModel");
 var zoneModel = require("../../model/common/zoneModel.js");
-var Collection = require("../../model/common/collectionModel");
 var Notification = require("../../model/common/notificationModel.js");
 var PushConstant = require("../../push/PushConstant.js");
-var Stories = require("../../model/common/storyModel");
-var Offers = require("../../model/common/couponModel");
+
 var Zendeskrequest = require("../../model/common/ZendeskRequestsModel");
-var orderactionlog = require("../../model/common/orderactionlog.js");
 
 
 // var instance = new Razorpay({
@@ -40,7 +37,6 @@ var Dluser = function(dluser) {
   this.email = dluser.email;
   this.phoneno = dluser.phoneno;
   this.referalcode = dluser.referalcode;
-  this.password = dluser.password;
   this.otp_status = dluser.otp_status;
   this.gender = dluser.gender 
   this.pushid_android = dluser.pushid_android;
@@ -132,7 +128,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
 
   // var otpurl = "https://www.google.com/";
-  console.log(otpurl);
+
 
   sql.query("Select * from User where phoneno = '" + newUser.phoneno + "'",function(err, res) {
       if (err) {
@@ -258,7 +254,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
 
       if (res[0].otp == req.otp) {
        
-        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid,token from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
+        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
             if (err) {
               console.log("error: ", err);
               result(err, null);
@@ -325,9 +321,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         responce[0].phoneno = res1[0].phoneno
                         responce[0].referalcode = res1[0].referalcode
                         responce[0].gender = res1[0].gender
-                        responce[0].virtualkey = res1[0].virtualkey
-                        responce[0].regionid = res1[0].regionid
-                        responce[0].other_region=res1[0].other_region
+                       
                         
                       }else{
                         res1[0].aid=0;

@@ -6,7 +6,6 @@ const https = require('https');
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 var Dunzoresponce = require("../../model/common/dunzoresponceModel");
-var Dunzomoveitdetails = require("../../model/common/dunzomoveitdetailsModel");
 var moment = require("moment");
 var Notification = require("../../model/common/notificationModel.js");
 var PushConstant = require("../../push/PushConstant.js");

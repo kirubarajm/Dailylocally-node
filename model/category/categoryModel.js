@@ -98,17 +98,18 @@ Category.get_category_list =async function get_category_list(req,result) {
 
 
 //cart details for ear user
-Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,isMobile,result) {
+Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,subscription,result) {
 
   //console.log("122",userzoneid+","+zoneName);
   var tempmessage = "";
   var coupon__error_message = "";
   var gst = 0;
   var delivery_charge =constant.deliverycharge;
-  const productdetails = [];
+  var productdetails = [];
+  var subscription_product=[];
   var totalamount = 0;
   var product_orginal_price = 0;
-  var amount = 0;
+
   var refund_coupon_adjustment = 0;
   var coupon_discount_amount = 0;
   var isAvaliableItem = true;
@@ -118,9 +119,9 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,i
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
   var startdate =  moment().format("YYYY-MM-DD");
-  var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
   var currenthour  = moment(day).format("HH");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+  var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
   var convenience_charge = 0;
   var product_cost_limit_status = true;
   var product_gst = 0;
@@ -145,61 +146,153 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,i
   if (userdetails.length !==0) {   
   
   
-   
-    for (let i = 0; i < orderitems.length; i++) {
-      // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
-      
-      var res1 = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +orderitems[i].pid +"' ");
-      // if (res1[0].quantity < orderitems[i].quantity) {
-      //   res1[0].availablity = false;
-      //   tempmessage = tempmessage + res1[0].product_name + ",";
-      //   isAvaliableItem = false;
-      // }else if (res1[0].approved_status != 2) {
-      //   // console.log("approved_status");
-      //   res1[0].availablity = false;
-      //   tempmessage = tempmessage + res1[0].product_name + ",";
-      //   isAvaliableItem = false;
-      // }else if (res1[0].delete_status !=0) {
-      //   // console.log("delete_status");
-      //   res1[0].availablity = false;
-      //   tempmessage = tempmessage + res1[0].product_name + ",";
-      //   isAvaliableItem = false;
-      // }else
-      
-
-      if (res1[0].live_status == 0) {
-        // console.log("active_status");
-        res1[0].availablity = false;
-        tempmessage = tempmessage + res1[0].Productname + ",";
-        isAvaliableItem = false;
-      } else {
-        res1[0].availablity = true;
-      }
-
-      ///get amount each product
-      amount = res1[0].mrp * orderitems[i].quantity;
-     
-      product_discount_price = res1[0].discount_cost * orderitems[i].quantity;
-     
-      amount=  amount - product_discount_price ;
+    if (orderitems) {
+      for (let i = 0; i < orderitems.length; i++) {
+        // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
+        
+        var res1 = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +orderitems[i].pid +"' ");
+        // if (res1[0].quantity < orderitems[i].quantity) {
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else if (res1[0].approved_status != 2) {
+        //   // console.log("approved_status");
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else if (res1[0].delete_status !=0) {
+        //   // console.log("delete_status");
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else
+        
   
-      product_weight  = res1[0].Weight * orderitems[i].quantity;
-      product_gst = Math.round((amount / 100) * res1[0].gst );
+        if (res1[0].live_status == 0) {
+          // console.log("active_status");
+          res1[0].availablity = false;
+          tempmessage = tempmessage + res1[0].Productname + ",";
+          isAvaliableItem = false;
+        } else {
+          res1[0].availablity = true;
+        }
+  
+        var amount = 0;
+        ///get amount each product
+        amount = res1[0].mrp * orderitems[i].quantity;
+       
+        product_discount_price = res1[0].discount_cost * orderitems[i].quantity;
+       
+        amount=  amount - product_discount_price ;
     
-     
-      res1[0].amount = amount;
-      res1[0].product_gst = product_gst;
-      res1[0].cartquantity = orderitems[i].quantity;
-      res1[0].product_weight = product_weight;
-      res1[0].product_discount_price = product_discount_price;
+        product_weight  = res1[0].Weight * orderitems[i].quantity;
+        // product_gst = Math.round((amount / 100) * res1[0].gst );
+      
+       
+        res1[0].amount = amount;
+        // res1[0].product_gst = product_gst;
+        res1[0].cartquantity = orderitems[i].quantity;
+        res1[0].product_weight = product_weight;
+        res1[0].product_discount_price = product_discount_price;
+        res1[0].no_of_deliveries = 1;
+        res1[0].subscription = 0;
+        //total product cost
+        totalamount = totalamount + amount;
+        // gst = gst + product_gst;
+        product_total_weight = product_total_weight + product_weight;
 
-      //total product cost
-      totalamount = totalamount + amount;
-      gst = gst + product_gst;
-      product_total_weight = product_total_weight + product_weight;
 
-      productdetails.push(res1[0]);
+        if (orderitems[i].dayorderdate) {
+          res1[0].deliverydate=orderitems[i].dayorderdate;
+        }else{
+
+          
+              if (currenthour < 21) {
+    
+                res1[0].deliverydate = tomorrow;
+              } else {
+                
+                res1[0].deliverydate= dayafertomorrow;
+              }
+
+        }
+  
+        productdetails.push(res1[0]);
+      
+      }
     }
+
+   
+    if (subscription) {
+      for (let i = 0; i < subscription.length; i++) {
+        // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
+        
+        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +subscription[i].pid +"' ");
+        // if (res1[0].quantity < orderitems[i].quantity) {
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else if (res1[0].approved_status != 2) {
+        //   // console.log("approved_status");
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else if (res1[0].delete_status !=0) {
+        //   // console.log("delete_status");
+        //   res1[0].availablity = false;
+        //   tempmessage = tempmessage + res1[0].product_name + ",";
+        //   isAvaliableItem = false;
+        // }else
+        
+  
+        if (subscription_product_list[0].live_status == 0) {
+          // console.log("active_status");
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        } else {
+          subscription_product_list[0].availablity = true;
+        }
+  
+        var amount = 0;
+        ///get amount each product
+        amount = subscription_product_list[0].mrp * subscription[i].quantity;
+       
+        product_discount_price = subscription_product_list[0].discount_cost * subscription[i].quantity;
+       
+        amount =  amount - product_discount_price ;
+    
+        product_weight  = subscription_product_list[0].Weight * subscription[i].quantity;
+        // product_gst = Math.round((amount / 100) * subscription_product_list[0].gst );
+      
+       
+        subscription_product_list[0].amount = amount;
+        // subscription_product_list[0].product_gst = product_gst;
+        subscription_product_list[0].cartquantity = subscription[i].quantity;
+        subscription_product_list[0].product_weight = product_weight;
+        subscription_product_list[0].product_discount_price = product_discount_price;
+        subscription_product_list[0].no_of_deliveries = 7;
+        subscription_product_list[0].subscription = 0;
+        subscription_product_list[0].deliverydate = tomorrow;
+        if (subscription[i].planid==1) {
+          amount = amount * 7;
+        }
+
+
+
+
+        //total product cost
+        totalamount = totalamount + amount;
+        // gst = gst + product_gst;
+        product_total_weight = product_total_weight + product_weight;
+      
+        subscription_product.push(subscription_product_list[0]);
+        
+      }
+    }
+
+
+
    
     var query1 ="select *, ROUND( 3959 * acos( cos( radians('" +
     req.lat +
@@ -408,6 +501,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,i
         
           res2[0].amountdetails = calculationdetails;
           res2[0].item = productdetails;
+          res2[0].subscription_item = subscription_product;
           res2[0].ordercount = ordercount;
           res2[0].cartdetails = cartdetails;
           res2[0].first_tunnel = userdetails[0].first_tunnel;

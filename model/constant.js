@@ -28,17 +28,7 @@ const calculate = {
   max_order_rating_skip: 2,
   tunnel_refund_amout: 100,
   //  moveitversioncode : 1,
-  moveitversioncodenew: 1, //normal update
-  moveitversionforceupdate: 1, //forceupdate version
-  moveitforceupdate: 1,
-
-  makeitversioncodenew: 1, //normal update
-  makeitversionforceupdate: 1, //forceupdate version
-  makeitforceupdate: 1,
-
-  salesversioncodenew: 1, //normal update
-  salesversionforceupdate: 1, //forceupdate version
-  salesforceupdate: 1,
+ 
 
   eatiosversioncodenew: 1, //normal update
   eatiosversionforceupdate: 1, //forceupdate version
