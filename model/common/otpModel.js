@@ -13,9 +13,7 @@ var sql = require("../db.js");
 
 
   OTP.send_otp_byphone = function send_otp_byphone(newUser,result) {
-    sql.query(
-      "Select * from Sales_QA_employees where phoneno = '" + newUser.phoneno + "'",
-      function(err, res1) {
+    sql.query("Select * from Sales_QA_employees where phoneno = '" + newUser.phoneno + "'",function(err, res1) {
         if (err) {
           result(err, null);
         } else {
@@ -91,30 +89,6 @@ var sql = require("../db.js");
   
   
   
-  OTP.sales_user_otpverification = function sales_user_otpverification( req,result) {
-
-    sql.query("Select * from Otp where oid = '" + req.oid + "'", function(err,res) {
-      if (err) {
-        result(err, null);
-      } else {
-        if (res[0].otp == req.otp) {
-                  let resobj = {
-                    success: true,
-                    status: true,
-                    message: "OTP verified successfully"
-                  };
-                  result(null, resobj);
-                
-        } else {
-          let resobj = {
-            success: true,
-            status: false,
-            message:"OTP is not valid!, Try once again"
-          };
-          result(null, resobj);
-        }
-      }
-    });
-  };
+ 
 
   module.exports = OTP;

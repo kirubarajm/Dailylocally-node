@@ -13,6 +13,11 @@ var Category = require("../../model/category/categoryModel");
 var razer_customerid_responce = require("../../model/common/razorpaycustomeridresponceModel");
 var CouponUsed = require("../../model/common/couponUsedModel");
 var orderproductModel = require("../../model/common/orderproductModel");
+var dayorder = require("../../model/common/dayorderModel");
+var Dayorderproducts = require("../../model/common/dayorderproductsModel");
+
+
+
 var instance = new Razorpay({
   key_id: constant.razorpay_key_id,
   key_secret: constant.razorpay_key_secret
@@ -101,7 +106,6 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
 
                       var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
-                      console.log("Other_Item_list0",Other_Item_list);
                       Order.OrderOnline(req,Other_Item_list,function(err,res){
                         if (err) {
                           result(err, null);
@@ -200,9 +204,10 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
           orderitem.sat = Other_Item_list[i].sat || 0;
           orderitem.sun = Other_Item_list[i].sun || 0;
           
-
+    
           var items = new orderproductModel(orderitem);
-        
+          console.log("orderproductModel",items);
+       
           orderproductModel.createOrderitems(items, function(err, res2) {
             if (err) { 
               sql.rollback(function() {
@@ -331,30 +336,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
   order_place.orderid +
   "' ";
 
-  //////////= Razorpay caption =////////// 
-// if(order_place.payment_status === 1){
-//   const getprice = await query("select price from Orders where orderid ='"+order_place.orderid+"'");
-//   if (getprice.err) {
- 
-//   }else{
-//     var paymentid  = order_place.transactionid;
-//     var amount     = getprice[0].price*100;
-//     instance.payments.capture(paymentid, parseInt(amount))
-//     .then((data)=>{
-//       captionupdate = "update Orders set captured_status=1 where transactionid='"+order_place.transactionid+"'";
-//       sql.query(captionupdate, async function(err, captionresult) {
-//         if (err) {
-//           result(err, null);
-//         }else{
-//           console.log(captionresult);
-//         }
-//       });
-//     }).catch((err)=>{
-//       console.log(err);      
-//     });
-//   }
-// }
-///////////////////////////////////
+
 
   sql.query(orderUpdateQuery, async function(err, res1) {
     if (err) {
@@ -363,33 +345,16 @@ Order.online_order_place_conformation = async function(order_place, result) {
       if (order_place.payment_status === 1) {
        
        
-
-        // if (order_place.cid) {
-        //   const orderdetailsquery = "select * from Orders where orderid ='" +order_place.orderid +"'";
-        //   sql.query(orderdetailsquery, async function(err, orderdetails) {
-        //     if (err) {
-        //       result(err, null);
-        //     }else{
-        //       var new_createCouponUsed = new CouponUsed(order_place); 
-        //       new_createCouponUsed.after_discount_cost = orderdetails[0].price
-        //       new_createCouponUsed.order_cost = orderdetails[0].original_price
-        //       new_createCouponUsed.userid = orderdetails[0].userid
-          
-        //       CouponUsed.createCouponUsed(new_createCouponUsed, function(err, res2) {
-        //         if (err) {
-        //           result(err, null);
-        //           return;
-        //         }
-        //       });
-        //     }
-        //   });
-        //  }
          
-        var getordertypequery = "select us.phoneno from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
+        var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
         var getordertype = await query(getordertypequery);
-               
-          sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);          
-     
+        order_place.userid=getordertype[0].userid;
+        sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
+        
+        var getproductdetails = "select * from Orderproducts  where status=0 and orderid="+order_place.orderid;
+        var getproduct = await query(getproductdetails);
+        
+        dayorder.checkdayorder(order_place,getproduct);
 
          let resobj = {
            success: true,
@@ -411,15 +376,15 @@ Order.online_order_place_conformation = async function(order_place, result) {
       }
     }
   });
-}
-}else{
+    }
+  }else{
   let resobj = {
     success: true,
     message: "Sorry Order is not found!",
     status: false
   };
   result(null, resobj);
-}
+  }
 };
 
 

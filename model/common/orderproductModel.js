@@ -20,10 +20,14 @@ var orderproductModel = function(orderproductModel) {
   this.fri = orderproductModel.fri ||0 ;
   this.sat = orderproductModel.sat ||0 ;
   this.sun = orderproductModel.sun ||0 ;
+  this.status= orderproductModel.status ||0 ;
 
 };
 
 orderproductModel.createOrderitems = function createOrderitems(order_item, res) {
+
+  
+
   sql.query("INSERT INTO Orderproducts set ?", order_item, function(err, result) {
     if (err) {
       res(err, null);
@@ -40,23 +44,7 @@ orderproductModel.createOrderitems = function createOrderitems(order_item, res) 
   });
 };
 
-orderproductModel.createOrderitemsonline = function createOrderitemsonline(order_item,res) {
-  sql.query("INSERT INTO OrderItem set ?", order_item, function(err, result) {
-    if (err) {
-      res(err, null);
-    } else {
-      var OrderItemid = result.insertId;
-     
-      let resobj = {
-        success: true,
-        message: "Order Item Created successfully",
-        OrderItemid: OrderItemid
-      };
 
-      res(null, resobj);
-    }
-  });
-};
 
 
 

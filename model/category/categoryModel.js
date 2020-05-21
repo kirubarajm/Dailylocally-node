@@ -272,8 +272,9 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         subscription_product_list[0].product_weight = product_weight;
         subscription_product_list[0].product_discount_price = product_discount_price;
         subscription_product_list[0].no_of_deliveries = 7;
-        subscription_product_list[0].subscription = 0;
+        subscription_product_list[0].subscription = 1;
         subscription_product_list[0].deliverydate = tomorrow;
+        subscription_product_list[0].starting_date = startdate;
         if (subscription[i].planid==1) {
           amount = amount * 7;
         }
