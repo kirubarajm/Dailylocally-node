@@ -25,7 +25,9 @@ app.use(express.static(__dirname));
 var dlRoutes = require("./routes/dlRoutes"); //importing route
 var webhookRoutes = require("./routes/webhookRoutes"); //importing webhook route
 var categoryRoutes = require("./routes/categoryRoutes");
+var adminRoutes = require("./routes/adminRoutes");
 
 dlRoutes(app); //register the dailyLocally routes
 webhookRoutes(app); //register the webhookRoutes routes
 categoryRoutes(app); //register the categoryRoutes routes
+adminRoutes(app); //register the adminRoutes routes
