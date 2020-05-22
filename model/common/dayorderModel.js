@@ -66,53 +66,194 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
         } else {
             
-          console.log("getproduct[i]",getproduct[i].no_of_deliveries);
+          var dates = [];
 
-          for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
-        
-            console.log("getproduct[i]",j);
+          var d = new Date();
+          d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
 
-            var date  = moment().add(j, "days").format("YYYY-MM-DD");;
-
-            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
-
-            if (dayorders.length !=0) {
-                
-                var new_createDayorderproducts={};
-          
-                new_createDayorderproducts.orderid=Dayorder.orderid;
-                new_createDayorderproducts.doid=dayorders[0].id;
-                new_createDayorderproducts.pid=getproduct[i].pid;
-            
-                Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
-
-            }else{
-                
-  
-                var new_day_order={};
-                new_day_order.userid=Dayorder.userid;
-                new_day_order.date=date;
-             
-     
-                sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
-                    if (err) {
-                      res(err, null);
-                    } else {
-                      var doid = result.insertId;
-                     
-                      var new_createDayorderproducts={};
-
-                      new_createDayorderproducts.orderid=Dayorder.orderid;
-                      new_createDayorderproducts.doid=doid;
-                      new_createDayorderproducts.pid=getproduct[i].pid;
- 
-                      Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
-                    }
-                  });
-
-            }
+          if (getproduct[i].mon==1) {
+            dates.push(moment(d).format("YYYY-MM-DD"));
+            var monday = 1;
 
           }
+
+          if (getproduct[i].tue==1) {
+             dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+             var tuesday = 2;
+
+          }
+
+          if (getproduct[i].wed==1) {
+            dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));//wed
+            var wednesday = 3;
+
+          }
+
+          if (getproduct[i].thur==1) {
+             dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+             var Thursday = 4;
+          }
+
+          if (getproduct[i].fri==1) {
+            dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));//fri
+            var friday = 5;
+          }
+
+          if (getproduct[i].sat==1) {
+             dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
+             var saturday = 6;
+          }
+
+          if (getproduct[i].sun==1) {
+             dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+             var sunday = 7;
+          }
+
+          console.log("dates",dates);
+          /////formula for i max ---->[31-3(daycount)]/3(daycount)
+           
+          for(let k=0; k < getproduct[i].no_of_deliveries; k++){
+
+          
+          
+            d=moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD");
+
+            if (monday==1) {
+              if(dates.length<getproduct[i].no_of_deliveries){
+                dates.push(moment(d).format("YYYY-MM-DD"));
+              }
+            }
+           
+            if (tuesday == 2) {
+            if(dates.length<getproduct[i].no_of_deliveries){
+              dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+            }
+          }
+
+          if (wednesday == 3) {
+            if(dates.length<getproduct[i].no_of_deliveries){
+              dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));
+            }
+          }
+
+          if (Thursday == 4) {
+            if(dates.length<getproduct[i].no_of_deliveries){
+              dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+            }
+          }
+            
+            if (friday == 5) {
+              if(dates.length<getproduct[i].no_of_deliveries){
+                dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"))
+              } 
+            }
+              
+            if (saturday == 6) {
+              if(dates.length<getproduct[i].no_of_deliveries){
+                dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"))
+              } 
+            }
+            
+            if (sunday == 7) {
+              if(dates.length<getproduct[i].no_of_deliveries){
+                dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"))
+              } 
+  
+            }
+            
+          }
+
+          if (dates.length==0) {
+            
+            for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
+            var date  = moment().add(j, "days").format("YYYY-MM-DD");;
+            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+            if (dayorders.length !=0) {
+                  var new_createDayorderproducts={};
+            
+                  new_createDayorderproducts.orderid=Dayorder.orderid;
+                  new_createDayorderproducts.doid=dayorders[0].id;
+                  new_createDayorderproducts.pid=getproduct[i].pid;
+              
+                  Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
+  
+              }else{
+                  
+    
+                  var new_day_order={};
+                  new_day_order.userid=Dayorder.userid;
+                  new_day_order.date=date;
+               
+       
+                  sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
+                      if (err) {
+                        res(err, null);
+                      } else {
+                        var doid = result.insertId;
+                       
+                        var new_createDayorderproducts={};
+  
+                        new_createDayorderproducts.orderid=Dayorder.orderid;
+                        new_createDayorderproducts.doid=doid;
+                        new_createDayorderproducts.pid=getproduct[i].pid;
+   
+                        Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
+                      }
+                    });
+  
+              }
+  
+            }
+          }else{
+       
+
+            for (let j = 0; j < dates.length; j++) {
+        
+           
+
+              var date  =dates[j];
+  
+              var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+  
+              if (dayorders.length !=0) {
+                  
+                  var new_createDayorderproducts={};
+            
+                  new_createDayorderproducts.orderid=Dayorder.orderid;
+                  new_createDayorderproducts.doid=dayorders[0].id;
+                  new_createDayorderproducts.pid=getproduct[i].pid;
+              
+                  Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
+  
+              }else{
+                  
+    
+                  var new_day_order={};
+                  new_day_order.userid=Dayorder.userid;
+                  new_day_order.date=date;
+               
+       
+                  sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
+                      if (err) {
+                        res(err, null);
+                      } else {
+                        var doid = result.insertId;
+                       
+                        var new_createDayorderproducts={};
+  
+                        new_createDayorderproducts.orderid=Dayorder.orderid;
+                        new_createDayorderproducts.doid=doid;
+                        new_createDayorderproducts.pid=getproduct[i].pid;
+   
+                        Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
+                      }
+                    });
+  
+              }
+  
+            }
+          }
+          
 
         }
         

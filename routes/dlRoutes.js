@@ -55,6 +55,11 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/orderplace").post(middleware.checkToken,routesVersioning({"1.0.0":orders.online_order_place_conformation}));
 
 
+
+ //live order list
+ app.route("/user/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byeatuser}));
+
+
  //promotions
 //  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 

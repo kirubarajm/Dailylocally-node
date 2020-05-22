@@ -274,7 +274,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         subscription_product_list[0].no_of_deliveries = 7;
         subscription_product_list[0].subscription = 1;
         subscription_product_list[0].deliverydate = tomorrow;
-        subscription_product_list[0].starting_date = startdate;
+        subscription_product_list[0].mon =  subscription[i].mon ||0;
+        subscription_product_list[0].tue =  subscription[i].tue ||0;
+        subscription_product_list[0].wed =  subscription[i].wed ||0;
+        subscription_product_list[0].thur =  subscription[i].thur ||0;
+        subscription_product_list[0].fri =  subscription[i].fri ||0;
+        subscription_product_list[0].sat =  subscription[i].sat ||0;
+        subscription_product_list[0].sun =  subscription[i].sun ||0;
         if (subscription[i].planid==1) {
           amount = amount * 7;
         }
