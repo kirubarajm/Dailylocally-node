@@ -336,7 +336,6 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
         switch (req.type) {
             case 'catid':            
                 catid=req.id;
-                console.log("catid -->",catid);
                 break;
             case 'scl1_id':
                 var getidsquery = "select catid,scl1_id from SubcategoryL1 where scl1_id="+req.id;
