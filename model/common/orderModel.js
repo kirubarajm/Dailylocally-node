@@ -391,260 +391,208 @@ Order.online_order_place_conformation = async function(order_place, result) {
 
 
 
-Order.live_order_list_byeatuserid = async function live_order_list_byeatuserid(req,result) {
+Order.live_order_list_byuserid = async function live_order_list_byuserid(req,result) {
 
-  // var foodpreparationtime = constant.foodpreparationtime;
-  // var onekm = constant.onekm;
-  // var radiuslimit = constant.radiuslimit;
 
-  // const orderdetails = await query("select ors.*,mk.brandname from Orders ors join MakeitUser mk on mk.userid = ors.makeit_user_id where ors.userid ='" +req.userid +"' and ors.orderstatus = 6  and ors.payment_status = 1 order by ors.orderid desc limit 1");
- 
-  // if (orderdetails.length !== 0) {
 
-  //   orderdetails[0].rating = false;
-  //   orderdetails[0].showrating = false;
+  var orderdetails = await query(" select ors.* from Dayorder ors join Dayorder_products drp on drp.doid = ors.id where ors.userid ='" +req.userid +"' and ors.dayorderstatus  = 6   order by ors.id desc limit 1");
+
+  if (orderdetails.length !== 0) {
+
+    orderdetails[0].rating = false;
+    orderdetails[0].showrating = false;
     
-  // if (orderdetails[0].rating_skip < constant.max_order_rating_skip) {
+  if (orderdetails[0].rating_skip < constant.max_order_rating_skip) {
               
-  //   const orderratingdetails = await query("select * from Order_rating where orderid ='" +orderdetails[0].orderid +"'");
+    var orderratingdetails = await query("select * from day_order_rating where orderid ='" +orderdetails[0].id +"'");
    
-  //   var today = moment();
-  //   var moveit_actual_delivered_time = moment(orderdetails[0].moveit_actual_delivered_time);
-  //   var diffMs  = (today - moveit_actual_delivered_time);
-  //   var diffDays = Math.floor(diffMs / 86400000); 
-  //   var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
-  //   var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+    var today = moment();
+    var moveit_actual_delivered_time = moment(orderdetails[0].moveit_actual_delivered_time);
+    var diffMs  = (today - moveit_actual_delivered_time);
+    var diffDays = Math.floor(diffMs / 86400000); 
+    var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+    var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
 
-  //   if (orderratingdetails.length !== 0) orderdetails[0].rating = true;
-  //   if (diffDays || diffHrs || diffMins > 30) orderdetails[0].showrating = true;
+    if (orderratingdetails.length !== 0) orderdetails[0].rating = true;
+    if (diffDays || diffHrs || diffMins > 0) orderdetails[0].showrating = true;
 
-  // }
-  // }
-  // // or payment_status !=3)
-  // sql.query("select * from Orders where userid ='" +req.userid +"' and orderstatus < 6  and payment_status !=2 order by orderid desc limit 1",function(err, res) {
-  //     if (err) {
-  //       result(err, null);
-  //     } else {
-  //    //   console.log(res.length);
-  //       if (res.length === 0) {
-  //         let resobj = {
-  //           success: true,
-  //           status: false,
-  //           message: "Active order not found!",
-  //           orderdetails: orderdetails
-  //         };
-  //         result(null, resobj);
-  //       } else {
+  }
+  }
+  // or payment_status !=3)
+  liveorderquery ="select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"' and dr.dayorderstatus < 6  group by dr.id order by dr.date ";
 
-  //         if (res[0].delivery_vendor ==0) {
-            
-  //           if (res[0].payment_type === "0" || res[0].payment_type === 0) liveorderquery ="Select distinct ors.orderid,ors.delivery_vendor,ors.dunzo_taskid,ors.ordertime,ors.order_assigned_time,ors.orderstatus,ors.price,ors.userid,ors.payment_type,ors.payment_status,ors.moveit_user_id,ors.lock_status,mk.userid as makeituserid,mk.name as makeitusername,mk.brandname as makeitbrandname,mk.img1 as makeitimage,( 3959 * acos( cos( radians(ors.cus_lat) ) * cos( radians( mk.lat ) )  * cos( radians(mk.lon ) - radians(ors.cus_lon) ) + sin( radians(ors.cus_lat) ) * sin(radians(mk.lat)) ) ) AS distance,JSON_OBJECT('item', JSON_ARRAYAGG(JSON_OBJECT('quantity', ci.quantity,'productid', ci.productid,'price',ci.price,'product_name',pt.product_name))) AS items from Orders ors join MakeitUser mk on ors.makeit_user_id = mk.userid left join OrderItem ci ON ci.orderid = ors.orderid left join Product pt on pt.productid = ci.productid where ors.userid =" +req.userid +" and ors.orderstatus < 6  and payment_status !=2 ";
-  //           else if (res[0].payment_type === "1" || res[0].payment_status === 1) liveorderquery ="Select ors.orderid,ors.delivery_vendor,ors.dunzo_taskid,ors.ordertime,ors.orderstatus,ors.order_assigned_time,ors.price,ors.userid,ors.payment_type,ors.payment_status,ors.moveit_user_id,ors.lock_status,mk.userid as makeituserid,mk.name as makeitusername,mk.brandname as makeitbrandname,mk.img1 as makeitimage,( 3959 * acos( cos( radians(ors.cus_lat) ) * cos( radians( mk.lat ) )  * cos( radians(mk.lon ) - radians(ors.cus_lon) ) + sin( radians(ors.cus_lat) ) * sin(radians(mk.lat)) ) ) AS distance,JSON_OBJECT('item', JSON_ARRAYAGG(JSON_OBJECT('quantity', ci.quantity,'productid', ci.productid,'price',ci.price,'product_name',pt.product_name))) AS items from Orders ors join MakeitUser mk on ors.makeit_user_id = mk.userid left join OrderItem ci ON ci.orderid = ors.orderid left join Product pt on pt.productid = ci.productid where ors.userid ='" +req.userid +"' and ors.orderstatus < 6 and payment_status !=2 ";
-  //           else {
-  //             let resobj = {
-  //               success: true,
-  //               status: false,
-  //               message: "Active order not found!",
-  //               orderdetails: orderdetails
-  //             };
-  //             result(null, resobj);
-  //             return;
-  //           }
-
-  //         }else{
-            
-  //           liveorderquery ="Select dm.*,ors.delivery_vendor,ors.dunzo_taskid,ors.orderid,ors.ordertime,ors.orderstatus,ors.order_assigned_time,ors.price,ors.userid,ors.payment_type,ors.payment_status,ors.moveit_user_id,ors.lock_status,mk.userid as makeituserid,mk.name as makeitusername,mk.brandname as makeitbrandname,mk.img1 as makeitimage,( 3959 * acos( cos( radians(ors.cus_lat) ) * cos( radians( mk.lat ) )  * cos( radians(mk.lon ) - radians(ors.cus_lon) ) + sin( radians(ors.cus_lat) ) * sin(radians(mk.lat)) ) ) AS distance,JSON_OBJECT('item', JSON_ARRAYAGG(JSON_OBJECT('quantity', ci.quantity,'productid', ci.productid,'price',ci.price,'product_name',pt.product_name))) AS items from Orders ors join MakeitUser mk on ors.makeit_user_id = mk.userid left join OrderItem ci ON ci.orderid = ors.orderid left join Product pt on pt.productid = ci.productid left join Dunzo_moveit_details as dm on dm.task_id=ors.dunzo_taskid where ors.userid ='" +req.userid +"' and ors.orderstatus < 6 and payment_status !=2 ";
-
-  //         }
-          
-        
-  //         sql.query(liveorderquery,async function(err, res1) {
-  //           if (err) {
-  //             result(err, null);
-  //           } else {
-         
-
-      
-  //             for (let i = 0; i < res1.length; i++) {
-           
-  //               if (res1[i].items) {
-  //                 var items = JSON.parse(res1[i].items);
-  //                 res1[i].items = items.item;
-  //               }
-  //             }
-
-  //             ///this code only online payment incomplete orderA to return pay the payment If false res1[0].onlinepaymentstatus thay have to repay true track the order,  not for COD
-  //             if (res1[0].payment_type == 1 && res1[0].payment_status == 0 && res1[0].lock_status === 1) {
-  //               res1[0].onlinepaymentstatus = false;
-  //             }else{
-  //               res1[0].onlinepaymentstatus = true;
-  //             }
-          
-  //               res1[0].distance = Math.ceil(res1[0].distance);
-
-  //               if ( res1[0].orderstatus < 6 ) {
-  //                 req.orderid  =res1[0].orderid;
-  //                 await Order.eat_get_delivery_time(req);
-                 
-  //                 var orderdeliverytime = await query("select * from Order_deliverytime where orderid = "+req.orderid +" order by od_id desc limit 1");
-                  
-
-  //                 if (res1[0].delivery_vendor==1) {
-                    
-  //               //   var url = dunzoconst.dunzo_cancel_url+'/'+res1[0].dunzo_taskid+'/status?test=true'
-
-  //               //   var headers= {
-  //               //     'Content-Type': 'application/json',
-  //               //     'client-id': dunzoconst.dunzo_client_id,
-  //               //     'Authorization' : dunzoconst.Authorization,
-  //               //     'Accept-Language':'en_US'
-  //               //   };
-                
-  //               //   const options = {
-  //               //     url: url,
-  //               //     method: 'GET',
-  //               //     headers: headers
-  //               // };
-                
-  //               // request(options, function(err, res, body) {
-  //               //     let dunzo_status = JSON.parse(body);
-  //               //   //  console.log(json);
-  //               //  // console.log("dunzo_status------------------->",dunzo_status);
-  //               //   var pickup=dunzo_status.eta.pickup || 0;
-  //               //   var dropoff= dunzo_status.eta.dropoff || 0;
-
-  //               //   var eta = Math.round(pickup + dropoff);
-  //               //   res1[0].deliverytime = moment().add(0, "seconds").add(eta, "minutes").format("YYYY-MM-DD HH:mm:ss");
-  //               //   res1[0].eta = eta;
-                 
-  //               //   let resobj = {
-  //               //     success: true,
-  //               //     status: true,
-  //               //     orderdetails: orderdetails,
-  //               //     result: res1
-  //               //   };
-  
-  //               //   result(null, resobj);  
-  //               // });
-
-  //               var pickup= parseInt(res1[0].runner_eta_pickup_min) || 0;
-  //               var dropoff= parseInt(res1[0].runner_eta_dropoff_min) || 0;
-
-  //               var eta = Math.round(pickup + dropoff);
-
-  //               if (eta ==0) {                  
-  //                 eta = constant.delivery_buffer_time + foodpreparationtime + Math.round(onekm * res1[0].distance);            
                
-  //               }
-  //              // /moment().add(0, "seconds").add(eta, "minutes").format("YYYY-MM-DD HH:mm:ss")
-  //              if (res1[0].moveit_expected_delivered_time) {
-  //               res1[0].deliverytime = res1[0].moveit_expected_delivered_time;
-  //              }else{
-  //               res1[0].deliverytime = moment().add(0, "seconds").add(eta, "minutes").format("YYYY-MM-DD HH:mm:ss");
-  //              }
-               
-  //               res1[0].eta = eta;
-               
-       
-  //               let resobj = {
-  //                 success: true,
-  //                 status: true,
-  //                 orderdetails: orderdetails,
-  //                 result: res1
-  //               };
+  sql.query(liveorderquery,async function(err, res1) {
+    if (err) {
+      result(err, null);
+    } else {
+ 
+   
 
-  //               result(null, resobj);  
+      for (let i = 0; i < res1.length; i++) {
+   
+        if (res1[i].items) {
+          res1[i].items = JSON.parse(res1[i].items);
+          // console.log("items",items);
+          // res1[i].items = items.item;
+        }
+      }
 
-
-  //                 } else {
-
-  //                   if (orderdeliverytime.length !== 0) {
-  //                     res1[0].deliverytime = orderdeliverytime[0].deliverytime;
-  //                     res1[0].eta = orderdeliverytime[0].duration;
-
-  //                     let resobj = {
-  //                       success: true,
-  //                       status: true,
-  //                       orderdetails: orderdetails,
-  //                       result: res1
-  //                     };
-      
-  //                     result(null, resobj);  
-  //                   }else{
+     
   
-  //                     // we need to remove once delivery time stable
-  //                     eta = constant.delivery_buffer_time + foodpreparationtime + Math.round(onekm * res1[0].distance);
-  //                     //15min Food Preparation time , 3min 1 km
-                  
-  //                     res1[0].eta = Math.round(eta) + " mins";
-  //                     res1[0].deliverytime = moment().add(0, "seconds").add(eta, "minutes").format("YYYY-MM-DD HH:mm:ss");
+    
+          let resobj = {
+            success: true,
+            status: true,
+            orderdetails: orderdetails,
+            result: res1
+          };
+
+          result(null, resobj);  
 
 
-  //                     let resobj = {
-  //                       success: true,
-  //                       status: true,
-  //                       orderdetails: orderdetails,
-  //                       result: res1
-  //                     };
-      
-  //                     result(null, resobj);  
-  //                   }
 
-  //                 }
-                  
-  //               }else{
-
-  //                 let resobj = {
-  //                   success: true,
-  //                   status: true,
-  //                   orderdetails: orderdetails,
-  //                   result: res1
-  //                 };
-  
-  //                 result(null, resobj);  
-
-  //               }
-
-
-  //           }
-  //         });
-  //       }
-  //     }
-  // }
-  // );
-
-
-///////monday,wed,friday - 30 days
-  var dates = [];
-
-var d = new Date();
-d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
-dates.push(moment(d).format("YYYY-MM-DD"));
-// dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
-dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));//wed
-// dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
-dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));//fri
-// dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
-// dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
-
-/////formula for i max ---->[31-3(daycount)]/3(daycount)
-for(let i=0; i<28; i++){
-
-  console.log( "i", i);
-
-
-    d=moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD");
-    if(dates.length<31){
-      dates.push(moment(d).format("YYYY-MM-DD"));
     }
-    if(dates.length<31){
-      dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));
-    }
-    if(dates.length<31){
-      dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"))
-    }    
-}
-console.log("dates--->",dates,);
+  });
+ 
+
+
+
+
 };
 
+
+Order.order_skip_count = async function order_skip_count(req,result) {
+
+  var orderdetails = await query("select * from Dayorder where orderid = '"+req.doid+"'");
+
+  if (orderdetails.length !==0) {
+    
+    rating_skip =  orderdetails[0].rating_skip + 1;
+
+    var skipupdatequery = await query("update Dayorder set rating_skip = "+rating_skip+"  where orderid = '"+req.doid+"'");
+    if (skipupdatequery.err) {
+      let resobj = {
+        success: true,
+        status:false,
+        result: err
+      };
+      result(null, resobj);
+    }
+    let resobj = {
+      success: true,
+      status: true,
+      message:"Rating skip updated",
+      result: orderdetails
+    };
+    result(null, resobj);
+
+  }else{
+
+    let resobj = {
+      success: true,
+      status:false,
+      message:"There is no orders found!",
+      result: orderdetails
+    };
+    result(null, resobj);
+
+  }
+
+};
+
+
+Order.day_order_view_by_user = function day_order_view_by_user(req, result) {
+
+  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.id ='"+req.doid+"'  group by dr.id order by dr.date" ;//and dm.active_status=1
+  sql.query(orderquery,async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "Order not found!",
+            result: []
+          };
+          result(null, resobj);
+        } else {
+
+               
+              
+
+              
+
+              
+
+                if (res1[0].items) {
+                  var items = JSON.parse(res1[0].items);
+                  res1[0].items = items.item;
+                }
+
+          
+            
+
+
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    result: res1
+                  };
+  
+                  result(null, resobj);  
+  
+                  
+        }
+      }
+    }
+  );
+};
+
+
+Order.day_orderlist_user = async function day_orderlist_user(req,result) {
+
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"'   group by dr.id order by dr.date";
+  sql.query(query,function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "orders not found!"
+          };
+          result(null, resobj);
+        } else {
+           
+            history_list =res;
+           for (let i = 0; i < history_list.length; i++) {
+
+          
+
+             if (history_list[i].items) {
+               var items = JSON.parse(history_list[i].items);
+               history_list[i].items = items;
+             }
+
+            
+           }
+
+           
+           let resobj = {
+             success: true,
+             status: true,
+             result: history_list
+           };
+
+           result(null, resobj);
+
+        
+        }
+      }
+    }
+  );
+};
 module.exports = Order;

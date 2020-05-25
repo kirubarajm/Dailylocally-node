@@ -50,16 +50,51 @@ exports.online_order_place_conformation = function(req, res) {
   }
 };
 
-exports.live_order_list_byeatuser = function(req, res) {
-  Order.live_order_list_byeatuserid(req.params, function(err, user) {
+exports.live_order_list_byuserid = function(req, res) {
+  Order.live_order_list_byuserid(req.params, function(err, user) {
     if (err) res.send(err);
     res.send(user);
   });
 };
 
 
+exports.day_order_skip_count = function(req, res) {
+  if (!req.body.orderid) {
+    res.status(400).send({ error: true,status:false, message: "Please provide orderid" });
+  }else{
+  Order.order_skip_count(req.body, function(err, user) {
+    console.log("controller");
+    if (err) res.send(err);
+    console.log("res", user);
+    res.send(user);
+  });
+}
+};
 
 
 
+exports.day_order_view_user = function(req, res) {
+
+  Order.day_order_view_by_user(req.params, function(err, user) {
+    console.log("controller");
+    if (err) res.send(err);
+    console.log("res", user);
+    res.send(user);
+  });
+
+};
 
 
+exports.order_list = function(req, res) {
+ 
+  // if (!req.params.userid) {
+  //   res.status(400).send({ error: true,status:false, message: "Please provide userid" });
+  // }else{
+  Order.day_orderlist_user(req.body, function(err, user) {
+    console.log("controller");
+    if (err) res.send(err);
+    console.log("res", user);
+    res.send(user);
+  });
+//}
+};

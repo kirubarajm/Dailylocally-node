@@ -9,10 +9,10 @@ module.exports = function(app) {
   var sub_category_L2 = require("../controllers/category/Subcategoryl2Controller");
   var productmaster = require("../controllers/category/ProductMasterController");
   var orders = require("../controllers/common/OrderController");
-
-
-
-
+  var datorderrating = require("../controllers/common/OrderratingController");
+  var Promotion = require("../controllers/common/PromotionController");
+  var Zendeskissues = require("../controllers/common/ZendeskissuesController");
+  var collection = require("../controllers/common/CollectionController");
 // Dl user
 app.route("/user/app/versioncheck").post(routesVersioning({"1.0.0": dluser.user_app_version_check_vid}));
 app.route("/user/sendotp").post(routesVersioning({"1.0.0":dluser.dl_user_send_otp}));
@@ -57,11 +57,29 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 
 
  //live order list
- app.route("/user/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byeatuser}));
-
-
+ app.route("/user/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byuserid}));
+ app.route("/user/rating").post(middleware.checkToken,routesVersioning({"1.0.0":datorderrating.createorderrating}));
+ app.route("/user/orderskip").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_skip_count}));
+ app.route("/user/dayorder/:doid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_view_user}));
+ app.route("/user/dayorderhistory").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list}));
+ 
  //promotions
-//  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+
+
+  
+//////zen desk//////
+app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
+app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
+app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":user.zendesk_requestcreate}));
+
+
+//collections
+app.route("/user/collection").post(middleware.checkToken,routesVersioning({"1.0.0":collection.list_all_collection}));
+app.route("/user/collectiondetails").post(middleware.checkToken,routesVersioning({"1.0.0":collection.get_all_collection_by_cid_v2}));
+
+
+
 
 // app.route("/eat/address").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.list_all_address})).post(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.create_a_address}));
 // app.route("/eat/addresslist/:aid").get(middleware.checkToken,routesVersioning({"1.0.0":eatuseraddress.read_a_user_address_aid}));
@@ -140,11 +158,6 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 // app.route("/eat/payment/retry").post(middleware.checkToken,routesVersioning({"1.0.0":eatuser.payment_retry}));
 // app.route("/eat/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
-// //////zen desk//////
-// app.route("/eat/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
-// app.route("/eat/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
-// app.route("/eat/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":eatuser.zendesk_requestcreate}));
-// app.route("/eat/productunlive").get(middleware.checkToken,routesVersioning({"1.0.0":quicksearch.manual_product_unlive}));
 
 
 
