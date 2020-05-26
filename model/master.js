@@ -4,41 +4,6 @@
 
 const master = [
 
-    {
-        'regionlist': [{
-                "regionid": 1,
-                "regionname": "Tamil nadu"
-            },
-            {
-                "regionid": 2,
-                "regionname": "Kerala specialist"
-            },
-            {
-                "regionid": 3,
-                "regionname": "punjabi"
-            }
-        ]
-    },
-
-    {
-        'cuisinelist': [{
-                "cuisineid": 1,
-                "cuisinename": "Continental"
-            },
-            {
-                "cuisineid": 2,
-                "cuisinename": "South Indian"
-            },
-            {
-                "cuisineid": 3,
-                "cuisinename": "North Indian"
-            },
-            {
-                "cuisineid": 4,
-                "cuisinename": "Itallian"
-            }
-        ]
-    },
 
     {
         'sort': [{
@@ -62,99 +27,10 @@ const master = [
     },
 
 
-    {
-        'makeitregistrationStatus': [{
-                "registrationStatusid": 0,
-                "registrationStatus": "Registration"
-            },
-
-            {
-                "registrationStatusid": 1,
-                "registrationStatus": "Makeit Appoinment"
-            },
-            {
-                "registrationStatusid": 2,
-                "registrationStatus": "Sales Assign"
-            },
-            {
-                "registrationStatusid": 3,
-                "registrationStatus": "Sales Approval"
-            },
-            {
-                "registrationStatusid": 4,
-                "registrationStatus": "Admin Approval"
-            }
-        ]
-    },
+   
 
 
-
-    // Food Cycle for product 0 is disable 1 is enable for food cycle
-    {
-        'foodcycle': [{
-                "foodcycleStatusid": 1,
-                "foodcycle": "Breakfast",
-                "foodtime": " 7 to 12",
-            },
-            {
-                "foodcycleStatusid": 2,
-                "foodcycle": "Lunch",
-                "foodtime": "12 to 4",
-            },
-            {
-                "foodcycleStatusid": 3,
-                "foodcycle": "Dinner",
-                "foodtime": "6 to 11",
-            }
-        ]
-    },
-
-
-    // // Sales for followupstatus
-    //  {'salesfollowupstatus' : [
-    //     {
-    //         "followupstatussid":0,
-    //         "followupstatus":"incomplete"
-    // },
-    //     {
-    //         "followupstatussid":1,
-    //         "followupstatus":"complete"
-    //     }
-    // ]},
-
-
-    // Sales for followupstatus
-    {
-        'salesfollowupstatus': [{
-                "followupstatussid": 0,
-                "followupstatus": "incomplete"
-            },
-            {
-                "followupstatussid": 1,
-                "followupstatus": "complete"
-            },
-            {
-                "followupstatussid": 2,
-                "followupstatus": "info-schedule"
-            },
-            {
-                "followupstatussid": 3,
-                "followupstatus": "info-reschedule"
-            },
-            {
-                "followupstatussid": 4,
-                "followupstatus": "appointment-schedule"
-            },
-            {
-                "followupstatussid": 5,
-                "followupstatus": "appointment-reschedule"
-            },
-            {
-                "followupstatussid": 6,
-                "followupstatus": "appointment cancel"
-            }
-        ]
-    },
+   
 
 
     // order status
@@ -965,6 +841,25 @@ const master = [
             }
         ]
     },
+    {
+        'search_types': [{
+                "type": 1,
+                "description": "category"
+            },
+            {
+                "type": 2,
+                "description": "sub_cat 1"
+            },
+            {
+                "type": 3,
+                "description": "sub_cat 2"
+            },
+            {
+                "type": 4,
+                "description": "product"
+            }
+        ]
+    }
 
 ]
 module.exports = master;

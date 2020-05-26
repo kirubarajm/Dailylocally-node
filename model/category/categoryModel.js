@@ -561,4 +561,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
     result(null, resobj);
   } 
 };
+
+
+
 module.exports = Category;

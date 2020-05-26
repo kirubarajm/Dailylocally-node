@@ -709,5 +709,163 @@ Catalog.edit_subcategoryl2 =async function edit_subcategoryl2(req,result) {
 };
 
 
+/////////Search Catalog///////////
+Catalog.home_quick_search =async function home_quick_search(req,result) {
+
+    var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+    
+    var servicable_status= true;
+    if (userdetails.length !=0) {
+        
+        var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+        req.lat +
+        "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+        req.lon +
+        "') ) + sin( radians('" +
+        req.lat +
+        "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+    
+    
+      if (get_nearby_zone.length !=0) {
+        
+  
+        if (get_nearby_zone[0].distance > constant.radiuslimit) {
+          servicable_status =false;
+        }
+      }
+  
+  
+      if(req.search){
+          var getsearchquery = "(SELECT name,'1' as type FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
+          var getsearch = await query(getsearchquery);
+          if(getsearch.length > 0){
+
+          
+
+              let resobj = {
+                  success: true,
+                  status: true,
+                  servicable_status:servicable_status,
+                  data: getsearch
+              };
+          result(null, resobj);
+          }else{
+              let resobj = {
+                  success: true,
+                  status: false,
+                  message: "no records found"
+              };
+              result(null, resobj);
+          }
+      }else{
+          let resobj = {
+              success: true,
+              status: false,
+              message: "check your post value"
+          };
+          result(null, resobj);
+      }
+
+    } else {
+        let resobj = {
+            success: true,
+            status: false,
+            message: "user not found"
+        };
+        result(null, resobj);
+    }
+
+     
+};
+
+
+/////////Search Catalog Data///////////
+Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(req,result) {
+    if(req.type){
+
+        var catid = 0;
+        var scl1_id = 0;
+        var scl2_id = 0;
+        var pid = 0;
+
+        var category =[];
+        var l1subcategory =[];
+        var l2subcategory =[];
+        var product =[];
+
+        switch (req.type) {
+            case 1:            
+                catid=req.id;
+                break;
+            case 2:
+                var getidsquery = "select catid,scl1_id from SubcategoryL1 where scl1_id="+req.id;
+                var getids = await query(getidsquery);
+                if(getids.length>0){
+                    catid = getids[0].catid;
+                    scl1_id = getids[0].scl1_id;
+                }
+                break;
+            case 3:
+                var getidsquery = "select l1.catid,l2.scl1_id,l2.scl2_id from SubcategoryL2 as l2 left join SubcategoryL1 as l1 on l1.scl1_id=l2.scl1_id where l2.scl2_id="+req.id+" group by l2.scl2_id";
+                var getids = await query(getidsquery);
+                if(getids.length>0){
+                    catid = getids[0].catid;
+                    scl1_id = getids[0].scl1_id;
+                    scl2_id = getids[0].scl2_id;
+                }
+                break;
+            case 4: 
+                var getidsquery = "select l1.catid,pm.scl1_id,pm.scl2_id,pm.pid from ProductMaster as pm left join SubcategoryL1 as l1 on l1.scl1_id=pm.scl1_id where pm.pid="+req.id+" group by pm.pid";
+                var getids = await query(getidsquery);
+                if(getids.length>0){
+                    catid = getids[0].catid;
+                    scl1_id = getids[0].scl1_id;
+                    scl2_id = getids[0].scl2_id;
+                    pid = getids[0].pid;
+                }
+                break;        
+            default:
+                break;
+        }
+
+        if(catid>0){
+            var categorydataquery = "select catid,name,active_status from Category where catid="+catid;
+            category = await query(categorydataquery);            
+        }
+
+        if(scl1_id>0){
+            var l1subcategorydataquery = "select l1.scl1_id,l1.name,l1.active_status,l1.catid,if(scl2_id,1,0) as l2_status from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id where l1.scl1_id="+scl1_id+" group by l1.scl1_id";
+            l1subcategory = await query(l1subcategorydataquery);            
+        }
+
+        if(scl2_id>0){
+            var l2subcategorydataquery = "select scl2_id,name,active_status,scl1_id from SubcategoryL2 where scl2_id="+scl2_id;
+            l2subcategory = await query(l2subcategorydataquery);            
+        }
+
+        if(pid>0){
+            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id from ProductMaster where pid="+pid;
+            product = await query(productdataquery);            
+        }
+        
+        let resobj = {
+            success: true,
+            status: true,
+            category: category,
+            l1subcategory:l1subcategory,
+            l2subcategory:l2subcategory,
+            product:product
+        };
+        result(null, resobj);        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
 
 module.exports = Catalog;

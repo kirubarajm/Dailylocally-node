@@ -191,3 +191,23 @@ exports.edit_subcategoryl2 = function(req, res) {
         res.send(ress);
     });    
 };
+
+/////////Search Catalog///////////
+exports.home_quick_search = function(req, res) {    
+    catalog.home_quick_search(req.body, function(err, ress) {
+        //console.log("search_catalog controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Search Catalog Data///////////
+exports.search_catalog_data_mobile = function(req, res) {    
+    catalog.search_catalog_data_mobile(req.body, function(err, ress) {
+        //console.log("search_catalog_data controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
