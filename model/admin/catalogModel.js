@@ -7,32 +7,35 @@ var request = require('request');
 let jwt     = require('jsonwebtoken');
 let config  = require('../config.js');
 var moment  = require("moment");
+var Category = require('../admin/categoryTableModel.js');
+var Subcategoryl1 = require('../admin/subcategoryl1TableModel.js');
+var Subcategoryl2 = require('../admin/subcategoryl2TableModel.js');
 
 var Catalog = function(catalog) {};
 
 /////////Get Category List///////////
 Catalog.get_category_list =async function get_category_list(req,result) {
-    var getcategoryquery = "select catid,name,active_status from Category";
-    var getcategory = await query(getcategoryquery);
-    if(getcategory.length > 0){
-        let resobj = {
-            success: true,
-            status: true,
-            data: getcategory
-        };
-        result(null, resobj);
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "no records found"
-        };
-        result(null, resobj);
-    }
+  var getcategoryquery = "select catid,name,active_status from Category";
+  var getcategory = await query(getcategoryquery);
+  if(getcategory.length > 0){
+    let resobj = {
+        success: true,
+        status: true,
+        data: getcategory
+    };
+    result(null, resobj);
+  }else{
+    let resobj = {
+        success: true,
+        status: false,
+        message: "no records found"
+    };
+    result(null, resobj);
+  }
 };
 
 /////////Get L1SubCategory List///////////
-Catalog.get_l1subcategory_list =async function get_l1subcategory_list(req,result) {
+Catalog.get_subcategoryl1_list =async function get_subcategoryl1_list(req,result) {
     if(req.catid){
         var getl1subcategoryquery = "select l1.scl1_id,l1.name,l1.active_status,l1.catid,if(scl2_id,1,0) as l2_status from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id where l1.catid="+req.catid+" group by l1.scl1_id;"
         var getl1subcategory = await query(getl1subcategoryquery);
@@ -62,7 +65,7 @@ Catalog.get_l1subcategory_list =async function get_l1subcategory_list(req,result
 };
 
 /////////Get L2SubCategory List///////////
-Catalog.get_l2subcategory_list =async function get_l2subcategory_list(req,result) {
+Catalog.get_subcategoryl2_list =async function get_subcategoryl2_list(req,result) {
     if(req.scl1_id){
         var getcategoryquery = "select scl2_id,name,active_status,scl1_id from SubcategoryL2 where scl1_id="+req.scl1_id;
         var getcategory = await query(getcategoryquery);
@@ -93,12 +96,12 @@ Catalog.get_l2subcategory_list =async function get_l2subcategory_list(req,result
 
 /////////Get Product List///////////
 Catalog.get_product_list =async function get_product_list(req,result) {
-    if(req){
+    if(req.zone_id){
         var wherecon = "";
-        if(req.scl1_id){ wherecon = wherecon+" and scl1_id="+req.scl1_id+" "; }
-        if(req.scl2_id){ wherecon = wherecon+" and scl2_id="+req.scl2_id+" "; }
-        var getproductquery = "select pid,Productname,active_status,scl1_id,scl2_id from ProductMaster where pid !='' "+wherecon;
-
+        if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
+        if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
+        var getproductquery = "select pm.pid,pm.Productname,pm.active_status,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pm.pid !='' "+wherecon+" and pl.zoneid="+req.zone_id;
+        
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
             let resobj = {
@@ -167,7 +170,7 @@ Catalog.update_category_livestatus =async function update_category_livestatus(re
 };
 
 /////////Update L1SubCategory Status///////////
-Catalog.update_l1subcategory_livestatus =async function update_l1subcategory_livestatus(req,result) {
+Catalog.update_subcategoryl1_livestatus =async function update_subcategoryl1_livestatus(req,result) {
     if(req.scl1_id){
         var gatstatusquery = "select active_status from SubcategoryL1 where scl1_id="+req.scl1_id;
         var gatstatus = await query(gatstatusquery);
@@ -208,7 +211,7 @@ Catalog.update_l1subcategory_livestatus =async function update_l1subcategory_liv
 };
 
 /////////Update L2SubCategory Status///////////
-Catalog.update_l2subcategory_livestatus =async function update_l2subcategory_livestatus(req,result) {
+Catalog.update_subcategoryl2_livestatus =async function update_subcategoryl2_livestatus(req,result) {
     if(req.scl2_id){
         var gatstatusquery = "select active_status from SubcategoryL2 where scl2_id="+req.scl2_id;
         var gatstatus = await query(gatstatusquery);
@@ -251,17 +254,17 @@ Catalog.update_l2subcategory_livestatus =async function update_l2subcategory_liv
 /////////Update Product Status///////////
 Catalog.update_product_livestatus =async function update_product_livestatus(req,result) {
     if(req.pid){
-        var gatstatusquery = "select active_status from ProductMaster where pid="+req.pid;
+        var gatstatusquery = "select active_status from Product_live where pid="+req.pid;
         var gatstatus = await query(gatstatusquery);
         if(gatstatus.length>0){
             var updatestatus = 0;
             if(gatstatus[0].active_status ==0){
                 updatestatus = 1;
             }
-            var statusupdatequery = "update ProductMaster set active_status="+updatestatus+" where pid="+req.pid;
+            var statusupdatequery = "update Product_live set live_status="+updatestatus+" where pid="+req.pid;
             var statusupdate = await query(statusupdatequery);
             if(statusupdate.affectedRows > 0){
-                var updatedselectquery = "select pid,Productname,active_status from ProductMaster where pid="+req.pid;
+                var updatedselectquery = "select pm.pid,pm.Productname,pl.live_status from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pm.pid="+req.pid;
                 var updatedselect = await query(updatedselectquery);
                 let resobj = {
                     success: true,
@@ -406,6 +409,305 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
         result(null, resobj);
     }
 };
+
+/////////view Category///////////
+Catalog.view_category =async function view_category(req,result) {
+    if(req.catid){
+        var getcategoryquery = "select * from Category where catid="+req.catid;
+        var getcategory = await query(getcategoryquery);
+        if(getcategory.length > 0 ){
+            let resobj = {
+                success: true,
+                status: true,
+                date: getcategory
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Add Category///////////
+Catalog.add_category =async function add_category(req,result) {
+    if(req.name && req.image){
+        var checkcategoryquery = "select * from Category where name='"+req.name+"' ";
+        var checkcategory = await query(checkcategoryquery);
+        if(checkcategory.length ==0 ){
+            var addcategory = await Category.createCategory(req);           
+            let resobj = {
+                success: true,
+                status: true,
+                message: "category added susccessfully"
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "category name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Edit Category///////////
+Catalog.edit_category =async function edit_category(req,result) {
+    if(req.catid && req.name){
+        var checkcategoryquery = "select * from Category where name='"+req.name+"' and catid NOT IN("+req.catid+")";
+        var checkcategory = await query(checkcategoryquery);
+        if(checkcategory.length ==0 ){
+            var updatecategory = await Category.updateCategory(req);           
+            let resobj = {
+                success: true,
+                status: true,
+                message: "category Updated susccessfully"
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "category name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////view SubCategoryL1///////////
+Catalog.view_subcategoryl1 =async function view_subcategoryl1(req,result) {
+    if(req.scl1_id){
+        var getsubcategoryl1query = "select * from SubcategoryL1 where scl1_id="+req.scl1_id;
+        var getsubcategoryl1 = await query(getsubcategoryl1query);
+        if(getsubcategoryl1.length > 0 ){
+            let resobj = {
+                success: true,
+                status: true,
+                date: getsubcategoryl1
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Add SubCategoryL1///////////
+Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
+    if(req.name && req.image && req.catid){
+        var checksubcategoryl1query = "select * from SubcategoryL1 where name='"+req.name+"' ";
+        var checksubcategoryl1 = await query(checksubcategoryl1query);
+        if(checksubcategoryl1.length ==0 ){
+            var checkcategoryquery = "select * from Category where catid="+req.catid;
+            var checkcategory = await query(checkcategoryquery);
+            if(checkcategory.length >0){
+                var addsubcategoryl1 = await Subcategoryl1.createSubcategoryl1(req);           
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "subcategoryl1 added susccessfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "invalid category"
+                };
+                result(null, resobj);
+            }            
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "subcategoryl1 name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Edit SubCategoryL1///////////
+Catalog.edit_subcategoryl1 =async function edit_subcategoryl1(req,result) {
+    if(req.scl1_id && req.name){
+        var checkcategoryquery = "select * from SubcategoryL1 where name='"+req.name+"' and scl1_id NOT IN("+req.scl1_id+")";
+        var checkcategory = await query(checkcategoryquery);
+        if(checkcategory.length ==0 ){
+            var updatesubcategoryl1 = await Subcategoryl1.updateSubcategoryl1(req);           
+            let resobj = {
+                success: true,
+                status: true,
+                message: "subcategoryl1 Updated susccessfully"
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "subcategoryl1 name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////view SubCategoryL2///////////
+Catalog.view_subcategoryl2 =async function view_subcategoryl2(req,result) {
+    if(req.scl2_id){
+        var getsubcategoryl2query = "select * from SubcategoryL2 where scl2_id="+req.scl2_id;
+        var getsubcategoryl2 = await query(getsubcategoryl2query);
+        if(getsubcategoryl2.length > 0 ){
+            let resobj = {
+                success: true,
+                status: true,
+                date: getsubcategoryl2
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Add SubCategoryL2///////////
+Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
+    if(req.name && req.image && req.scl1_id){
+        var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' ";
+        var checksubcategoryl2 = await query(checksubcategoryl2query);
+        if(checksubcategoryl2.length ==0 ){
+            var checksubcategoryl1query = "select * from SubcategoryL1 where scl1_id="+req.scl1_id;
+            var checksubcategoryl1 = await query(checksubcategoryl1query);
+            if(checksubcategoryl1.length >0){
+                var addsubcategoryl2 = await Subcategoryl2.createSubcategoryl2(req);           
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "subcategoryl2 added susccessfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "invalid subcategoryl1"
+                };
+                result(null, resobj);
+            }            
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "subcategoryl2 name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Edit SubCategoryL2///////////
+Catalog.edit_subcategoryl2 =async function edit_subcategoryl2(req,result) {
+    if(req.scl2_id && req.name){
+        var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' and scl2_id NOT IN("+req.scl2_id+")";
+        var checksubcategoryl2 = await query(checksubcategoryl2query);
+        if(checksubcategoryl2.length ==0 ){
+            var updatesubcategoryl2 = await Subcategoryl2.updateSubcategoryl2(req);           
+            let resobj = {
+                success: true,
+                status: true,
+                message: "subcategoryl1 Updated susccessfully"
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "subcategoryl2 name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
 
 
 module.exports = Catalog;

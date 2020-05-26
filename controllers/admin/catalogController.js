@@ -13,9 +13,9 @@ exports.get_category_list = function(req, res) {
 };
 
 /////////Get L1SubCategory List///////////
-exports.get_l1subcategory_list = function(req, res) {    
-    catalog.get_l1subcategory_list(req.body, function(err, ress) {
-        //console.log("get_l1subcategory_list controller");
+exports.get_subcategoryl1_list = function(req, res) {    
+    catalog.get_subcategoryl1_list(req.body, function(err, ress) {
+        //console.log("get_subcategoryl1_list controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -23,9 +23,9 @@ exports.get_l1subcategory_list = function(req, res) {
 };
 
 /////////Get L2SubCategory List///////////
-exports.get_l2subcategory_list = function(req, res) {    
-    catalog.get_l2subcategory_list(req.body, function(err, ress) {
-        //console.log("get_l2subcategory_list controller");
+exports.get_subcategoryl2_list = function(req, res) {    
+    catalog.get_subcategoryl2_list(req.body, function(err, ress) {
+        //console.log("get_subcategoryl2_list controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -53,9 +53,9 @@ exports.update_category_livestatus = function(req, res) {
 };
 
 /////////Update L1SubCategory Status///////////
-exports.update_l1subcategory_livestatus = function(req, res) {    
-    catalog.update_l1subcategory_livestatus(req.body, function(err, ress) {
-        //console.log("update_l1subcategory_livestatus controller");
+exports.update_subcategoryl1_livestatus = function(req, res) {    
+    catalog.update_subcategoryl1_livestatus(req.body, function(err, ress) {
+        //console.log("update_subcategoryl1_livestatus controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -63,9 +63,9 @@ exports.update_l1subcategory_livestatus = function(req, res) {
 };
 
 /////////Update L2SubCategory Status///////////
-exports.update_l2subcategory_livestatus = function(req, res) {    
-    catalog.update_l2subcategory_livestatus(req.body, function(err, ress) {
-        //console.log("update_l2subcategory_livestatus controller");
+exports.update_subcategoryl2_livestatus = function(req, res) {    
+    catalog.update_subcategoryl2_livestatus(req.body, function(err, ress) {
+        //console.log("update_subcategoryl2_livestatus controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -96,6 +96,96 @@ exports.search_catalog = function(req, res) {
 exports.search_catalog_data = function(req, res) {    
     catalog.search_catalog_data(req.body, function(err, ress) {
         //console.log("search_catalog_data controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////View Category///////////
+exports.view_category = function(req, res) {    
+    catalog.view_category(req.body, function(err, ress) {
+        //console.log("view_category controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Add Category///////////
+exports.add_category = function(req, res) {    
+    catalog.add_category(req.body, function(err, ress) {
+        //console.log("add_category controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Edit Category///////////
+exports.edit_category = function(req, res) {    
+    catalog.edit_category(req.body, function(err, ress) {
+        //console.log("edit_category controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////View SubCategoryl1///////////
+exports.view_subcategoryl1 = function(req, res) {    
+    catalog.view_subcategoryl1(req.body, function(err, ress) {
+        //console.log("view_subcategoryl1 controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Add SubCategoryl1///////////
+exports.add_subcategoryl1 = function(req, res) {    
+    catalog.add_subcategoryl1(req.body, function(err, ress) {
+        //console.log("add_subcategoryl1 controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Edit SubCategoryl1///////////
+exports.edit_subcategoryl1 = function(req, res) {    
+    catalog.edit_subcategoryl1(req.body, function(err, ress) {
+        //console.log("edit_subcategoryl1 controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////View SubCategoryl2///////////
+exports.view_subcategoryl2 = function(req, res) {    
+    catalog.view_subcategoryl2(req.body, function(err, ress) {
+        //console.log("view_subcategoryl2 controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Add SubCategoryl2///////////
+exports.add_subcategoryl2 = function(req, res) {    
+    catalog.add_subcategoryl2(req.body, function(err, ress) {
+        //console.log("add_subcategoryl2 controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Edit SubCategoryl2///////////
+exports.edit_subcategoryl2 = function(req, res) {    
+    catalog.edit_subcategoryl2(req.body, function(err, ress) {
+        //console.log("edit_subcategoryl2 controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
