@@ -240,7 +240,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
 // otp verification
 Dluser.user_otp_verification =async function user_otp_verification(req,result) {
-
+  var registrationstatus = false;
   var emailstatus = false;
   var otpstatus = false;
   var genderstatus = false;
@@ -284,6 +284,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                       emailstatus:emailstatus,
                       otpstatus: true,
                       genderstatus: genderstatus,
+                      registrationstatus:registrationstatus,
                       userid: res2.insertId,
                       result: res1
                     };
@@ -300,6 +301,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
 
                 if (res1[0].gender !== "" &&res1[0].gender !== null &&res1[0].name !== "" &&res1[0].name !== null) {
                   genderstatus = true;
+                  registrationstatus=true;
                   otpstatus = true;
                 }
 
@@ -317,7 +319,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         responce[0].razer_customerid = res1[0].razer_customerid
                         responce[0].userid = res1[0].userid
                         responce[0].name = res1[0].name
-                        responce[0].email = res1[0].email
+                        responce[0].email = res1[0].email 
                         responce[0].phoneno = res1[0].phoneno
                         responce[0].referalcode = res1[0].referalcode
                         responce[0].gender = res1[0].gender
@@ -347,6 +349,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         emailstatus:emailstatus,
                         otpstatus: otpstatus,
                         genderstatus: genderstatus,
+                        registrationstatus:registrationstatus,
                         message: 'Authentication successful!',
                         token: token,
                         userid: res1[0].userid,
