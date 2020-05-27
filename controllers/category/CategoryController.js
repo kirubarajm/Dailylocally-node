@@ -45,3 +45,22 @@ exports.get_category_list = function(req, res) {
       });
     }
   };
+
+
+  exports.subscribeplan_by_pid = function(req, res) {
+    var subscription = req.body.subscription;
+   if (!req.body.lat) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lat" });
+    } else if (!req.body.lon) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lan" });
+    }else {
+      Category.subscribeplan_by_pid(req.body, subscription,function(err,user) {
+        if (err) res.send(err);
+        res.json(user);
+      });
+    }
+  };

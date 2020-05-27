@@ -98,3 +98,23 @@ exports.order_list = function(req, res) {
   });
 //}
 };
+
+exports.order_list_calendar  = function(req, res) {
+ 
+  Order.order_list_calendar_by_month_wise(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+//}
+};
+
+
+
+exports.order_list_calendar_day  = function(req, res) {
+ 
+  Order.order_list_calendar_by_day_wise(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+//}
+};

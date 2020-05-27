@@ -595,4 +595,99 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
     }
   );
 };
+
+
+Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_month_wise(req,result) {
+
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
+
+  console.log(query);
+  sql.query(query,function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "orders not found!"
+          };
+          result(null, resobj);
+        } else {
+           
+            history_list =res;
+           for (let i = 0; i < history_list.length; i++) {
+
+          
+
+             if (history_list[i].items) {
+               var items = JSON.parse(history_list[i].items);
+               history_list[i].items = items;
+             }
+
+            
+           }
+
+           
+           let resobj = {
+             success: true,
+             status: true,
+             result: history_list
+           };
+
+           result(null, resobj);
+
+        
+        }
+      }
+    }
+  );
+};
+
+
+Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
+
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
+  sql.query(query,function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "orders not found!"
+          };
+          result(null, resobj);
+        } else {
+           
+            history_list =res;
+           for (let i = 0; i < history_list.length; i++) {
+
+          
+
+             if (history_list[i].items) {
+               var items = JSON.parse(history_list[i].items);
+               history_list[i].items = items;
+             }
+
+            
+           }
+
+           
+           let resobj = {
+             success: true,
+             status: true,
+             result: history_list
+           };
+
+           result(null, resobj);
+
+        
+        }
+      }
+    }
+  );
+};
+
 module.exports = Order;

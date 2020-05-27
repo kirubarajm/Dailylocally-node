@@ -563,5 +563,96 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 };
 
 
+//cart details for ear user
+Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,subscription,result) {
+  var tempmessage = "";
+  var isAvaliableItem = true;
+  var planStatus = true;
+  var subscription_product = [];
+  var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+
+  if (userdetails.length !==0) {   
+
+   
+    if (subscription) {
+      for (let i = 0; i < subscription.length; i++) {
+        
+        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +subscription[i].pid +"' ");
+        if (subscription_product_list[0].live_status == 0) {
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        }else if (subscription_product_list[0].subscription == 0) {
+     
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        } else {
+          subscription_product_list[0].availablity = true;
+        }
+      
+        subscription_product.push(subscription_product_list[0]);
+        
+      }
+    }
+   
+    var query1 ="select * from Subscription_plan where active_status=1";
+   
+  
+    sql.query(query1,async function(err,res2) {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+      } else {
+       
+       
+        if (res2.length==0) {
+          planStatus = false;
+        }
+
+        //  res2[0].subscription_product = subscription_product;
+
+         
+
+          let resobj = {
+            success: true,
+            };
+            
+        
+          if (!isAvaliableItem){
+            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.status = isAvaliableItem
+          }
+
+          if (!planStatus){
+            console.log(res2.length);
+            resobj.message = tempmessage.slice(0, -1) + " Subscription Plan not available!";
+            resobj.status = planStatus
+          }
+
+          resobj.subscription_plan= res2;
+          resobj.result = subscription_product; 
+          result(null, resobj);
+      
+          
+      } 
+
+    });
+
+  
+
+
+    
+    
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "user is not found"
+    };
+    result(null, resobj);
+  } 
+};
+
 
 module.exports = Category;

@@ -25,6 +25,7 @@ app.route("/user/edit").put(middleware.checkToken,routesVersioning({"1.0.0":dlus
 app.route("/user/referral/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":dluser.user_referral}));
 app.route("/user/pushid/add").put(middleware.checkToken,routesVersioning({"1.0.0":dluser.add_a_pushid}));
 app.route("/user/customersupport").post(routesVersioning({"1.0.0":dluser.customer_support}));
+
 //User Address
 app.route("/user/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address})).post(middleware.checkToken,routesVersioning({"1.0.0":useraddress.create_a_address}));
 app.route("/user/address/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":useraddress.read_a_user_address_userid})).delete(routesVersioning({"1.0.0":useraddress.delete_a_user_address}));
@@ -39,10 +40,8 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
   // sub_category_L1
   app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
 
-
  // sub_category_L2
  app.route("/user/subcategoryL2").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L2.get_Sub_Category_L2_list}));
-
 
 
  // products
@@ -65,6 +64,13 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/orderskip").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_skip_count}));
  app.route("/user/dayorder/:doid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_view_user}));
  app.route("/user/dayorderhistory").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list}));
+ app.route("/user/dayorderhistory/month").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar}));
+ app.route("/user/dayorderhistory/day").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar_day}));
+
+
+ //Subscription_plan
+ app.route("/user/subscribeplan").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_by_pid}));
+
  
  //promotions
   app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
