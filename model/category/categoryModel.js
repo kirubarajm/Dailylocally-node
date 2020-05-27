@@ -653,5 +653,45 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,subscrip
   } 
 };
 
+//cart details for ear user
+Category.get_dayorder_date = async function get_dayorder_date(req,result) {
+  var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+  var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
+  var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+  var order_delivery_day_message= '';
+  var order_delivery_day='';
+  var currenthour  = moment(day).format("HH");
+  var day = moment().format("YYYY-MM-DD HH:mm:ss");
+  if (userdetails.length !==0) {   
+
+   
+   
+    if (currenthour < 21) {
+       order_delivery_day_message = "Your Order delivery will be Tomorrow 12 pm";
+       order_delivery_day = tomorrow;
+    } else {
+       order_delivery_day_message = "Your Order delivery will be day after Tomorrow "+dayafertomorrow
+       order_delivery_day= dayafertomorrow;
+    }
+  
+    let resobj = {
+      success: true,
+      status: true,
+      order_delivery_day: order_delivery_day
+    };
+    result(null, resobj);
+
+    
+    
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "user is not found"
+    };
+    result(null, resobj);
+  } 
+};
+
 
 module.exports = Category;

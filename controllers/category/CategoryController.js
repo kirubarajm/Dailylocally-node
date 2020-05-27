@@ -64,3 +64,12 @@ exports.get_category_list = function(req, res) {
       });
     }
   };
+
+ exports.get_dayorder_date = function(req, res) {
+ 
+      Category.get_dayorder_date(req.body,function(err,user) {
+        if (err) res.send(err);
+        res.json(user);
+      });
+
+  };
