@@ -228,25 +228,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
         var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +subscription[i].pid +"' ");
-        // if (res1[0].quantity < orderitems[i].quantity) {
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else if (res1[0].approved_status != 2) {
-        //   // console.log("approved_status");
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else if (res1[0].delete_status !=0) {
-        //   // console.log("delete_status");
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else
-        
+    
   
         if (subscription_product_list[0].live_status == 0) {
           // console.log("active_status");
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        }else if(subscription_product_list[0].subscription == 0) {
+     
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
           isAvaliableItem = false;
@@ -281,8 +271,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         subscription_product_list[0].fri =  subscription[i].fri ||0;
         subscription_product_list[0].sat =  subscription[i].sat ||0;
         subscription_product_list[0].sun =  subscription[i].sun ||0;
-        if (subscription[i].planid==1) {
-          amount = amount * 7;
+
+        if (subscription[i].planid) {
+
+          var getplan=await query("select * from Subscription_plan where spid='"+subscription[i].planid+"' ");
+          amount = amount * getplan[0].numberofdays;
         }
 
 
@@ -526,6 +519,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             resobj.status = couponstatus
           }
 
+          
+          if (!isAvaliableItem){
+            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.status = isAvaliableItem
+          }
 
           if (!isAvaliablezone){
             resobj.message = " Service is not available! for your following address";
