@@ -261,7 +261,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         subscription_product_list[0].cartquantity = subscription[i].quantity;
         subscription_product_list[0].product_weight = product_weight;
         subscription_product_list[0].product_discount_price = product_discount_price;
-        subscription_product_list[0].no_of_deliveries = 7;
+        
         subscription_product_list[0].subscription = 1;
         subscription_product_list[0].deliverydate = tomorrow;
         subscription_product_list[0].mon =  subscription[i].mon ||0;
@@ -275,6 +275,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         if (subscription[i].planid) {
 
           var getplan=await query("select * from Subscription_plan where spid='"+subscription[i].planid+"' ");
+          subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
         }
 
