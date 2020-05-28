@@ -35,7 +35,7 @@ exports.read_a_proceed_to_pay = function(req, res) {
 
 exports.online_order_place_conformation = function(req, res) {
   // var order_place = new Order(req.body);
-  console.log(req.body);
+
   if (!req.body.orderid) {
     res.status(400).send({ error: true,status:false, message: "Please provide orderid" });
   }else if (!req.body.payment_status) {

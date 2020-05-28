@@ -6,15 +6,16 @@ var dayorder = require("../../model/common/dayorderModel");
 
 
 var Dayorderproducts = function(Dayorderproducts) {
-    this.date = Dayorderproducts.doid;
-    this.userid = Dayorderproducts.productid;
+    this.doid = Dayorderproducts.doid;
+    this.ordder_pid = Dayorderproducts.ordder_pid;
     this.orderid = Dayorderproducts.orderid;
   };
 
 
 
   Dayorderproducts.createDayorderproducts =async function createDayorderproducts(new_createDayorderproducts,result) {
-  
+    
+    console.log("new_createDayorderproducts",new_createDayorderproducts);
     sql.query("INSERT INTO Dayorder_products set ?", new_createDayorderproducts, async function(err, res1) {
         if (err) { 
             result(err, null); //result.send(err);

@@ -18,28 +18,28 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
 
 
-
+    
     for (let i = 0; i < getproduct.length; i++) {
        
 
         if (getproduct[i].subscription==0) {
-     
+
           var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
 
             var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
 
             if (dayorders.length !=0) {
-                
+              console.log("dayorders.length",dayorders.length);
                 var new_createDayorderproducts={};
           
-                new_createDayorderproducts.orderid=Dayorder.orderid;
+                new_createDayorderproducts.orderid = Dayorder.orderid;
                 new_createDayorderproducts.doid=dayorders[0].id;
-                new_createDayorderproducts.pid=getproduct[i].pid;
+                new_createDayorderproducts.ordder_pid=getproduct[i].id;
             
                 Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
 
             }else{
-                
+              console.log("dayorders.length1",dayorders.length);
   
                 var new_day_order={};
                 new_day_order.userid=Dayorder.userid;
@@ -56,7 +56,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
                       new_createDayorderproducts.orderid=Dayorder.orderid;
                       new_createDayorderproducts.doid=doid;
-                      new_createDayorderproducts.pid=getproduct[i].pid;
+                      new_createDayorderproducts.ordder_pid=getproduct[i].id;
  
                       Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                     }
@@ -68,7 +68,10 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             
           var dates = [];
 
-          var d = new Date();
+          // var d = moment(getproduct[i].starting_date).format("YYYY-MM-DD") ;
+          console.log("d",d);
+          var d = new Date(getproduct[i].starting_date);
+          console.log("d",d);
           d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
 
           if (getproduct[i].mon==1) {
@@ -173,7 +176,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             
                   new_createDayorderproducts.orderid=Dayorder.orderid;
                   new_createDayorderproducts.doid=dayorders[0].id;
-                  new_createDayorderproducts.pid=getproduct[i].pid;
+                  new_createDayorderproducts.ordder_pid=getproduct[i].id;
               
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
   
@@ -195,7 +198,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
                         new_createDayorderproducts.orderid=Dayorder.orderid;
                         new_createDayorderproducts.doid=doid;
-                        new_createDayorderproducts.pid=getproduct[i].pid;
+                        new_createDayorderproducts.ordder_pid=getproduct[i].id;
    
                         Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                       }
@@ -221,7 +224,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             
                   new_createDayorderproducts.orderid=Dayorder.orderid;
                   new_createDayorderproducts.doid=dayorders[0].id;
-                  new_createDayorderproducts.pid=getproduct[i].pid;
+                  new_createDayorderproducts.ordder_pid=getproduct[i].id;
               
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
   
@@ -243,7 +246,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
                         new_createDayorderproducts.orderid=Dayorder.orderid;
                         new_createDayorderproducts.doid=doid;
-                        new_createDayorderproducts.pid=getproduct[i].pid;
+                        new_createDayorderproducts.ordder_pid=getproduct[i].id;
    
                         Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                       }

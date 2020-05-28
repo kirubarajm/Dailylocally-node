@@ -260,10 +260,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         // subscription_product_list[0].product_gst = product_gst;
         subscription_product_list[0].cartquantity = subscription[i].quantity;
         subscription_product_list[0].product_weight = product_weight;
-        subscription_product_list[0].product_discount_price = product_discount_price;
-        
+        subscription_product_list[0].product_discount_price = product_discount_price;       
         subscription_product_list[0].subscription = 1;
         subscription_product_list[0].deliverydate = tomorrow;
+        subscription_product_list[0].starting_date = subscription[i].dayorderdate || tomorrow;
         subscription_product_list[0].mon =  subscription[i].mon ||0;
         subscription_product_list[0].tue =  subscription[i].tue ||0;
         subscription_product_list[0].wed =  subscription[i].wed ||0;

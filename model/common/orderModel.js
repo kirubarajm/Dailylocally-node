@@ -106,7 +106,6 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
 
                       var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
-                     
                       Order.OrderOnline(req,Other_Item_list,function(err,res){
                         if (err) {
                           result(err, null);
@@ -146,7 +145,7 @@ Order.OrderOnline = async function OrderOnline(req,Other_Item_list,result) {
      message: customerid.error.description
       
       
-    };
+    };``
   result(null,resobj );
   return
 }
@@ -187,6 +186,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
 
       //  console.log("Other_Item_list",Other_Item_list);
           for (var i = 0; i < Other_Item_list.length; i++) {
+           
           var orderitem = {};
           orderitem.orderid = orderid;
           orderitem.pid = Other_Item_list[i].pid;
@@ -204,11 +204,9 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
           orderitem.fri = Other_Item_list[i].fri || 0;
           orderitem.sat = Other_Item_list[i].sat || 0;
           orderitem.sun = Other_Item_list[i].sun || 0;
-          
-    
+        
           var items = new orderproductModel(orderitem);
-          console.log("orderproductModel",items);
-       
+        
           orderproductModel.createOrderitems(items, function(err, res2) {
             if (err) { 
               sql.rollback(function() {
@@ -329,15 +327,11 @@ Order.online_order_place_conformation = async function(order_place, result) {
       result(null, resobj);
     }else{
 
-    
-  
   var transaction_time = moment().format("YYYY-MM-DD HH:mm:ss");
   var transaction_status= order_place.payment_status === 1? 'success':'failed';
   var orderUpdateQuery ="update Orders set payment_status = '" +order_place.payment_status +"',tsid='" + order_place.transactionid +"',transaction_status='"+transaction_status+"', transaction_time= '" +transaction_time +"' WHERE orderid = '" +
   order_place.orderid +
   "' ";
-
-
 
   sql.query(orderUpdateQuery, async function(err, res1) {
     if (err) {
@@ -354,7 +348,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
         
         var getproductdetails = "select * from Orderproducts  where status=0 and orderid="+order_place.orderid;
         var getproduct = await query(getproductdetails);
-        
+        // console.log("getproduct",getproduct);
         dayorder.checkdayorder(order_place,getproduct);
 
          let resobj = {
@@ -377,7 +371,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
       }
     }
   });
-    }
+ }
   }else{
   let resobj = {
     success: true,
@@ -599,9 +593,8 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
 
 Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_month_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.ordder_pid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
 
-  console.log(query);
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);
