@@ -37,8 +37,8 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  // category
  app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list}));
 
-  // sub_category_L1
-  app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
+// sub_category_L1
+ app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
 
  // sub_category_L2
  app.route("/user/subcategoryL2").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L2.get_Sub_Category_L2_list}));
@@ -79,25 +79,23 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 
   
 //////zen desk//////
-app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
-app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
-app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.zendesk_requestcreate}));
+ app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
+ app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
+ app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.zendesk_requestcreate}));
 
 
 //collections
-app.route("/user/collection").post(middleware.checkToken,routesVersioning({"1.0.0":collection.list_all_collection}));
-app.route("/user/collectiondetails").post(middleware.checkToken,routesVersioning({"1.0.0":collection.get_all_collection_by_cid_v2}));
-app.route("/user/collection/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_product_list}));
+ app.route("/user/collection").post(middleware.checkToken,routesVersioning({"1.0.0":collection.list_all_collection}));
+ app.route("/user/collectiondetails").post(middleware.checkToken,routesVersioning({"1.0.0":collection.get_all_collection_by_cid_v2}));
+ app.route("/user/collection/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_product_list}));
 
 
 ///search
-
-app.route("/user/quicksearch").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.home_quick_search}));
-app.route("/user/search/catalogdata").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog_data_mobile}));
+ app.route("/user/quicksearch").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.home_quick_search}));
+ app.route("/user/search/catalogdata").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog_data_mobile}));
 
 
 //fav
-
 app.route("/user/fav").post(middleware.checkToken,routesVersioning({"1.0.0":fav.create_a_fav}));
 app.route("/user/fav/:id").delete(middleware.checkToken,routesVersioning({"1.0.0":fav.delete_a_fav}));
 app.route("/user/fav/productlist/:id").get(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_product_by_userid}));

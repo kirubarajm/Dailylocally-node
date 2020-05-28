@@ -563,7 +563,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
 //cart details for ear user
-Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,subscription,result) {
+Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) {
   var tempmessage = "";
   var isAvaliableItem = true;
   var planStatus = true;
@@ -573,10 +573,10 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,subscrip
   if (userdetails.length !==0) {   
 
    
-    if (subscription) {
-      for (let i = 0; i < subscription.length; i++) {
+    if (req.pid) {
+
         
-        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +subscription[i].pid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +req.pid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
@@ -592,7 +592,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,subscrip
       
         subscription_product.push(subscription_product_list[0]);
         
-      }
+
     }
    
     var query1 ="select * from Subscription_plan where active_status=1";
