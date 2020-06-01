@@ -6,7 +6,7 @@ var request = require('request');
 let jwt = require('jsonwebtoken');
 let config = require('../config.js');
 var moment = require("moment");
-
+var Collection = require("../../model/common/collectionModel");
 
 const query = util.promisify(sql.query).bind(sql);
 
@@ -60,8 +60,82 @@ Category.get_category_list =async function get_category_list(req,result) {
       }
     }
 
-    var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
 
+  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
+
+  var res = await query(category_query)
+
+  if (res.length!=0) {
+    for (let i = 0; i < res.length; i++) {
+     
+      res[i].servicable_status=servicable_status;
+      res[i].category=true,
+      res[i].clickable= true
+    }
+
+     Collection.list_all_active_collection(req,async function(err,res3) {
+        if (err) {
+          result(err, null);
+        } else {
+          // if (res3.status != true) {
+          //   result(null, res3);
+          // } else {  }
+          if (res3.status == true) {
+            var collectionlist        = {};
+            collectionlist.collection = res3.collection;
+            var collectiontype        = collectionlist.collection;
+            var collectiontrue = collectiontype.filter(collectiontype => collectiontype.type==2);
+            collectionlist.collection = collectiontrue.filter(collectiontrue => collectiontrue.collectionstatus==true);
+            
+            if(kitchenlist.length >= kitchen_pagenation_limit){
+              kitchenlist.push(collectionlist);
+              kitchenlist[kitchenlist.length-1].title   = "Collections";
+              kitchenlist[kitchenlist.length-1].subtitle= "Collections";
+              kitchenlist[kitchenlist.length-1].type    = 1; 
+            }   
+          }                               
+
+         
+        }
+      });
+
+
+
+
+    let resobj = {
+      success: true,
+      status:true,
+      serviceablestatus: servicable_status,
+      unserviceable_title:"Sorry! Your area is not serviceable.",
+      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      empty_content:"Daily Locally",
+      empty_subconent :"Daily Locally",
+      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      category_title :"Categories",
+      result: res
+    };
+    result(null, resobj);
+
+  }else{
+    
+    let resobj = {
+      success: true,
+      status:true,
+      serviceablestatus: servicable_status,
+      unserviceable_title:"Sorry! Your area is not serviceable.",
+      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      empty_content:"Daily Locally",
+      empty_subconent :"Daily Locally",
+      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      category_title :"Categories",
+      result: []
+    };
+    result(null, resobj);
+  }
 
         
   sql.query(category_query, function(err, res) {
@@ -70,10 +144,13 @@ Category.get_category_list =async function get_category_list(req,result) {
     } else {
 
 
+    
+
       for (let i = 0; i < res.length; i++) {
      
         res[i].servicable_status=servicable_status;
-        
+        res[i].category=true,
+        res[i].clickable= true
       }
 
       let resobj = {

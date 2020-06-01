@@ -17,7 +17,7 @@ var Collection = function(collection) {
 
 
 Collection.list_all_active_collection = function list_all_active_collection(req,result) {
-  sql.query("Select cid,query,name,active_status,img_url from Collections where active_status=1 and type=0",async function(err, res) {
+  sql.query("Select cid,query,name,active_status,img_url from Collections where active_status=1",async function(err, res) {
     if (err) {
       result(err, null);
     } else {
@@ -48,7 +48,7 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
   for (let i = 0; i < res.length; i++) {
     req.cid = res[i].cid;   
     req.query = res[i].query;
-    await Collection.get_all_collection_by_cid_getkichens(req, async function(err,res3) {
+    await Collection.get_all_collection_by_cid(req, async function(err,res3) {
       if (err) {
         result(err, null);
       } else {
@@ -76,62 +76,17 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
 return res
 }
 
-Collection.get_all_collection_by_cid_getkichens = async function get_all_collection_by_cid_getkichens(req,result) {  
-  var foodpreparationtime = constant.foodpreparationtime;
-  var onekm = constant.onekm;
-  var radiuslimit=constant.radiuslimit;
-  var  productquery = '';
-  var  groupbyquery = " GROUP BY pt.makeit_userid";
-  var  orderbyquery = " GROUP BY pt.productid ORDER BY mk.rating desc,distance asc";
-
-  var breatfastcycle = constant.breatfastcycle;
-  var dinnercycle = constant.dinnercycle;
-  var lunchcycle = constant.lunchcycle;
+Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
+  
 
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
   var productquery = "";
-  // console.log(currenthour);
-
-  if (currenthour < lunchcycle) {
-    productquery = productquery + " and pt.breakfast = 1";
-    //  console.log("breakfast");
-  }else if(currenthour >= lunchcycle && currenthour < dinnercycle){
-    productquery = productquery + " and pt.lunch = 1";
-    //  console.log("lunch");
-  }else if( currenthour >= dinnercycle){    
-    productquery = productquery + " and pt.dinner = 1";
-    //  console.log("dinner");
-  }
-
-  //based on logic this conditions will change
-  if (req.cid == 1 || req.cid == 2 || req.cid == 4 || req.cid == 6 || req.cid == 7) {
-    var productlist = req.query + productquery  + groupbyquery;
-  }else if(req.cid == 3 ) {
-    var productlist = req.query + productquery  + orderbyquery;
-  }else if(req.cid= 5){
-    var productlist = req.query + productquery+ " GROUP BY mk.userid ORDER BY mk.unservicable = 0 desc,mk.created_at desc limit 10"
-  } 
 
     
-  var res1 = await query(productlist,[req.lat,req.lon,req.lat,req.eatuserid,req.eatuserid]);
-    for (let i = 0; i < res1.length; i++) {
-      if (req.cid === 1 || req.cid === 2 || req.cid == 4 || req.cid == 6 || req.cid == 7) {
-        res1[i].productlist =JSON.parse(res1[i].productlist)
-      }
-          
-    
+  var res1 = await query(req.query);
 
-      var eta = constant.delivery_buffer_time + foodpreparationtime + (onekm * res1[i].distance);          
-      res1[i].serviceablestatus = false;
-      if (res1[i].distance <= radiuslimit) {
-        res1[i].serviceablestatus = true;
-      }         
-      res1[i].eta = Math.round(eta) + " mins";
-      if (res1[i].cuisines) {
-        res1[i].cuisines = JSON.parse(res1[i].cuisines);
-      }
-    }
+
 
     let resobj = {
       success: true,
