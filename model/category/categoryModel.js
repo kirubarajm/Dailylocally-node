@@ -229,7 +229,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         
         var res1 = await query("Select pm.*,pl.* From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +orderitems[i].plid +"' ");
       
-        console.log("res1",res1);
+       
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;

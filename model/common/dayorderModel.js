@@ -10,6 +10,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   var Dayorder = function(Dayorder) {
     this.date = Dayorder.date;
     this.userid = Dayorder.userid;
+    this.zoneid=order.zoneid;
   };
 
 
@@ -44,6 +45,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
                 var new_day_order={};
                 new_day_order.userid=Dayorder.userid;
+                new_day_order.zoneid=Dayorder.zoneid;
                 new_day_order.date=getproduct[i].deliverydate;
              
      
@@ -190,6 +192,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
                   var new_day_order={};
                   new_day_order.userid=Dayorder.userid;
                   new_day_order.date=date;
+                  new_day_order.zoneid=Dayorder.zoneid;
                
        
                   sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
@@ -244,6 +247,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
                   var new_day_order={};
                   new_day_order.userid=Dayorder.userid;
                   new_day_order.date=date;
+                  new_day_order.zoneid=Dayorder.zoneid;
                
        
                   sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {

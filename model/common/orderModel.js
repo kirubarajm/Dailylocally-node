@@ -43,6 +43,7 @@ var Order = function(order) {
   this.app_type = order.app_type || 0;
   // this.delivery_charge = order.delivery_charge;
   this.payment_type = order.payment_type;
+  this.zoneid=order.zoneid;
 
   
 };
@@ -103,6 +104,7 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                       req.landmark = address_data[0].landmark;
                       req.cus_pincode = address_data[0].pincode;
                       req.delivery_charge = amountdata.delivery_charge;
+                      req.zoneid =  res3.result[0].id;
 
                       var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
@@ -339,11 +341,12 @@ Order.online_order_place_conformation = async function(order_place, result) {
     } else {
       if (order_place.payment_status === 1) {
        
-       
+    
          
         var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
         var getordertype = await query(getordertypequery);
         order_place.userid=getordertype[0].userid;
+        order_place.zoneid=orderdetails[0].zoneid;
         sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
         
         var getproductdetails = "select * from Orderproducts  where status=0 and orderid="+order_place.orderid;
