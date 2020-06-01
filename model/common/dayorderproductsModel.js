@@ -9,13 +9,16 @@ var Dayorderproducts = function(Dayorderproducts) {
     this.doid = Dayorderproducts.doid;
     this.ordder_pid = Dayorderproducts.ordder_pid;
     this.orderid = Dayorderproducts.orderid;
+    this.productname=Dayorderproducts.productname;
+    this.quantity=Dayorderproducts.quantity;
+    this.price=Dayorderproducts.price;
+
   };
 
 
 
   Dayorderproducts.createDayorderproducts =async function createDayorderproducts(new_createDayorderproducts,result) {
     
-    console.log("new_createDayorderproducts",new_createDayorderproducts);
     sql.query("INSERT INTO Dayorder_products set ?", new_createDayorderproducts, async function(err, res1) {
         if (err) { 
             result(err, null); //result.send(err);

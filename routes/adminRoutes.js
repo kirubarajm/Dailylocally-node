@@ -3,6 +3,7 @@ module.exports = function(app) {
   var routesVersioning = require('express-routes-versioning')();
   let middleware = require('../model/middleware.js');
   var catalog = require("../controllers/admin/catalogController");
+  var dayorder = require("../controllers/common/DayorderController");
   
 
   //////// Admin Routes /////////
@@ -33,6 +34,11 @@ module.exports = function(app) {
    app.route("/admin/view/subcategoryl2").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.view_subcategoryl2}));
    app.route("/admin/add/subcategoryl2").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.add_subcategoryl2}));
    app.route("/admin/edit/subcategoryl2").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.edit_subcategoryl2}));
+
+
+   //dar order list
+
+   app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.day_order_list}));
 
 
 }

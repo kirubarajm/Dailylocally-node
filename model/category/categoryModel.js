@@ -227,24 +227,9 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var res1 = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +orderitems[i].pid +"' ");
-        // if (res1[0].quantity < orderitems[i].quantity) {
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else if (res1[0].approved_status != 2) {
-        //   // console.log("approved_status");
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else if (res1[0].delete_status !=0) {
-        //   // console.log("delete_status");
-        //   res1[0].availablity = false;
-        //   tempmessage = tempmessage + res1[0].product_name + ",";
-        //   isAvaliableItem = false;
-        // }else
-        
-  
+        var res1 = await query("Select pm.*,pl.* From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +orderitems[i].plid +"' ");
+      
+        console.log("res1",res1);
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;
@@ -304,7 +289,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +subscription[i].pid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +subscription[i].plid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -653,7 +638,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
     if (req.pid) {
 
         
-        var subscription_product_list = await query("Select pm.*,pl.live_status From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pm.pid = '" +req.pid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +req.plid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";

@@ -20,7 +20,8 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
     
     for (let i = 0; i < getproduct.length; i++) {
-       
+
+      console.log("getproduct[i].plid",getproduct[i].plid);
 
         if (getproduct[i].subscription==0) {
 
@@ -34,7 +35,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
           
                 new_createDayorderproducts.orderid = Dayorder.orderid;
                 new_createDayorderproducts.doid=dayorders[0].id;
-                new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                new_createDayorderproducts.ordder_pid=getproduct[i].plid;
             
                 Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
 
@@ -56,7 +57,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
                       new_createDayorderproducts.orderid=Dayorder.orderid;
                       new_createDayorderproducts.doid=doid;
-                      new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                      new_createDayorderproducts.ordder_pid=getproduct[i].plid;
  
                       Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                     }
@@ -176,7 +177,10 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             
                   new_createDayorderproducts.orderid=Dayorder.orderid;
                   new_createDayorderproducts.doid=dayorders[0].id;
-                  new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                  new_createDayorderproducts.ordder_pid=getproduct[i].plid;
+                  new_createDayorderproducts.productname=getproduct[i].productname;
+                  new_createDayorderproducts.quantity=getproduct[i].quantity;
+                  new_createDayorderproducts.price=getproduct[i].price;
               
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
   
@@ -198,7 +202,10 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
                         new_createDayorderproducts.orderid=Dayorder.orderid;
                         new_createDayorderproducts.doid=doid;
-                        new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                        new_createDayorderproducts.ordder_pid=getproduct[i].plid;
+                        new_createDayorderproducts.productname=getproduct[i].productname;
+                        new_createDayorderproducts.quantity=getproduct[i].quantity;
+                        new_createDayorderproducts.price=getproduct[i].price;
    
                         Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                       }
@@ -224,7 +231,10 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             
                   new_createDayorderproducts.orderid=Dayorder.orderid;
                   new_createDayorderproducts.doid=dayorders[0].id;
-                  new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                  new_createDayorderproducts.ordder_pid=getproduct[i].plid;
+                  new_createDayorderproducts.productname=getproduct[i].productname;
+                  new_createDayorderproducts.quantity=getproduct[i].quantity;
+                  new_createDayorderproducts.price=getproduct[i].price;
               
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
   
@@ -246,7 +256,10 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
                         new_createDayorderproducts.orderid=Dayorder.orderid;
                         new_createDayorderproducts.doid=doid;
-                        new_createDayorderproducts.ordder_pid=getproduct[i].id;
+                        new_createDayorderproducts.ordder_pid=getproduct[i].plid;
+                        new_createDayorderproducts.productname=getproduct[i].productname;
+                        new_createDayorderproducts.quantity=getproduct[i].quantity;
+                        new_createDayorderproducts.price=getproduct[i].price;
    
                         Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                       }
@@ -268,13 +281,31 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   };
 
 
-  Dayorder.createDayorder =async function createDayorder(Dayorder,getproduct,result) {
+  Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
+    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+
+    if (Dayorder.starting_date && Dayorder.end_date) {
+      var get_day_order_list = await query("select orp.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'ordder_pid',orp.ordder_pid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"')  group by drs.id,drs.userid");
+
+    }else{
+      var get_day_order_list = await query("select orp.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'ordder_pid',orp.ordder_pid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date='"+tomorrow+"' group by drs.id,drs.userid");
+
+    }
+
+    if (Dayorder.id) {
+      var get_day_order_list = await query("select orp.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'ordder_pid',orp.ordder_pid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' group by drs.id,drs.userid");
+
+    }
 
 
-  
-    
+    let resobj = {
+      success: true,
+      status: true,
+      orderdetails: get_day_order_list,
+      result: res1
+    };
 
-
+    result(null, resobj);  
   };
   
   

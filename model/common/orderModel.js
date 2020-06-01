@@ -145,7 +145,7 @@ Order.OrderOnline = async function OrderOnline(req,Other_Item_list,result) {
      message: customerid.error.description
       
       
-    };``
+    };
   result(null,resobj );
   return
 }
@@ -184,12 +184,12 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
       }else{
         var orderid = res1.insertId;
 
-      //  console.log("Other_Item_list",Other_Item_list);
+        console.log("Other_Item_list",Other_Item_list);
           for (var i = 0; i < Other_Item_list.length; i++) {
-           
+         
           var orderitem = {};
           orderitem.orderid = orderid;
-          orderitem.pid = Other_Item_list[i].pid;
+          orderitem.plid = Other_Item_list[i].plid;
           orderitem.productname = Other_Item_list[i].Productname;
           orderitem.quantity = Other_Item_list[i].cartquantity;
           orderitem.price = Other_Item_list[i].amount;
