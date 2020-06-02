@@ -191,7 +191,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
          
           var orderitem = {};
           orderitem.orderid = orderid;
-          orderitem.plid = Other_Item_list[i].plid;
+          orderitem.vpid = Other_Item_list[i].vpid;
           orderitem.productname = Other_Item_list[i].Productname;
           orderitem.quantity = Other_Item_list[i].cartquantity;
           orderitem.price = Other_Item_list[i].amount;
@@ -416,7 +416,7 @@ Order.live_order_list_byuserid = async function live_order_list_byuserid(req,res
   }
   }
   // or payment_status !=3)
-  liveorderquery ="select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"' and dr.dayorderstatus < 6  group by dr.id order by dr.date ";
+  liveorderquery ="select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' and dr.dayorderstatus < 6  group by dr.id order by dr.date ";
 
                
   sql.query(liveorderquery,async function(err, res1) {
@@ -501,7 +501,7 @@ Order.order_skip_count = async function order_skip_count(req,result) {
 
 Order.day_order_view_by_user = function day_order_view_by_user(req, result) {
 
-  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.id ='"+req.doid+"'  group by dr.id order by dr.date" ;//and dm.active_status=1
+  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.id ='"+req.doid+"'  group by dr.id order by dr.date" ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -550,7 +550,7 @@ Order.day_order_view_by_user = function day_order_view_by_user(req, result) {
 
 Order.day_orderlist_user = async function day_orderlist_user(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.pid where dr.userid ='"+req.userid+"'   group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"'   group by dr.id order by dr.date";
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);
@@ -596,7 +596,7 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
 
 Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_month_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.ordder_pid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
 
   sql.query(query,function(err, res) {
       if (err) {
@@ -643,7 +643,7 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'pid',op.pid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.pid=dp.ordder_pid where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);

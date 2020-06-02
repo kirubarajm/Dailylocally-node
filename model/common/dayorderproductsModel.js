@@ -7,11 +7,12 @@ var dayorder = require("../../model/common/dayorderModel");
 
 var Dayorderproducts = function(Dayorderproducts) {
     this.doid = Dayorderproducts.doid;
-    this.ordder_pid = Dayorderproducts.ordder_pid;
+    this.vpid = Dayorderproducts.vpid;
     this.orderid = Dayorderproducts.orderid;
     this.productname=Dayorderproducts.productname;
     this.quantity=Dayorderproducts.quantity;
     this.price=Dayorderproducts.price;
+    this.scm_status=Dayorderproducts.scm_status || 0;
 
   };
 

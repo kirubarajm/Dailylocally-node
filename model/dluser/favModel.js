@@ -5,14 +5,14 @@ var moment = require("moment");
 //Task object constructor
 var Fav = function(fav){
     this.userid = fav.userid;
-    this.productid=fav.productid || 0;
+    this.vpid=fav.vpid || 0;
 };
 
 
 Fav.createFav = function createFav(newFav, result) {  
   
 
-        var query = "Select * from Fav where userid = '"+newFav.userid+"' and productid = '"+newFav.productid+"'";
+        var query = "Select * from Fav where userid = '"+newFav.userid+"' and vpid = '"+newFav.productid+"'";
   
   //  console.log(query);
     sql.query(query , function (err, res) {             
@@ -82,7 +82,7 @@ Fav.remove = function(id, result){
 
 Fav.read_a_product_by_userid = function read_a_product_by_userid(userId,result) {
 
-    sql.query("select * from Fav where userid ='"+userId+"' and productid != 0", function (err, res) {
+    sql.query("select * from Fav where userid ='"+userId+"' and vpid != 0", function (err, res) {
        
         if(err) {
             console.log("error: ", err);
@@ -108,7 +108,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(userId,result) 
             }else{
 
 
-            var query = "   Select distinct fa.pid,pt.Productname from  ProductMaster pt left join Fav fa on fa.pid = pt.pid  where fa.userid  = '"+req.userid+"'  group by pid "
+            var query = "   Select distinct fa.vpid,pt.Productname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  where fa.userid  = '"+req.userid+"'  group by vpid "
 
                 sql.query(query, function (err, res) {
 

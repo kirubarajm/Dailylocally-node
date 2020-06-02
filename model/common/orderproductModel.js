@@ -4,7 +4,7 @@ var sql = require("../db.js");
 
 //Task object constructor
 var orderproductModel = function(orderproductModel) {
-  this.plid = orderproductModel.plid;
+  this.vpid = orderproductModel.vpid;
   this.orderid = orderproductModel.orderid;
   this.productname = orderproductModel.productname;
   this.quantity = orderproductModel.quantity;

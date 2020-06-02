@@ -227,7 +227,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var res1 = await query("Select pm.*,pl.* From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +orderitems[i].plid +"' ");
+        var res1 = await query("Select pm.*,pl.* From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +orderitems[i].vpid +"' ");
       
        
         if (res1[0].live_status == 0) {
@@ -258,6 +258,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         res1[0].product_discount_price = product_discount_price;
         res1[0].no_of_deliveries = 1;
         res1[0].subscription = 0;
+        res1[0].starting_date = orderitems[i].dayorderdate || tomorrow;
         //total product cost
         totalamount = totalamount + amount;
         // gst = gst + product_gst;
@@ -289,7 +290,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +subscription[i].plid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +subscription[i].vpid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -635,10 +636,10 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
   if (userdetails.length !==0) {   
 
    
-    if (req.pid) {
+    if (req.plid ) {
 
         
-        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.plid = '" +req.plid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +req.vpid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
@@ -686,7 +687,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
           }
 
           if (!planStatus){
-            console.log(res2.length);
+       
             resobj.message = tempmessage.slice(0, -1) + " Subscription Plan not available!";
             resobj.status = planStatus
           }

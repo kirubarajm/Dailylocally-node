@@ -4,6 +4,7 @@ module.exports = function(app) {
   let middleware = require('../model/middleware.js');
   var catalog = require("../controllers/admin/catalogController");
   var dayorder = require("../controllers/common/DayorderController");
+  var procurement = require("../controllers/procurement/ProcurementController");
   
 
   //////// Admin Routes /////////
@@ -36,9 +37,10 @@ module.exports = function(app) {
    app.route("/admin/edit/subcategoryl2").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.edit_subcategoryl2}));
 
 
-   //dar order list
+   //SCM
 
    app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.day_order_list}));
+   app.route("/admin/procurement/create").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.new_procurement_create}));
 
 
 }
