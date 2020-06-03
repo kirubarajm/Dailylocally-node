@@ -10,6 +10,8 @@ var moment  = require("moment");
 var Category = require('../admin/categoryTableModel.js');
 var Subcategoryl1 = require('../admin/subcategoryl1TableModel.js');
 var Subcategoryl2 = require('../admin/subcategoryl2TableModel.js');
+var Product = require('../admin/productTableModel.js');
+var VendorProductMapping = require('../admin/vendorproductmappingTableModel');
 
 var Catalog = function(catalog) {};
 
@@ -698,6 +700,164 @@ Catalog.edit_subcategoryl2 =async function edit_subcategoryl2(req,result) {
             };
             result(null, resobj);
         }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Get UOM List///////////
+Catalog.get_uom_list =async function get_uom_list(req,result) {
+    var getuomquery = "select uomid,name from UOM";
+    var getuom = await query(getuomquery);
+    if(getuom.length > 0){
+      let resobj = {
+          success: true,
+          status: true,
+          data: getuom
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {
+          success: true,
+          status: false,
+          message: "no records found"
+      };
+      result(null, resobj);
+    }
+};
+
+/////////Get Brand List///////////
+Catalog.get_brand_list =async function get_brand_list(req,result) {
+    var getbrandquery = "select id,brandname from Brand";
+    var getbrand = await query(getbrandquery);
+    if(getbrand.length > 0){
+      let resobj = {
+          success: true,
+          status: true,
+          data: getbrand
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {
+          success: true,
+          status: false,
+          message: "no records found"
+      };
+      result(null, resobj);
+    }
+};
+
+/////////view Product///////////
+Catalog.view_product =async function view_product(req,result) {
+    if(req.product_id){
+        var getproductquery = "select cat.name as category_name,sc1.name as subcategoryl1_name,sc2.name as subcategory2_name,pm.Productname,pm.pid as product_id,pm.weight,uom.name as uom,pm.packetsize,br.brandname,pm.short_desc,pm.productdetails,'zone mapping' as zonemapping,pm.hsn_code,pm.tag,if(pm.Perishable=1,'yes','no') as Perishable,case when pm.vegtype=0 then 'veg' when pm.vegtype=1 then 'nonveg' when pm.vegtype=2 then 'Vegan' end as vegtype,pm.basiccost as targetedbaseprice,pm.image,pm.mrp,pm.gst,pm.discount_cost,(pm.mrp-pm.discount_cost) as discountedamount from ProductMaster as pm left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join Brand as br on br.id=pm.brand left join UOM as uom on uom.uomid=pm.uom where pm.pid="+req.product_id;
+        var getproduct = await query(getproductquery);
+        if(getproduct.length > 0 ){
+            var getvendorquery = "select vpmid,vpm.vid as vendorid,v.name as vendorname,vpm.expiry_date,vpm.base_price,vpm.other_charges,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost_price from Vendor as v left join Vendor_products_mapping as vpm on vpm.vid=v.vid where vpm.productid="+req.product_id;
+            var getvendor = await query(getvendorquery);
+            getproduct[0].vendorlist = getvendor;
+
+            let resobj = {
+                success: true,
+                status: true,
+                date: getproduct
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Add Product///////////
+Catalog.add_product =async function add_product(req,result) {
+    if(req){
+        var checkcategoryquery = "select * from ProductMaster where Productname='"+req.Productname+"' ";
+        var checkcategory = await query(checkcategoryquery);
+        if(checkcategory.length ==0 ){
+            var addproduct = await Product.createProduct(req);           
+            let resobj = {
+                success: true,
+                status: true,
+                message: "Product added susccessfully"
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "Product name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Edit Product///////////
+Catalog.edit_product =async function edit_product(req,result) {
+    if(req){
+        var checkcategoryquery = "select * from ProductMaster where Productname='"+req.productname+"' and pid NOT IN("+req.pid+")";
+        var checkcategory = await query(checkcategoryquery);
+        if(checkcategory.length ==0 ){
+            var updateproduct = await Product.updateProduct(req);            
+            let resobj = {
+                success: true,
+                status: true,
+                message: "Product Updated susccessfully"
+            };
+            result(null, resobj);             
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "Product name already exist"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////// Edit Vendor Product Mapping ////////////////
+Catalog.edit_vendor_product_mapping =async function edit_vendor_product_mapping(req,result) {
+    if(req.vpmid){        
+        var updateVPM = await VendorProductMapping.updateVendorProductMapping(req);            
+        let resobj = {
+            success: true,
+            status: true,
+            message: "vendor product mapping Updated susccessfully"
+        };
+        result(null, resobj);
     }else{
         let resobj = {
             success: true,
