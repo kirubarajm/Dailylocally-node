@@ -758,7 +758,7 @@ Catalog.view_product =async function view_product(req,result) {
         var getproductquery = "select cat.name as category_name,sc1.name as subcategoryl1_name,sc2.name as subcategory2_name,pm.Productname,pm.pid as product_id,pm.weight,uom.name as uom,pm.packetsize,br.brandname,pm.short_desc,pm.productdetails,'zone mapping' as zonemapping,pm.hsn_code,pm.tag,if(pm.Perishable=1,'yes','no') as Perishable,case when pm.vegtype=0 then 'veg' when pm.vegtype=1 then 'nonveg' when pm.vegtype=2 then 'Vegan' end as vegtype,pm.basiccost as targetedbaseprice,pm.image,pm.mrp,pm.gst,pm.discount_cost,(pm.mrp-pm.discount_cost) as discountedamount from ProductMaster as pm left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join Brand as br on br.id=pm.brand left join UOM as uom on uom.uomid=pm.uom where pm.pid="+req.product_id;
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0 ){
-            var getvendorquery = "select vpmid,vpm.vid as vendorid,v.name as vendorname,vpm.expiry_date,vpm.base_price,vpm.other_charges,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost_price from Vendor as v left join Vendor_products_mapping as vpm on vpm.vid=v.vid where vpm.productid="+req.product_id;
+            var getvendorquery = "select vpmid,vpm.vid as vendorid,v.name as vendorname,vpm.expiry_date,vpm.base_price,vpm.other_charges,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost_price from Vendor as v left join Vendor_products_mapping as vpm on vpm.vid=v.vid where vpm.pid="+req.product_id;
             var getvendor = await query(getvendorquery);
             getproduct[0].vendorlist = getvendor;
 
@@ -789,7 +789,7 @@ Catalog.view_product =async function view_product(req,result) {
 /////////Add Product///////////
 Catalog.add_product =async function add_product(req,result) {
     if(req){
-        var checkcategoryquery = "select * from ProductMaster where Productname='"+req.Productname+"' ";
+        var checkcategoryquery = "select * from ProductMaster where Productname='"+req.productname+"' ";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
             var addproduct = await Product.createProduct(req);           
