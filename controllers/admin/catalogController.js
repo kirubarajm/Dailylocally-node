@@ -192,6 +192,66 @@ exports.edit_subcategoryl2 = function(req, res) {
     });    
 };
 
+/////////Get UOM List///////////
+exports.get_uom_list = function(req, res) {    
+    catalog.get_uom_list(req.body, function(err, ress) {
+        //console.log("get_uom_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Get Brand List///////////
+exports.get_brand_list = function(req, res) {    
+    catalog.get_brand_list(req.body, function(err, ress) {
+        //console.log("get_brand_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////View Product///////////
+exports.view_product = function(req, res) {    
+    catalog.view_product(req.body, function(err, ress) {
+        //console.log("view_product controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Add Product///////////
+exports.add_product = function(req, res) {    
+    catalog.add_product(req.body, function(err, ress) {
+        //console.log("add_product controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Edit Product///////////
+exports.edit_product = function(req, res) {    
+    catalog.edit_product(req.body, function(err, ress) {
+        //console.log("edit_product controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////// Edit Vendor Product Mapping ////////////////
+exports.edit_vendor_product_mapping = function(req, res) {    
+    catalog.edit_vendor_product_mapping(req.body, function(err, ress) {
+        //console.log("edit_vendor_product_mapping controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Search Catalog///////////
 exports.home_quick_search = function(req, res) {    
     catalog.home_quick_search(req.body, function(err, ress) {
