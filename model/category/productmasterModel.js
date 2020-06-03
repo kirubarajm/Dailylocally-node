@@ -83,7 +83,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
     }
 
     // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
-    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Fav faa on faa.pid = pm.pid and faa.userid = '"+req.userid+"' where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl2_id='"+req.scl2_id+"' and pm.scl1_id= '"+req.scl1_id+"'";
+    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl2_id='"+req.scl2_id+"' and pm.scl1_id= '"+req.scl1_id+"'";
 
 
   sql.query(product_list,async function(err, res) {

@@ -8,9 +8,9 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
 
   var Procurement = function(procurement) {
-    this.pid = procurement.pid;
-    this.userid = procurement.quantity;
-    this.pr_status = procurement.pr_status;
+    this.vpid = procurement.vpid;
+    this.quantity = procurement.quantity;
+    this.pr_status = procurement.pr_status || 0;
     this.zoneid=procurement.zoneid;
   };
 
@@ -18,23 +18,46 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
   Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
 
-    
-    var get_product = await query("select ordder_pid,productname,count(quantity) as productquantity from Dayorder_products where doid IN('"+new_Procurement+"') group by ordder_pid");
+    var productquery= "select vpid,productname,count(quantity) as quantity from Dayorder_products where doid IN("+new_Procurement.doid+") and scm_status=0 group by vpid"
+    // console.log("productquery",productquery);
+    var get_product = await query(productquery);
 
     if (get_product.length !=0) {
 
         for (let i = 0; i < get_product.length; i++) {
-
-            
-            sql.query("INSERT INTO Procurement set ?", new_Procurement, function(err, result) {
+            get_product[i].zoneid= 1;
+            var items = new Procurement(get_product[i]);
+          
+            sql.query("INSERT INTO Procurement set ?", items,async function(err, res) {
                 if (err) {
-                  res(err, null);
+                    console.log(err);
+                    result(err, null);
                 } else {
+                    var Dayorder_products_query="update Dayorder_products set scm_status=1 where doid IN("+new_Procurement.doid+")";
+                    // console.log("Dayorder_products_query",Dayorder_products_query);
+                    var update_query=await query(Dayorder_products_query);
+
+                    let resobj = {  
+                        success: true,
+                        status:true,
+                        message:"procurement created!"   
+
+                        };
+                        result(null, resobj);
                 
 
                 }
               });
         }
+    }else{
+
+        let resobj = {  
+            success: true,
+            status: false,
+            message:"data not available"   
+
+            };
+            result(null, resobj);
     }
    
     

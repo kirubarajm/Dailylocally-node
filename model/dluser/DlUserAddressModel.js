@@ -132,7 +132,7 @@ UserAddress.updateById = function(req, result){
         }
 
       var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-    
+        console.log("address query",query);
         sql.query(query,[new Date()], function (err, res) {
             if (err) {
                 console.log("error: ", err);

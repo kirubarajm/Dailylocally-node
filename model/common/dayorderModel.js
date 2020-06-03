@@ -310,11 +310,11 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
       
       for (let i = 0; i < get_day_order_list.length; i++) {
         
-        var get_product = await query("select productname,count(quantity)as productquantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by ordder_pid");
+        var get_product = await query("select productname,count(quantity)as quantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by ordder_pid");
 
         get_product.forEach(element => {
           get_day_order_list[i].productname=element.productname;
-          get_day_order_list[i].productquantity=element.productquantity;
+          get_day_order_list[i].quantity=element.quantity;
         });
         
       }
