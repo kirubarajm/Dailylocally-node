@@ -212,6 +212,26 @@ exports.get_brand_list = function(req, res) {
     });    
 };
 
+/////////Get Zone List///////////
+exports.get_zone_list = function(req, res) {    
+    catalog.get_zone_list(req.body, function(err, ress) {
+        //console.log("get_zone_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Get Vendor List///////////
+exports.get_vendor_list = function(req, res) {    
+    catalog.get_vendor_list(req.body, function(err, ress) {
+        //console.log("get_vendor_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////View Product///////////
 exports.view_product = function(req, res) {    
     catalog.view_product(req.body, function(err, ress) {
