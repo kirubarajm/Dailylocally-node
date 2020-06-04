@@ -62,81 +62,6 @@ Category.get_category_list =async function get_category_list(req,result) {
 
 
   var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
-
-  var res = await query(category_query)
-
-  if (res.length!=0) {
-    for (let i = 0; i < res.length; i++) {
-     
-      res[i].servicable_status=servicable_status;
-      res[i].category=true,
-      res[i].clickable= true
-    }
-
-     Collection.list_all_active_collection(req,async function(err,res3) {
-        if (err) {
-          result(err, null);
-        } else {
-          // if (res3.status != true) {
-          //   result(null, res3);
-          // } else {  }
-          if (res3.status == true) {
-            var collectionlist        = {};
-            collectionlist.collection = res3.collection;
-            var collectiontype        = collectionlist.collection;
-            var collectiontrue = collectiontype.filter(collectiontype => collectiontype.type==2);
-            collectionlist.collection = collectiontrue.filter(collectiontrue => collectiontrue.collectionstatus==true);
-            
-            if(kitchenlist.length >= kitchen_pagenation_limit){
-              kitchenlist.push(collectionlist);
-              kitchenlist[kitchenlist.length-1].title   = "Collections";
-              kitchenlist[kitchenlist.length-1].subtitle= "Collections";
-              kitchenlist[kitchenlist.length-1].type    = 1; 
-            }   
-          }                               
-
-         
-        }
-      });
-
-
-
-
-    let resobj = {
-      success: true,
-      status:true,
-      serviceablestatus: servicable_status,
-      unserviceable_title:"Sorry! Your area is not serviceable.",
-      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-      empty_content:"Daily Locally",
-      empty_subconent :"Daily Locally",
-      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title :"Categories",
-      result: res
-    };
-    result(null, resobj);
-
-  }else{
-    
-    let resobj = {
-      success: true,
-      status:true,
-      serviceablestatus: servicable_status,
-      unserviceable_title:"Sorry! Your area is not serviceable.",
-      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-      empty_content:"Daily Locally",
-      empty_subconent :"Daily Locally",
-      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title :"Categories",
-      result: []
-    };
-    result(null, resobj);
-  }
-
         
   sql.query(category_query, function(err, res) {
     if (err) {
@@ -151,23 +76,70 @@ Category.get_category_list =async function get_category_list(req,result) {
         res[i].servicable_status=servicable_status;
         res[i].category=true,
         res[i].clickable= true
+        res[i].collection_status= false
+
       }
 
-      let resobj = {
-        success: true,
-        status:true,
-        serviceablestatus: servicable_status,
-        unserviceable_title:"Sorry! Your area is not serviceable.",
-        unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-        empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-        empty_content:"Daily Locally",
-        empty_subconent :"Daily Locally",
-        header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-        header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Categories",
-        result: res
-      };
-      result(null, resobj);
+
+      Collection.list_all_active_collection(req,async function(err,res3) {
+        if (err) {
+          result(err, null);
+        } else {
+        
+       
+            var collectionlist        = {};
+            collectionlist.collection = res3.collection;
+            var collection       = collectionlist.collection[0];
+            collection.category=true,
+            collection.clickable= false
+            collection.collection_status= true
+
+            collection.catid = collection.cid;
+            collection.servicable_status=servicable_status;
+            collection.query=0;
+           
+            // console.log("collectiontype",collectiontype.length);
+        
+             res.splice(2, 0, collection);
+
+
+
+            let resobj = {
+              success: true,
+              status:true,
+              serviceablestatus: servicable_status,
+              unserviceable_title:"Sorry! Your area is not serviceable.",
+              unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+              empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+              empty_content:"Daily Locally",
+              empty_subconent :"Daily Locally",
+              header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+              header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+              category_title :"Categories",
+              result: res
+            };
+            result(null, resobj);
+                                
+
+         
+        }
+      });
+
+      // let resobj = {
+      //   success: true,
+      //   status:true,
+      //   serviceablestatus: servicable_status,
+      //   unserviceable_title:"Sorry! Your area is not serviceable.",
+      //   unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      //   empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      //   empty_content:"Daily Locally",
+      //   empty_subconent :"Daily Locally",
+      //   header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      //   header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      //   category_title :"Categories",
+      //   result: res
+      // };
+      // result(null, resobj);
     }
   });
 }
@@ -177,7 +149,6 @@ Category.get_category_list =async function get_category_list(req,result) {
 //cart details for ear user
 Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,subscription,result) {
 
-  //console.log("122",userzoneid+","+zoneName);
   var tempmessage = "";
   var coupon__error_message = "";
   var gst = 0;
@@ -227,7 +198,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var res1 = await query("Select pm.*,pl.* From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +orderitems[i].vpid +"' ");
+        var res1 = await query("Select pm.*,pl.*,um.name as unit From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +orderitems[i].vpid +"' ");
       
        
         if (res1[0].live_status == 0) {
@@ -242,15 +213,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         var amount = 0;
         ///get amount each product
         amount = res1[0].mrp * orderitems[i].quantity;
-       
+        // console.log("amount",amount);
         product_discount_price = res1[0].discount_cost * orderitems[i].quantity;
        
-        amount=  amount - product_discount_price ;
+        amount =  amount - product_discount_price;
     
         product_weight  = res1[0].Weight * orderitems[i].quantity;
         // product_gst = Math.round((amount / 100) * res1[0].gst );
       
-       
+        
         res1[0].amount = amount;
         // res1[0].product_gst = product_gst;
         res1[0].cartquantity = orderitems[i].quantity;
@@ -290,7 +261,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +subscription[i].vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +subscription[i].vpid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -313,13 +284,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
        
         product_discount_price = subscription_product_list[0].discount_cost * subscription[i].quantity;
        
-        amount =  amount - product_discount_price ;
+        amount =  amount - product_discount_price;
     
         product_weight  = subscription_product_list[0].Weight * subscription[i].quantity;
         // product_gst = Math.round((amount / 100) * subscription_product_list[0].gst );
       
        
-        subscription_product_list[0].amount = amount;
+       
         // subscription_product_list[0].product_gst = product_gst;
         subscription_product_list[0].cartquantity = subscription[i].quantity;
         subscription_product_list[0].product_weight = product_weight;
@@ -340,10 +311,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           var getplan=await query("select * from Subscription_plan where spid='"+subscription[i].planid+"' ");
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
+          
         }
 
 
-
+        subscription_product_list[0].amount = amount;
 
         //total product cost
         totalamount = totalamount + amount;
@@ -639,7 +611,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
     if (req.vpid ) {
 
         
-        var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +req.vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +req.vpid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";

@@ -37,6 +37,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
         category_title :"Categories",
         message : 'user not found',
+        get_sub_cat_images:[],
         result: []
       };  
       result(null, resobj);
@@ -65,11 +66,12 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
 
 
         
-  sql.query(sub_category_query, function(err, res) {
+  sql.query(sub_category_query,async function(err, res) {
     if (err) {
       result(err, null);
     } else {
 
+      var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
 
       for (let i = 0; i < res.length; i++) {
      
@@ -89,6 +91,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
         category_title :"Sub_Categories_L1",
+        get_sub_cat_images:get_sub_cat_images,
         result: res
       };
       result(null, resobj);

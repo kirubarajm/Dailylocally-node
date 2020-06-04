@@ -70,6 +70,8 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
       result(err, null);
     } else {
 
+      var get_sub_cat2_images = await query("select * from Sub_category_images where type=3");
+
 
       for (let i = 0; i < res.length; i++) {
      
@@ -93,6 +95,7 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
         category_title :"Sub_Categories_L2",
         product_list:product_list,
+        get_sub_cat2_images:get_sub_cat2_images,
         result: res
       };
       result(null, resobj);

@@ -895,7 +895,7 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
   
   
       if(req.search){
-          var getsearchquery = "(SELECT name,'1' as type FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
+          var getsearchquery = "(SELECT name,'1' as type,catid as id FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
           var getsearch = await query(getsearchquery);
           if(getsearch.length > 0){
 
@@ -954,6 +954,13 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
         switch (req.type) {
             case 1:            
                 catid=req.id;
+                // var getidsquery = "select * from Category where catid="+req.id;
+                // var getids = await query(getidsquery);
+                // if(getids.length>0){
+                //     catid = getids[0].catid;
+                //     scl1_id = getids[0].scl1_id;
+                // }
+         
                 break;
             case 2:
                 var getidsquery = "select catid,scl1_id from SubcategoryL1 where scl1_id="+req.id;
