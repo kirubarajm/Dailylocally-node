@@ -17,14 +17,16 @@ var Collection = function(collection) {
 
 
 Collection.list_all_active_collection = function list_all_active_collection(req,result) {
-  sql.query("Select cid,query,name,active_status,img_url from Collections where active_status=1",async function(err, res) {
+  sql.query("Select cid,query,name,active_status,img_url as image from Collections where active_status=1",async function(err, res) {
     if (err) {
       result(err, null);
     } else {
-      var kitchens =   await Collection.getcollectionlist(res,req);
-      //console.log("first collection");
+    
+     var kitchen= await Collection.getcollectionlist(res,req);
+ 
       
       if (res.length !== 0 ) {
+      
         let resobj = {
           success: true,
           status:true,
@@ -44,10 +46,11 @@ Collection.list_all_active_collection = function list_all_active_collection(req,
 };
 
 Collection.getcollectionlist = async function getcollectionlist(res,req){
-  var userdetails = await query("Select * From User where userid = '" +req.eatuserid +"'");
+  var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
   for (let i = 0; i < res.length; i++) {
     req.cid = res[i].cid;   
     req.query = res[i].query;
+    
     await Collection.get_all_collection_by_cid(req, async function(err,res3) {
       if (err) {
         result(err, null);
@@ -56,19 +59,17 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
           result(null, res3);
         } else {          
        
-          var kitchenlist = res3.result
+          var productlist = res3.result
            
-          if (userdetails[0].first_tunnel == 0) {
-            if (kitchenlist.length !==0) {
-              res[i].collectionstatus = true;
-            }else{
-              res[i].collectionstatus = false;
-            }
-          }else{
+          
+          if (productlist.length !==0) {
             res[i].collectionstatus = true;
-          }           	
+          }else{
+            res[i].collectionstatus = false;
+          } 
+        
           delete res[i].query;
-         // delete json[res[i].query]
+          console.log("collectionstatus",res);
         }
       }
     });
@@ -79,21 +80,34 @@ return res
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
   
 
-  var day = moment().format("YYYY-MM-DD HH:mm:ss");;
-  var currenthour  = moment(day).format("HH");
-  var productquery = "";
+    await sql.query(req.query,[req.cid],async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {            
+        if (res1.length !=0) {
+                              
+            let resobj = {
+              success: true,
+              status: true,
+              collection_name:res1[0].name,
+              result: res1
+            };
+            result(null, resobj);
+          }else{
+            let resobj = {
+              success: true,
+              status: false,
+              collection_name:res[0].name,
+              result: res1
+            };
+            result(null, resobj);
+          }
+          }
 
-    
-  var res1 = await query(req.query);
-
-
-
-    let resobj = {
-      success: true,
-      status:true,
-      result: res1
-    };
-    result(null, resobj);  
+    });
+   
+   
+   
 };
 
 
