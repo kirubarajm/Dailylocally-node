@@ -636,7 +636,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
   if (userdetails.length !==0) {   
 
    
-    if (req.plid ) {
+    if (req.vpid ) {
 
         
         var subscription_product_list = await query("Select pm.*,pl.*  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid where pl.vpid = '" +req.vpid +"' ");

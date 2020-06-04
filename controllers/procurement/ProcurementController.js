@@ -10,4 +10,19 @@ exports.new_procurement_create = function(req, res) {
       res.send(user);
     });
   };
+
+  exports.procurement_list = function(req, res) {
+    Procurement.procurement_list(req.body, function(err, user) {
+      if (err) res.send(err);
+      res.send(user);
+    });
+  };
+
+  exports.move_to_purchase = function(req, res) {
+    Procurement.move_to_purchase(req.body, function(err, user) {
+      if (err) res.send(err);
+      res.send(user);
+    });
+  };
+  
   
