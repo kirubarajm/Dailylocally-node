@@ -3,7 +3,36 @@
 // makeit appointment status 
 
 const master = [
+    {
+        'product_Perishable': [{
+                "Perishable": 0,
+                "Perishablename": "no"
+            },
+            {
+                "Perishable": 1,
+                "Perishablename": "yes"
+            }
+        ]
+    },
+    {
+        'product_vegtype': [{
+                "vegtype": 0,
+                "vegtypename": "veg"
+            },
+            {
+                "vegtype": 1,
+                "vegtypename": "non-veg"
+            },
+            {
+                "vegtype": 2,
+                "vegtypename": "Vegan"
+            },
+        ]
+    },
 
+
+
+///////////////old Files/////////
     {
         'regionlist': [{
                 "regionid": 1,

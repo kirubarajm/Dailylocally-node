@@ -11,13 +11,23 @@ var Subcategoryl1 = function(subcategoryl1) {
 }
 
 //For Admin
-Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req) {
+Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req, result) {
     req.active_status=1;
     sql.query("INSERT INTO SubcategoryL1 set ?", req,async function(err, res) {
         if (err) {
-            return err;
+            let resobj = {
+                success: true,
+                status: false,
+                message: err
+            };
+            result(null, resobj);
         } else {
-             return res;
+            let resobj = {
+                success: true,
+                status: true,
+                data: res
+            };
+            result(null, resobj);
         }
     });    
 };
@@ -25,9 +35,19 @@ Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req) {
 Subcategoryl1.updateSubcategoryl1 =async function updateSubcategoryl1(req) {
     sql.query("UPDATE SubcategoryL1 SET ? WHERE scl1_id = ?", [req, req.scl1_id],async function(err, res) {
         if (err) {
-            return err;
+            let resobj = {
+                success: true,
+                status: false,
+                message: err
+            };
+            result(null, resobj);
         } else {
-            return res;
+            let resobj = {
+                success: true,
+                status: true,
+                data: res
+            };
+            result(null, resobj);
         }
       }
     );

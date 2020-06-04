@@ -14,23 +14,43 @@ var VendorProductMapping = function(vendorproductmapping) {
 }
 
 //For Admin
-VendorProductMapping.createVendorProductMapping = async function createVendorProductMapping(req) {
+VendorProductMapping.createVendorProductMapping = async function createVendorProductMapping(req, result) {
     req.active_status=1;
     sql.query("INSERT INTO Vendor_products_mapping set ?", req,async function(err, res) {
         if (err) {
-            return err;
+            let resobj = {
+                success: true,
+                status: false,
+                message: err
+            };
+            result(null, resobj);
         } else {
-             return res;
+            let resobj = {
+                success: true,
+                status: true,
+                data: res
+            };
+            result(null, resobj);
         }
     });    
 };
 
-VendorProductMapping.updateVendorProductMapping =async function updateVendorProductMapping(req) {
+VendorProductMapping.updateVendorProductMapping =async function updateVendorProductMapping(req, result) {
     sql.query("UPDATE Vendor_products_mapping SET ? WHERE vpmid = ?", [req, req.vpmid],async function(err, res) {
         if (err) {
-            return err;
+            let resobj = {
+                success: true,
+                status: false,
+                message: err
+            };
+            result(null, resobj);
         } else {
-            return res;
+            let resobj = {
+                success: true,
+                status: true,
+                data: res
+            };
+            result(null, resobj);
         }
       }
     );

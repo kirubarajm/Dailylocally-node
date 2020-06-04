@@ -4,16 +4,15 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var Subcategoryl2 = function(subcategoryl2) {
-  this.name = subcategoryl2.name;
-  this.image = subcategoryl2.image;
-  this.scl1_id = subcategoryl2.scl1_id;
+var L2SubcategoryMapping = function(l2subcategorymapping) {
+  this.master_l2_subcatid = l2subcategorymapping.master_l2_subcatid;
+  this.zoneid = l2subcategorymapping.zoneid;
+  this.active_status = l2subcategorymapping.active_status;
 }
 
 //For Admin
-Subcategoryl2.createSubcategoryl2 = async function createSubcategoryl2(req, result) {
-    req.active_status=1;
-    sql.query("INSERT INTO SubcategoryL2 set ?", req,async function(err, res) {
+L2SubcategoryMapping.createL2SubcategoryMapping = async function createL2SubcategoryMapping(req, result) {
+    sql.query("INSERT INTO Zone_l2_subcategory_mapping set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -32,8 +31,8 @@ Subcategoryl2.createSubcategoryl2 = async function createSubcategoryl2(req, resu
     });    
 };
 
-Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
-    sql.query("UPDATE SubcategoryL2 SET ? WHERE scl2_id = ?", [req, req.scl2_id],async function(err, res) {
+L2SubcategoryMapping.updateL2SubcategoryMapping =async function updateL2SubcategoryMapping(req, result) {
+    sql.query("UPDATE Zone_l2_subcategory_mapping SET ? WHERE virtual_l2_subcatid = ?", [req, req.virtual_l2subcatid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -53,4 +52,4 @@ Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
     );
 };
 
-module.exports = Subcategoryl2;
+module.exports = L2SubcategoryMapping;
