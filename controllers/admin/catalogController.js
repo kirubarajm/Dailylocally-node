@@ -232,6 +232,26 @@ exports.get_vendor_list = function(req, res) {
     });    
 };
 
+/////////Get Tag List///////////
+exports.get_tag_list = function(req, res) {    
+    catalog.get_tag_list(req.body, function(err, ress) {
+        //console.log("get_tag_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////File Upload///////////
+exports.fileUpload = function(req, res) {    
+    catalog.fileUpload(req, function(err, ress) {     
+        //console.log("fileUpload controller");   
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.json(ress);
+    });    
+};
+
 /////////View Product///////////
 exports.view_product = function(req, res) {    
     catalog.view_product(req.body, function(err, ress) {

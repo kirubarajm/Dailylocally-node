@@ -19,6 +19,16 @@ var CategoryMapping = require('../admin/zonecategorymappingTableModel.js');
 
 var Catalog = function(catalog) {};
 
+var AWS_ACCESS_KEY = "AKIAJJQUEYLIU23E63OA";
+var AWS_SECRET_ACCESS_KEY = "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";
+const fs = require("fs");
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3({
+    accessKeyId: AWS_ACCESS_KEY,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    region: "us-east-1"
+  });
+
 /////////Get Category List///////////
 Catalog.get_category_list =async function get_category_list(req,result) {
     if(req.zone_id){
@@ -1050,10 +1060,66 @@ Catalog.get_vendor_list =async function get_vendor_list(req,result) {
     }
 };
 
+/////////Get Tag List///////////
+Catalog.get_tag_list =async function get_tag_list(req,result) {
+    var gettagquery = "select tagid,name from tag";
+    var gettag = await query(gettagquery);
+    if(gettag.length > 0){
+      let resobj = {
+          success: true,
+          status: true,
+          data: gettag
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {
+          success: true,
+          status: false,
+          message: "no records found"
+      };
+      result(null, resobj);
+    }
+};
+
+/////////File Upload step:1 ->///////////
+Catalog.fileUpload = function fileUpload(newDocument,result) {
+    if (Object.keys(newDocument.files).length == 0) {
+      return result.status(400).send("No files were uploaded.");
+    }
+    var fileName = newDocument.files.lic;
+    var name = fileName.name;
+    var name = Date.now() + "-" + name;
+    const params = {
+      Bucket: "eattovo/upload/admin/makeit/product", // pass your bucket name
+      Key: name, // file will be saved as testBucket/contacts.csv
+      Body: fileName.data,
+      ContentType: "image/jpg",
+      ACL: "public-read"
+    };
+    Catalog.documentUpload(params,result);
+};
+
+/////////File Upload step:2 ->///////////
+Catalog.documentUpload = function documentUpload(params,result) {
+    s3.upload(params, (err, data) => {
+      if (err) {
+        result(err, null);
+      } else {
+        let resobj = {
+          success: true,
+          status :true,
+          message: "Document uploaded successfully",
+          data: data
+        };
+        result(null, resobj);
+      }
+    });
+}
+
 /////////view Product///////////
 Catalog.view_product =async function view_product(req,result) {
     if(req.product_id){
-        var getproductquery = "select cat.catid,cat.name as category_name,sc1.scl1_id,sc1.name as subcategoryl1_name,sc2.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname,pm.weight,uom.uomid,uom.name as uom,pm.packetsize,br.id as brand_id,br.brandname,pm.short_desc,pm.productdetails,'zone mapping' as zonemapping,pm.hsn_code,pm.tag,pm.Perishable,pm.vegtype,pm.basiccost as targetedbaseprice,pm.image,pm.mrp,pm.gst,pm.discount_cost,(pm.mrp-pm.discount_cost) as discountedamount from ProductMaster as pm left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join Brand as br on br.id=pm.brand left join UOM as uom on uom.uomid=pm.uom where pm.pid="+req.product_id;
+        var getproductquery = "select cat.catid,cat.name as category_name,sc1.scl1_id,sc1.name as subcategoryl1_name,sc2.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,pm.weight,uom.uomid,uom.name as uom,pm.packetsize,br.id as brand_id,br.brandname,pm.short_desc,pm.productdetails,'zone mapping' as zonemapping,pm.hsn_code,pm.tag as tag_id,tag.name as tagname,pm.Perishable,pm.vegtype,pm.targetedbaseprice,pm.image,pm.mrp,pm.gst,pm.discount_cost,(pm.mrp-pm.discount_cost) as discountedamount from ProductMaster as pm left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join Brand as br on br.id=pm.brand left join UOM as uom on uom.uomid=pm.uom left join tag as tag on tag.tagid=pm.tag where pm.pid="+req.product_id;
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0 ){
             var getvendorquery = "select vpmid,vpm.vid as vendorid,v.name as vendorname,vpm.expiry_date,vpm.base_price,vpm.other_charges,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost_price from Vendor as v left join Vendor_products_mapping as vpm on vpm.vid=v.vid where vpm.pid="+req.product_id;
@@ -1163,13 +1229,23 @@ Catalog.edit_product =async function edit_product(req,result) {
         var checkcategoryquery = "select * from ProductMaster where Productname='"+req.productname+"' and pid NOT IN("+req.pid+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
-            var updateproduct = await Product.updateProduct(req);            
-            let resobj = {
-                success: true,
-                status: true,
-                message: "Product Updated susccessfully"
-            };
-            result(null, resobj);             
+            Product.updateProduct(req,async function(err,productres){
+                if(productres.status==true){
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "Product Updated susccessfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "somthing went wrong plz try again"
+                    };
+                    result(null, resobj);
+                }
+            });            
         }else{
             let resobj = {
                 success: true,
