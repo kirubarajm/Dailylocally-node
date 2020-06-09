@@ -6,11 +6,11 @@ const query = util.promisify(sql.query).bind(sql);
 
 var Product = function(product) {
   this.hsn_code = product.hsn_code;
-  this.Productname = product.Productname;
+  this.Productname = product.productname;
   this.image = product.image;
   this.brand = product.brand;
   this.mrp = product.mrp;
-  this.basiccost = product.basiccost;
+  this.targetedbaseprice = product.targetedbaseprice;
   this.discount_cost = product.discount_cost;
   this.gst = product.gst;
   this.scl1_id = product.scl1_id;

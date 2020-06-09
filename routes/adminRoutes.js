@@ -5,6 +5,7 @@ module.exports = function(app) {
   var catalog = require("../controllers/admin/catalogController");
   var dayorder = require("../controllers/common/DayorderController");
   var procurement = require("../controllers/procurement/ProcurementController");
+  var scm = require("../controllers/admin/scmController.js");
   
 
   //////// Admin Routes /////////
@@ -41,6 +42,8 @@ module.exports = function(app) {
    app.route("/admin/brandlist").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.get_brand_list}));
    app.route("/admin/zonelist").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.get_zone_list}));
    app.route("/admin/vendorlist").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.get_vendor_list}));
+   app.route("/admin/taglist").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.get_tag_list}));
+   app.route("/admin/fileUpload").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.fileUpload}));
 
 
    //////// Product ////////////
@@ -57,6 +60,9 @@ module.exports = function(app) {
    app.route("/admin/procurement/create").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.new_procurement_create}));
    app.route("/admin/procurement/list").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.procurement_list}));
    app.route("/admin/procurement/movetopurchase").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.move_to_purchase}));
+
+   app.route("/admin/po/waitingpolist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.waiting_po_list}));
+   app.route("/admin/po/productwisevendorlist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.product_wise_vendor_list}));
 
    
 
