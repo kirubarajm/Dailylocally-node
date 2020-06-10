@@ -1324,7 +1324,8 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
   
   
       if(req.search){
-          var getsearchquery = "(SELECT name,'1' as type,catid as id FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
+          var getsearchquery = "(SELECT name,'1' as type,catid as id,catid as id1 FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id,scl1_id as id1  FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id,scl1_id as id1 FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id,pid as id1 FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
+          console.log("getsearchquery",getsearchquery);
           var getsearch = await query(getsearchquery);
           if(getsearch.length > 0){
 
