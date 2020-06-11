@@ -34,16 +34,21 @@ var Order = function(order) {
   this.aid = order.aid || 0;
   this.cus_lat = order.cus_lat;
   this.cus_lon = order.cus_lon;
-  this.cus_address = order.cus_address;
-  this.cus_address_title = order.cus_address_title;
-  this.flatno = order.flatno;
-  this.cus_locality= order.cus_locality;
+  this.city = order.city;
+  this.flat_house_no = order.flat_house_no;
+  this.plot_house_no = order.plot_house_no;
   this.cus_pincode = order.cus_pincode ||0;
   this.landmark = order.landmark;
   this.app_type = order.app_type || 0;
-  // this.delivery_charge = order.delivery_charge;
   this.payment_type = order.payment_type;
+  this.google_address = order.google_address;
+  this.complete_address = order.complete_address;
+  this.floor = order.floor;
+  this.block_name = order.block_name;
+  this.city = order.city;
+  this.apartment_name = order.apartment_name;
   this.zoneid=order.zoneid;
+  this.address_type=order.address_type;
 
   
 };
@@ -81,8 +86,6 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
           req.lat = address_data[0].lat;
           req.lon = address_data[0].lon;
   
-            //normal flow order creation
-            console.log("normal flow order creation");
             
             Category.read_a_cartdetails(req, orderitems, subscription,async function(err,res3) {
                   if (err) {
@@ -94,17 +97,24 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                       var amountdata = res3.result[0].amountdetails;
 
                       req.gst = amountdata.gstcharge;
-                      req.price = amountdata.grandtotal;             
-                      req.cus_address = address_data[0].address;
-                      req.cus_lat = address_data[0].lat;
-                      req.cus_lon = address_data[0].lon;
-                      req.cus_address_title = address_data[0].address_title;
-                      req.cus_locality = address_data[0].locality;
-                      req.flatno = address_data[0].flatno;
-                      req.landmark = address_data[0].landmark;
-                      req.cus_pincode = address_data[0].pincode;
+                      req.price = amountdata.grandtotal;    
                       req.delivery_charge = amountdata.delivery_charge;
                       req.zoneid =  res3.result[0].id;
+
+                      req.google_address = address_data[0].google_address;
+                      req.complete_address = address_data[0].complete_address;
+                      req.flat_house_no = address_data[0].flat_house_no;
+                      req.plot_house_no = address_data[0].plot_house_no;
+                      req.floor = address_data[0].floor;
+                      req.block_name = address_data[0].block_name;
+                      req.city = address_data[0].city;
+                      req.cus_lat = address_data[0].lat;
+                      req.cus_lon = address_data[0].lon;
+                      req.landmark = address_data[0].landmark;
+                      req.cus_pincode = address_data[0].pincode;
+                      req.apartment_name = address_data[0].apartment_name;
+                      req.address_type = address_data[0].address_type;
+
 
                       var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
@@ -253,6 +263,7 @@ Order.Customeridresponse = function Customeridresponse(req) {
     else return res;
   });
 };
+
 Order.create_customerid_by_razorpay = async function create_customerid_by_razorpay(userid) {
 
   const userinfo = await query("Select * from User where userid = '" + userid + "'");

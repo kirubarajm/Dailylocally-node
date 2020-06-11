@@ -5,10 +5,7 @@ var sql = require('../db.js');
 //Task object constructor
 var UserAddress = function(useraddress){
     this.userid = useraddress.userid;
-    this.address_title = useraddress.address_title;
-    this.address = useraddress.address;
-    this.flatno = useraddress.flatno;
-    this.locality = useraddress.locality;
+    this.city = useraddress.city;
     this.pincode = useraddress.pincode;
     this.lat = useraddress.lat;
     this.lon = useraddress.lon;
@@ -16,6 +13,13 @@ var UserAddress = function(useraddress){
     this.address_type = useraddress.address_type;
     this.delete_status = useraddress.delete_status || 0;  
     this.address_default = useraddress.address_default || 0;
+    this.google_address = useraddress.google_address;
+    this.complete_address = useraddress.complete_address;
+    this.flat_house_no = useraddress.flat_house_no;
+    this.plot_house_no = useraddress.plot_house_no;
+    this.floor = useraddress.floor;
+    this.block_name = useraddress.block_name;
+    this.apartment_name = useraddress.apartment_name;
 };
 
 
@@ -118,8 +122,6 @@ UserAddress.getAllAddress = function getAllAddress(result) {
 
 UserAddress.updateById = function(req, result){
 
-
-
   staticquery = "UPDATE Address SET updated_at = ?,";
         var column = '';
         for (const [key, value] of Object.entries(req)) {
@@ -132,7 +134,6 @@ UserAddress.updateById = function(req, result){
         }
 
       var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-        console.log("address query",query);
         sql.query(query,[new Date()], function (err, res) {
             if (err) {
                 console.log("error: ", err);
