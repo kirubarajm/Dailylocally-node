@@ -10,7 +10,9 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   var Dayorder = function(Dayorder) {
     this.date = Dayorder.date;
     this.userid = Dayorder.userid;
-    this.zoneid=order.zoneid;
+    this.zoneid=Dayorder.zoneid;
+    this.dayorderstatus=Dayorder.dayorderstatus || 0 ;
+    this.rating_skip=Dayorder.rating_skip || 0;
   };
 
 
