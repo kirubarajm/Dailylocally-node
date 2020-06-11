@@ -728,5 +728,129 @@ Category.get_dayorder_date = async function get_dayorder_date(req,result) {
   } 
 };
 
+//cart details for ear user
+Category.subscribeplan_totalamount_by_pid = async function subscribeplan_totalamount_by_pid(req,result) {
+  var tempmessage = "";
+  var isAvaliableItem = true;
+  var planStatus = true;
+  var subscription_product = [];
+  var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+
+  if (userdetails.length !==0) {   
+
+   
+    if (req.vpid ) {
+
+        
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +req.vpid +"' ");
+        if (subscription_product_list[0].live_status == 0) {
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        }else if (subscription_product_list[0].subscription == 0) {
+     
+          subscription_product_list[0].availablity = false;
+          tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
+          isAvaliableItem = false;
+        } else {
+          subscription_product_list[0].availablity = true;
+        }
+
+
+        var amount = 0;
+        ///get amount each product
+        amount = subscription_product_list[0].mrp * req.quantity;
+       
+        product_discount_price = subscription_product_list[0].discount_cost * req.quantity;
+       
+        amount =  amount - product_discount_price;
+    
+        product_weight  = subscription_product_list[0].Weight * req.quantity;
+        // product_gst = Math.round((amount / 100) * subscription_product_list[0].gst );
+      
+       
+       
+        // subscription_product_list[0].product_gst = product_gst;
+        subscription_product_list[0].cartquantity = req.quantity;
+        subscription_product_list[0].product_weight = product_weight;
+        subscription_product_list[0].product_discount_price = product_discount_price;       
+        subscription_product_list[0].subscription = 1;
+      
+
+        if (req.planid) {
+
+          var getplan=await query("select * from Subscription_plan where spid='"+req.planid+"' ");
+          subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
+          amount = amount * getplan[0].numberofdays;
+          
+        }
+
+
+        subscription_product_list[0].amount = amount;
+
+      
+        subscription_product.push(subscription_product_list[0]);
+        
+
+    }
+   
+    var query1 ="select * from Subscription_plan where active_status=1";
+   
+  
+    sql.query(query1,async function(err,res2) {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+      } else {
+       
+       
+        if (res2.length==0) {
+          planStatus = false;
+        }
+
+        //  res2[0].subscription_product = subscription_product;
+
+         
+
+          let resobj = {
+            success: true,
+            status:true
+            };
+            
+        
+          if (!isAvaliableItem){
+            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.status = isAvaliableItem
+          }
+
+          if (!planStatus){
+       
+            resobj.message = tempmessage.slice(0, -1) + " Subscription Plan not available!";
+            resobj.status = planStatus
+          }
+
+        //  / resobj.subscription_plan= res2;
+          resobj.result = subscription_product; 
+          result(null, resobj);
+      
+          
+      } 
+
+    });
+
+  
+
+
+    
+    
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "user is not found"
+    };
+    result(null, resobj);
+  } 
+};
 
 module.exports = Category;

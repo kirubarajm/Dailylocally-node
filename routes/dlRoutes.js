@@ -71,7 +71,7 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  //Subscription_plan
  app.route("/user/subscribeplan").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_by_pid}));
  app.route("/user/startingdate").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_dayorder_date}));
-
+ app.route("/user/subscribeplan/totalamount").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_totalamount_by_pid}));
  
  //promotions
   app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
