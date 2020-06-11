@@ -71,6 +71,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
       result(err, null);
     } else {
 
+
       var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
 
       for (let i = 0; i < res.length; i++) {
