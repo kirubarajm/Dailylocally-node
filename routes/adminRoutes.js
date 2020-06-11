@@ -63,7 +63,11 @@ module.exports = function(app) {
 
    app.route("/admin/po/waitingpolist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.waiting_po_list}));
    app.route("/admin/po/productwisevendorlist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.product_wise_vendor_list}));
-
+   app.route("/admin/po/productvendorassign").post(middleware.checkToken,routesVersioning({"1.0.0": scm.product_vendor_assign}));
+   app.route("/admin/po/createpo").post(middleware.checkToken,routesVersioning({"1.0.0": scm.create_po}));
+   app.route("/admin/po/getpolist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_list}));
+   app.route("/admin/po/getporeceivelist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_receive_list}));
+   app.route("/admin/po/updateporeceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_receive}));
    
 
 }

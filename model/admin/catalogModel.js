@@ -32,7 +32,7 @@ const s3 = new AWS.S3({
 /////////Get Category List///////////
 Catalog.get_category_list =async function get_category_list(req,result) {
     if(req.zone_id){
-        var getcategoryquery = "select ca.catid,ca.name,zcm.active_status from Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.zoneid="+req.zone_id;
+        var getcategoryquery = "select ca.catid,ca.name,zcm.active_status,ca.image from Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.zoneid="+req.zone_id;
         var getcategory = await query(getcategoryquery);
         if(getcategory.length > 0){
             let resobj = {
@@ -62,7 +62,7 @@ Catalog.get_category_list =async function get_category_list(req,result) {
 /////////Get L1SubCategory List///////////
 Catalog.get_subcategoryl1_list =async function get_subcategoryl1_list(req,result) {
     if(req.catid && req.zone_id){
-        var getl1subcategoryquery = "select l1.scl1_id,l1.name,zl1sm.active_status,l1.catid,if(scl2_id,1,0) as l2_status from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id left join Zone_l1_subcategory_mapping as zl1sm on zl1sm.master_l1_subcatid=l1.scl1_id where l1.catid="+req.catid+" and zl1sm.zoneid="+req.zone_id+" group by l1.scl1_id";        
+        var getl1subcategoryquery = "select l1.scl1_id,l1.name,zl1sm.active_status,l1.image,l1.catid,if(scl2_id,1,0) as l2_status from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id left join Zone_l1_subcategory_mapping as zl1sm on zl1sm.master_l1_subcatid=l1.scl1_id where l1.catid="+req.catid+" and zl1sm.zoneid="+req.zone_id+" group by l1.scl1_id";        
         var getl1subcategory = await query(getl1subcategoryquery);
         if(getl1subcategory.length > 0){
             let resobj = {
@@ -92,7 +92,7 @@ Catalog.get_subcategoryl1_list =async function get_subcategoryl1_list(req,result
 /////////Get L2SubCategory List///////////
 Catalog.get_subcategoryl2_list =async function get_subcategoryl2_list(req,result) {
     if(req.scl1_id && req.zone_id){
-        var getl2subcategoryquery = "select l2.scl2_id,l2.name,zl2sm.active_status,l2.scl1_id from SubcategoryL2 as l2 left join Zone_l2_subcategory_mapping as zl2sm on zl2sm.master_l2_subcatid=l2.scl2_id where scl1_id="+req.scl1_id+" and zl2sm.zoneid="+req.zone_id+" group by l2.scl2_id";        
+        var getl2subcategoryquery = "select l2.scl2_id,l2.name,zl2sm.active_status,l2.image,l2.scl1_id from SubcategoryL2 as l2 left join Zone_l2_subcategory_mapping as zl2sm on zl2sm.master_l2_subcatid=l2.scl2_id where scl1_id="+req.scl1_id+" and zl2sm.zoneid="+req.zone_id+" group by l2.scl2_id";        
         var getl2subcategory = await query(getl2subcategoryquery);
         if(getl2subcategory.length > 0){
             let resobj = {
@@ -125,7 +125,7 @@ Catalog.get_product_list =async function get_product_list(req,result) {
         var wherecon = "";
         if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
         if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
-        var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
+        var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
             let resobj = {
@@ -166,34 +166,36 @@ Catalog.update_category_livestatus =async function update_category_livestatus(re
             if(updatestatus==0){
                 var getl1subquery = "select scl1_id from SubcategoryL1 where catid="+req.catid;
                 var getl1sub = await query(getl1subquery);
-                var l1sub = [];
-                for (let i = 0; i < getl1sub.length; i++) {
-                    l1sub.push(getl1sub[i].scl1_id);
-                    var getl2subquery = "select scl2_id from SubcategoryL2 where scl1_id="+getl1sub[i].scl1_id;
-                    var getl2sub = await query(getl2subquery);
-                    if(getl2sub.length>0){
-                        var l2sub = [];
-                        for (let i = 0; i < getl2sub.length; i++) {
-                            l2sub.push(getl2sub[i].scl2_id);                            
-                        }
-                        var updatel2subtatusquery = "update Zone_l2_subcategory_mapping set active_status=0 where master_l2_subcatid IN("+l2sub+") and zoneid="+req.zone_id;
-                        var updatel2subtatus = await query(updatel2subtatusquery);
-                    }                        
+                if(getl1sub.length > 0){
+                    var l1sub = [];
+                    for (let i = 0; i < getl1sub.length; i++) {
+                        l1sub.push(getl1sub[i].scl1_id);
+                        var getl2subquery = "select scl2_id from SubcategoryL2 where scl1_id="+getl1sub[i].scl1_id;
+                        var getl2sub = await query(getl2subquery);
+                        if(getl2sub.length>0){
+                            var l2sub = [];
+                            for (let i = 0; i < getl2sub.length; i++) {
+                                l2sub.push(getl2sub[i].scl2_id);                            
+                            }
+                            var updatel2subtatusquery = "update Zone_l2_subcategory_mapping set active_status=0 where master_l2_subcatid IN("+l2sub+") and zoneid="+req.zone_id;
+                            var updatel2subtatus = await query(updatel2subtatusquery);
+                        }                        
 
-                    var getproductsquery = "select pid from ProductMaster where scl1_id="+getl1sub[i].scl1_id;
-                    var getproducts = await query(getproductsquery);
-                    if(getproducts.length>0){
-                        var products = [];
-                        for (let j = 0; j < getproducts.length; j++) {
-                            products.push(getproducts[j].pid);                            
+                        var getproductsquery = "select pid from ProductMaster where scl1_id="+getl1sub[i].scl1_id;
+                        var getproducts = await query(getproductsquery);
+                        if(getproducts.length>0){
+                            var products = [];
+                            for (let j = 0; j < getproducts.length; j++) {
+                                products.push(getproducts[j].pid);                            
+                            }
+                            var updateproductstatusquery = "update Product_live set live_status=0 where pid IN("+products+") and zoneid="+req.zone_id;
+                            var updateproductstatus = await query(updateproductstatusquery);
                         }
-                        var updateproductstatusquery = "update Product_live set live_status=0 where pid IN("+products+") and zoneid="+req.zone_id;
-                        var updateproductstatus = await query(updateproductstatusquery);
+                        
                     }
-                    
-                }
-                var updatel1subtatusquery = "update Zone_l1_subcategory_mapping set active_status=0 where master_l1_subcatid IN("+l1sub+") and zoneid="+req.zone_id;
-                var updatel1subtatus = await query(updatel1subtatusquery);
+                    var updatel1subtatusquery = "update Zone_l1_subcategory_mapping set active_status=0 where master_l1_subcatid IN("+l1sub+") and zoneid="+req.zone_id;
+                    var updatel1subtatus = await query(updatel1subtatusquery);
+                }                
             }
                 
             var statusupdatequery = "update Zone_category_mapping set active_status="+updatestatus+" where master_catid="+req.catid+" and zoneid="+req.zone_id;
@@ -246,7 +248,7 @@ Catalog.update_subcategoryl1_livestatus =async function update_subcategoryl1_liv
                     //console.log("l2 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if category should be mode live",
                     };
                     result(null, resobj);
@@ -279,21 +281,25 @@ Catalog.update_subcategoryl1_livestatus =async function update_subcategoryl1_liv
                     if(updatestatus ==0){
                         var getl2subquery = "select scl2_id from SubcategoryL2 where scl1_id="+req.scl1_id
                         var getl2sub = await query(getl2subquery);
-                        var l2sub = [];
-                        for (let i = 0; i < getl2sub.length; i++) {
-                            l2sub.push(getl2sub[i].scl2_id);                            
-                        }
-                        var updatel2subtatusquery = "update Zone_l2_subcategory_mapping set active_status=0 where master_l2_subcatid IN("+l2sub+") and zoneid="+req.zone_id;
-                        var updatel2subtatus = await query(updatel2subtatusquery);
+                        if(getl2sub.length > 0){
+                            var l2sub = [];
+                            for (let i = 0; i < getl2sub.length; i++) {
+                                l2sub.push(getl2sub[i].scl2_id);                            
+                            }
+                            var updatel2subtatusquery = "update Zone_l2_subcategory_mapping set active_status=0 where master_l2_subcatid IN("+l2sub+") and zoneid="+req.zone_id;
+                            var updatel2subtatus = await query(updatel2subtatusquery);
 
-                        var getproductsquery = "select pid from ProductMaster where scl1_id="+req.scl1_id
-                        var getproducts = await query(getproductsquery);
-                        var products = [];
-                        for (let j = 0; j < getproducts.length; j++) {
-                            products.push(getproducts[j].pid);                            
-                        }
-                        var updateproductstatusquery = "update Product_live set live_status=0 where pid IN("+products+") and zoneid="+req.zone_id;
-                        var updateproductstatus = await query(updateproductstatusquery); 
+                            var getproductsquery = "select pid from ProductMaster where scl1_id="+req.scl1_id
+                            var getproducts = await query(getproductsquery);
+                            if(getproducts.length > 0){
+                                var products = [];
+                                for (let j = 0; j < getproducts.length; j++) {
+                                    products.push(getproducts[j].pid);                            
+                                }
+                                var updateproductstatusquery = "update Product_live set live_status=0 where pid IN("+products+") and zoneid="+req.zone_id;
+                                var updateproductstatus = await query(updateproductstatusquery); 
+                            }                            
+                        }                        
                     }
                     var updatedselectquery = "select sl1.scl1_id,sl1.name,zl1sc.active_status from SubcategoryL1 as sl1 left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=sl1.scl1_id where scl1_id="+req.scl1_id+" group by sl1.scl1_id";
                     var updatedselect = await query(updatedselectquery);
@@ -343,7 +349,7 @@ Catalog.update_subcategoryl2_livestatus =async function update_subcategoryl2_liv
                     //console.log("l1 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if L1 subcategory should be mode live",
                     };
                     result(null, resobj);
@@ -351,7 +357,7 @@ Catalog.update_subcategoryl2_livestatus =async function update_subcategoryl2_liv
                     //console.log("l2 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if category should be mode live",
                     };
                     result(null, resobj);
@@ -441,7 +447,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
                     //console.log("l2 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if L2 subcategory should be mode live",
                     };
                     result(null, resobj);
@@ -449,7 +455,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
                     //console.log("l1 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if L1 subcategory should be mode live",
                     };
                     result(null, resobj);
@@ -457,7 +463,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
                     //console.log("l2 sub out");
                     let resobj = {
                         success: true,
-                        status: true,
+                        status: false,
                         message: "product can be lived only if category should be mode live",
                     };
                     result(null, resobj);
@@ -1086,7 +1092,7 @@ Catalog.fileUpload = function fileUpload(newDocument,result) {
     if (Object.keys(newDocument.files).length == 0) {
       return result.status(400).send("No files were uploaded.");
     }
-    var fileName = newDocument.files.lic;
+    var fileName = newDocument.files.file;
     var name = fileName.name;
     var name = Date.now() + "-" + name;
     const params = {
