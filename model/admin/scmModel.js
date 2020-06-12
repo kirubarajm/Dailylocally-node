@@ -265,4 +265,49 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
 };
 
 
+
+SCM.quality_type_list =async function quality_type_list(req,result) {
+    var QA_typesquery = "select * from QA_types";
+    var getpolist = await query(QA_typesquery);
+    if(getpolist.length > 0){
+        let resobj = {
+            success: true,
+            status: true,
+            data: getpolist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no records found"
+        };
+        result(null, resobj);
+    }
+
+};
+
+
+SCM.quality_check_product =async function quality_check_product(req,result) {
+    var QA_typesquery = "select * from QA_types";
+    var getpolist = await query(QA_typesquery);
+    if(getpolist.length > 0){
+        let resobj = {
+            success: true,
+            status: true,
+            data: getpolist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no records found"
+        };
+        result(null, resobj);
+    }
+
+};
+
+
 module.exports = SCM;

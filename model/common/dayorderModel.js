@@ -344,17 +344,17 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
     if (Dayorder.date) {
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date ='"+Dayorder.date +"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 3   group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date ='"+Dayorder.date +"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4  group by drs.id,drs.userid");
 
     }else{
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 3 group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4 group by drs.id,drs.userid");
 
     }
 
     if (Dayorder.id) {
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 3 group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4 group by drs.id,drs.userid");
 
     }
 
@@ -392,7 +392,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
     
     if (Dayorder.id) {
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  where drs.id='"+Dayorder.id+"' and zoneid=1 and orp.scm_status = 3 group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('available', orp.quantity,'quantity', orp.quantity,'vpid',orp.vpid,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  where drs.id='"+Dayorder.id+"' and zoneid=1 and orp.scm_status = 4 group by drs.id,drs.userid");
 
     }
 
@@ -417,4 +417,5 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
     result(null, resobj);  
   };
  
+  
   module.exports = Dayorder;
