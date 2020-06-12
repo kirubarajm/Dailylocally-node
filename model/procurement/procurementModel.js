@@ -66,7 +66,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
   Procurement.procurement_list=async function procurement_list(req,result) {
 
-    var procurement_list_query= "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name from Procurement pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom where pro.pr_status=0 and pro.zoneid='"+req.zoneid+"'"
+    var procurement_list_query= "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,st.quantity as boh,greatest(0,pro.quantity-st.quantity)as procurement_quantity from Procurement  pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.pid= pm.pid where pro.pr_status=0 and pro.zoneid='"+req.zoneid+"'"
 
     
     var procurement_list = await query(procurement_list_query);
@@ -80,7 +80,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
             result(null, resobj);
     
   };
-  
+
   
   Procurement.move_to_purchase=async function move_to_purchase(req,result) {
 
