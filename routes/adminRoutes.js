@@ -72,5 +72,6 @@ module.exports = function(app) {
    app.route("/admin/po/updateporeceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_receive}));
    
   //SCM QUALITY
-  app.route("/admin/quality/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.day_order_list}));
+  app.route("/admin/quality/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_list}));
+  app.route("/admin/quality/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_view}));
 }
