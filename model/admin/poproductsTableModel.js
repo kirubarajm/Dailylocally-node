@@ -14,6 +14,8 @@ var POproducts = function(poproducts) {
   this.received_quantity = poproducts.received_quantity;
   this.aditional_quantity = poproducts.aditional_quantity;
   this.pop_status = poproducts.pop_status;
+  this.due_date = poproducts.due_date;
+  this.buyer_comment = poproducts.buyer_comment;
 }
 
 //For Admin
@@ -37,8 +39,11 @@ POproducts.createPOProducts = async function createPOProducts(req, result) {
     });    
 };
 
-POproducts.updatePOProducts =async function updatePOProducts(req, result) {
-    sql.query("UPDATE POproducts SET ? WHERE popid = ?", [req, req.poid],async function(err, res) {
+POproducts.updatePOProducts =async function updatePOProducts(req,popid, result) {
+    console.log("updatePOProducts req--->",req,"popid->",popid);
+    sql.query("UPDATE POproducts set ? where popid = ?", [req, popid],function(err, res) {
+        //sql.query("UPDATE PackagingBox set ? where id =?", [packagingboxdetails,id], function(err, res) {
+        console.log("updatePOProducts res-->",res);
         if (err) {
             let resobj = {
                 success: true,
