@@ -1328,12 +1328,41 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
         }
       }
   
+              // (SELECT name,'1' as type,catid as id,catid as id1 FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id,scl1_id as id1  FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id,scl1_id as id1 FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id,pid as id1 FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')
+            //  / var getsearch = await query(getsearchquery);
   
       if(req.search){
-          var getsearchquery = "(SELECT name,'1' as type,catid as id,catid as id1 FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id,scl1_id as id1  FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id,scl1_id as id1 FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id,pid as id1 FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')";
-          console.log("getsearchquery",getsearchquery);
-          var getsearch = await query(getsearchquery);
-          if(getsearch.length > 0){
+
+        var suggestion_list = {};
+
+        var products_title ='Products';
+        var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name  FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
+
+        if (products_list.length !=0) {
+            suggestion_list.products_title=products_title;
+            suggestion_list.products_list=products_list;
+        }
+
+        var subcategory_title = 'Sub category';
+        var subcategory_list = await query("SELECT sub1.name as sub_category,sub1.scl1_id,sub1.catid,cat.name as category_name FROM  SubcategoryL1 as sub1 left join Category cat on cat.catid=sub1.scl1_id WHERE  sub1.active_status=1 and  sub1.name LIKE '%"+req.search+"%' group by sub1.scl1_id");
+
+        if (subcategory_list.length !=0) {
+            suggestion_list.subcategory_title=subcategory_title;
+            suggestion_list.subcategory_list=subcategory_list;
+        }
+
+        var category_title= "Category";
+        var category_list  = await query("SELECT catid,image,name FROM  Category WHERE name LIKE '%"+req.search+"%'");
+
+        if (category_list.length !=0) {
+            suggestion_list.category_title=category_title;
+            suggestion_list.category_list=category_list;
+        }
+
+
+
+  
+        //   if(suggestion_list.length == 0){
 
           
 
@@ -1341,17 +1370,19 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
                   success: true,
                   status: true,
                   servicable_status:servicable_status,
-                  data: getsearch
+                  data: suggestion_list
               };
           result(null, resobj);
-          }else{
-              let resobj = {
-                  success: true,
-                  status: false,
-                  message: "no records found"
-              };
-              result(null, resobj);
-          }
+
+
+        //   }else{
+        //       let resobj = {
+        //           success: true,
+        //           status: false,
+        //           message: "no records found"
+        //       };
+        //       result(null, resobj);
+        //   }
       }else{
           let resobj = {
               success: true,

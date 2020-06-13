@@ -71,3 +71,23 @@ exports.update_po_receive = function(req, res) {
         res.send(ress);
     });    
 };
+
+
+exports.quality_type_list = function(req, res) {    
+    SCM.quality_type_list(req.body, function(err, ress) {
+        //console.log("update_po_receive controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+
+exports.quality_check_product = function(req, res) {    
+    SCM.quality_check_product(req.body, function(err, ress) {
+        //console.log("update_po_receive controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};

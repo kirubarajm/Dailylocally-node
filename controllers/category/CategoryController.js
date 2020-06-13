@@ -57,6 +57,18 @@ exports.get_category_list = function(req, res) {
     
   };
 
+
+  
+  exports.subscribeplan_totalamount_by_pid = function(req, res) {
+
+
+    Category.subscribeplan_totalamount_by_pid(req.body,function(err,user) {
+      if (err) res.send(err);
+      res.json(user);
+    });
+  
+};
+
  exports.get_dayorder_date = function(req, res) {
  
       Category.get_dayorder_date(req.body,function(err,user) {
