@@ -527,7 +527,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
            
         }
 
-        var update_revoke = await query("update Dayorder_products set scm_status=6 where doid = '"+req.doid+"'");
+        var update_revoke = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
         let resobj = {
             success: true,
             status: true,
@@ -537,7 +537,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 
     } else {
         
-        var update_revoke = await query("update Dayorder_products set scm_status=4 where doid = '"+req.doid+"'");
+        var update_revoke = await query("update Dayorder_products set scm_status=2 where doid = '"+req.doid+"'");
         let resobj = {
             success: true,
             status: true,
