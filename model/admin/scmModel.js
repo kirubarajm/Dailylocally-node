@@ -90,7 +90,7 @@ SCM.product_vendor_assign =async function product_vendor_assign(req,result) {
                 buyer_comment = req.buyer_comment;
             }
 
-            result_array.push({"vid":getvendorprice[0].vid,"pid":getvendorprice[0].pid,"base_price":getvendorprice[0].base_price,"other_charges":getvendorprice[0].other_charges,"due_date":due_date,"buyer_comment":buyer_comment});          
+            result_array.push({"vid":getvendorprice[0].vid,"vpid":getvendorprice[0].pid,"base_price":getvendorprice[0].base_price,"other_charges":getvendorprice[0].other_charges,"due_date":due_date,"buyer_comment":buyer_comment});          
         }       
         
         if(result_array.length > 0){
@@ -141,11 +141,11 @@ SCM.create_po =async function create_po(req,result) {
                     for (let j = 0; j < polist.length; j++) {
                         var vendorcost = 0;
                         if(polist[j].vid == uniquevendors[i]){
-                            var getvendorcostquery = "select * from Vendor_products_mapping where vid="+polist[j].vid+" and pid="+polist[j].pid;
+                            var getvendorcostquery = "select * from Vendor_products_mapping where vid="+polist[j].vid+" and pid="+polist[j].vpid;
                             var getvendorcost = await query(getvendorcostquery);
                             //console.log("getvendorcost -->",getvendorcost);
                             var inserpopdata = [];
-                            inserpopdata.push({"poid":pores.data.insertId,"prid":polist[j].prid,"pid":polist[j].pid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
+                            inserpopdata.push({"poid":pores.data.insertId,"prid":polist[j].prid,"vpid":polist[j].vpid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
                             POProducts.createPOProducts(inserpopdata,async function(err,popres){  });
                             vendorcost = vendorcost+((getvendorcost[0].base_price*polist[j].qty)+(getvendorcost[0].other_charges*polist[j].qty));
                             // console.log("vendorcost -->",vendorcost);
@@ -249,7 +249,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
 /////////Update PO receive///////////
 SCM.update_po_receive =async function update_po_receive(req,result) {
     if(req.zone_id && req.popid && req.vpid && req.quantity){     
-        var getpopquery = "select popid,pid,received_quantity from POproducts where popid="+req.popid;
+        var getpopquery = "select popid,vpid,received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
             var updatepopdata = [];
