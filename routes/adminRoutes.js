@@ -70,6 +70,9 @@ module.exports = function(app) {
    app.route("/admin/po/getpolist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_list}));
    app.route("/admin/po/getporeceivelist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_receive_list}));
    app.route("/admin/po/updateporeceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_receive}));
+   app.route("/admin/po/getsortinglist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_soring_list}));
+   app.route("/admin/po/savesorting").post(middleware.checkToken,routesVersioning({"1.0.0": scm.save_sorting}));
+   app.route("/admin/po/movetoqa").post(middleware.checkToken,routesVersioning({"1.0.0": scm.move_to_qa}));
    
   //SCM QUALITY
   app.route("/admin/quality/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_list}));

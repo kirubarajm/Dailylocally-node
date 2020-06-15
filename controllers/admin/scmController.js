@@ -72,6 +72,36 @@ exports.update_po_receive = function(req, res) {
     });    
 };
 
+/////////Get Sorting List///////////
+exports.get_soring_list = function(req, res) {    
+    SCM.get_soring_list(req.body, function(err, ress) {
+        //console.log("get_soring_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Save Sorting///////////
+exports.save_sorting = function(req, res) {    
+    SCM.save_sorting(req.body, function(err, ress) {
+        //console.log("save_sorting controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Move to QA///////////
+exports.move_to_qa = function(req, res) {    
+    SCM.move_to_qa(req.body, function(err, ress) {
+        //console.log("move_to_qa controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 
 exports.quality_type_list = function(req, res) {    
     SCM.quality_type_list(req.body, function(err, ress) {
