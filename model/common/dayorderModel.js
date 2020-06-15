@@ -314,19 +314,19 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
    
     if (get_day_order_list.length !=0) {
       
-      for (let i = 0; i < get_day_order_list.length; i++) {
+      // for (let i = 0; i < get_day_order_list.length; i++) {
         
 
-        get_day_order_list[i].products = JSON.parse(get_day_order_list[i].products);
-        get_day_order_list[i].product_count= get_day_order_list[i].products.length
-        var get_product = await query("select productname,count(quantity)as quantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by vpid");
+      //   get_day_order_list[i].products = JSON.parse(get_day_order_list[i].products);
+      //   get_day_order_list[i].product_count= get_day_order_list[i].products.length
+      //   var get_product = await query("select productname,count(quantity)as quantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by vpid");
  
-        get_product.forEach(element => {
-          get_day_order_list[i].productname=element.productname;
-          get_day_order_list[i].quantity=element.quantity;
-        });
+      //   get_product.forEach(element => {
+      //     get_day_order_list[i].productname=element.productname;
+      //     get_day_order_list[i].quantity=element.quantity;
+      //   });
         
-      }
+      // }
     }
 
     let resobj = {
