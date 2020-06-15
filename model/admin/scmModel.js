@@ -248,7 +248,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
 
 /////////Update PO receive///////////
 SCM.update_po_receive =async function update_po_receive(req,result) {
-    if(req.zone_id && req.popid && req.pid && req.quantity){     
+    if(req.zone_id && req.popid && req.vpid && req.quantity){     
         var getpopquery = "select popid,pid,received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
@@ -258,16 +258,16 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
             var updatepopquery  = "update POproducts set received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
             var updatepop = await query(updatepopquery);          
             if(updatepop.affectedRows>0){
-                var checkpidquery = "select * from Stock where pid="+req.pid;
+                var checkpidquery = "select * from Stock where vpid="+req.vpid;
                 var checkpid = await query(checkpidquery);
                 console.log("checkpid ==>",checkpid);
                 if(checkpid.length>0){
                     ////Update/////
                     var totalqty = checkpid[0].quantity+req.quantity;
-                    var updatestockquery  = "update Stock set quantity="+totalqty+" where pid="+req.pid;
+                    var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req.vpid;
                     var updatestock = await query(updatestockquery);  
                     if(updatestock.affectedRows>0){
-
+                        SCM.update_dayorders(req);
                         let resobj = {
                             success: true,
                             status: true,
@@ -285,9 +285,10 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                 }else{
                     ////Insert/////
                     var stockdata = [];
-                    stockdata.push({"pid":req.pid,"quantity":req.quantity});
+                    stockdata.push({"vpid":req.vpid,"quantity":req.quantity});
                     Stock.createStock(stockdata,async function(err,stockres){
                         if(stockres.status==true){
+                            SCM.update_dayorders(req);
                             let resobj = {
                                 success: true,
                                 status: true,
@@ -332,10 +333,144 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
     }     
 };
 
-SCM.update_po_receive =async function update_po_receive(req) {
+/////Update Day order product after po receive//////
+SCM.update_dayorders =async function update_dayorders(req) {
+    console.log("update_dayorders-->1");
+    var getstocksquery = "select * from Stock where quantity !=0";
+    var getstocks = await query(getstocksquery);
 
+    if(getstocks.length > 0){
+        for (let i = 0; i < getstocks.length; i++) {
+            var getdayorderproductsquery = "select * from Dayorder_products where vpid="+getstocks[i].vpid+" order by created_at";
+            var getdayorderproducts = await query(getdayorderproductsquery);
+
+            if(getdayorderproducts.length > 0){
+                for (let j = 0; j < getdayorderproducts.length && getstocks[i].quantity>0; j++) {
+                    if(getdayorderproducts[j].vpid == getstocks[i].vpid && getdayorderproducts[j].sorting_status != 2){
+                        if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
+                            var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
+                            if(getstocks[i].quantity >= qty){
+                                var updateDOPquery = "update Dayorder_products set received_quantity="+qty+" where id="+getdayorderproducts[j].id;
+                                var updateDOP = await query(updateDOPquery);
+                                getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
+                            }                            
+                        }
+                    }
+                }
+                var updatestockquery = "update Stock set quantity="+getstocks[i].quantity+" where vpid="+getstocks[i].vpid;
+                var updatestock = await query(updatestockquery);
+            }         
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "stock updated successfully"
+        };
+        console.log("resobj-->2",resobj);
+        return resobj;
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no stock"
+        };
+        console.log("resobj-->2",resobj);
+        return resobj;
+    }
 };
 
+/////////Get Sorting List///////////
+SCM.get_soring_list =async function get_soring_list(req,result) {
+    if(req.zone_id){
+        var getpolistquery = "select po.poid,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.po_status=0 group by po.poid";
+        var getpolist = await query(getpolistquery);
+        if(getpolist.length > 0){
+            let resobj = {
+                success: true,
+                status: true,
+                data: getpolist
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no records found"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }  
+};
+
+/////////Move to QA///////////
+SCM.save_sorting =async function save_sorting(req,result) {
+    if(req.dopid_list){
+        for (let i = 0; i < req.dopid_list.length; i++) {
+            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list.id;
+            var getdop = await query(getdopquery);
+            var sorting_status = 0;
+            if(getdop.length > 0){
+                if(getdop[0].quantity <= getdop[0].received_quantity){
+                    sorting_status = 2;
+                }else if(getdop[0].quantity >= getdop[0].received_quantity){
+                    sorting_status = 1;
+                }
+            }
+            var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+" where id="+req.dopid_list.id;
+            var updatedop = await query(updatedopquery);
+        } 
+        let resobj = {
+            success: true,
+            status: true,
+            message: "sorting saved"
+        };
+        result(null, resobj);      
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }  
+};
+
+/////////Move to QA///////////
+SCM.move_to_qa =async function move_to_qa(req,result) {
+    if(req.dopid_list){
+        for (let i = 0; i < req.dopid_list.length; i++) {
+            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list.id;
+            var getdop = await query(getdopquery);
+            var sorting_status = 0;
+            if(getdop.length > 0){
+                if(getdop[0].sorting_status >0 ){
+                    var updatedopquery = "update Dayorder_products set scm_status=4 where id="+req.dopid_list.id;
+                    var updatedop = await query(updatedopquery);
+                }
+            }            
+        } 
+        let resobj = {
+            success: true,
+            status: true,
+            message: "moved to QA"
+        };
+        result(null, resobj);      
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    } 
+};
 
 
 SCM.quality_type_list =async function quality_type_list(req,result) {

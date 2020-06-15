@@ -5,7 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var Stock = function(stock) {
-  this.pid = stock.pid;
+  this.vpid = stock.vpid;
   this.quantity = stock.quantity;
   this.stock_status = stock.stock_status;
 }
@@ -32,7 +32,7 @@ Stock.createStock = async function createStock(req, result) {
 };
 
 Stock.updateStock =async function updateStock(req, result) {
-    sql.query("UPDATE Stock SET ? WHERE popid = ?", [req, req.poid],async function(err, res) {
+    sql.query("UPDATE Stock SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
