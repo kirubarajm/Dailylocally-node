@@ -9,6 +9,7 @@ let config  = require('../config.js');
 var moment  = require('moment');
 var PO = require('../admin/poTableModel.js');
 var POProducts = require('../admin/poproductsTableModel.js');
+var QA_check_list = require("../../model/common/qualitychecklistModel.js");
 var Stock = require('../admin/stockTableModel.js');
 
 
@@ -496,23 +497,55 @@ SCM.quality_type_list =async function quality_type_list(req,result) {
 
 
 SCM.quality_check_product =async function quality_check_product(req,result) {
-    var QA_typesquery = "select * from QA_types";
-    var getpolist = await query(QA_typesquery);
-    if(getpolist.length > 0){
+    
+
+    if (req.type==1) {
+        
+        for (let i = 0; i < req.checklist.length; i++) {
+
+            var Quality = [];
+            Quality = req.checklist[i].qaid;
+            
+            for (let j = 0; j <  Quality.length; j++) {
+           
+                var check_list = {};
+                check_list.vpid =  req.checklist[i].vpid;
+                check_list.qaid = Quality[j];
+                check_list.doid = req.doid;
+              
+                var new_check_list = new QA_check_list(check_list);
+                QA_check_list.create_qa_check_list(new_check_list, function(err, res2) {
+                  if (err) { 
+                    sql.rollback(function() {
+                     
+                      result(err, null);
+                    });
+                  }
+                });
+                
+            }
+           
+        }
+
+        var update_revoke = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
         let resobj = {
             success: true,
             status: true,
-            data: getpolist
+            message: "Product Quality chcek has been done"
         };
         result(null, resobj);
-    }else{
+
+    } else {
+        
+        var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"'");
         let resobj = {
             success: true,
-            status: false,
-            message: "no records found"
+            status: true,
+            message: "Product Revoke has been done"
         };
         result(null, resobj);
     }
+
 
 };
 
