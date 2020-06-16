@@ -10,7 +10,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   var Procurement = function(procurement) {
     this.vpid = procurement.vpid;
     this.quantity = procurement.quantity;
-    this.pr_status = procurement.pr_status || 0;
+    this.pr_status = procurement.pr_status || 1;
     this.zoneid=procurement.zoneid;
   };
 
@@ -33,7 +33,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
                     console.log(err);
                     result(err, null);
                 } else {
-                    var Dayorder_products_query="update Dayorder_products set scm_status=1 where doid IN("+new_Procurement.doid+")";
+                    var Dayorder_products_query="update Dayorder_products set scm_status=1,prid='"+res.insertId+"' where doid IN("+new_Procurement.doid+")";
                     // console.log("Dayorder_products_query",Dayorder_products_query);
                     var update_query=await query(Dayorder_products_query);
 
@@ -84,9 +84,13 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
   
   Procurement.move_to_purchase=async function move_to_purchase(req,result) {
 
-    var procurement_list_query= "update Procurement set pr_status=1 where prid IN("+req.pridlist+")";
+    var procurement_list_query= "update Procurement set pr_status=2 where prid IN("+req.pridlist+")";
  
     var updatequery = await query(procurement_list_query);
+
+    var Dayorder_products_query= "update Dayorder_products set scm_status=2 where prid IN("+req.pridlist+")";
+ 
+    var productquery = await query(Dayorder_products_query);
 
         let resobj = {  
             success: true,
