@@ -518,6 +518,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
                       result(err, null);
                     });
                   }
+
                 });
                 
             }
@@ -525,6 +526,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         }
 
         var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
+        var updateDO = await query("update Dayorder set dayorderstatus=6 where id = '"+req.doid+"'");
         let resobj = {
             success: true,
             status: true,
