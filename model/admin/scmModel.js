@@ -48,7 +48,7 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
 /////////Product Wise Vendor List///////////
 SCM.product_wise_vendor_list =async function product_wise_vendor_list(req,result) {
     if(req.zone_id & req.products.length>0){        
-        var getvendorquery = "SELECT v.vid,ven.name FROM Vendor_products_mapping as v left join Vendor as ven on ven.vid=v.vid  WHERE v.pid IN (114,115,116) GROUP BY v.vid HAVING COUNT(DISTINCT v.pid) ="+req.products.length;
+        var getvendorquery = "SELECT v.vid,ven.name FROM Vendor_products_mapping as v left join Vendor as ven on ven.vid=v.vid  WHERE v.pid IN ("+req.products+") GROUP BY v.vid HAVING COUNT(DISTINCT v.pid) ="+req.products.length;
         var getvendor = await query(getvendorquery);
         if(getvendor.length > 0){
             let resobj = {
