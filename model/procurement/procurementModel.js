@@ -18,7 +18,7 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
   Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
 
-    var productquery= "select vpid,productname,count(quantity) as quantity from Dayorder_products where doid IN("+new_Procurement.doid+") and scm_status=0 group by vpid"
+    var productquery= "select vpid,productname,sum(quantity) as quantity from Dayorder_products where doid IN("+new_Procurement.doid+") and scm_status=0 group by vpid"
     // console.log("productquery",productquery);
     var get_product = await query(productquery);
 
