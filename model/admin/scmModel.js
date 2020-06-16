@@ -48,7 +48,7 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
 /////////Product Wise Vendor List///////////
 SCM.product_wise_vendor_list =async function product_wise_vendor_list(req,result) {
     if(req.zone_id & req.products.length>0){        
-        var getvendorquery = "SELECT v.vid,ven.name FROM Vendor_products_mapping as v left join Vendor as ven on ven.vid=v.vid  WHERE v.pid IN (114,115,116) GROUP BY v.vid HAVING COUNT(DISTINCT v.pid) ="+req.products.length;
+        var getvendorquery = "SELECT v.vid,ven.name,v.base_price,v.other_charges,v.expiry_date FROM Vendor_products_mapping as v left join Vendor as ven on ven.vid=v.vid  WHERE v.pid IN ("+req.products+") GROUP BY v.vid HAVING COUNT(DISTINCT v.pid) ="+req.products.length;
         var getvendor = await query(getvendorquery);
         if(getvendor.length > 0){
             let resobj = {
@@ -253,10 +253,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
         var getpopquery = "select popid,vpid,received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
-            var updatepopdata = [];
-            updatepopdata.push({"received_quantity":getpop[0].received_quantity+req.quantity});
-
-            var updatepopquery  = "update POproducts set received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
+            var updatepopquery  = "update POproducts set scm_status=3,received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
             var updatepop = await query(updatepopquery);          
             if(updatepop.affectedRows>0){
                 var checkpidquery = "select * from Stock where vpid="+req.vpid;
