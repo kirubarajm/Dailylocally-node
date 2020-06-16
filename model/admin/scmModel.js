@@ -18,7 +18,7 @@ var SCM = function(scm) {};
 /////////Get Category List///////////
 SCM.waiting_po_list =async function waiting_po_list(req,result) {
     if(req.zone_id){
-        var getwaitingpouery = "select pro.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pro.vpid,pm.pid,pm.Productname,pm.productdetails,pm.uom as uomid,uom.name as uom_name,pro.quantity,pro.pr_status from Procurement as pro left join Product_live as pl on pl.vpid=pro.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom where pro.pr_status=1 and pro.zoneid="+req.zone_id;
+        var getwaitingpouery = "select pro.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pro.vpid,pm.pid,pm.Productname,pm.productdetails,pm.uom as uomid,uom.name as uom_name,pro.quantity,pro.pr_status from Procurement as pro left join Product_live as pl on pl.vpid=pro.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom where pro.pr_status=2 and pro.zoneid="+req.zone_id;
         var getwaitingpo = await query(getwaitingpouery);
         if(getwaitingpo.length > 0){
             let resobj = {
@@ -253,7 +253,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
         var getpopquery = "select popid,vpid,received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
-            var updatepopquery  = "update POproducts set scm_status=3,received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
+            var updatepopquery  = "update POproducts set pop_status=1,received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
             var updatepop = await query(updatepopquery);          
             if(updatepop.affectedRows>0){
                 var checkpidquery = "select * from Stock where vpid="+req.vpid;
@@ -348,7 +348,7 @@ SCM.update_dayorders =async function update_dayorders(req) {
                         if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
                             var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
                             if(getstocks[i].quantity >= qty){
-                                var updateDOPquery = "update Dayorder_products set received_quantity="+qty+" where id="+getdayorderproducts[j].id;
+                                var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+" where id="+getdayorderproducts[j].id;
                                 var updateDOP = await query(updateDOPquery);
                                 getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
                             }                            
@@ -411,7 +411,7 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
 SCM.save_sorting =async function save_sorting(req,result) {
     if(req.dopid_list){
         for (let i = 0; i < req.dopid_list.length; i++) {
-            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list.id;
+            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list[i];
             var getdop = await query(getdopquery);
             var sorting_status = 0;
             if(getdop.length > 0){
@@ -421,7 +421,7 @@ SCM.save_sorting =async function save_sorting(req,result) {
                     sorting_status = 1;
                 }
             }
-            var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+" where id="+req.dopid_list.id;
+            var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+" where id="+req.dopid_list[i];
             var updatedop = await query(updatedopquery);
         } 
         let resobj = {
@@ -444,12 +444,12 @@ SCM.save_sorting =async function save_sorting(req,result) {
 SCM.move_to_qa =async function move_to_qa(req,result) {
     if(req.dopid_list){
         for (let i = 0; i < req.dopid_list.length; i++) {
-            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list.id;
+            var getdopquery = "select * from Dayorder_products where id="+req.dopid_list[i];
             var getdop = await query(getdopquery);
             var sorting_status = 0;
             if(getdop.length > 0){
                 if(getdop[0].sorting_status >0 ){
-                    var updatedopquery = "update Dayorder_products set scm_status=4 where id="+req.dopid_list.id;
+                    var updatedopquery = "update Dayorder_products set scm_status=4 where id="+req.dopid_list[i];
                     var updatedop = await query(updatedopquery);
                 }
             }            
