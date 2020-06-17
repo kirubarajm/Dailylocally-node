@@ -1327,7 +1327,7 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
       if(req.search){
         var suggestion_list = {};
         var products_title ='Products';
-        var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name  FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
+        var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname,sum(pm.weight*1000) as weight FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
         if (products_list.length !=0) {
             suggestion_list.products_title=products_title;
             suggestion_list.products_list=products_list;
@@ -1340,12 +1340,12 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
             suggestion_list.subcategory_list=subcategory_list;
         }
 
-        var category_title= "Category";
-        var category_list  = await query("SELECT catid,image,name FROM  Category WHERE name LIKE '%"+req.search+"%'");
-        if (category_list.length !=0) {
-            suggestion_list.category_title=category_title;
-            suggestion_list.category_list=category_list;
-        }
+        // var category_title= "Category";
+        // var category_list  = await query("SELECT catid,image,name FROM  Category WHERE name LIKE '%"+req.search+"%'");
+        // if (category_list.length !=0) {
+        //     suggestion_list.category_title=category_title;
+        //     suggestion_list.category_list=category_list;
+        // }
 
         // if(suggestion_list.length == 0){
             let resobj = {
