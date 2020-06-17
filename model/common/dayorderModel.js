@@ -297,17 +297,17 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 
     if (Dayorder.starting_date && Dayorder.end_date) {
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"') and zoneid='"+Dayorder.zoneid+"'  group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"') and zoneid='"+Dayorder.zoneid+"'  group by drs.id,drs.userid");
 
     }else{
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date='"+tomorrow+"'  and zoneid='"+Dayorder.zoneid+"' group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date='"+tomorrow+"'  and zoneid='"+Dayorder.zoneid+"' group by drs.id,drs.userid");
 
     }
 
     if (Dayorder.id) {
 
-      var get_day_order_list = await query("select drs.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' and zoneid='"+Dayorder.zoneid+"' group by drs.id,drs.userid");
+      var get_day_order_list = await query("select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' and zoneid='"+Dayorder.zoneid+"' group by drs.id,drs.userid");
 
     }
 
