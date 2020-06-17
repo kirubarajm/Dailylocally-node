@@ -295,9 +295,7 @@ exports.edit_vendor_product_mapping = function(req, res) {
 /////////Search Catalog///////////
 exports.home_quick_search = function(req, res) {    
     catalog.home_quick_search(req.body, function(err, ress) {
-        //console.log("search_catalog controller");
         if (err) res.send(err);
-        //console.log("res", ress);
         res.send(ress);
     });    
 };
