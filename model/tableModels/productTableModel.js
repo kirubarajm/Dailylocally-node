@@ -44,7 +44,7 @@ Product.createProduct = async function createProduct(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -64,7 +64,7 @@ Product.updateProduct =async function updateProduct(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }

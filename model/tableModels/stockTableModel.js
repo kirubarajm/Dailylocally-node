@@ -4,16 +4,15 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var PO = function(po) {
-  this.vid = po.vid;
-  this.cost = po.cost;
-  this.zoneid = po.zoneid;
-  this.po_status = po.po_status;
+var Stock = function(stock) {
+  this.vpid = stock.vpid;
+  this.quantity = stock.quantity;
+  this.stock_status = stock.stock_status;
 }
 
 //For Admin
-PO.createPO = async function createPO(req, result) {
-    sql.query("INSERT INTO PO set ?", req,async function(err, res) {
+Stock.createStock = async function createStock(req, result) {
+    sql.query("INSERT INTO Stock set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -25,15 +24,15 @@ PO.createPO = async function createPO(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-PO.updatePO =async function updatePO(req, result) {
-    sql.query("UPDATE PO SET ? WHERE poid = ?", [req, req.poid],async function(err, res) {
+Stock.updateStock =async function updateStock(req, result) {
+    sql.query("UPDATE Stock SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -45,7 +44,7 @@ PO.updatePO =async function updatePO(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -53,4 +52,4 @@ PO.updatePO =async function updatePO(req, result) {
     );
 };
 
-module.exports = PO;
+module.exports = Stock;

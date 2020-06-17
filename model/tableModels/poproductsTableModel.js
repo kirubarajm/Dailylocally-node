@@ -32,7 +32,7 @@ POproducts.createPOProducts = async function createPOProducts(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -55,7 +55,7 @@ POproducts.updatePOProducts =async function updatePOProducts(req,popid, result) 
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }

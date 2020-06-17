@@ -4,15 +4,15 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var Stock = function(stock) {
-  this.vpid = stock.vpid;
-  this.quantity = stock.quantity;
-  this.stock_status = stock.stock_status;
+var ProductLive = function(productlive) {
+  this.zoneid = productlive.zoneid;
+  this.pid = productlive.pid;
+  this.live_status = productlive.live_status;
 }
 
 //For Admin
-Stock.createStock = async function createStock(req, result) {
-    sql.query("INSERT INTO Stock set ?", req,async function(err, res) {
+ProductLive.createProductLive = async function createProductLive(req, result) {
+    sql.query("INSERT INTO Product_live set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -24,15 +24,15 @@ Stock.createStock = async function createStock(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-Stock.updateStock =async function updateStock(req, result) {
-    sql.query("UPDATE Stock SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
+ProductLive.updateProductLive =async function updateProductLive(req, result) {
+    sql.query("UPDATE Product_live SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -44,7 +44,7 @@ Stock.updateStock =async function updateStock(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -52,4 +52,4 @@ Stock.updateStock =async function updateStock(req, result) {
     );
 };
 
-module.exports = Stock;
+module.exports = ProductLive;

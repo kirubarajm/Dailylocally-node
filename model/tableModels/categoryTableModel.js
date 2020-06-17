@@ -4,15 +4,16 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var ProductLive = function(productlive) {
-  this.zoneid = productlive.zoneid;
-  this.pid = productlive.pid;
-  this.live_status = productlive.live_status;
+var Category = function(category) {
+  this.name = category.name;
+  this.image = category.image;
+  this.active_status = category.active_status;
 }
 
 //For Admin
-ProductLive.createProductLive = async function createProductLive(req, result) {
-    sql.query("INSERT INTO Product_live set ?", req,async function(err, res) {
+Category.createCategory = async function createCategory(req, result) {
+    req.active_status=0;
+    sql.query("INSERT INTO Category set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -24,15 +25,15 @@ ProductLive.createProductLive = async function createProductLive(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-ProductLive.updateProductLive =async function updateProductLive(req, result) {
-    sql.query("UPDATE Product_live SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
+Category.updateCategory =async function updateCategory(req, result) {
+    sql.query("UPDATE Category SET ? WHERE catid = ?", [req, req.catid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -44,7 +45,7 @@ ProductLive.updateProductLive =async function updateProductLive(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -52,4 +53,4 @@ ProductLive.updateProductLive =async function updateProductLive(req, result) {
     );
 };
 
-module.exports = ProductLive;
+module.exports = Category;

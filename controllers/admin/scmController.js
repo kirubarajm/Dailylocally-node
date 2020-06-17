@@ -102,20 +102,20 @@ exports.move_to_qa = function(req, res) {
     });    
 };
 
-
+////////Get Quality Type List/////////////
 exports.quality_type_list = function(req, res) {    
     SCM.quality_type_list(req.body, function(err, ress) {
-        //console.log("update_po_receive controller");
+        //console.log("quality_type_list controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
     });    
 };
 
-
+////////Update Quantity Check/////////////
 exports.quality_check_product = function(req, res) {    
     SCM.quality_check_product(req.body, function(err, ress) {
-        //console.log("update_po_receive controller");
+        //console.log("quality_check_product controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);

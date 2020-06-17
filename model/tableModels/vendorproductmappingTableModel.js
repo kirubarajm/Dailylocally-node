@@ -4,16 +4,19 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var Subcategoryl2 = function(subcategoryl2) {
-  this.name = subcategoryl2.name;
-  this.image = subcategoryl2.image;
-  this.scl1_id = subcategoryl2.scl1_id;
+var VendorProductMapping = function(vendorproductmapping) {
+  this.vid = vendorproductmapping.vid;
+  this.pid = vendorproductmapping.pid;
+  this.price_agreement_approval = vendorproductmapping.price_agreement_approval;
+  this.base_price = vendorproductmapping.base_price;
+  this.other_charges = vendorproductmapping.other_charges;
+  this.expiry_date = vendorproductmapping.expiry_date;  
 }
 
 //For Admin
-Subcategoryl2.createSubcategoryl2 = async function createSubcategoryl2(req, result) {
+VendorProductMapping.createVendorProductMapping = async function createVendorProductMapping(req, result) {
     req.active_status=1;
-    sql.query("INSERT INTO SubcategoryL2 set ?", req,async function(err, res) {
+    sql.query("INSERT INTO Vendor_products_mapping set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -25,15 +28,15 @@ Subcategoryl2.createSubcategoryl2 = async function createSubcategoryl2(req, resu
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
-    sql.query("UPDATE SubcategoryL2 SET ? WHERE scl2_id = ?", [req, req.scl2_id],async function(err, res) {
+VendorProductMapping.updateVendorProductMapping =async function updateVendorProductMapping(req, result) {
+    sql.query("UPDATE Vendor_products_mapping SET ? WHERE vpmid = ?", [req, req.vpmid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -45,7 +48,7 @@ Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -53,4 +56,4 @@ Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
     );
 };
 
-module.exports = Subcategoryl2;
+module.exports = VendorProductMapping;

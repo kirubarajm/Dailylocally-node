@@ -7,10 +7,10 @@ var request = require('request');
 let jwt     = require('jsonwebtoken');
 let config  = require('../config.js');
 var moment  = require('moment');
-var PO = require('../admin/poTableModel.js');
-var POProducts = require('../admin/poproductsTableModel.js');
+var PO = require('../tableModels/poTableModel.js');
+var POProducts = require('../tableModels/poproductsTableModel.js');
 var QA_check_list = require("../../model/common/qualitychecklistModel.js");
-var Stock = require('../admin/stockTableModel.js');
+var Stock = require('../tableModels/stockTableModel.js');
 
 
 var SCM = function(scm) {};
@@ -24,7 +24,7 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getwaitingpo
+                result: getwaitingpo
             };
             result(null, resobj);
         }else{
@@ -54,7 +54,7 @@ SCM.product_wise_vendor_list =async function product_wise_vendor_list(req,result
             let resobj = {
                 success: true,
                 status: true,
-                data: getvendor
+                result: getvendor
             };
             result(null, resobj);
         }else{
@@ -98,7 +98,7 @@ SCM.product_vendor_assign =async function product_vendor_assign(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: result_array
+                result: result_array
             };
             result(null, resobj);
         }else{
@@ -196,7 +196,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getpolist
+                result: getpolist
             };
             result(null, resobj);
         }else{
@@ -226,7 +226,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getpolist
+                result: getpolist
             };
             result(null, resobj);
         }else{
@@ -386,7 +386,7 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getpolist
+                result: getpolist
             };
             result(null, resobj);
         }else{
@@ -470,7 +470,7 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
     } 
 };
 
-
+////////Get Quality Type List/////////////
 SCM.quality_type_list =async function quality_type_list(req,result) {
     var QA_typesquery = "select * from QA_types";
     var getpolist = await query(QA_typesquery);
@@ -478,7 +478,7 @@ SCM.quality_type_list =async function quality_type_list(req,result) {
         let resobj = {
             success: true,
             status: true,
-            data: getpolist
+            result: getpolist
         };
         result(null, resobj);
     }else{
@@ -489,22 +489,15 @@ SCM.quality_type_list =async function quality_type_list(req,result) {
         };
         result(null, resobj);
     }
-
 };
 
-
+////////Update Quantity Check/////////////
 SCM.quality_check_product =async function quality_check_product(req,result) {
-    
-
-    if (req.type==1) {
-        
+    if (req.type==1) {        
         for (let i = 0; i < req.checklist.length; i++) {
-
             var Quality = [];
-            Quality = req.checklist[i].qaid;
-            
-            for (let j = 0; j <  Quality.length; j++) {
-           
+            Quality = req.checklist[i].qaid;            
+            for (let j = 0; j <  Quality.length; j++) {           
                 var check_list = {};
                 check_list.vpid =  req.checklist[i].vpid;
                 check_list.qaid = Quality[j];
@@ -513,18 +506,13 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
                 var new_check_list = new QA_check_list(check_list);
                 QA_check_list.create_qa_check_list(new_check_list, function(err, res2) {
                   if (err) { 
-                    sql.rollback(function() {
-                     
+                    sql.rollback(function() {                     
                       result(err, null);
                     });
                   }
-
-                });
-                
-            }
-           
+                });                
+            }           
         }
-
         var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
         var updateDO = await query("update Dayorder set dayorderstatus=6 where id = '"+req.doid+"'");
         let resobj = {
@@ -533,9 +521,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
             message: "Product Quality chcek has been done"
         };
         result(null, resobj);
-
-    } else {
-        
+    } else {        
         var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"'");
         let resobj = {
             success: true,
@@ -544,9 +530,6 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         };
         result(null, resobj);
     }
-
-
 };
-
 
 module.exports = SCM;

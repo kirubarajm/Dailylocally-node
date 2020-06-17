@@ -4,16 +4,15 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var Category = function(category) {
-  this.name = category.name;
-  this.image = category.image;
-  this.active_status = category.active_status;
+var ZoneCategoryMapping = function(zonecategorymapping) {
+  this.master_catid = zonecategorymapping.master_catid;
+  this.zoneid = zonecategorymapping.zoneid;
+  this.active_status = zonecategorymapping.active_status;
 }
 
 //For Admin
-Category.createCategory = async function createCategory(req, result) {
-    req.active_status=0;
-    sql.query("INSERT INTO Category set ?", req,async function(err, res) {
+ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategoryMapping(req, result) {
+    sql.query("INSERT INTO Zone_category_mapping set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -25,15 +24,15 @@ Category.createCategory = async function createCategory(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-Category.updateCategory =async function updateCategory(req, result) {
-    sql.query("UPDATE Category SET ? WHERE catid = ?", [req, req.catid],async function(err, res) {
+ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategoryMapping(req, result) {
+    sql.query("UPDATE Zone_category_mapping SET ? WHERE virtual_catid = ?", [req, req.virtual_catid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -45,7 +44,7 @@ Category.updateCategory =async function updateCategory(req, result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -53,4 +52,4 @@ Category.updateCategory =async function updateCategory(req, result) {
     );
 };
 
-module.exports = Category;
+module.exports = ZoneCategoryMapping;

@@ -4,16 +4,16 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var Subcategoryl1 = function(subcategoryl1) {
-  this.name = subcategoryl1.name;
-  this.image = subcategoryl1.image;
-  this.catid = subcategoryl1.catid;
+var Subcategoryl2 = function(subcategoryl2) {
+  this.name = subcategoryl2.name;
+  this.image = subcategoryl2.image;
+  this.scl1_id = subcategoryl2.scl1_id;
 }
 
 //For Admin
-Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req, result) {
+Subcategoryl2.createSubcategoryl2 = async function createSubcategoryl2(req, result) {
     req.active_status=1;
-    sql.query("INSERT INTO SubcategoryL1 set ?", req,async function(err, res) {
+    sql.query("INSERT INTO SubcategoryL2 set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -25,15 +25,15 @@ Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req, resu
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-Subcategoryl1.updateSubcategoryl1 =async function updateSubcategoryl1(req) {
-    sql.query("UPDATE SubcategoryL1 SET ? WHERE scl1_id = ?", [req, req.scl1_id],async function(err, res) {
+Subcategoryl2.updateSubcategoryl2 =async function updateSubcategoryl2(req) {
+    sql.query("UPDATE SubcategoryL2 SET ? WHERE scl2_id = ?", [req, req.scl2_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -45,7 +45,7 @@ Subcategoryl1.updateSubcategoryl1 =async function updateSubcategoryl1(req) {
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -53,4 +53,4 @@ Subcategoryl1.updateSubcategoryl1 =async function updateSubcategoryl1(req) {
     );
 };
 
-module.exports = Subcategoryl1;
+module.exports = Subcategoryl2;

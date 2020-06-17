@@ -4,15 +4,16 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var ZoneCategoryMapping = function(zonecategorymapping) {
-  this.master_catid = zonecategorymapping.master_catid;
-  this.zoneid = zonecategorymapping.zoneid;
-  this.active_status = zonecategorymapping.active_status;
+var PO = function(po) {
+  this.vid = po.vid;
+  this.cost = po.cost;
+  this.zoneid = po.zoneid;
+  this.po_status = po.po_status;
 }
 
 //For Admin
-ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategoryMapping(req, result) {
-    sql.query("INSERT INTO Zone_category_mapping set ?", req,async function(err, res) {
+PO.createPO = async function createPO(req, result) {
+    sql.query("INSERT INTO PO set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -24,15 +25,15 @@ ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategor
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategoryMapping(req, result) {
-    sql.query("UPDATE Zone_category_mapping SET ? WHERE virtual_catid = ?", [req, req.virtual_catid],async function(err, res) {
+PO.updatePO =async function updatePO(req, result) {
+    sql.query("UPDATE PO SET ? WHERE poid = ?", [req, req.poid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -44,7 +45,7 @@ ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategory
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -52,4 +53,4 @@ ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategory
     );
 };
 
-module.exports = ZoneCategoryMapping;
+module.exports = PO;

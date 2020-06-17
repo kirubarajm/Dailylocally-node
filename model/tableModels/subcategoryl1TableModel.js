@@ -4,19 +4,16 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var VendorProductMapping = function(vendorproductmapping) {
-  this.vid = vendorproductmapping.vid;
-  this.pid = vendorproductmapping.pid;
-  this.price_agreement_approval = vendorproductmapping.price_agreement_approval;
-  this.base_price = vendorproductmapping.base_price;
-  this.other_charges = vendorproductmapping.other_charges;
-  this.expiry_date = vendorproductmapping.expiry_date;  
+var Subcategoryl1 = function(subcategoryl1) {
+  this.name = subcategoryl1.name;
+  this.image = subcategoryl1.image;
+  this.catid = subcategoryl1.catid;
 }
 
 //For Admin
-VendorProductMapping.createVendorProductMapping = async function createVendorProductMapping(req, result) {
+Subcategoryl1.createSubcategoryl1 = async function createSubcategoryl1(req, result) {
     req.active_status=1;
-    sql.query("INSERT INTO Vendor_products_mapping set ?", req,async function(err, res) {
+    sql.query("INSERT INTO SubcategoryL1 set ?", req,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -28,15 +25,15 @@ VendorProductMapping.createVendorProductMapping = async function createVendorPro
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
     });    
 };
 
-VendorProductMapping.updateVendorProductMapping =async function updateVendorProductMapping(req, result) {
-    sql.query("UPDATE Vendor_products_mapping SET ? WHERE vpmid = ?", [req, req.vpmid],async function(err, res) {
+Subcategoryl1.updateSubcategoryl1 =async function updateSubcategoryl1(req) {
+    sql.query("UPDATE SubcategoryL1 SET ? WHERE scl1_id = ?", [req, req.scl1_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -48,7 +45,7 @@ VendorProductMapping.updateVendorProductMapping =async function updateVendorProd
             let resobj = {
                 success: true,
                 status: true,
-                data: res
+                result: res
             };
             result(null, resobj);
         }
@@ -56,4 +53,4 @@ VendorProductMapping.updateVendorProductMapping =async function updateVendorProd
     );
 };
 
-module.exports = VendorProductMapping;
+module.exports = Subcategoryl1;

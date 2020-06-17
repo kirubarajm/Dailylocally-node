@@ -7,15 +7,15 @@ var request = require('request');
 let jwt     = require('jsonwebtoken');
 let config  = require('../config.js');
 var moment  = require("moment");
-var Category = require('../admin/categoryTableModel.js');
-var Subcategoryl1 = require('../admin/subcategoryl1TableModel.js');
-var Subcategoryl2 = require('../admin/subcategoryl2TableModel.js');
-var Product = require('../admin/productTableModel.js');
-var VendorProductMapping = require('../admin/vendorproductmappingTableModel.js');
-var ProductLive = require('../admin/productliveTableModel.js');
-var L2SubCategoryMapping = require('../admin/zonel2subcategorymappingTableModel.js');
-var L1SubCategoryMapping = require('../admin/zonel1subcategorymappingTableModel.js');
-var CategoryMapping = require('../admin/zonecategorymappingTableModel.js');
+var Category = require('../tableModels/categoryTableModel.js');
+var Subcategoryl1 = require('../tableModels/subcategoryl1TableModel.js');
+var Subcategoryl2 = require('../tableModels/subcategoryl2TableModel.js');
+var Product = require('../tableModels/productTableModel.js');
+var VendorProductMapping = require('../tableModels/vendorproductmappingTableModel.js');
+var ProductLive = require('../tableModels/productliveTableModel.js');
+var L2SubCategoryMapping = require('../tableModels/zonel2subcategorymappingTableModel.js');
+var L1SubCategoryMapping = require('../tableModels/zonel1subcategorymappingTableModel.js');
+var CategoryMapping = require('../tableModels/zonecategorymappingTableModel.js');
 var sub_category_L1 = require("../../model/category/subcategoryL1Model");
 var Sub_Category_L2 = require("../../model/category/subcategoryL2Model");
 var Productlist = require("../../model/category/productmasterModel");
@@ -30,7 +30,7 @@ const s3 = new AWS.S3({
     accessKeyId: AWS_ACCESS_KEY,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
     region: "us-east-1"
-  });
+});
 
 /////////Get Category List///////////
 Catalog.get_category_list =async function get_category_list(req,result) {
@@ -41,7 +41,7 @@ Catalog.get_category_list =async function get_category_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getcategory
+                result: getcategory
             };
             result(null, resobj);
         }else{
@@ -71,7 +71,7 @@ Catalog.get_subcategoryl1_list =async function get_subcategoryl1_list(req,result
             let resobj = {
                 success: true,
                 status: true,
-                data: getl1subcategory
+                result: getl1subcategory
             };
             result(null, resobj);
         }else{
@@ -101,7 +101,7 @@ Catalog.get_subcategoryl2_list =async function get_subcategoryl2_list(req,result
             let resobj = {
                 success: true,
                 status: true,
-                data: getl2subcategory
+                result: getl2subcategory
             };
             result(null, resobj);
         }else{
@@ -134,7 +134,7 @@ Catalog.get_product_list =async function get_product_list(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getproduct
+                result: getproduct
             };
             result(null, resobj);
         }else{
@@ -210,7 +210,7 @@ Catalog.update_category_livestatus =async function update_category_livestatus(re
                     success: true,
                     status: true,
                     message: "category updated successfully",
-                    data: updatedselect
+                    result: updatedselect
                 };
                 result(null, resobj);
             }else{
@@ -265,7 +265,7 @@ Catalog.update_subcategoryl1_livestatus =async function update_subcategoryl1_liv
                             success: true,
                             status: true,
                             message: "SubcategoryL1 updated successfully",
-                            data: updatedselect
+                            result: updatedselect
                         };
                         result(null, resobj);
                     }else{
@@ -310,7 +310,7 @@ Catalog.update_subcategoryl1_livestatus =async function update_subcategoryl1_liv
                         success: true,
                         status: true,
                         message: "SubcategoryL1 updated successfully",
-                        data: updatedselect
+                        result: updatedselect
                     };
                     result(null, resobj);
                 }else{
@@ -374,7 +374,7 @@ Catalog.update_subcategoryl2_livestatus =async function update_subcategoryl2_liv
                             success: true,
                             status: true,
                             message: "SubcategoryL2 updated successfully",
-                            data: updatedselect
+                            result: updatedselect
                         };
                         result(null, resobj);
                     }else{
@@ -408,7 +408,7 @@ Catalog.update_subcategoryl2_livestatus =async function update_subcategoryl2_liv
                         success: true,
                         status: true,
                         message: "SubcategoryL2 updated successfully",
-                        data: updatedselect
+                        result: updatedselect
                     };
                     result(null, resobj);
                 }else{
@@ -481,7 +481,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
                             success: true,
                             status: true,
                             message: "ProductMaster updated successfully",
-                            data: updatedselect
+                            result: updatedselect
                         };
                         result(null, resobj);
                     }else{
@@ -504,7 +504,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
                         success: true,
                         status: true,
                         message: "ProductMaster updated successfully",
-                        data: updatedselect
+                        result: updatedselect
                     };
                     result(null, resobj);
                 }else{
@@ -536,7 +536,7 @@ Catalog.search_catalog =async function search_catalog(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                data: getsearch
+                result: getsearch
             };
         result(null, resobj);
         }else{
@@ -993,7 +993,7 @@ Catalog.get_uom_list =async function get_uom_list(req,result) {
       let resobj = {
           success: true,
           status: true,
-          data: getuom
+          result: getuom
       };
       result(null, resobj);
     }else{
@@ -1014,7 +1014,7 @@ Catalog.get_brand_list =async function get_brand_list(req,result) {
       let resobj = {
           success: true,
           status: true,
-          data: getbrand
+          result: getbrand
       };
       result(null, resobj);
     }else{
@@ -1035,7 +1035,7 @@ Catalog.get_zone_list =async function get_zone_list(req,result) {
       let resobj = {
           success: true,
           status: true,
-          data: getzone
+          result: getzone
       };
       result(null, resobj);
     }else{
@@ -1056,7 +1056,7 @@ Catalog.get_vendor_list =async function get_vendor_list(req,result) {
       let resobj = {
           success: true,
           status: true,
-          data: getbrand
+          result: getbrand
       };
       result(null, resobj);
     }else{
@@ -1077,7 +1077,7 @@ Catalog.get_tag_list =async function get_tag_list(req,result) {
       let resobj = {
           success: true,
           status: true,
-          data: gettag
+          result: gettag
       };
       result(null, resobj);
     }else{
@@ -1118,7 +1118,7 @@ Catalog.documentUpload = function documentUpload(params,result) {
           success: true,
           status :true,
           message: "Document uploaded successfully",
-          data: data
+          result: data
         };
         result(null, resobj);
       }
@@ -1182,7 +1182,7 @@ Catalog.add_product =async function add_product(req,result) {
                             //     let resobj = {
                             //         success: true,
                             //         status: true,
-                            //         data: productres.data,
+                            //         result: productres.data,
                             //         message: "Product added susccessfully"
                             //     };
                             //     result(null, resobj);
@@ -1190,7 +1190,7 @@ Catalog.add_product =async function add_product(req,result) {
                             //     let resobj = {
                             //         success: true,
                             //         status: false,
-                            //         data: productres.data,
+                            //         result: productres.data,
                             //         message: "product live insert error try again"
                             //     };
                             //     result(null, resobj);
@@ -1199,7 +1199,7 @@ Catalog.add_product =async function add_product(req,result) {
                         let resobj = {
                             success: true,
                             status: true,
-                            //data: productres.data,
+                            //result: productres.data,
                             message: "Product added susccessfully"
                         };
                         result(null, resobj);
@@ -1208,7 +1208,7 @@ Catalog.add_product =async function add_product(req,result) {
                     let resobj = {
                         success: true,
                         status: false,
-                        data: productres.data,
+                        result: productres.data,
                         message: "something went wrong plz try again"
                     };
                     result(null, resobj);
@@ -1305,39 +1305,29 @@ Catalog.edit_vendor_product_mapping =async function edit_vendor_product_mapping(
 
 /////////Search Catalog///////////
 Catalog.home_quick_search =async function home_quick_search(req,result) {
-
-    var userdetails       = await query("select * from User where userid = "+req.userid+" ");
-    
-    var servicable_status= true;
-    if (userdetails.length !=0) {
-        
+    var userdetails = await query("select * from User where userid = "+req.userid+" ");    
+    var servicable_status = true;
+    if (userdetails.length !=0) {       
         var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
         req.lat +
         "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
         req.lon +
         "') ) + sin( radians('" +
         req.lat +
-        "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
-    
-    
-      if (get_nearby_zone.length !=0) {
-        
-  
-        if (get_nearby_zone[0].distance > constant.radiuslimit) {
-          servicable_status =false;
+        "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");    
+        if (get_nearby_zone.length !=0) {  
+            if (get_nearby_zone[0].distance > constant.radiuslimit) {
+            servicable_status =false;
+            }
         }
-      }
   
-              // (SELECT name,'1' as type,catid as id,catid as id1 FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id,scl1_id as id1  FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id,scl1_id as id1 FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id,pid as id1 FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')
-            //  / var getsearch = await query(getsearchquery);
+        // (SELECT name,'1' as type,catid as id,catid as id1 FROM Category WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'2' as type,scl1_id as id,scl1_id as id1  FROM SubcategoryL1 WHERE name LIKE '%"+req.search+"%') UNION (SELECT name,'3' as type,scl2_id as id,scl1_id as id1 FROM SubcategoryL2 WHERE name LIKE '%"+req.search+"%') UNION (SELECT Productname as name,'4' as type,pid as id,pid as id1 FROM ProductMaster WHERE Productname LIKE '%"+req.search+"%')
+        //  var getsearch = await query(getsearchquery);
   
       if(req.search){
-
         var suggestion_list = {};
-
         var products_title ='Products';
         var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name  FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
-
         if (products_list.length !=0) {
             suggestion_list.products_title=products_title;
             suggestion_list.products_list=products_list;
@@ -1345,7 +1335,6 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
 
         var subcategory_title = 'Sub category';
         var subcategory_list = await query("SELECT sub1.name as sub_category,sub1.scl1_id,sub1.catid,cat.name as category_name FROM  SubcategoryL1 as sub1 left join Category cat on cat.catid=sub1.scl1_id WHERE  sub1.active_status=1 and  sub1.name LIKE '%"+req.search+"%' group by sub1.scl1_id");
-
         if (subcategory_list.length !=0) {
             suggestion_list.subcategory_title=subcategory_title;
             suggestion_list.subcategory_list=subcategory_list;
@@ -1353,28 +1342,19 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
 
         var category_title= "Category";
         var category_list  = await query("SELECT catid,image,name FROM  Category WHERE name LIKE '%"+req.search+"%'");
-
         if (category_list.length !=0) {
             suggestion_list.category_title=category_title;
             suggestion_list.category_list=category_list;
         }
 
-
-
-  
-        //   if(suggestion_list.length == 0){
-
-          
-
-              let resobj = {
-                  success: true,
-                  status: true,
-                  servicable_status:servicable_status,
-                  data: suggestion_list
-              };
-          result(null, resobj);
-
-
+        // if(suggestion_list.length == 0){
+            let resobj = {
+                success: true,
+                status: true,
+                servicable_status:servicable_status,
+                result: suggestion_list
+            };
+            result(null, resobj);
         //   }else{
         //       let resobj = {
         //           success: true,
@@ -1391,7 +1371,6 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
           };
           result(null, resobj);
       }
-
     } else {
         let resobj = {
             success: true,
@@ -1399,58 +1378,39 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
             message: "user not found"
         };
         result(null, resobj);
-    }
-
-     
+    }     
 };
 
 /////////Search Catalog Data///////////
 Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(req,result) {
-    
     Productlist.get_product_search(req,async function(err,res3) {
         if (err) {
           result(err, null);
         } else {
-
             console.log(res3);
-
-            result(null, res3);
-                            
-         
+            result(null, res3);         
         }
-      });
+    });
     
-    // if(req.type){
-        
-    // if (req.type==1) {
-        
+    // if(req.type){        
+    // if (req.type==1) {        
     //     req.catid=req.id;
     //     sub_category_L1.get_Sub_Category_L1_list(req,async function(err,res3) {
     //         if (err) {
     //           result(err, null);
     //         } else {
-
-    //             console.log(res3);
-    
-    //             result(null, res3);
-                                
-             
+    //             console.log(res3);    
+    //             result(null, res3);                               
     //         }
-    //       });
-
-    // }else if (req.type==2) {
-        
+    //     });
+    // }else if (req.type==2) {        
     //     req.scl1_id=req.id;
     //     Sub_Category_L2.get_Sub_Category_L2_list(req,async function(err,res3) {
     //         if (err) {
     //           result(err, null);
     //         } else {
-
-    //             console.log(res3);
-    
-    //             result(null, res3);
-                                
-             
+    //             console.log(res3);    
+    //             result(null, res3);             
     //         }
     //       });
     // }else if (req.type==3) {
@@ -1459,33 +1419,21 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
     //         if (err) {
     //           result(err, null);
     //         } else {
-
-    //             console.log(res3);
-    
-    //             result(null, res3);
-                                
-             
+    //             console.log(res3);    
+    //             result(null, res3);                                             
     //         }
-    //       });
+    //     });
     // }else{
     //     // /req.scl2_id=req.id;
     //     Productlist.get_product_search(req,async function(err,res3) {
     //         if (err) {
     //           result(err, null);
     //         } else {
-
-    //             console.log(res3);
-    
-    //             result(null, res3);
-                                
-             
+    //             console.log(res3);    
+    //             result(null, res3);             
     //         }
     //       });
     // }
-
-
-
-
     //     var catid = 0;
     //     var scl1_id = 0;
     //     var scl2_id = 0;
@@ -1576,7 +1524,5 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
     //     result(null, resobj);
     // }
 };
-
-
 
 module.exports = Catalog;
