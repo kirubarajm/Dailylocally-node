@@ -685,9 +685,9 @@ Catalog.add_category =async function add_category(req,result) {
                 if(categoryres.status==true){
                     Catalog.get_zone_list(req,async function(err,zoneres){
                         var lpcount = 0;
-                        for (let i = 0; i < zoneres.data.length; i++) {
+                        for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
-                            senddata.push({"zoneid":zoneres.data[i].id,"master_catid":categoryres.data.insertId,"active_status":0});
+                            senddata.push({"zoneid":zoneres.result[i].id,"master_catid":categoryres.result.insertId,"active_status":0});
                             CategoryMapping.createZoneCategoryMapping(senddata, async function(err,productliveres){
                                 // //console.log("productliveres -->",productliveres);
                                 // //if(productliveres.status==true){ lpcount++; }
@@ -794,9 +794,9 @@ Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
                     if(subcategory1res.status==true){
                         Catalog.get_zone_list(req,async function(err,zoneres){
                             var lpcount = 0;
-                            for (let i = 0; i < zoneres.data.length; i++) {
+                            for (let i = 0; i < zoneres.result.length; i++) {
                                 let senddata = [];
-                                senddata.push({"zoneid":zoneres.data[i].id,"master_l1_subcatid":subcategory1res.data.insertId,"active_status":0});
+                                senddata.push({"zoneid":zoneres.result[i].id,"master_l1_subcatid":subcategory1res.result.insertId,"active_status":0});
                                 L1SubCategoryMapping.createL1SubcategoryMapping(senddata, async function(err,productliveres){
                                     // //console.log("productliveres -->",productliveres);
                                     // //if(productliveres.status==true){ lpcount++; }
@@ -911,9 +911,9 @@ Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
                     if(subcategory2res.status==true){
                         Catalog.get_zone_list(req,async function(err,zoneres){
                             var lpcount = 0;
-                            for (let i = 0; i < zoneres.data.length; i++) {
+                            for (let i = 0; i < zoneres.result.length; i++) {
                                 let senddata = [];
-                                senddata.push({"zoneid":zoneres.data[i].id,"master_l2_subcatid":subcategory2res.data.insertId,"active_status":0});
+                                senddata.push({"zoneid":zoneres.result[i].id,"master_l2_subcatid":subcategory2res.result.insertId,"active_status":0});
                                 L2SubCategoryMapping.createL2SubcategoryMapping(senddata, async function(err,productliveres){
                                     // //console.log("productliveres -->",productliveres);
                                     // //if(productliveres.status==true){ lpcount++; }
@@ -1169,20 +1169,20 @@ Catalog.add_product =async function add_product(req,result) {
                 if(productres.status==true){               
                     Catalog.get_zone_list(req,async function(err,zoneres){
                         var lpcount = 0;
-                        for (let i = 0; i < zoneres.data.length; i++) {
+                        for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
-                            senddata.push({"zoneid":zoneres.data[i].id,"pid":productres.data.insertId,"live_status":0});
+                            senddata.push({"zoneid":zoneres.result[i].id,"pid":productres.result.insertId,"live_status":0});
                             //console.log("senddata -->",senddata);
                             ProductLive.createProductLive(senddata, async function(err,productliveres){
                                 // //console.log("productliveres -->",productliveres);
                                 // //if(productliveres.status==true){ lpcount++; }
                             }); 
 
-                            // if(zoneres.data.length == lpcount){
+                            // if(zoneres.result.length == lpcount){
                             //     let resobj = {
                             //         success: true,
                             //         status: true,
-                            //         result: productres.data,
+                            //         result: productres.result,
                             //         message: "Product added susccessfully"
                             //     };
                             //     result(null, resobj);
@@ -1190,7 +1190,7 @@ Catalog.add_product =async function add_product(req,result) {
                             //     let resobj = {
                             //         success: true,
                             //         status: false,
-                            //         result: productres.data,
+                            //         result: productres.result,
                             //         message: "product live insert error try again"
                             //     };
                             //     result(null, resobj);
@@ -1199,7 +1199,7 @@ Catalog.add_product =async function add_product(req,result) {
                         let resobj = {
                             success: true,
                             status: true,
-                            //result: productres.data,
+                            //result: productres.result,
                             message: "Product added susccessfully"
                         };
                         result(null, resobj);
@@ -1208,7 +1208,7 @@ Catalog.add_product =async function add_product(req,result) {
                     let resobj = {
                         success: true,
                         status: false,
-                        result: productres.data,
+                        result: productres.result,
                         message: "something went wrong plz try again"
                     };
                     result(null, resobj);

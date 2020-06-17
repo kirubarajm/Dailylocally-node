@@ -137,8 +137,8 @@ SCM.create_po =async function create_po(req,result) {
             // console.log("podata --->",podata);
             PO.createPO(podata,async function(err,pores){
                 if(pores.status==true){
-                    poids.push(pores.data.insertId);
-                    //console.log("inserted pores-->",pores.data.insertId);
+                    poids.push(pores.result.insertId);
+                    //console.log("inserted pores-->",pores.result.insertId);
                     for (let j = 0; j < polist.length; j++) {
                         var vendorcost = 0;
                         if(polist[j].vid == uniquevendors[i]){
@@ -146,7 +146,7 @@ SCM.create_po =async function create_po(req,result) {
                             var getvendorcost = await query(getvendorcostquery);
                             //console.log("getvendorcost -->",getvendorcost);
                             var inserpopdata = [];
-                            inserpopdata.push({"poid":pores.data.insertId,"prid":polist[j].prid,"vpid":polist[j].vpid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
+                            inserpopdata.push({"poid":pores.result.insertId,"prid":polist[j].prid,"vpid":polist[j].vpid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
                             POProducts.createPOProducts(inserpopdata,async function(err,popres){  });
                             vendorcost = vendorcost+((getvendorcost[0].base_price*polist[j].qty)+(getvendorcost[0].other_charges*polist[j].qty));
                             // console.log("vendorcost -->",vendorcost);
@@ -154,11 +154,11 @@ SCM.create_po =async function create_po(req,result) {
                             /////Update Dayorder product status///////
                         }
                         var poupdatedata = [];
-                        poupdatedata.push({"poid":pores.data.insertId,"cost":vendorcost});
+                        poupdatedata.push({"poid":pores.result.insertId,"cost":vendorcost});
                         //console.log("poupdatedata-->",poupdatedata);
                         //PO.updatePO(poupdatedata,async function(err,updateedpores){});
                         if(vendorcost > 0 ){
-                            var checkquery = "UPDATE PO SET cost="+vendorcost+" WHERE poid ="+pores.data.insertId;
+                            var checkquery = "UPDATE PO SET cost="+vendorcost+" WHERE poid ="+pores.result.insertId;
                             // console.log("checkquery -->",checkquery);
                             var check = await query(checkquery);
                         }                    
