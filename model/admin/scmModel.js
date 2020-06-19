@@ -214,7 +214,6 @@ SCM.get_po_list =async function get_po_list(req,result) {
         }
 
         var getpolistquery = "select po.poid,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zone_id+" "+where+" group by po.poid";
-        console.log("getpolistquery==>",getpolistquery);
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {
@@ -257,7 +256,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name,po.vid,ven.name,po.created_at,st.quantity as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.po_status=0 "+where+" group by pop.popid";
+        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name as uom,po.vid,ven.name,po.created_at,st.quantity as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.po_status=0 "+where+" group by pop.popid";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {
@@ -422,9 +421,12 @@ SCM.update_dayorders =async function update_dayorders(req) {
 /////////Get Sorting List///////////
 SCM.get_soring_list =async function get_soring_list(req,result) {
     if(req.zone_id){
-        var getpolistquery = "select po.poid,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.po_status=0 group by po.poid";
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',pm.Productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status)) AS products from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join Product_live as pl on pl.vpid=dop.vpid left join ProductMaster as pm on pm.pid=pl.pid where dop.scm_status=3 and dayo.zoneid="+req.zone_id+" group by dayo.id";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
+            for (let i = 0; i < getpolist.length; i++) {
+                getpolist[i].products = JSON.parse(getpolist[i].products);
+            }
             let resobj = {
                 success: true,
                 status: true,
@@ -484,16 +486,15 @@ SCM.save_sorting =async function save_sorting(req,result) {
 
 /////////Move to QA///////////
 SCM.move_to_qa =async function move_to_qa(req,result) {
+    console.log(req);
     if(req.dopid_list){
         for (let i = 0; i < req.dopid_list.length; i++) {
             var getdopquery = "select * from Dayorder_products where id="+req.dopid_list[i];
             var getdop = await query(getdopquery);
             var sorting_status = 0;
             if(getdop.length > 0){
-                if(getdop[0].sorting_status >0 ){
-                    var updatedopquery = "update Dayorder_products set scm_status=4 where id="+req.dopid_list[i];
-                    var updatedop = await query(updatedopquery);
-                }
+                var updatedopquery = "update Dayorder_products set scm_status=4 where id="+req.dopid_list[i];
+                var updatedop = await query(updatedopquery);
             }            
         } 
         let resobj = {

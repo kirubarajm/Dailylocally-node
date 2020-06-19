@@ -127,7 +127,7 @@ Catalog.get_product_list =async function get_product_list(req,result) {
     if(req.zone_id){
         var wherecon = "";
         if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
-        if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
+        if(req.scl2_id==0){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }else if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
         var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
