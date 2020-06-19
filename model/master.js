@@ -354,11 +354,11 @@ const master = [
     {
         'addresstype': [{
                 "addresstypeid": 1,
-                "description": 'Home'
+                "description": 'Individual'
             },
             {
                 "addresstypeid": 2,
-                "description": 'work'
+                "description": 'Apratment'
             },
             {
                 "addresstypeid": 3,

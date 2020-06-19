@@ -102,8 +102,4 @@ app.route("/user/fav/productlist/:id").get(middleware.checkToken,routesVersionin
 
 
 
-
-
-
-
 }

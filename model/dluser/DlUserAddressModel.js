@@ -59,9 +59,9 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
             
     
           if (new_address.address_type === 1) {
-                var message = "Sorry home address already exist!";
+                var message = "Sorry Individual address already exist!";
             }else if(new_address.address_type === 2){
-                var message = "Sorry office address already exist!";
+                var message = "Sorry Appratments address already exist!";
             }
                   let sucobj=true;
                   let mesobj = message;
