@@ -112,23 +112,19 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
      
     }else if (req.sortid==2) {
 
-      product_list = product_list+ " ORDER BY pm.Productname DESC ";
+      product_list = product_list+ " ORDER BY pm.mrp ASC ";
 
     }else if (req.sortid==3) {
 
-      product_list = product_list+ " ORDER BY pm.mrp ASC ";
-
-    }else if (req.sortid==4) {
-
       product_list = product_list+ " ORDER BY pm.mrp DESC ";
-
-    }else if (req.sortid==5) {
-
-      product_list = product_list+ " ORDER BY br.brandname ASC ";
-
-    }else if (req.sortid==6) {
-      product_list = product_list+ " ORDER BY br.brandname DESC ";
     }
+    // }else if (req.sortid==5) {
+
+    //   product_list = product_list+ " ORDER BY br.brandname ASC ";
+
+    // }else if (req.sortid==6) {
+    //   product_list = product_list+ " ORDER BY br.brandname DESC ";
+    // }
 
   sql.query(product_list,async function(err, res) {
     if (err) {
@@ -351,6 +347,60 @@ sql.query(product_list1,async function(err, res) {
   }
 });
 }
+};
+
+
+ProductMaster.get_brand_list = async function get_brand_list(req,result) {
+  
+  var brand_list = "select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand where pm.scl2_id= "+req.scl2_id+" group by  pm.brand ";
+  sql.query(brand_list,async function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+     
+
+  
+      let resobj = {
+        success: true,
+        status:true,
+        title :"brand List",
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+};
+
+
+ProductMaster.get_sort_list = async function get_sort_list(req,result) {
+  
+res =  [{
+            "sortid": 1,
+            "sortname": "A-Z"
+        },
+        {
+            "sortid": 2,
+            "sortname": "Low - High"
+         }
+         ,
+        {
+            "sortid": 3,
+            "sortname": "High -Low"
+        }
+    ]
+
+
+
+
+
+      let resobj = {
+        success: true,
+        status:true,
+        title :"Sort List",
+        result: res
+      };
+      result(null, resobj);
+   
 };
 
 module.exports = ProductMaster;
