@@ -12,6 +12,8 @@ var POtemp = function(potemp) {
   this.due_date = potemp.due_date;
   this.buyer_comment = potemp.buyer_comment;
   this.actual_quantity = potemp.actual_quantity;
+  this.zoneid = potemp.zoneid;
+  this.delete_status = potemp.delete_status;
 }
 
 //For Admin

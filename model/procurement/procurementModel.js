@@ -90,7 +90,7 @@ Procurement.move_to_purchase=async function move_to_purchase(req,result) {
         var checkpotemp = await query(checkpotempquery);
         if(checkpotemp.length == 0){
           var insertdata = [];
-          insertdata.push({"vpid":getprecurement[i].vpid,"prid":getprecurement[i].prid,"actual_quantity":getprecurement[i].quantity});
+          insertdata.push({"vpid":getprecurement[i].vpid,"prid":getprecurement[i].prid,"actual_quantity":getprecurement[i].quantity,"zoneid":req.zone_id});
           POtepm.createPOtemp(insertdata,async function(err,potempres){ 
             //console.log("potempres -->",potempres); 
           });
