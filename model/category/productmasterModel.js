@@ -177,6 +177,108 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
 };
 
 
+ProductMaster.get_product_details = async function get_product_details(req,result) {
+  
+  var radiuslimit         = constant.radiuslimit;
+  var servicable_status = true;
+  var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+  
+  if (userdetails.length ==0) {
+    let resobj = {
+      success: true,
+      status:false,
+      serviceablestatus: servicable_status,
+      unserviceable_title:"Sorry! Your area is not serviceable.",
+      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      empty_content:"Daily Locally",
+      empty_subconent :"Daily Locally",
+      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      category_title :"Product List",
+      message : 'user not found',
+      result: []
+    };  
+    result(null, resobj);
+
+  }else{
+
+
+    var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+    req.lat +
+    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+    req.lon +
+    "') ) + sin( radians('" +
+    req.lat +
+    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+
+
+  if (get_nearby_zone.length !=0) {
+    
+
+    if (get_nearby_zone[0].distance > radiuslimit) {
+      servicable_status =false;
+    }
+  }
+
+ 
+
+  // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
+  var product_detail = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where  pl.vpid='"+req.vpid+"' "
+
+
+ 
+
+sql.query(product_detail,async function(err, res) {
+  if (err) {
+    result(err, null);
+  } else {
+
+
+    for (let i = 0; i < res.length; i++) {
+   
+      res[i].servicable_status=servicable_status;
+      
+    }
+
+    // if (req.sortid==1) {
+  
+    //   res.sort((a,b) => (a.Productname  - b.Productname));
+    // } else if (req.sortid==2) {
+    //   // res.sort((a, b) => b.Productname - a.Productname);
+    //   res.sort((a,b) => (b.Productname  - a.Productname));
+    // }else if (req.sortid==3) {
+    //   res.sort((a, b) => parseFloat(a.mrp) - parseFloat(b.mrp));
+    // }else if (req.sortid==4) {
+    //   res.sort((a, b) => parseFloat(b.mrp) - parseFloat(a.mrp));
+    // }else if (req.sortid==5) {
+    //   res.sort((a, b) => a.brandname - b.brandname);
+    // }else if (req.sortid==6) {
+    //   res.sort((a, b) => b.brandname - a.brandname);
+    // }
+
+
+
+    let resobj = {
+      success: true,
+      status:true,
+      serviceablestatus: servicable_status,
+      unserviceable_title:"Sorry! Your area is not serviceable.",
+      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      empty_content:"Daily Locally",
+      empty_subconent :"Daily Locally",
+      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      category_title :"Product List",
+      result: res
+    };
+    result(null, resobj);
+  }
+});
+}
+};
+
 ProductMaster.get_collection_product_list = async function get_collection_product_list(req,result) {
   
  

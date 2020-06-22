@@ -47,6 +47,7 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 
  // products
  app.route("/user/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_ProductMaster_list}));
+ app.route("/user/productdetail").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_Product_detail}));
 
  //cart 
  app.route("/user/cartdetails").post(middleware.checkToken,routesVersioning({"1.0.0":category.read_a_cartdetails}));
