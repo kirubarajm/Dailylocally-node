@@ -15,6 +15,7 @@ module.exports = function(app) {
   var collection = require("../controllers/common/CollectionController");
   var catalog = require("../controllers/admin/catalogController");
   var fav = require("../controllers/dluser/FavController");
+  var coupon = require("../controllers/common/CouponController");
 
 // Dl user
 app.route("/user/app/versioncheck").post(routesVersioning({"1.0.0": dluser.user_app_version_check_vid}));
@@ -102,8 +103,12 @@ app.route("/user/fav/productlist/:id").get(middleware.checkToken,routesVersionin
 
 //master
 
- // products
- app.route("/user/brandlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
+ app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
+
+ //coupon
+
+app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
+app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
 
 }

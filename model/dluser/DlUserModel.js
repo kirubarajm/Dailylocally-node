@@ -109,7 +109,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
    if (newUser.otpcode) {
    var otpurl =
-    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=EATHOM&dest=" +
+    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
     newUser.phoneno +
     "&msg=<%23>Your DailyLocally App OTP is " +
     OTP +
@@ -119,7 +119,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
   }else{
 
    var otpurl =
-    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=EATHOM&dest=" +
+    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
     newUser.phoneno +
     "&msg=<%23>Your DailyLocally App OTP is " +
     OTP +

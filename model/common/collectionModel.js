@@ -16,33 +16,46 @@ var Collection = function(collection) {
 
 
 
-Collection.list_all_active_collection = function list_all_active_collection(req,result) {
-  sql.query("Select cid,query,name,active_status,img_url as image from Collections where active_status=1",async function(err, res) {
-    if (err) {
-      result(err, null);
-    } else {
-    
-     var kitchen= await Collection.getcollectionlist(res,req);
- 
-      
-      if (res.length !== 0 ) {
-      
-        let resobj = {
-          success: true,
-          status:true,
-          collection: res
-        };
-        result(null, resobj);
+Collection.list_all_active_collection =async function list_all_active_collection(req,result) {
+
+  var userdetails  = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
+
+  if (userdetails.length !==0) {
+    sql.query("Select cs.cid,cs.query,cs.name,cs.active_status,cs.img_url as image from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"'   ",async function(err, res) {
+      if (err) {
+        result(err, null);
       } else {
-        let resobj = {
-          success: true,
-          status:false,
-          message: "Sorry there no active collections"
-        };
-        result(null, resobj);
-       }     
-    }
-  });
+      
+       var kitchen= await Collection.getcollectionlist(res,req);
+   
+        
+        if (res.length !== 0 ) {
+        
+          let resobj = {
+            success: true,
+            status:true,
+            collection: res
+          };
+          result(null, resobj);
+        } else {
+          let resobj = {
+            success: true,
+            status:false,
+            message: "Sorry there no active collections"
+          };
+          result(null, resobj);
+         }     
+      }
+    });
+  } else {
+    let resobj = {
+      success: true,
+      status:false,
+      message: "user not found"
+    };
+    result(null, resobj);
+  }
+ 
 };
 
 Collection.getcollectionlist = async function getcollectionlist(res,req){
