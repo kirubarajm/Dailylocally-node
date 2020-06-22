@@ -32,6 +32,16 @@ exports.product_vendor_assign = function(req, res) {
     });    
 };
 
+/////////Update POtemp quantity///////////
+exports.update_potemp_quantity = function(req, res) {    
+    SCM.update_potemp_quantity(req.body, function(err, ress) {
+        //console.log("update_potemp_quantity controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Create PO///////////
 exports.create_po = function(req, res) {    
     SCM.create_po(req.body, function(err, ress) {
