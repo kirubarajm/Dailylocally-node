@@ -16,11 +16,12 @@ var Category = function(category) {
   this.image = category.image;
 };
 
+
 Category.get_category_list =async function get_category_list(req,result) {
   
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
-    var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+    var userdetails       = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
     
     if (userdetails.length ==0) {
       let resobj = {
@@ -61,15 +62,15 @@ Category.get_category_list =async function get_category_list(req,result) {
     }
 
 
-  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
-        
+  //var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
+    
+  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
+
   sql.query(category_query, function(err, res) {
     if (err) {
       result(err, null);
     } else {
 
-
-    
 
       for (let i = 0; i < res.length; i++) {
      
