@@ -5,12 +5,43 @@ const query = util.promisify(sql.query).bind(sql);
 var moment = require("moment");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var POtepm = require('../../model/tableModels/potempTableModel.js');
+var Dayorder = require('../../model/common/dayorderModel.js');
 
 var Procurement = function(procurement) {
   this.vpid = procurement.vpid;
   this.quantity = procurement.quantity;
   this.pr_status = procurement.pr_status || 1;
   this.zoneid=procurement.zoneid;
+};
+
+//// Procurment View //////////////
+Procurement.procurement_view=async function procurement_view(req,result) {
+  if(req.zone_id && req.prid){
+    var getprecurementquery = "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,st.quantity as boh,greatest(0,pro.quantity-st.quantity)as procurement_quantity from Procurement  pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.vpid= pm.pid where pro.prid="+req.prid+" and pro.zoneid="+req.zone_id;
+    var getprecurement = await query(getprecurementquery);
+    if(getprecurement.length > 0){
+      let resobj = {  
+        success: true,
+        status: true,
+        result: getprecurement
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {  
+        success: true,
+        status: false,
+        message:"no data"
+      };
+      result(null, resobj);
+    }    
+  }else{
+    let resobj = {  
+      success: true,
+      status: false,
+      message:"check your post values"
+    };
+    result(null, resobj);
+  }    
 };
 
 //////// Create New Precurment //////////
@@ -29,6 +60,10 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
         } else {       
           var Dayorder_products_query="update Dayorder_products set scm_status=1,prid='"+res.insertId+"' where id="+get_product[i].dopid+"";
           var update_query=await query(Dayorder_products_query);
+          ////// update day order status ////
+          var get_doid_query="select * from Dayorder_products where id="+get_product[i].dopid+"";
+          var get_doid=await query(get_doid_query);
+          Dayorder.update_scm_status(get_doid[0].doid);
         }
       });
     }
