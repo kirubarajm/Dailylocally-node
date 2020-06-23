@@ -160,23 +160,28 @@ SCM.product_vendor_assign =async function product_vendor_assign(req,result) {
         if(req.buyer_comment){
             buyer_comment = req.buyer_comment;
         }
-        var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"' where tempid in("+req.tempid+")";
-        var updatepotemp = await query(updatepotempquery);        
-        if(updatepotemp.affectedRows>0){
-            let resobj = {
-                success: true,
-                status: true,
-                message: "Vendor Added successfully"
-            };
-            result(null, resobj);
-        }else{
-            let resobj = {
-                success: true,
-                status: false,
-                message: "no records found"
-            };
-            result(null, resobj);
+
+        for (let i = 0; i < req.tempid.length; i++) {
+            var getpotempquery = "select * from POtemp where tempid in("+req.tempid[i]+")";
+            var getpotemp = await query(getpotempquery); 
+
+            if(getpotemp.length>0){
+                if(getpotemp[0].requested_quantity > 0){
+                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"' where tempid in("+req.tempid[i]+")";
+                    var updatepotemp = await query(updatepotempquery); 
+                }else{
+                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',requested_quantity="+getpotemp[0].actual_quantity+" where tempid in("+req.tempid[i]+")";
+                    var updatepotemp = await query(updatepotempquery);
+                }
+            }         
         }
+        
+        let resobj = {
+            success: true,
+            status: true,
+            message: "Vendor Added successfully"
+        };
+        result(null, resobj);        
     }else{
         let resobj = {
             success: true,
@@ -439,7 +444,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name as uom,po.vid,ven.name,po.created_at,st.quantity as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.po_status=0 "+where+" group by pop.popid";
+        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.po_status=0 "+where+" group by pop.popid";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {

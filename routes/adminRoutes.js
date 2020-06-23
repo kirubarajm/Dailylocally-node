@@ -53,6 +53,7 @@ module.exports = function(app) {
 
   /////// SCM Precurment /////////////
   app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.day_order_list}));
+  app.route("/admin/procurement/view").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.procurement_view}));
   app.route("/admin/procurement/create").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.new_procurement_create}));
   app.route("/admin/procurement/list").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.procurement_list}));
   app.route("/admin/procurement/movetopurchase").post(middleware.checkToken,routesVersioning({"1.0.0": procurement.move_to_purchase}));

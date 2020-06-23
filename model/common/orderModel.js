@@ -360,9 +360,9 @@ Order.online_order_place_conformation = async function(order_place, result) {
         order_place.zoneid=orderdetails[0].zoneid;
         sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
         
-        var getproductdetails = "select * from Orderproducts where status=0 and orderid="+order_place.orderid;
+        var getproductdetails = "select * from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
         var getproduct = await query(getproductdetails);
-        // console.log("getproduct",getproduct);
+        //console.log("getproduct==========>",getproduct);
         dayorder.checkdayorder(order_place,getproduct);
 
          let resobj = {
