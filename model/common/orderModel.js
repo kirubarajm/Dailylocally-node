@@ -360,7 +360,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
         order_place.zoneid=orderdetails[0].zoneid;
         sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
         
-        var getproductdetails = "select * from Orderproducts  where status=0 and orderid="+order_place.orderid;
+        var getproductdetails = "select * from Orderproducts where status=0 and orderid="+order_place.orderid;
         var getproduct = await query(getproductdetails);
         // console.log("getproduct",getproduct);
         dayorder.checkdayorder(order_place,getproduct);
@@ -578,8 +578,6 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
             history_list =res;
            for (let i = 0; i < history_list.length; i++) {
 
-          
-
              if (history_list[i].items) {
                var items = JSON.parse(history_list[i].items);
                history_list[i].items = items;
@@ -697,4 +695,47 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
   );
 };
 
+
+Order.order_transaction_order_list = async function day_orderlist_user(req,result) {
+
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"'   group by dr.id order by dr.date";
+  sql.query(query,function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "orders not found!"
+          };
+          result(null, resobj);
+        } else {
+           
+            history_list =res;
+           for (let i = 0; i < history_list.length; i++) {
+
+             if (history_list[i].items) {
+               var items = JSON.parse(history_list[i].items);
+               history_list[i].items = items;
+             }
+
+            
+           }
+
+           
+           let resobj = {
+             success: true,
+             status: true,
+             result: history_list
+           };
+
+           result(null, resobj);
+
+        
+        }
+      }
+    }
+  );
+}
 module.exports = Order;

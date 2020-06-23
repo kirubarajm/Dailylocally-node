@@ -23,4 +23,13 @@ exports.day_order_list = function(req, res) {
     });
   };
 
+
+  exports.day_order_product_cancel = function(req, res) {
+
+    Dayorder.day_order_product_cancel(req.body, function(err, result) {
+      if (err) res.send(err);
+      res.json(result);
+    });
+
+};
  

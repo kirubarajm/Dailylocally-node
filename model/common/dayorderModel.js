@@ -341,7 +341,7 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
   
   
   Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,result) {
-    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+
 
     if (Dayorder.date) {
 
@@ -418,5 +418,48 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
     result(null, resobj);  
   };
  
+  Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayorder,result) {
+    var now = moment().format("YYYY-MM-DD,h:mm:ss a");
+
+    var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
+    
+    if (product.length !==0) {
+
+      if (product[0].scm_status < 1 ) {
+
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
+
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'Product cancel Sucessfully'
+        };
+    
+        result(null, resobj); 
+      } else {
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'product not available'
+        };
+    
+        result(null, resobj); 
+      }
+
+    }else{
+
+      let resobj = {
+        success: true,
+        status: true,
+        message : 'product not available'
+      };
   
+      result(null, resobj); 
+    }
+  
+  
+
+     
+  };
+
   module.exports = Dayorder;
