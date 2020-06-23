@@ -41,7 +41,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_createDayorderproducts.product_gst = getproduct[i].gst;
         new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
         new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-        new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+        new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
         new_createDayorderproducts.product_weight = getproduct[i].weight;
         new_createDayorderproducts.product_uom = getproduct[i].uom;
         new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -57,7 +57,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.userid=Dayorder.userid;
         new_day_order.zoneid=Dayorder.zoneid;
         new_day_order.date=getproduct[i].deliverydate;       
-
+        console.log("new_day_order===>1",new_day_order); 
         sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
           if (err) {
             res(err, null);
@@ -82,7 +82,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_createDayorderproducts.product_gst = getproduct[i].gst;
             new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
             new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-            new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+            new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
             new_createDayorderproducts.product_weight = getproduct[i].weight;
             new_createDayorderproducts.product_uom = getproduct[i].uom;
             new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -95,7 +95,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           }
         });
       }
-    } else {            
+    } else {        
         var dates = [];
         // var d = moment(getproduct[i].starting_date).format("YYYY-MM-DD") ;
         console.log("d",d);
@@ -188,7 +188,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
         if (dates.length==0) {            
           for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
-          var date  = moment().add(j, "days").format("YYYY-MM-DD");;
+          var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
           var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
           if (dayorders.length !=0) {
             var new_createDayorderproducts={};
@@ -210,7 +210,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_createDayorderproducts.product_gst = getproduct[i].gst;
             new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
             new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-            new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+            new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
             new_createDayorderproducts.product_weight = getproduct[i].weight;
             new_createDayorderproducts.product_uom = getproduct[i].uom;
             new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -224,7 +224,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             var new_day_order={};
             new_day_order.userid=Dayorder.userid;
             new_day_order.date=date;
-            new_day_order.zoneid=Dayorder.zoneid;       
+            new_day_order.zoneid=Dayorder.zoneid;   
+            console.log("new_day_order===>2",new_day_order);    
             sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
                   res(err, null);
@@ -249,7 +250,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                   new_createDayorderproducts.product_gst = getproduct[i].gst;
                   new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
                   new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-                  new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+                  new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
                   new_createDayorderproducts.product_weight = getproduct[i].weight;
                   new_createDayorderproducts.product_uom = getproduct[i].uom;
                   new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -287,7 +288,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_createDayorderproducts.product_gst = getproduct[i].gst;
               new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
               new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-              new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+              new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
               new_createDayorderproducts.product_weight = getproduct[i].weight;
               new_createDayorderproducts.product_uom = getproduct[i].uom;
               new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -302,7 +303,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_day_order.userid=Dayorder.userid;
               new_day_order.date=date;
               new_day_order.zoneid=Dayorder.zoneid;              
-    
+              console.log("new_day_order===>3",new_day_order); 
               sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
                   res(err, null);
@@ -327,7 +328,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                   new_createDayorderproducts.product_gst = getproduct[i].gst;
                   new_createDayorderproducts.product_scl1_id = getproduct[i].scl1_id;
                   new_createDayorderproducts.product_scl2_id = getproduct[i].scl2_id;
-                  new_createDayorderproducts.product_subscription = getproduct[i].subscription;
+                  new_createDayorderproducts.product_subscription = getproduct[i].subscription1;
                   new_createDayorderproducts.product_weight = getproduct[i].weight;
                   new_createDayorderproducts.product_uom = getproduct[i].uom;
                   new_createDayorderproducts.product_packetsize = getproduct[i].packetsize;
@@ -396,51 +397,54 @@ if(Dayorder){
 }      
 };
 
-
+///////QA Day Order List
 Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,result) {
-  var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
-
-  if (Dayorder.date) {
-
-    var get_day_order_list = await query("select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'received_quantity', received_quantity)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.date ='"+Dayorder.date +"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4  group by drs.id,drs.userid");
-
-  }else{
-
-    var get_day_order_list = await query("select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'received_quantity', received_quantity)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4 group by drs.id,drs.userid");
-
-  }
-
-  if (Dayorder.id) {
-
-    var get_day_order_list = await query("select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'received_quantity', received_quantity)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where drs.id='"+Dayorder.id+"' and zoneid='"+Dayorder.zoneid+"' and orp.scm_status = 4 group by drs.id,drs.userid");
-
-  }
-
-  
-  if (get_day_order_list.length !=0) {
-    
-    for (let i = 0; i < get_day_order_list.length; i++) {
-      
-
-      get_day_order_list[i].products = JSON.parse(get_day_order_list[i].products);
-      get_day_order_list[i].product_count= get_day_order_list[i].products.length
-      // var get_product = await query("select productname,count(quantity)as quantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by vpid");
-
-      // get_product.forEach(element => {
-      //   get_day_order_list[i].productname=element.productname;
-      //   get_day_order_list[i].quantity=element.quantity;
-      // });
-      
+  if(Dayorder.zoneid){
+    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+    var where = "";
+    if(Dayorder.date){
+        where = where+" and drs.date='"+Dayorder.date +"' ";
+    }else{
+      where = where+" and drs.date='"+tomorrow+"' ";
+    }    
+    if(Dayorder.doid){
+        where = where+" and drs.id="+Dayorder.id;
     }
+    var getqadayorderquery = "select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'received_quantity', received_quantity)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid='"+Dayorder.zoneid+"' "+where+" and orp.scm_status = 4 group by drs.id,drs.userid";
+    var get_day_order_list = await query(getqadayorderquery);
+    
+    if (get_day_order_list.length>0) {    
+      for (let i = 0; i < get_day_order_list.length; i++) {
+        get_day_order_list[i].products = JSON.parse(get_day_order_list[i].products);
+        get_day_order_list[i].product_count= get_day_order_list[i].products.length
+        // var get_product = await query("select productname,count(quantity)as quantity from Dayorder_products where doid='"+get_day_order_list[i].id+"' group by vpid");
+        // get_product.forEach(element => {
+        //   get_day_order_list[i].productname=element.productname;
+        //   get_day_order_list[i].quantity=element.quantity;
+        // });      
+      }
+      let resobj = {
+        success: true,
+        status: true,
+        result: get_day_order_list
+      };
+      result(null, resobj);  
+    }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message: "no data"
+      };
+      result(null, resobj); 
+    }
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);
   }
-
-  let resobj = {
-    success: true,
-    status: true,
-    result: get_day_order_list
-  };
-
-  result(null, resobj);  
 };
 
 
@@ -475,7 +479,7 @@ Dayorder.quality_day_order_view=async function quality_day_order_view(Dayorder,r
   result(null, resobj);  
 };
 
-//////Update Day Orer Status ////
+//////Update Day Order Status ////
 Dayorder.update_scm_status = async function update_scm_status(Dayorder){
   console.log("Dayorder ==>",Dayorder);
   if(Dayorder){

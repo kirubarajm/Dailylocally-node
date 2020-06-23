@@ -48,7 +48,7 @@ SCM.waiting_po_list_old =async function waiting_po_list_old(req,result) {
 /////////Get Waiting PO List///////////
 SCM.waiting_po_list =async function waiting_po_list(req,result) {
     if(req.zone_id){
-        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pm.pid,pm.Productname,pm.productdetails,pm.uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,vpm.base_price as rate,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+vpm.other_charges)) as amount from POtemp as pot left join Product_live as pl on pl.vpid=pot.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Vendor_products_mapping as vpm on vpm.vid=pot.vid  left join Vendor as ven on ven.vid=pot.vid where pot.delete_status=0 and pot.zoneid="+req.zone_id+" group by pot.tempid";
+        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pm.pid,pm.Productname,pm.productdetails,pm.uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,vpm.base_price as rate,pot.due_date,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+vpm.other_charges)) as amount from POtemp as pot left join Product_live as pl on pl.vpid=pot.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Vendor_products_mapping as vpm on vpm.vid=pot.vid  left join Vendor as ven on ven.vid=pot.vid where pot.delete_status=0 and pot.zoneid="+req.zone_id+" group by pot.tempid";
         var getwaitingpo = await query(getwaitingpouery);
         if(getwaitingpo.length > 0){
             let resobj = {
@@ -305,11 +305,11 @@ SCM.create_po =async function create_po(req,result) {
         var polist = await query(polistquery);
         if(polist.length>0){
             var uniquevendors = polist.map( (value) => value.vid).filter( (value, index, _req) => _req.indexOf(value) == index);    
-            //console.log("Step 1: uniquevendors--->",uniquevendors);
+            // console.log("Step 1: uniquevendors--->",uniquevendors);
             if (!polist.vid) {
                 polist.sort((a, b) => parseFloat(a.vid) - parseFloat(b.vid));
             }
-            //console.log("Step 2: sortreq1--->",polist);
+            // console.log("Step 2: sortreq1--->",polist);
             var poids = [];
             for (let i = 0; i < uniquevendors.length; i++) {
                 ////Insert PO  and get id///
@@ -319,28 +319,29 @@ SCM.create_po =async function create_po(req,result) {
                 PO.createPO(podata,async function(err,pores){
                     if(pores.status==true){
                         poids.push(pores.result.insertId);
-                        //console.log("inserted pores-->",pores.result.insertId);
+                        // console.log("Step 3: inserted pores createPO-->",pores.result.insertId);
                         for (let j = 0; j < polist.length; j++) {
                             var vendorcost = 0;
                             if(polist[j].vid == uniquevendors[i]){
                                 var getvendorcostquery = "select * from Vendor_products_mapping where vid="+polist[j].vid+" and pid="+polist[j].vpid;
                                 var getvendorcost = await query(getvendorcostquery);
                                 //console.log("getvendorcost -->",getvendorcost);
-                                var inserpopdata = [];
-                                inserpopdata.push({"poid":pores.result.insertId,"prid":polist[j].prid,"vpid":polist[j].vpid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
-                                POProducts.createPOProducts(inserpopdata,async function(err,popres){ 
-                                    /////Delete PO Temp///////////
-                                    var updatepotempquery = "update POtemp set delete_status=1 where tempid="+polist[j].tempid;
-                                    var updatepotemp = await query(updatepotempquery);
-                                 });
-                                vendorcost = vendorcost+((getvendorcost[0].base_price*polist[j].qty)+(getvendorcost[0].other_charges*polist[j].qty));
-                                // console.log("vendorcost -->",vendorcost);
-                                /////Update Dayorder product status///////
+                                if(getvendorcost.length>0){
+                                    var inserpopdata = [];
+                                    inserpopdata.push({"poid":pores.result.insertId,"prid":polist[j].prid,"vpid":polist[j].vpid,"vid":polist[j].vid,"cost":getvendorcost[0].base_price*polist[j].qty,"other_charges":getvendorcost[0].other_charges*polist[j].qty,"requested_quantity":polist[j].qty,"pop_status":0,"due_date":polist[j].due_date,"buyer_comment":polist[j].buyer_comment});
+                                    POProducts.createPOProducts(inserpopdata,async function(err,popres){
+                                        // console.log("Step 4: aftr popres createPOProducts ==>",popres);
+                                        if(popres.status==true){
+                                            /////Delete PO Temp///////////
+                                            var updatepotempquery = "update POtemp set delete_status=1 where tempid="+polist[j].tempid;
+                                            var updatepotemp = await query(updatepotempquery);
+                                        }
+                                    });
+                                    vendorcost = parseInt(vendorcost)+(( parseInt(getvendorcost[0].base_price) * parseInt(polist[j].qty) ) + ( parseInt(getvendorcost[0].other_charges) * parseInt(polist[j].qty) ));
+                                    // console.log("vendorcost -->",vendorcost,"===",[i]);
+                                }
+                                /////Update Dayorder product status =>removed///////
                             }
-                            var poupdatedata = [];
-                            poupdatedata.push({"poid":pores.result.insertId,"cost":vendorcost});
-                            //console.log("poupdatedata-->",poupdatedata);
-                            //PO.updatePO(poupdatedata,async function(err,updateedpores){});
                             if(vendorcost > 0 ){
                                 var checkquery = "UPDATE PO SET cost="+vendorcost+" WHERE poid ="+pores.result.insertId;
                                 // console.log("checkquery -->",checkquery);
@@ -389,17 +390,17 @@ SCM.get_po_list =async function get_po_list(req,result) {
             where = where+" and pop.pop_status="+req.pop_status;
         }
         if(req.vid){
-            where = where+" and po.vid="+req.vid;
+            where = where+" and po.vid='"+req.vid+"' or ven.name='"+req.vid+"' ";
         }
         if(req.due_date){
             where = where+" and date(pop.due_date)='"+req.due_date+"' ";
         }
         if(req.delivery_note){
-            where = where+" and pop.delivery_note="+req.delivery_note;
+            where = where+" and pop.delivery_note='"+req.delivery_note+"' ";
         }
         if(req.po_status){
             where = where+" and po.po_status="+req.po_status;
-        }
+        }        
 
         var getpolistquery = "select po.poid,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zone_id+" "+where+" group by po.poid";
         var getpolist = await query(getpolistquery);
@@ -436,15 +437,15 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
             where = where+" and date(po.created_at)='"+req.date+"' ";
         }
         if(req.vpid){
-            where = where+" and pop.vpid="+req.vpid;
+            where = where+" and pop.vpid='"+req.vpid+"' or pm.Productname='"+req.vpid+"' ";
         }
         if(req.vid){
-            where = where+" and po.vid="+req.vid;
+            where = where+" and po.vid='"+req.vid+"' or ven.name='"+req.vid+"' ";
         }
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.po_status=0 "+where+" group by pop.popid";
+        var getpolistquery = "select pop.popid,po.poid,pop.vpid,pm.Productname,pm.short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zone_id+" and po.po_status=0 "+where+" group by pop.popid";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {
@@ -479,15 +480,24 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
             dn = req.delivery_note;
         }
 
-        var getpopquery = "select popid,vpid,received_quantity from POproducts where popid="+req.popid;
+        var getpopquery = "select poid,popid,vpid,received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
             var updatepopquery  = "update POproducts set pop_status=1,delivery_note='"+dn+"',received_quantity="+parseInt(getpop[0].received_quantity+req.quantity)+" where popid="+req.popid;
             var updatepop = await query(updatepopquery);          
             if(updatepop.affectedRows>0){
+                var checkpostatusquery = "select count(popid) as popcount,count(case when pop_status=1 then popid end) as reccount from POproducts where poid="+getpop[0].poid;
+                var checkpostatus = await query(checkpostatusquery);
+                if(checkpostatus.length>0){
+                    if(checkpostatus[0].popcount == checkpostatus[0].reccount){
+                        var updatepostatusquery = "update PO set po_status=1 where poid="+getpop[0].poid;
+                        var updatepostatus = await query(updatepostatusquery);
+                    }
+                }
+
                 var checkpidquery = "select * from Stock where vpid="+req.vpid;
                 var checkpid = await query(checkpidquery);
-                console.log("checkpid ==>",checkpid);
+                // console.log("checkpid ==>",checkpid);
                 if(checkpid.length>0){
                     ////Update/////
                     var totalqty = checkpid[0].quantity+req.quantity;
@@ -562,7 +572,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
 
 /////Update Day order product after po receive//////
 SCM.update_dayorders =async function update_dayorders(req) {
-    console.log("update_dayorders-->1");
+    // console.log("update_dayorders-->1");
     var getstocksquery = "select * from Stock where quantity !=0";
     var getstocks = await query(getstocksquery);
 
@@ -593,7 +603,7 @@ SCM.update_dayorders =async function update_dayorders(req) {
             status: true,
             message: "stock updated successfully"
         };
-        console.log("resobj-->2",resobj);
+        // console.log("resobj-->2",resobj);
         return resobj;
     }else{
         let resobj = {
@@ -601,7 +611,7 @@ SCM.update_dayorders =async function update_dayorders(req) {
             status: false,
             message: "no stock"
         };
-        console.log("resobj-->2",resobj);
+        // console.log("resobj-->2",resobj);
         return resobj;
     }
 };
@@ -609,18 +619,41 @@ SCM.update_dayorders =async function update_dayorders(req) {
 /////////Get Sorting List///////////
 SCM.get_soring_list =async function get_soring_list(req,result) {
     if(req.zone_id){
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',pm.Productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status)) AS products from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join Product_live as pl on pl.vpid=dop.vpid left join ProductMaster as pm on pm.pid=pl.pid where dop.scm_status=3 and dayo.zoneid="+req.zone_id+" group by dayo.id";
+        var where = "";
+        if(req.doid){
+            where = where+" and dayo.id="+req.doid;
+        }
+        if(req.date){
+            where = where+" and date(dayo.date)='"+req.date+"' ";
+        }
+
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',pm.Productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*pm.weight),'received_weight',(dop.received_quantity*pm.weight))) AS products,0 as actival_weight,0 as received_weight,0 as dispatch from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join Product_live as pl on pl.vpid=dop.vpid left join ProductMaster as pm on pm.pid=pl.pid where dayo.dayorderstatus=1 and dop.scm_status=3 and dayo.zoneid="+req.zone_id+" "+where+" group by dayo.id";        
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             for (let i = 0; i < getpolist.length; i++) {
                 getpolist[i].products = JSON.parse(getpolist[i].products);
-            }
-            let resobj = {
-                success: true,
-                status: true,
-                result: getpolist
-            };
-            result(null, resobj);
+                var productlist = getpolist[i].products;
+                for (let j = 0; j < productlist.length; j++) {
+                    getpolist[i].actival_weight = parseInt(getpolist[i].actival_weight)+parseInt(productlist[j].actival_weight);
+                    getpolist[i].received_weight =parseInt(getpolist[i].received_weight)+parseInt(productlist[j].received_weight);  
+                }
+
+                var checkscmquery = "select count(id) as dopcount,count(case when scm_status>=2 then id end) as scm2count from Dayorder_products where doid="+getpolist[i].doid;        
+                var checkscm = await query(checkscmquery);
+                if(checkscm.length>0){
+                    if(checkscm[0].dopcount == checkscm[0].scm2count){
+                        getpolist[i].dispatch = 1;
+                    }
+                }
+            }            
+            if(getpolist[0].actival_weight > 0 || getpolist[0].received_weight > 0){
+                let resobj = {
+                    success: true,
+                    status: true,
+                    result: getpolist
+                };
+                result(null, resobj);
+            }            
         }else{
             let resobj = {
                 success: true,
