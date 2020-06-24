@@ -70,6 +70,7 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
     console.log("no slot -->",cur_hr);
   }
 
+  
     if (req.payment_type==1) {
       
         var address_data = await query("Select * from Address where aid = '" +req.aid +"' and userid = '" +req.userid +"'");
