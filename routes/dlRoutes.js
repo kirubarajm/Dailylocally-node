@@ -87,7 +87,7 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 //////zen desk//////
  app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
  app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
- app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.zendesk_requestcreate}));
+ app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":dluser.zendesk_requestcreate}));
 
 
 //collections
