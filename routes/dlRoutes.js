@@ -87,13 +87,14 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 //////zen desk//////
  app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
  app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
- app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.zendesk_requestcreate}));
+ app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":dluser.zendesk_requestcreate}));
 
 
 //collections
  app.route("/user/collection").post(middleware.checkToken,routesVersioning({"1.0.0":collection.list_all_collection}));
  app.route("/user/collectiondetails").post(middleware.checkToken,routesVersioning({"1.0.0":collection.get_all_collection_by_cid_v2}));
  app.route("/user/collection/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_product_list}));
+ app.route("/user/collection/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_collection_Sub_Category_L1_list}));
 
 
 ///search
@@ -104,15 +105,14 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 //fav
 app.route("/user/fav").post(middleware.checkToken,routesVersioning({"1.0.0":fav.create_a_fav}));
 app.route("/user/fav/:id").delete(middleware.checkToken,routesVersioning({"1.0.0":fav.delete_a_fav}));
-app.route("/user/fav/productlist/:id").get(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_product_by_userid}));
+app.route("/user/fav/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_product_by_userid}));
+app.route("/user/fav/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_subcategoryL1_by_userid}));
 
 //master
-
  app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
 
  //coupon
-
 app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
 app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
 

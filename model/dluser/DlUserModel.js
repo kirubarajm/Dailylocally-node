@@ -5953,4 +5953,286 @@ Dluser.createOrderActionLog = function createOrderActionLog(logreq) {
     else return res;
   });
 };
+
+
+Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
+
+  sql.query("Select * from User where  userid = ? ",req.userid,function(err, res) {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+      } else {
+      
+        if (!res[0].zendeskuserid) {
+            
+
+          var user ={};
+          var userdetails={}
+          user.name=res[0].name;
+          user.email=res[0].email;
+          user.phone=res[0].phoneno;
+          userdetails.user = user;
+         
+          console.log("userdetails----------->",userdetails);
+
+
+        
+        
+      //   console.log(user11111);
+        var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
+        var headers= {
+          'Content-Type': 'application/json',
+          'Authorization': auth,
+         };
+         var getUrl="api/v2/users.json?"
+         var ticketURL=constant.zendesk_url+getUrl;
+    //set request parameter
+       request.post({headers: headers, url: ticketURL, json: userdetails, method: 'POST'},async function (e, r, body) {
+    
+       if (!body.error) {
+         
+         var updatedetails = await query("update User set zendeskuserid= '"+body.user.id+"' where userid = "+req.userid+ " ")
+
+         req.zendeskuserid=body.user.id;
+
+         Eatuser.new_zendesk_request_create(req);
+   
+         let resobj = {
+           success: true,
+           status: true,
+           status_code : 200,
+           message : "request created successfully",
+           
+         };
+         result(null, resobj);
+         
+       }else{
+        var getUrl="api/v2/users/search.json?query=email:"+res[0].email
+        var ticketURL=constant.zendesk_url+getUrl;
+         //var url = "https://tovogroup.zendesk.com/api/v2/users/search.json?query=email:"+res[0].email+""
+    
+         console.log("-------------------------------url",ticketURL);
+
+
+          request.get({headers: headers, url:ticketURL, method: 'GET'},async function (e, r, body) {
+            console.log("e--",e);
+            //console.log("r--",r);
+            console.log("-------------------------------body",body);
+
+            const obj = JSON.parse(body);
+            console.log("-------------------------------body.user[0].id",obj.users[0]);
+            if (obj.users[0].id) {
+            var updatedetails = await query("update User set zendeskuserid= '"+obj.users[0].id+"' where userid = "+req.userid+ " ")
+
+              req.zendeskuserid=obj.users[0].id;
+
+              Eatuser.new_zendesk_request_create(req);
+        
+              let resobj = {
+                success: true,
+                status: true,
+                status_code : 200,
+                message : "request created successfully",
+                
+              };
+              result(null, resobj);
+            
+              }
+          });
+       }
+  
+      
+       });
+
+        }else{
+
+          req.zendeskuserid=res[0].zendeskuserid;
+
+          console.log("req------------>",req);
+          Eatuser.new_zendesk_request_create(req);
+   
+          let resobj = {
+            success: true,
+            status: true,
+            status_code : 200,
+            message : "request created successfully",
+            
+          };
+          result(null, resobj);
+        }
+
+
+       
+      }
+    }
+  );
+};
+
+///Click to call////
+Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result) {   
+  var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
+  var headers= {
+    'Content-Type': 'application/json',
+    'Authorization': auth,
+   };
+  var checkTicketDetail = await query("select zendesk_ticketid from Orders where orderid="+req.orderid);
+  if(checkTicketDetail.length>0&&checkTicketDetail[0].zendesk_ticketid){
+    let resobj = {
+      success: true,
+      status: false,
+      message : "Already ticket created.",
+    };
+     result(null, resobj);
+     return;
+  }
+  sql.query("Select * from User where  userid = ? ",req.userid,async function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+      //console.log("res[0].zendeskuserid--",res[0].zendeskuserid);
+      if (!res[0].zendeskuserid) {
+        var user ={};
+        var userdetails={}
+        user.name=res[0].name;
+        user.email=res[0].email;
+        user.phone=res[0].phoneno;
+        userdetails.user = user;
+        var Userapi="/api/v2/users.json?"
+        var UserURL=constant.zendesk_url+Userapi;
+     request.post({headers: headers, url: UserURL, json: userdetails, method: 'POST'},async function (e, r, body) {
+      var objUser = body;
+      //console.log("user body--",body);
+      if (typeof body === "string") { 
+        try {
+          objUser = JSON.parse(body);
+        } catch (e) {
+            console.log("e--",e);
+        } 
+      }
+      
+     if (!objUser.error) {
+       var updatedetails = await query("update User set zendeskuserid= '"+objUser.user.id+"' where userid = "+req.userid+ " ")
+       zendeskuserid=objUser.user.id;
+       req.zendeskuserid=objUser.user.id;
+       Eatuser.zendesk_ticket_create(req,result);
+     }else{
+       var url = constant.zendesk_url+"api/v2/users/search.json?query=email:"+res[0].email+""
+       //console.log("user search url--",url);
+       request.get({headers: headers, url:url, method: 'GET'},async function (e, r, body) {
+          var obj = body;
+          console.log("user search body--",body);
+          if (typeof body === "string") {
+            try {
+              obj = JSON.parse(body);
+            } catch (e) {
+              console.log("e--",e);
+            }
+          }
+          if (obj.users[0].id) {
+            //console.log("obj.users[0].id--",obj.users[0].id);
+            var updatedetails = await query("update User set zendeskuserid= '"+obj.users[0].id+"' where userid = "+req.userid+ " ")
+            zendeskuserid=obj.users[0].id;  
+            req.zendeskuserid=obj.users[0].id;
+            Eatuser.zendesk_ticket_create(req,result);
+          }else{
+            //console.log("obj--",obj);
+            let resobj = {
+              success: true,
+              status: false,
+              message : "User not created.",
+            };
+             result(null, resobj);
+             return;
+          }
+        });
+     }
+     });
+      }else{
+        zendeskuserid=res[0].zendeskuserid;
+        req.zendeskuserid=res[0].zendeskuserid;
+        Eatuser.zendesk_ticket_create(req,result);
+      }
+    }
+  }
+  );
+};
+
+Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
+  var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
+  var headers= {
+    'Content-Type': 'application/json',
+    'Authorization': auth,
+   };
+
+   var description="";
+   var tags=['admin_ticket'];
+
+   if(req.issues.length>0){
+     for(var i=0;i<req.issues.length;i++){
+      description=description===""?(i+1)+". "+req.issues[i].issues:description+"\n"+(i+1)+". "+req.issues[i].issues
+      tags.push(req.issues[i].tag_name.replace(/\s+/g,"_"));
+     }
+   }
+
+  if(req.zendeskuserid){
+    var detail={};
+    var ticketdetails={}
+    detail.priority='high';
+    detail.subject='Ticket raised from admin for order '+req.orderid;
+    detail.description=description;
+    detail.requester_id=req.zendeskuserid;
+    detail.tags=tags;
+    ticketdetails.ticket = detail;
+    var url = constant.zendesk_url+"api/v2/tickets.json"
+    console.log("url--",url);
+    console.log("detail--",ticketdetails);
+    request.post({headers: headers, url:url, json: ticketdetails,method: 'POST'},async function (e, r, body) {
+      var obj = body;
+      console.log("Ticket boday--",body);
+      if (typeof body === "string") { 
+        try {
+          obj = JSON.parse(body);
+        } catch (e) {
+          console.log("e--",e);
+        }
+      }
+      if (obj.ticket.id){
+          var ticketid=obj.ticket.id;
+          req.ticketid=ticketid;
+          req.app_type=0;
+          req.tagid=0;
+          req.type=3;
+          var updateOrderQuery="update Orders set zendesk_ticketid= "+ticketid+" where orderid= "+req.orderid; 
+          var update_orders=await query(updateOrderQuery);
+          
+          var orderactionlog={};
+          orderactionlog.orderid=req.orderid;
+          orderactionlog.app_type=req.app_type||0;
+          orderactionlog.userid=req.admin_id || 0;
+          orderactionlog.action=5;
+          await Eatuser.createOrderActionLog(orderactionlog);
+
+                for(var i=0;i<req.issues.length;i++){
+                  req.issueid=req.issues[i].id;
+                  Eatuser.new_zendesk_request_create(req);
+                }
+
+          let resobj = {
+            success: true,
+            status: true,
+            message : "Ticket created successfully",
+          };
+         result(null, resobj);
+        }
+    });
+  }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message : "Ticket not created.Please try again later.",
+      };
+     result(null, resobj);
+  }
+}
+
 module.exports = Dluser;

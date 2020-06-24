@@ -505,7 +505,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
     
     if (product.length !==0) {
 
-      if (product[0].scm_status < 1 ) {
+      if (product[0].scm_status < 6 ) {
 
         var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
 
