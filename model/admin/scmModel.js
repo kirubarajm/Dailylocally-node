@@ -505,7 +505,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                     var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req.vpid;
                     var updatestock = await query(updatestockquery);  
                     if(updatestock.affectedRows>0){
-                        SCM.update_dayorders(req);
+                        ////SCM.auto_stock_to_dayorder(req);
                         let resobj = {
                             success: true,
                             status: true,
@@ -526,7 +526,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                     stockdata.push({"vpid":req.vpid,"quantity":req.quantity});
                     Stock.createStock(stockdata,async function(err,stockres){
                         if(stockres.status==true){
-                            SCM.update_dayorders(req);
+                            ////SCM.auto_stock_to_dayorder(req);
                             let resobj = {
                                 success: true,
                                 status: true,
@@ -552,6 +552,73 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                 result(null, resobj);
             }
             
+        }else{
+            ////Invalid popid/////
+            let resobj = {
+                success: true,
+                status: false,
+                message: "Invalid popid"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////////Update PO unreceive///////////
+SCM.update_po_unreceive =async function update_po_unreceive(req,result) {
+    if(req.zone_id && req.popid){
+        var getpopquery = "select poid,popid,vpid,received_quantity,sorting_status from POproducts where popid="+req.popid;
+        var getpop = await query(getpopquery);
+        if(getpop.length>0){
+            if(getpop[0].sorting_status==0){
+                var getstockquery = "select * from Stock where vpid="+getpop[0].vpid;
+                var getstock = await query(getstockquery);
+                if(getstock.length>0){
+                    var qty = parseInt(getstock[0].quantity) - parseInt(getpop[0].received_quantity);
+                    var updatestockquery = "update Stock set quantity="+qty+" where vpid="+getpop[0].vpid;
+                    var updatestock = await query(updatestockquery);
+                    if(updatestock.affectedRows>0){
+                        var updatepopquery = "update POproducts set pop_status=0,received_quantity=0 where popid="+req.popid;
+                        var updatepopquery = await query(updatepopquery);                    
+                    }
+                    if(updatestock.affectedRows>0 && updatepopquery.affectedRows>0){
+                        let resobj = {
+                            success: true,
+                            status: true,
+                            message: "un received successfully"
+                        };
+                        result(null, resobj);
+                    }else{
+                        let resobj = {
+                            success: true,
+                            status: false,
+                            message: "something went wrong plz try again"
+                        };
+                        result(null, resobj);
+                    }
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "no stock"
+                    };
+                    result(null, resobj);
+                }
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "pop already moved to sorting"
+                };
+                result(null, resobj);
+            }            
         }else{
             ////Invalid popid/////
             let resobj = {
@@ -837,8 +904,53 @@ SCM.close_po =async function close_po(req,result) {
     }     
 };
 
-/////Update Day order product after po receive//////
-SCM.update_dayorders =async function update_dayorders(req) {
+/////////Delete POtemp///////////
+SCM.delete_po_temp =async function delete_po_temp(req,result) {
+    if(req.zone_id && req.temppoid){   
+        var potempquery = "select * from POtemp where zoneid="+req.zone_id+" and tempid="+req.temppoid;
+        var potemp = await query(potempquery);
+        if(potemp.length>0){
+            var updatepotempquery = "update POtemp set delete_status=1 where zoneid="+req.zone_id+" and tempid="+req.temppoid;
+            var updatepotemp = await query(updatepotempquery);
+            if(updatepotemp.affectedRows>0){
+                var updateprocurmentquery = "update Procurement set pr_status=1 where zoneid="+req.zone_id+" and prid="+potemp[0].prid;
+                var updateprocurment = await query(updateprocurmentquery);
+            }
+            if(updatepotemp.affectedRows>0 && updateprocurment.affectedRows>0){
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "potemp deleted successfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "something went wrong plz try again"
+                };
+                result(null, resobj);
+            }            
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "invalid potemp id"
+            };
+            result(null, resobj);  
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////Auto stock to dayorder product assign//////
+SCM.auto_stock_to_dayorder =async function auto_stock_to_dayorder(req) {
     // console.log("update_dayorders-->1");
     var getstocksquery = "select * from Stock where quantity !=0";
     var getstocks = await query(getstocksquery);
@@ -880,6 +992,87 @@ SCM.update_dayorders =async function update_dayorders(req) {
         };
         // console.log("resobj-->2",resobj);
         return resobj;
+    }
+};
+
+/////PO to DayOrder with Sorting////////////////
+SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
+    // console.log("stpe:1");
+    if(req.zone_id && req.popid){
+        var getpopquery = "select * from POproducts where popid="+req.popid;
+        var getpop = await query(getpopquery);
+        if(getpop.length>0){
+            // console.log("stpe:2");
+            var getstockquery = "select * from Stock where vpid="+getpop[0].vpid;
+            var getstock = await query(getstockquery);
+            if(getstock.length>0){
+                var getdayorderproductquery = "select * from Dayorder_products where scm_status=2 and vpid="+getpop[0].vpid+" order by created_at";
+                var getdayorderproduct = await query(getdayorderproductquery);
+                if(getdayorderproduct.length>0){
+                    // console.log("stpe:3");
+                    for (let i = 0; i < getdayorderproduct.length && getstock[0].quantity>0; i++) {
+                        if(getdayorderproduct[i].quantity >= getdayorderproduct[i].received_quantity){
+                            var qty = parseInt(getdayorderproduct[i].quantity) - parseInt(getdayorderproduct[i].received_quantity);
+                            if(getstock[0].quantity >= qty){
+                                var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
+                                var updateDOP = await query(updateDOPquery);
+                                getstock[0].quantity = parseInt(getstock[0].quantity) - parseInt(qty);
+                            }
+                        }                        
+                    }
+                    // console.log("stpe:4");
+                    var updatestockquery = "update Stock set quantity="+getstock[0].quantity+" where vpid="+getstock[0].vpid;
+                    var updatestock = await query(updatestockquery);
+                    
+                    var updatepopquery = "update POproducts set sorting_status=1 where popid="+req.popid;
+                    var updatepop = await query(updatepopquery);
+                    
+                    if(updatestock.affectedRows>0 && updatepop.affectedRows>0){
+                        let resobj = {
+                            success: true,
+                            status: true,
+                            message: "stock updated successfully"
+                        };
+                        result(null, resobj);
+                    }else{
+                        let resobj = {
+                            success: true,
+                            status: false,
+                            message: "something went wrong plz try again1"
+                        };
+                        result(null, resobj);
+                    }                                        
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "something went wrong plz try again2"
+                    };
+                    result(null, resobj);
+                }
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "no stock"
+                };
+                result(null, resobj);
+            }
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "invalid pop id"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
     }
 };
 
