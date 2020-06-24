@@ -317,11 +317,8 @@ Order.create_customerid_by_razorpay = async function create_customerid_by_razorp
 
 
 Order.online_order_place_conformation = async function(order_place, result) {
-
   var orderdetails = await query("select * from Orders where orderid ='"+order_place.orderid+"'");
-
-  if (orderdetails.length!==0) {
-    
+  if (orderdetails.length!==0) {    
     if (orderdetails[0].payment_status==2) {   
       let resobj = {
         success: true,
@@ -330,8 +327,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
         orderid: order_place.orderid
       };
       result(null, resobj);
-    }else  if (orderdetails[0].payment_status==1) {
-      
+    }else  if (orderdetails[0].payment_status==1) {      
       let resobj = {
         success: true,
         message: "Sorry Order is already payment paid",
@@ -340,60 +336,53 @@ Order.online_order_place_conformation = async function(order_place, result) {
       };
       result(null, resobj);
     }else{
+      var transaction_time = moment().format("YYYY-MM-DD HH:mm:ss");
+      var transaction_status= order_place.payment_status === 1? 'success':'failed';
+      var orderUpdateQuery ="update Orders set payment_status = '" +order_place.payment_status +"',tsid='" + order_place.transactionid +"',transaction_status='"+transaction_status+"', transaction_time= '" +transaction_time +"' WHERE orderid = '" +
+      order_place.orderid +
+      "' ";
 
-  var transaction_time = moment().format("YYYY-MM-DD HH:mm:ss");
-  var transaction_status= order_place.payment_status === 1? 'success':'failed';
-  var orderUpdateQuery ="update Orders set payment_status = '" +order_place.payment_status +"',tsid='" + order_place.transactionid +"',transaction_status='"+transaction_status+"', transaction_time= '" +transaction_time +"' WHERE orderid = '" +
-  order_place.orderid +
-  "' ";
+      sql.query(orderUpdateQuery, async function(err, res1) {
+        if (err) {
+          result(err, null);
+        } else {
+          if (order_place.payment_status === 1) {         
+            var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
+            var getordertype = await query(getordertypequery);
+            order_place.userid=getordertype[0].userid;
+            order_place.zoneid=orderdetails[0].zoneid;
+            sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
+            
+            var getproductdetails = "select op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
+            var getproduct = await query(getproductdetails);
+            console.log("getproduct==========>",getproduct);
+            dayorder.checkdayorder(order_place,getproduct);
 
-  sql.query(orderUpdateQuery, async function(err, res1) {
-    if (err) {
-      result(err, null);
-    } else {
-      if (order_place.payment_status === 1) {
-       
-    
-         
-        var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
-        var getordertype = await query(getordertypequery);
-        order_place.userid=getordertype[0].userid;
-        order_place.zoneid=orderdetails[0].zoneid;
-        sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
-        
-        var getproductdetails = "select * from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
-        var getproduct = await query(getproductdetails);
-        //console.log("getproduct==========>",getproduct);
-        dayorder.checkdayorder(order_place,getproduct);
-
-         let resobj = {
-           success: true,
-           status: true,
-           message: "Your order placed successfully"
-         };
-         result(null, resobj);
-     
-
-       
-      }else if (order_place.payment_status === 2) {
-        let resobj = {
-          success: true,
-          message: "Sorry payment not yet be paid following order",
-          status: false,
-          orderid: order_place.orderid
-        };
-        result(null, resobj);
-      }
+            let resobj = {
+              success: true,
+              status: true,
+              message: "Your order placed successfully"
+            };
+            result(null, resobj);           
+          }else if (order_place.payment_status === 2) {
+            let resobj = {
+              success: true,
+              message: "Sorry payment not yet be paid following order",
+              status: false,
+              orderid: order_place.orderid
+            };
+            result(null, resobj);
+          }
+        }
+      });
     }
-  });
- }
   }else{
-  let resobj = {
-    success: true,
-    message: "Sorry Order is not found!",
-    status: false
-  };
-  result(null, resobj);
+    let resobj = {
+      success: true,
+      message: "Sorry Order is not found!",
+      status: false
+    };
+    result(null, resobj);
   }
 };
 

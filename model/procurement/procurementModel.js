@@ -91,9 +91,9 @@ Procurement.procurement_list=async function procurement_list(req,result) {
         where = where+" and date(pro.created_at)='"+req.date+"' ";
     }
     if(req.vpid){
-        where = where+" and pro.vpid="+req.vpid;
+        where = where+" and pro.vpid='"+req.vpid+"' or pm.Productname='"+req.vpid+"' ";
     }
-    var procurement_list_query= "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,st.quantity as boh,greatest(0,pro.quantity-st.quantity)as procurement_quantity from Procurement  pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.vpid= pm.pid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+"";    
+    var procurement_list_query= "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,if(st.quantity,st.quantity,0) as boh,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity from Procurement pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.vpid= pm.pid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+"";    
     var procurement_list = await query(procurement_list_query);
 
     if(procurement_list.length > 0){
