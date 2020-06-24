@@ -50,6 +50,7 @@ exports.online_order_place_conformation = function(req, res) {
   }
 };
 
+
 exports.live_order_list_byuserid = function(req, res) {
   Order.live_order_list_byuserid(req.params, function(err, user) {
     if (err) res.send(err);
@@ -87,16 +88,13 @@ exports.day_order_view_user = function(req, res) {
 
 exports.order_list = function(req, res) {
  
-  // if (!req.params.userid) {
-  //   res.status(400).send({ error: true,status:false, message: "Please provide userid" });
-  // }else{
   Order.day_orderlist_user(req.body, function(err, user) {
     console.log("controller");
     if (err) res.send(err);
     console.log("res", user);
     res.send(user);
   });
-//}
+
 };
 
 exports.order_list_calendar  = function(req, res) {
@@ -117,4 +115,20 @@ exports.order_list_calendar_day  = function(req, res) {
     res.send(user);
   });
 //}
+};
+
+exports.transaction_list = function(req, res) {
+  Order.order_transaction_order_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
+
+exports.day_order_transaction_view_by_user = function(req, res) {
+  Order.day_order_transaction_view_by_user(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
 };

@@ -200,8 +200,6 @@ Coupon.getAllcoupon_by_user = function getAllcoupon_by_user(userid,result) {
   
 
 
-
-
   Coupon.coupons_validate_by_userid = async function coupons_validate_by_userid(req,result) {
 
     sql.query("Select * from Coupon where active_status= 1 and coupon_name = '"+req.coupon_name+"' and expiry_date > NOW() limit 1", async function(err, res) {

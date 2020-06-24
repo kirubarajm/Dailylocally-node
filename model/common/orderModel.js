@@ -567,8 +567,6 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
             history_list =res;
            for (let i = 0; i < history_list.length; i++) {
 
-          
-
              if (history_list[i].items) {
                var items = JSON.parse(history_list[i].items);
                history_list[i].items = items;
@@ -680,6 +678,81 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
            result(null, resobj);
 
         
+        }
+      }
+    }
+  );
+};
+
+
+Order.order_transaction_order_list = async function order_transaction_order_list(req,result) {
+
+  var query = "select * from Orders where userid ='"+req.userid+"' and payment_status=1 order by created_at desc" ;
+  sql.query(query,function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "orders not found!"
+          };
+          result(null, resobj);
+        } else {
+           
+         
+           
+           let resobj = {
+             success: true,
+             status: true,
+             result: res
+           };
+
+           result(null, resobj);
+
+        
+        }
+      }
+    }
+  );
+}
+
+
+Order.day_order_transaction_view_by_user = function day_order_transaction_view_by_user(req, result) {
+
+  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dp.orderid ='"+req.orderid+"' " ;//and dm.active_status=1
+  sql.query(orderquery,async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "Order not found!",
+            result: []
+          };
+          result(null, resobj);
+        } else {
+
+               
+                if (res1[0].items) {
+                  var items = JSON.parse(res1[0].items);
+                  res1[0].items = items;
+                }
+
+          
+        
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    result: res1
+                  };
+  
+                  result(null, resobj);  
+  
+                  
         }
       }
     }

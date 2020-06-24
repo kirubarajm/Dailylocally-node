@@ -21,7 +21,7 @@ app.use(cors());
 app.use(fileUpload());
 app.use(express.static(__dirname));
 
- //importing route
+ //importing routes
 var dlRoutes = require("./routes/dlRoutes"); //importing route
 var webhookRoutes = require("./routes/webhookRoutes"); //importing webhook route
 var categoryRoutes = require("./routes/categoryRoutes");

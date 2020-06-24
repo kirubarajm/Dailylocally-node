@@ -16,6 +16,7 @@ module.exports = function(app) {
   var catalog = require("../controllers/admin/catalogController");
   var fav = require("../controllers/dluser/FavController");
   var coupon = require("../controllers/common/CouponController");
+  var darorder = require("../controllers/common/DayorderController"); 
 
 // Dl user
 app.route("/user/app/versioncheck").post(routesVersioning({"1.0.0": dluser.user_app_version_check_vid}));
@@ -59,6 +60,9 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/orderplace").post(middleware.checkToken,routesVersioning({"1.0.0":orders.online_order_place_conformation}));
 
 
+ //order  cancel
+ app.route("/user/dayorder/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.day_order_product_cancel}));
+
 
  //live order list
  app.route("/user/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byuserid}));
@@ -68,7 +72,7 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/dayorderhistory").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list}));
  app.route("/user/dayorderhistory/month").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar}));
  app.route("/user/dayorderhistory/day").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar_day}));
-
+ app.route("/user/dayorder/productdetail").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_order_Product_detail}));
 
  //Subscription_plan
  app.route("/user/subscribeplan").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_by_pid}));
@@ -111,5 +115,9 @@ app.route("/user/fav/productlist/:id").get(middleware.checkToken,routesVersionin
 
 app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
 app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
+
+//transaction
+app.route("/user/transaction").post(middleware.checkToken,routesVersioning({"1.0.0":orders.transaction_list}));
+app.route("/user/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
 
 }
