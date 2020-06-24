@@ -82,6 +82,36 @@ exports.update_po_receive = function(req, res) {
     });    
 };
 
+/////////View PO///////////
+exports.view_po = function(req, res) {    
+    SCM.view_po(req.body, function(err, ress) {
+        //console.log("view_po controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Delete PO///////////
+exports.delete_po = function(req, res) {    
+    SCM.delete_po(req.body, function(err, ress) {
+        //console.log("delete_po controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Close PO///////////
+exports.close_po = function(req, res) {    
+    SCM.close_po(req.body, function(err, ress) {
+        //console.log("close_po controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Get Sorting List///////////
 exports.get_soring_list = function(req, res) {    
     SCM.get_soring_list(req.body, function(err, ress) {

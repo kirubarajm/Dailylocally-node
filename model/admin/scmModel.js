@@ -11,6 +11,7 @@ var PO = require('../tableModels/poTableModel.js');
 var POProducts = require('../tableModels/poproductsTableModel.js');
 var QA_check_list = require("../../model/common/qualitychecklistModel.js");
 var Stock = require('../tableModels/stockTableModel.js');
+const { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } = require('constants');
 
 
 var SCM = function(scm) {};
@@ -557,6 +558,272 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                 success: true,
                 status: false,
                 message: "Invalid popid"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////////View PO/////////////
+SCM.view_po =async function view_po(req,result) {
+    if(req.zone_id && req.poid){   
+        var poviewquery = "select po.poid,po.vid,ven.name as vendor_name,po.cost,po.zoneid,po.po_status,po.created_at,po.updated_at,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'prid',pop.prid,'vpid',pop.vpid,'product_name',pm.Productname,'vid',pop.vid,'vendor_name',ven.name,'cost',pop.cost,'other_charges',pop.other_charges,'requested_quantity',pop.requested_quantity,'received_quantity',pop.received_quantity,'aditional_quantity',pop.aditional_quantity,'pop_status',pop.pop_status,'due_date',pop.due_date,'buyer_comment',pop.buyer_comment,'delivery_note',pop.delivery_note,'sorting_status',pop.sorting_status,'created_at',pop.created_at,'updated_at',pop.updated_at)) as products from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor_products_mapping as vpm on vpm.vid=po.vid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid where po.poid="+req.poid;
+        var poview = await query(poviewquery);
+        if(poview.length>0){
+            for (let i = 0; i < poview.length; i++) {
+                poview[i].products = JSON.parse(poview[i].products);                
+            }
+            let resobj = {
+                success: true,
+                status: true,
+                result: poview
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data"
+            };
+            result(null, resobj);  
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////////Delete PO///////////
+SCM.delete_po =async function delete_po(req,result) {
+    if(req.zone_id && req.poid){  
+        var getpoquery = "select * from PO where zoneid="+req.zone_id+" and poid="+req.poid;
+        var getpo = await query(getpoquery);
+        if(getpo.length>0){
+            let resobj = { };
+            //console.log("getpo[0].po_status==>",getpo[0].po_status);
+            switch (getpo[0].po_status) {
+                case 0:
+                    //////Update PO///////////////
+                    var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=0 then pop.popid end) as open_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zone_id+" and pop.poid="+req.poid;
+                    var getpop = await query(getpopquery);
+                    if(getpop.length>0){
+                        if(getpop[0].total_count == getpop[0].open_count){
+                            var updatepoquery = "update PO set po_status=4 where zoneid="+req.zone_id+" and poid="+req.poid;
+                            var updatepo = await query(updatepoquery);
+
+                            var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
+                            var updatepo = await query(updatepoquery);
+                            if(updatepo.affectedRows>0){
+                                resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "updated successfully"
+                                };
+                                result(null, resobj);
+                            }else{
+                                resobj = {
+                                    success: true,
+                                    status: false,
+                                    message: "something went wrong plz try again"
+                                };
+                                result(null, resobj);
+                            }
+                        }else{
+                            resobj = {
+                                success: true,
+                                status: false,
+                                message: "some poproducts status not match"
+                            };
+                            result(null, resobj);
+                        }
+                    }else{
+                        resobj = {
+                            success: true,
+                            status: false,
+                            message: "no data"
+                        };
+                        result(null, resobj);
+                    }                    
+                    break;
+                case 1:
+                    /////Already Received//////
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already Received"
+                    };
+                    result(null, resobj);
+                    break;
+                case 2:
+                    /////Already UN-Received//////  
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already UN-Received"
+                    };
+                    result(null, resobj);                                                                                      
+                    break;
+                case 3:
+                    /////Already Close////// 
+                    console.log("3");
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already Close"
+                    };
+                    result(null, resobj);
+                    break;
+                case 4:
+                    /////Already Delete//////
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already Delete"
+                    };
+                    result(null, resobj);
+                    break;            
+                default:
+                    ////Default//////////
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "no action performed"
+                    };
+                    result(null, resobj);
+                    break;
+            }  
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "in valid po id"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////////Close PO///////////
+SCM.close_po =async function close_po(req,result) {
+    if(req.zone_id && req.poid){  
+        var getpoquery = "select * from PO where zoneid="+req.zone_id+" and poid="+req.poid;
+        var getpo = await query(getpoquery);
+        if(getpo.length>0){
+            let resobj = { };
+            //console.log("getpo[0].po_status==>",getpo[0].po_status);
+            switch (getpo[0].po_status) {
+                case 0:
+                case 1:
+                    //////Update PO///////////////
+                    var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=1 then pop.popid end) as received_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zone_id+" and pop.poid="+req.poid;
+                    var getpop = await query(getpopquery);
+                    if(getpop.length>0){
+                        if((getpop[0].total_count>0 && getpop[0].received_count>0) && (getpop[0].total_count != getpop[0].received_count)){
+                            var updatepoquery = "update PO set po_status=3 where zoneid="+req.zone_id+" and poid="+req.poid;
+                            var updatepo = await query(updatepoquery);
+
+                            var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
+                            var updatepo = await query(updatepoquery);
+                            if(updatepo.affectedRows>0){
+                                resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "updated successfully"
+                                };
+                                result(null, resobj);
+                            }else{
+                                resobj = {
+                                    success: true,
+                                    status: false,
+                                    message: "something went wrong plz try again"
+                                };
+                                result(null, resobj);
+                            }
+                        }else if((getpop[0].total_count>0 && getpop[0].received_count>0) && (getpop[0].total_count == getpop[0].received_count)){
+                            resobj = {
+                                success: true,
+                                status: false,
+                                message: "already received"
+                            };
+                            result(null, resobj);
+                        }else{
+                            resobj = {
+                                success: true,
+                                status: false,
+                                message: "some poproducts status not match"
+                            };
+                            result(null, resobj);
+                        }
+                    }else{
+                        resobj = {
+                            success: true,
+                            status: false,
+                            message: "no data"
+                        };
+                        result(null, resobj);
+                    }                    
+                    break;
+                case 2:
+                    /////Already UN-Received//////  
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already UN-Received"
+                    };
+                    result(null, resobj);                                                                                      
+                    break;
+                case 3:
+                    /////Already Close////// 
+                    console.log("3");
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already Close"
+                    };
+                    result(null, resobj);
+                    break;
+                case 4:
+                    /////Already Delete//////
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "Already Delete"
+                    };
+                    result(null, resobj);
+                    break;            
+                default:
+                    ////Default//////////
+                    resobj = {
+                        success: true,
+                        status: false,
+                        message: "no action performed"
+                    };
+                    result(null, resobj);
+                    break;
+            }  
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "in valid po id"
             };
             result(null, resobj);
         }
