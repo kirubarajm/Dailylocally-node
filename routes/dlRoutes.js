@@ -117,6 +117,7 @@ app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({
 app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
 
 //transaction
-app.route("/user/dayorderhistory").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list}));
+app.route("/user/transaction").post(middleware.checkToken,routesVersioning({"1.0.0":orders.transaction_list}));
+app.route("/user/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
 
 }

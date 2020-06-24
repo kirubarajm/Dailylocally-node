@@ -116,3 +116,19 @@ exports.order_list_calendar_day  = function(req, res) {
   });
 //}
 };
+
+exports.transaction_list = function(req, res) {
+  Order.order_transaction_order_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
+
+exports.day_order_transaction_view_by_user = function(req, res) {
+  Order.day_order_transaction_view_by_user(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};

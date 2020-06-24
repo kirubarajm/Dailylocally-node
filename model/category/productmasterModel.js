@@ -237,11 +237,12 @@ sql.query(product_detail,async function(err, res) {
 
     for (let i = 0; i < res.length; i++) {
    
+      res[i].weight = res[i].weight * 1000;
       res[i].servicable_status=servicable_status;
       res[i].offer='offer';
-      res[i].discount_cost=false;
+      res[i].discount_cost_status=false;
       if ( res[i].discount_cost) {
-        res[i].discount_cost=true;
+        res[i].discount_cost_status=true;
       }
       
     }
