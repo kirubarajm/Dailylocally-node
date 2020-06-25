@@ -66,9 +66,12 @@ module.exports = function(app) {
   app.route("/admin/po/getpolist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_list}));
   app.route("/admin/po/getporeceivelist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_po_receive_list}));
   app.route("/admin/po/updateporeceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_receive}));
+  app.route("/admin/po/updatepounreceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_unreceive}));
+  app.route("/admin/po/popsoring").post(middleware.checkToken,routesVersioning({"1.0.0": scm.pop_to_dayorder}));
   app.route("/admin/po/view").post(middleware.checkToken,routesVersioning({"1.0.0": scm.view_po}));
   app.route("/admin/po/delete").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po}));
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
+  app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
   /////// SCM Sorting /////////////
   app.route("/admin/sorting/getsortinglist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_soring_list}));
   app.route("/admin/sorting/savesorting").post(middleware.checkToken,routesVersioning({"1.0.0": scm.save_sorting}));

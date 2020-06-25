@@ -82,6 +82,26 @@ exports.update_po_receive = function(req, res) {
     });    
 };
 
+/////////Update PO un-receive///////////
+exports.update_po_unreceive = function(req, res) {    
+    SCM.update_po_unreceive(req.body, function(err, ress) {
+        //console.log("update_po_unreceive controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////pop to dayorder soring///////////
+exports.pop_to_dayorder = function(req, res) {    
+    SCM.pop_to_dayorder(req.body, function(err, ress) {
+        //console.log("pop_to_dayorder controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////View PO///////////
 exports.view_po = function(req, res) {    
     SCM.view_po(req.body, function(err, ress) {
@@ -106,6 +126,16 @@ exports.delete_po = function(req, res) {
 exports.close_po = function(req, res) {    
     SCM.close_po(req.body, function(err, ress) {
         //console.log("close_po controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Delete POtemp///////////
+exports.delete_po_temp = function(req, res) {    
+    SCM.delete_po_temp(req.body, function(err, ress) {
+        //console.log("delete_po_temp controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);

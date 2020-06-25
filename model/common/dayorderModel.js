@@ -410,7 +410,7 @@ Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,
     if(Dayorder.doid){
         where = where+" and drs.id="+Dayorder.id;
     }
-    var getqadayorderquery = "select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'received_quantity', received_quantity)) AS products from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid='"+Dayorder.zoneid+"' "+where+" and orp.scm_status = 4 group by drs.id,drs.userid";
+    var getqadayorderquery = "select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'quantity',orp.quantity,'received_quantity',orp.received_quantity,'actival_weight',(orp.quantity*pm.weight),'received_weight',(orp.received_quantity*pm.weight))) AS products from Dayorder as drs left join Dayorder_products as orp on orp.doid=drs.id left join Product_live as pl on pl.vpid=orp.vpid left join ProductMaster as pm on pm.pid=pl.pid where drs.zoneid='"+Dayorder.zoneid+"' "+where+" and orp.scm_status = 4 group by drs.id,drs.userid";
     var get_day_order_list = await query(getqadayorderquery);
     
     if (get_day_order_list.length>0) {    
