@@ -17,7 +17,7 @@ var Procurement = function(procurement) {
 //// Procurment View //////////////
 Procurement.procurement_view=async function procurement_view(req,result) {
   if(req.zone_id && req.prid){
-    var getprecurementquery = "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,st.quantity as boh,greatest(0,pro.quantity-st.quantity)as procurement_quantity from Procurement  pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.vpid= pm.pid where pro.prid="+req.prid+" and pro.zoneid="+req.zone_id;
+    var getprecurementquery = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as unit,uom.name as unit_name,if(st.quantity,st.quantity,0) as boh,pro.quantity,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.prid="+req.prid+" and pro.zoneid="+req.zone_id;
     var getprecurement = await query(getprecurementquery);
     if(getprecurement.length > 0){
       let resobj = {  
@@ -46,7 +46,7 @@ Procurement.procurement_view=async function procurement_view(req,result) {
 
 //////// Create New Precurment //////////
 Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
-  var productquery= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.vpid"
+  var productquery= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.id"
   var get_product = await query(productquery);  
 
   if (get_product.length !=0) {
@@ -93,7 +93,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
     if(req.vpid){
         where = where+" and pro.vpid='"+req.vpid+"' or pm.Productname='"+req.vpid+"' ";
     }
-    var procurement_list_query= "select pro.*,pm.Productname,pm.uom as unit,um.name as unit_name,if(st.quantity,st.quantity,0) as boh,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity from Procurement pro left join Product_live pl on pl.vpid=pro.vpid left join ProductMaster pm on pm.pid=pl.pid left join UOM um on um.uomid=pm.uom left join Stock st on st.vpid= pm.pid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+"";    
+    var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as unit,uom.name as unit_name,if(st.quantity,st.quantity,0) as boh,pro.quantity,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+" order by pro.prid";
     var procurement_list = await query(procurement_list_query);
 
     if(procurement_list.length > 0){
