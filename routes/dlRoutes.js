@@ -59,7 +59,6 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 //online order conformation
  app.route("/user/orderplace").post(middleware.checkToken,routesVersioning({"1.0.0":orders.online_order_place_conformation}));
 
-
  //order  cancel
  app.route("/user/dayorder/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.day_order_product_cancel}));
 
@@ -82,8 +81,6 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  //promotions
   app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
-
-  
 //////zen desk//////
  app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
  app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));

@@ -11,8 +11,8 @@ var Locationtracking = require("../../model/common/usersfirstlocationtrackingMod
 var zoneModel = require("../../model/common/zoneModel.js");
 var Notification = require("../../model/common/notificationModel.js");
 var PushConstant = require("../../push/PushConstant.js");
-
 var Zendeskrequest = require("../../model/common/ZendeskRequestsModel");
+var clusteruser = require("../../model/Cluster/clusterUserModel");
 
 
 // var instance = new Razorpay({
@@ -276,6 +276,10 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                       // }
                      );
 
+                     var user = {};
+                         user.userid= res2.insertId
+                    var new_cluster = new clusteruser(user);
+                     clusteruser.create_a_cluster_user(new_cluster);
                     let resobj = {
                       success: true,
                       status: true,
@@ -285,7 +289,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                       otpstatus: true,
                       genderstatus: genderstatus,
                       registrationstatus:registrationstatus,
-                      userid: res2.insertId,
+                      userid: user.userid,
                       result: res1
                     };
 
