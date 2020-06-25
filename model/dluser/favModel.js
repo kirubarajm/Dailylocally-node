@@ -44,15 +44,27 @@ Fav.createFav = function createFav(newFav, result) {
                     
                         }
                         });
-        }else{
+             }else{
            
-           let resobj = {  
-           success: true,
-           status:false,
-           message:"Already added the Favourite"
-           };
-           result(null, resobj);
-        }
+            sql.query("DELETE FROM Fav WHERE favid=?", res[0].favid, function (err, res) {
+                            
+                if(err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                }
+                else{
+                  
+                    let resobj = {  
+                    success: true,
+                    status: true,
+                    message:'Favourite removed successfully',
+                    };
+
+                    result(null, resobj);
+            
+                }
+                });
+            }
         } 
         });                  
 };
