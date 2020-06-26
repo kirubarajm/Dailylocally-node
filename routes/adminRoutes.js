@@ -6,6 +6,7 @@ module.exports = function(app) {
   var dayorder = require("../controllers/common/DayorderController");
   var procurement = require("../controllers/procurement/ProcurementController");
   var scm = require("../controllers/admin/scmController.js");  
+  var stockkeeping = require("../controllers/admin/stockkeepingController.js");
 
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
@@ -82,5 +83,13 @@ module.exports = function(app) {
   app.route("/admin/quality/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_view}));
   app.route("/admin/quality/type").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_type_list}));
   app.route("/admin/quality/qualitycheck").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_check_product}));
+  /////// Stock Keeping /////////////
+  app.route("/admin/stockkeeping/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_list}));
+  app.route("/admin/stockkeeping/openlist").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_openlist}));
+  app.route("/admin/stockkeeping/add").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_add}));
+  app.route("/admin/stockkeeping/view").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_view}));
+  app.route("/admin/stockkeeping/edit").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_edit}));
+  app.route("/admin/stockkeeping/delete").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_delete}));
+
   
 }
