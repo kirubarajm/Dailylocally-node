@@ -94,7 +94,7 @@ StockKeeping.stockkeeping_openlist =async function stockkeeping_openlist(req,res
 /////////Stockkeeping Add///////////
 StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
     if(req.zone_id && req.stockid && req.vpid){
-        var checkSKquery = "select * from StockKeeping where zoneid="+req.zone_id+" and stockid="+req.stockid+" and vpid="+req.vpid+" and date(created_at)=CURDATE()";
+        var checkSKquery = "select * from StockKeeping where zoneid="+req.zone_id+" and stockid="+req.stockid+" and vpid="+req.vpid+" and date(created_at)=CURDATE() and delete_status=0";
         var checkS = await query(checkSKquery);
         if(checkS.length==0){
             if(req.actual_quantity){  var actual_quantity=req.actual_quantity; }else{ var actual_quantity=0; }
@@ -108,7 +108,7 @@ StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
 
             if(getother.length>0){
                 var sklist = [];
-                sklist.push({"stockid":req.stockid,"vpid":req.vpid,"product_name":getother[0].Productname,"cat_id":getother[0].catid,"category_name":getother[0].catagory_name,"scl1_id":getother[0].scl1_id,"subcategoryl1_name":getother[0].subcatL1name,"scl2_id":getother[0].scl2_id,"subcategoryl2_name":getother[0].subcatL2name,"price":getother[0].mrp,"missing_quantity":missing_quantity,"boh":getother[0].boh,"actual_quantity":actual_quantity,"in_sorting":getother[0].insorting,"type":type,"wastage":wastage,"wastage_image":wastage_image,"zone_id":req.zone_id,"commend":getother[0].Productname,"weight":getother[0].weight});
+                sklist.push({"stockid":req.stockid,"vpid":req.vpid,"product_name":getother[0].Productname,"cat_id":getother[0].catid,"category_name":getother[0].catagory_name,"scl1_id":getother[0].scl1_id,"subcategoryl1_name":getother[0].subcatL1name,"scl2_id":getother[0].scl2_id,"subcategoryl2_name":getother[0].subcatL2name,"price":getother[0].mrp,"missing_quantity":missing_quantity,"boh":getother[0].boh,"actual_quantity":actual_quantity,"in_sorting":getother[0].insorting,"type":type,"wastage":wastage,"wastage_image":wastage_image,"zoneid":req.zone_id,"commend":getother[0].Productname,"weight":getother[0].weight});
                 /////////create stockkeeping//////////
                 Stockkeeping.createStockKeeping(sklist, async function(err,skres){
                     if(skres.success==true){
@@ -202,7 +202,7 @@ StockKeeping.stockkeeping_edit =async function stockkeeping_edit(req,result) {
         var checkskquery = "select * from StockKeeping where zoneid="+req.zone_id+" and skid="+req.skid;
         var checksk = await query(checkskquery);
         if(checksk.length>0){
-            var updateskquery = "update StockKeeping set actual_quantity="+req.actual_quantity+",missing_quantity="+req.missing_quantity+",wastage="+req.wastage+",wastage_image="+req.wastage_image+",type="+req.type+" where zoneid="+req.zone_id+" and skid="+req.skid;
+            var updateskquery = "update StockKeeping set actual_quantity="+req.actual_quantity+",missing_quantity="+req.missing_quantity+",wastage="+req.wastage+",wastage_image='"+req.wastage_image+"',type="+req.type+" where zoneid="+req.zone_id+" and skid="+req.skid;
             var updatesk = await query(updateskquery);
             if(updatesk.affectedRows>0){          
                 /////////Update Stock//////////
@@ -222,13 +222,7 @@ StockKeeping.stockkeeping_edit =async function stockkeeping_edit(req,result) {
                         message: "something went wrong plz try again in Stock"
                     };
                     result(null, resobj);
-                }
-                let resobj = {
-                    success: true,
-                    status: true,
-                    mesage: "updated successfully"
-                };
-                result(null, resobj);               
+                }               
             }else{
                 let resobj = {
                     success: true,
