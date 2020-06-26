@@ -688,8 +688,8 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
 
 Order.order_transaction_order_list = async function order_transaction_order_list(req,result) {
 
-  var query = "select * from Orders where userid ='"+req.userid+"' and payment_status=1 order by created_at desc" ;
-  sql.query(query,function(err, res) {
+  var query = "select ors.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid where ors.userid ='"+req.userid+"' and ors.payment_status=1 group by ors.orderid order by ors.created_at desc  " ;
+  sql.query(query,async function(err, res) {
       if (err) {
         result(err, null);
       } else {
@@ -702,7 +702,6 @@ Order.order_transaction_order_list = async function order_transaction_order_list
           result(null, resobj);
         } else {
            
-         
            
            let resobj = {
              success: true,
@@ -722,7 +721,7 @@ Order.order_transaction_order_list = async function order_transaction_order_list
 
 Order.day_order_transaction_view_by_user = function day_order_transaction_view_by_user(req, result) {
 
-  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dp.orderid ='"+req.orderid+"' " ;//and dm.active_status=1
+  var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000 )) AS items from Orders ors left join Orderproducts dp on dp.orderid=ors.orderid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where ors.orderid ='"+req.orderid+"' " ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -737,14 +736,50 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
           result(null, resobj);
         } else {
 
-               
+     
                 if (res1[0].items) {
                   var items = JSON.parse(res1[0].items);
-                  res1[0].items = items;
+                  res1[0].items = items.item;
+                  res1[0].itemscount = items.length;
                 }
 
           
         
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    result: res1
+                  };
+  
+                  result(null, resobj);  
+  
+                  
+        }
+      }
+    }
+  );
+};
+
+
+Order.payment_check = function payment_check(orderid, result) {
+
+  var orderquery =  "select * from Orders where orderid='"+orderid+"' ";
+  sql.query(orderquery,async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length === 0) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "Order not found!",
+            result: []
+          };
+          result(null, resobj);
+        } else {
+
+              
+
                   let resobj = {
                     success: true,
                     status: true,

@@ -17,3 +17,5 @@ exports.get_all_Promotion_by_userid = function(req, res) {
       res.json(result);
     });
   };
+
+  

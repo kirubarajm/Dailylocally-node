@@ -47,3 +47,10 @@ exports.delete_a_Orderrating = function(req, res) {
     res.json({ message: "Product successfully deleted" });
   });
 };
+
+exports.day_order_rating_check = function(req, res) {
+  Orderrating.day_order_rating_check(req.body, function(err, product) {
+    if (err) res.send(err);
+    res.json(product);
+  });
+};
