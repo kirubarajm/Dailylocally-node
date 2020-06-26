@@ -452,7 +452,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zone_id+" and po.po_status=0 "+where+" group by pop.popid";
+        var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zone_id+" and po.po_status=0 "+where+" group by pop.popid";
 
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
@@ -512,13 +512,13 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                     }
                 }
 
-                var checkpidquery = "select * from Stock where vpid="+req.vpid;
+                var checkpidquery = "select * from Stock where vpid="+req.vpid+" and zoneid="+req.zone_id;
                 var checkpid = await query(checkpidquery);
                 // console.log("checkpid ==>",checkpid);
                 if(checkpid.length>0){
                     ////Update/////
                     var totalqty = checkpid[0].quantity+req.quantity;
-                    var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req.vpid;
+                    var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req.vpid+" and zoneid="+req.zone_id;
                     var updatestock = await query(updatestockquery);  
                     if(updatestock.affectedRows>0){
                         ////SCM.auto_stock_to_dayorder(req);
@@ -539,7 +539,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
                 }else{
                     ////Insert/////
                     var stockdata = [];
-                    stockdata.push({"vpid":req.vpid,"quantity":req.quantity});
+                    stockdata.push({"vpid":req.vpid,"quantity":req.quantity,"zoneid":req.zone_id});
                     Stock.createStock(stockdata,async function(err,stockres){
                         if(stockres.status==true){
                             ////SCM.auto_stock_to_dayorder(req);
@@ -968,47 +968,57 @@ SCM.delete_po_temp =async function delete_po_temp(req,result) {
 /////Auto stock to dayorder product assign//////
 SCM.auto_stock_to_dayorder =async function auto_stock_to_dayorder(req) {
     // console.log("update_dayorders-->1");
-    var getstocksquery = "select * from Stock where quantity !=0";
-    var getstocks = await query(getstocksquery);
+    if(req.zone_id){
+        var getstocksquery = "select * from Stock where quantity !=0 and zoneid="+req.zone_id;
+        var getstocks = await query(getstocksquery);
 
-    if(getstocks.length > 0){
-        for (let i = 0; i < getstocks.length; i++) {
-            var getdayorderproductsquery = "select * from Dayorder_products where vpid="+getstocks[i].vpid+" order by created_at";
-            var getdayorderproducts = await query(getdayorderproductsquery);
+        if(getstocks.length > 0){
+            for (let i = 0; i < getstocks.length; i++) {
+                var getdayorderproductsquery = "select * from Dayorder_products where vpid="+getstocks[i].vpid+" order by created_at";
+                var getdayorderproducts = await query(getdayorderproductsquery);
 
-            if(getdayorderproducts.length > 0){
-                for (let j = 0; j < getdayorderproducts.length && getstocks[i].quantity>0; j++) {
-                    if(getdayorderproducts[j].vpid == getstocks[i].vpid && getdayorderproducts[j].sorting_status != 2){
-                        if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
-                            var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
-                            if(getstocks[i].quantity >= qty){
-                                var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+" where id="+getdayorderproducts[j].id;
-                                var updateDOP = await query(updateDOPquery);
-                                getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
-                            }                            
+                if(getdayorderproducts.length > 0){
+                    for (let j = 0; j < getdayorderproducts.length && getstocks[i].quantity>0; j++) {
+                        if(getdayorderproducts[j].vpid == getstocks[i].vpid && getdayorderproducts[j].sorting_status != 2){
+                            if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
+                                var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
+                                if(getstocks[i].quantity >= qty){
+                                    var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+" where id="+getdayorderproducts[j].id;
+                                    var updateDOP = await query(updateDOPquery);
+                                    getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
+                                }                            
+                            }
                         }
                     }
-                }
-                var updatestockquery = "update Stock set quantity="+getstocks[i].quantity+" where vpid="+getstocks[i].vpid;
-                var updatestock = await query(updatestockquery);
-            }         
+                    var updatestockquery = "update Stock set quantity="+getstocks[i].quantity+" where vpid="+getstocks[i].vpid+" and zoneid="+req.zone_id;
+                    var updatestock = await query(updatestockquery);
+                }         
+            }
+            let resobj = {
+                success: true,
+                status: true,
+                message: "stock updated successfully"
+            };
+            // console.log("resobj-->2",resobj);
+            return resobj;
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no stock"
+            };
+            // console.log("resobj-->2",resobj);
+            return resobj;
         }
-        let resobj = {
-            success: true,
-            status: true,
-            message: "stock updated successfully"
-        };
-        // console.log("resobj-->2",resobj);
-        return resobj;
     }else{
         let resobj = {
             success: true,
             status: false,
-            message: "no stock"
+            message: "check your post value"
         };
         // console.log("resobj-->2",resobj);
         return resobj;
-    }
+    }    
 };
 
 /////PO to DayOrder with Sorting////////////////
@@ -1135,7 +1145,11 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
                         getpolist[i].action = 1;
                     }
                 }
-            }            
+            }
+            if (!getpolist.action) {
+                getpolist.sort((a, b) => parseFloat(a.action) - parseFloat(b.action));
+            }
+            
             if(getpolist[0].actival_weight > 0 || getpolist[0].received_weight > 0){
                 let resobj = {
                     success: true,

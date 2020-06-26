@@ -7,6 +7,7 @@ const query = util.promisify(sql.query).bind(sql);
 var Stock = function(stock) {
   this.vpid = stock.vpid;
   this.quantity = stock.quantity;
+  this.zoneid = stock.zoneid;
   this.stock_status = stock.stock_status;
 }
 
