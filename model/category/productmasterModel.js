@@ -288,7 +288,7 @@ ProductMaster.get_order_product_details = async function get_order_product_detai
   // var userdetails       = await query("select * from User where userid = "+req.userid+" ");
   
   // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
-  var product_detail = "select * from Dayorder_products where vpid='"+req.vpid+"' and doid='"+req.doid+"'"
+  var product_detail = "select dor.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where dor.vpid='"+req.vpid+"' and dor.doid='"+req.doid+"'"
 
 sql.query(product_detail,async function(err, res) {
   if (err) {
@@ -296,11 +296,6 @@ sql.query(product_detail,async function(err, res) {
   } else {
 
 
-    for (let i = 0; i < res.length; i++) {
-   
-      res[i].servicable_status=servicable_status;
-      
-    }
 
 
 
