@@ -134,10 +134,10 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
               brandquery = brandquery.slice(0, -2) + ")";
 
               if (req.catid) {
-                var product_list = "   Select distinct fa.vpid,pt.Productname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid "
+                var product_list = "   Select pt.* from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid "
 
               } else {
-                var product_list = "   Select distinct fa.vpid,pt.Productname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid    "
+                var product_list = "   Select pt.* from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid    "
 
               }
 
@@ -171,7 +171,6 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
               }
 
 
-              console.log(product_list);
                 sql.query(product_list, function (err, res) {
 
                     if(err) {
@@ -180,6 +179,21 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                     }
                     else{
                     
+                        for (let i = 0; i < res.length; i++) {
+     
+                            res[i].weight = res[i].weight * 1000;
+                            // res[i].servicable_status=servicable_status;
+                            res[i].offer='offer';
+                            res[i].discount_cost_status=false;
+                            res[i].mrp_discount_amout=0;
+                            if ( res[i].discount_cost) {
+                              res[i].discount_cost_status=true;
+                              res[i].mrp_discount_amout = res[i].mrp - res[i].discount_cost ;
+                            }
+                            
+                            
+                          }
+                      
                         
                         let resobj = {  
                         success: true,
