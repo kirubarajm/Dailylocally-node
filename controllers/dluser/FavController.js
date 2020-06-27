@@ -43,3 +43,10 @@ exports.read_a_subcategoryL1_by_userid = function(req, res) {
   });
 };
 
+
+exports.read_category_by_userid = function(req, res) {
+  Fav.read_a_category_by_userid(req.body, function(err, fav) {
+    if (err) res.send(err);
+    res.json(fav);
+  });
+};

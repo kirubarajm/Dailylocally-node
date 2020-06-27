@@ -390,7 +390,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
                 var maxdiscount = couponlist[0].maxdiscount;
                 var numberoftimes = couponlist[0].numberoftimes;
                 var discount_percent = couponlist[0].discount_percent;
-                var minprice_limit = couponlist[0].minprice_limit
+                var minprice_limit = couponlist[0].minprice_limit;
+                var coupon_name = couponlist[0].coupon_name || '';
                 var CouponsUsedlist = await query("Select * From CouponsUsed where cid = '" +req.cid +"' and userid = '" +req.userid +"' and active_status = 1");
                 var couponusedcount = CouponsUsedlist.length;
 
@@ -452,6 +453,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           calculationdetails.totalamount = totalamount;
           calculationdetails.coupon_discount_amount = coupon_discount_amount;
           calculationdetails.couponstatus = false;
+          calculationdetails.coupon_name=coupon_name;
           calculationdetails.product_cost_limit_status = product_cost_limit_status;
           calculationdetails.product_cost_limit_message = constant.product_cost_limit_message;
           calculationdetails.product_cost_limit_short_message = constant.product_cost_limit_short_message+constant.minimum_cart_value;

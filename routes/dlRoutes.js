@@ -108,6 +108,7 @@ app.route("/user/fav").post(middleware.checkToken,routesVersioning({"1.0.0":fav.
 app.route("/user/fav/:id").delete(middleware.checkToken,routesVersioning({"1.0.0":fav.delete_a_fav}));
 app.route("/user/fav/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_product_by_userid}));
 app.route("/user/fav/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_subcategoryL1_by_userid}));
+app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_category_by_userid}));
 
 //master
  app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
