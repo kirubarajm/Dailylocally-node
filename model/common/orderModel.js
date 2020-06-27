@@ -595,7 +595,7 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
 
 Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_month_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dayorderpid',op.id'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
 
   sql.query(query,function(err, res) {
       if (err) {
@@ -642,7 +642,7 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);
