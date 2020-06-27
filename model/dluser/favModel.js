@@ -155,7 +155,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.mrp DESC ";
               }
 
-              console.log(product_list);
+
                 sql.query(product_list, function (err, res) {
 
                     if(err) {
@@ -221,10 +221,9 @@ Fav.read_a_subcategoryL1_by_userid = function read_a_subcategoryL1_by_userid(req
                     
                         
                         let resobj = {  
-                        success: true,
+                        success:true,
                         status:true,
                         result:res   
-
                         };
                         result(null, resobj);
                 

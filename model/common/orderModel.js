@@ -739,7 +739,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
      
                 if (res1[0].items) {
                   var items = JSON.parse(res1[0].items);
-                  res1[0].items = items.item;
+                  res1[0].items = items;
                   res1[0].itemscount = items.length;
                 }
 

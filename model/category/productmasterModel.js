@@ -288,7 +288,7 @@ ProductMaster.get_order_product_details = async function get_order_product_detai
   // var userdetails       = await query("select * from User where userid = "+req.userid+" ");
   
   // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
-  var product_detail = "select dor.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where dor.vpid='"+req.vpid+"' and dor.doid='"+req.doid+"'"
+  var product_detail = "select dor.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where dp.vpid='"+req.vpid+"' and dp.doid='"+req.doid+"'"
 
 sql.query(product_detail,async function(err, res) {
   if (err) {
@@ -296,6 +296,11 @@ sql.query(product_detail,async function(err, res) {
   } else {
 
 
+    if (res[0].items) {
+     var items = JSON.parse(res[0].items);
+       res[0].items = items;
+      res[0].itemscount = items.length;
+    }
 
 
 
@@ -357,11 +362,12 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
   }
 
 
-  if (!req.scl2_id) {
-      req.scl2_id=0;
+  if (req.scl1_id) {
+    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"'";
+  }else{
+    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' ";
   }
 
-  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl1_id='"+req.scl1_id+"' and sub1.catid= '"+req.catid+"'";
 sql.query(product_list,async function(err, res) {
   if (err) {
     result(err, null);
