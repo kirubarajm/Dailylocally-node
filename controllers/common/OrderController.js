@@ -132,3 +132,14 @@ exports.day_order_transaction_view_by_user = function(req, res) {
   });
 
 };
+
+exports.payment_check = function(req, res) {
+
+  Order.payment_check(req.params.orderid, function(err, user) {
+    console.log("controller");
+    if (err) res.send(err);
+    console.log("res", user);
+    res.send(user);
+  });
+
+};

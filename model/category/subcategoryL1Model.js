@@ -147,8 +147,8 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
   }
 
 
-  var sub_category_query = await query("select sub1.* from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid  left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id  where cmp.cid='"+req.cid+"' group by pm.scl1_id");
-      
+  var sub_category_query = "select sub1.* from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid  left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id  where cmp.cid='"+req.cid+"' group by pm.scl1_id";
+
 sql.query(sub_category_query,async function(err, res) {
   if (err) {
     result(err, null);

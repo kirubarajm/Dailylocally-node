@@ -285,53 +285,10 @@ ProductMaster.get_order_product_details = async function get_order_product_detai
   
   var radiuslimit         = constant.radiuslimit;
   var servicable_status = true;
-  var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+  // var userdetails       = await query("select * from User where userid = "+req.userid+" ");
   
-  if (userdetails.length ==0) {
-    let resobj = {
-      success: true,
-      status:false,
-      serviceablestatus: servicable_status,
-      unserviceable_title:"Sorry! Your area is not serviceable.",
-      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-      empty_content:"Daily Locally",
-      empty_subconent :"Daily Locally",
-      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title :"Product List",
-      message : 'user not found',
-      result: []
-    };  
-    result(null, resobj);
-
-  }else{
-
-
-    var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
-    req.lat +
-    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
-    req.lon +
-    "') ) + sin( radians('" +
-    req.lat +
-    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
-
-
-  if (get_nearby_zone.length !=0) {
-    
-
-    if (get_nearby_zone[0].distance > radiuslimit) {
-      servicable_status =false;
-    }
-  }
-
- 
-
   // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
-  var product_detail = "select * from Dayorder_products where vpid='"+req.vpid+"' and doid='"+req.doid+"'"
-
-
- 
+  var product_detail = "select dor.*,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where dp.id='"+req.dayorderpid+"' and dp.doid='"+req.doid+"' group by dp.vpid"
 
 sql.query(product_detail,async function(err, res) {
   if (err) {
@@ -339,10 +296,10 @@ sql.query(product_detail,async function(err, res) {
   } else {
 
 
-    for (let i = 0; i < res.length; i++) {
-   
-      res[i].servicable_status=servicable_status;
-      
+    if (res[0].items) {
+     var items = JSON.parse(res[0].items);
+       res[0].items = items;
+      // res[0].items.quantity_info = items.length +'pkts';
     }
 
 
@@ -352,20 +309,11 @@ sql.query(product_detail,async function(err, res) {
       success: true,
       status:true,
       serviceablestatus: servicable_status,
-      unserviceable_title:"Sorry! Your area is not serviceable.",
-      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-      empty_content:"Daily Locally",
-      empty_subconent :"Daily Locally",
-      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title :"Product List",
       result: res
     };
     result(null, resobj);
   }
 });
-}
 };
 
 ProductMaster.get_collection_product_list = async function get_collection_product_list(req,result) {
@@ -414,11 +362,12 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
   }
 
 
-  if (!req.scl2_id) {
-      req.scl2_id=0;
+  if (req.scl1_id) {
+    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"'";
+  }else{
+    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' ";
   }
 
-  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl1_id='"+req.scl1_id+"' and sub1.catid= '"+req.catid+"'";
 sql.query(product_list,async function(err, res) {
   if (err) {
     result(err, null);
@@ -426,11 +375,19 @@ sql.query(product_list,async function(err, res) {
    
 
     for (let i = 0; i < res.length; i++) {
-   
+     
+      res[i].weight = res[i].weight * 1000;
       res[i].servicable_status=servicable_status;
+      res[i].offer='offer';
+      res[i].discount_cost_status=false;
+      res[i].mrp_discount_amout=0;
+      if ( res[i].discount_cost) {
+        res[i].discount_cost_status=true;
+        res[i].mrp_discount_amout = res[i].mrp - res[i].discount_cost ;
+      }
+      
       
     }
-
 
     let resobj = {
       success: true,

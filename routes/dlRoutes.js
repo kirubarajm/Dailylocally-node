@@ -72,6 +72,8 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/dayorderhistory/month").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar}));
  app.route("/user/dayorderhistory/day").post(middleware.checkToken,routesVersioning({"1.0.0":orders.order_list_calendar_day}));
  app.route("/user/dayorder/productdetail").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_order_Product_detail}));
+ app.route("/user/payment_check/:orderid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.payment_check}));
+ app.route("/user/rating/check").post(middleware.checkToken,routesVersioning({"1.0.0":datorderrating.day_order_rating_check}));
 
  //Subscription_plan
  app.route("/user/subscribeplan").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_by_pid}));
@@ -79,7 +81,9 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/subscribeplan/totalamount").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_totalamount_by_pid}));
  
  //promotions
-  app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+  // app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+  app.route("/user/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+
 
 //////zen desk//////
  app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
@@ -104,6 +108,7 @@ app.route("/user/fav").post(middleware.checkToken,routesVersioning({"1.0.0":fav.
 app.route("/user/fav/:id").delete(middleware.checkToken,routesVersioning({"1.0.0":fav.delete_a_fav}));
 app.route("/user/fav/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_product_by_userid}));
 app.route("/user/fav/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_a_subcategoryL1_by_userid}));
+app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_category_by_userid}));
 
 //master
  app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));

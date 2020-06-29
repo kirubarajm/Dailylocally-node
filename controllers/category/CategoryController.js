@@ -77,3 +77,24 @@ exports.get_category_list = function(req, res) {
       });
 
   };
+
+  exports.get_collection_category_list = function(req, res) {
+    if (!req.body.lat) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lat" });
+    } else if (!req.body.lon) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide lan" });
+    }else if (!req.body.userid) {
+      res
+        .status(400)
+        .send({ error: true, status: false, message: "Please provide userid" });
+    } else {
+        Category.get_collection_category_list(req.body, function(err, user) {
+        if (err) res.send(err);
+        res.send(user);
+      });
+    }
+  };
