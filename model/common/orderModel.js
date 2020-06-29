@@ -595,7 +595,7 @@ Order.day_orderlist_user = async function day_orderlist_user(req,result) {
 
 Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_month_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dayorderpid',op.id'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.userid ='"+req.userid+"' AND YEAR(dr.date) = '"+req.year+"' AND MONTH(dr.date) = '"+req.month+"' group by dr.id order by dr.date";
 
   sql.query(query,function(err, res) {
       if (err) {
@@ -739,7 +739,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
         } else {
 
 
-                console.log(res1[0].items);
+
      
                 if (res1[0].items) {
                   var items = JSON.parse(res1[0].items);
@@ -748,7 +748,72 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
                 }
 
           
-        
+                var cartdetails = [];
+                var totalamountinfo = {};
+                var couponinfo = {};
+                var gstinfo = {};
+                var deliverychargeinfo = {};
+                var other_charges_info = {};
+                deliverychargeinfo.low_cost_status=false//show low cost 30
+                deliverychargeinfo.default_cost_status = false;//default cost 30
+                deliverychargeinfo.infostatus = true;
+                deliverychargeinfo.infodetails = [];
+      
+                //var grandtotalinfo = {};
+      
+                totalamountinfo.title = "Total Amount";
+                totalamountinfo.charges = res1[0].price;
+                totalamountinfo.status = true;
+                totalamountinfo.infostatus = false;
+                totalamountinfo.color_code = "#ff444444";
+                totalamountinfo.low_cost_status = false;
+                totalamountinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+                totalamountinfo.default_cost=constant.convenience_charge;
+                totalamountinfo.default_cost_status=false;
+                totalamountinfo.infodetails = [];            
+                cartdetails.push(totalamountinfo);
+      
+                if (res1[0].coupon) {
+                  couponinfo.title = "Discount (-)";
+                  couponinfo.charges = coupon_discount_amount;
+                  couponinfo.status = true;
+                  couponinfo.infostatus = false;
+                  couponinfo.color_code = "#129612";
+                  couponinfo.low_cost_status = false;
+                  couponinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+                  couponinfo.default_cost=constant.convenience_charge;
+                  couponinfo.default_cost_status=false;
+                  couponinfo.infodetails = [];
+                  cartdetails.push(couponinfo);
+                }
+      
+                if (res1[0].gst !==0) {
+                  gstinfo.title = "Taxes ";//gst modified taxes 13-jan-2020
+                gstinfo.charges = res1[0].gst;
+                gstinfo.status = true;
+                gstinfo.infostatus = false;
+                gstinfo.color_code = "#ff444444";
+                gstinfo.low_cost_status = false;
+                gstinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+                gstinfo.default_cost=constant.convenience_charge;
+                gstinfo.default_cost_status=false;
+                gstinfo.infodetails = [];
+                cartdetails.push(gstinfo);
+                }
+                
+      
+                // //this code is modified 23-09-2019
+                if (res1[0].delivery_charge !==0) {
+                 
+                  deliverychargeinfo.title = "Delivery charge";
+                  deliverychargeinfo.charges = res1[0].delivery_charge;
+                  deliverychargeinfo.status = true;
+                  cartdetails.push(deliverychargeinfo);
+                }    
+                
+               
+      
+                res1[0].cartdetails=cartdetails;
                   let resobj = {
                     success: true,
                     status: true,
