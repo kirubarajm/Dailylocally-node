@@ -21,9 +21,10 @@ var StockKeeping = function(stockkeeping) {
     this.type = stockkeeping.type;
     this.wastage = stockkeeping.wastage;
     this.wastage_image = stockkeeping.wastage_image;
-    this.zone_id = stockkeeping.zone_id;
+    this.zoneid = stockkeeping.zoneid;
     this.commend = stockkeeping.commend;
     this.weight = stockkeeping.weight;
+    this.delete_status = stockkeeping.delete_status;
 }
 
 //For Admin
