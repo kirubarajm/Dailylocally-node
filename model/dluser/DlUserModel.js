@@ -6239,4 +6239,23 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
   }
 }
 
+
+
+Dluser.faq_by_type = async function faq_by_type(id, result) {
+
+  sql.query("Select * from Faq where type = ? ", id, function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+      let resobj = {
+        success: true,
+        status:true,
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+
+};
+
 module.exports = Dluser;

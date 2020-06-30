@@ -98,6 +98,13 @@ exports.get_ProductMaster_list = function(req, res) {
     
   };
 
+  exports.get_collection_brand_list = function(req, res) {
+    ProductMaster.get_collection_brand_list(req.params.cid, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
   exports.get_sort_list = function(req, res) {
     ProductMaster.get_sort_list(req.params, function(err, user) {
     //console.log("Kitchen List Sort Filter v_2_2 controller");

@@ -113,6 +113,7 @@ app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.
 //master
  app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
+ app.route("/user/collection/filterlist/:cid").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_brand_list}));
 
  //coupon
 app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
@@ -121,5 +122,6 @@ app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":c
 //transaction
 app.route("/user/transaction").post(middleware.checkToken,routesVersioning({"1.0.0":orders.transaction_list}));
 app.route("/user/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
+app.route("/user/faqs/:id").get(routesVersioning({"1.0.0":dluser.faq_by_type}));
 
 }

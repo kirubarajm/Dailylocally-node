@@ -355,20 +355,58 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
 
   if (get_nearby_zone.length !=0) {
     
-
     if (get_nearby_zone[0].distance > radiuslimit) {
       servicable_status =false;
     }
   }
 
 
+
+
+  var brandquery  = "";
+  var brandlist   = [];
+  if (req.brandlist !== undefined || req.brandlist !== null) {
+    brandlist = req.brandlist;
+  }
+
+  if (brandlist) {
+    for (let i = 0; i < brandlist.length; i++) {
+      brandquery = brandquery + " pm.brand = '" + brandlist[i].brand + "' or";
+    }
+  }
+
+  brandquery = brandquery.slice(0, -2) + ")";
+
+  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid ";
+
+
   if (req.scl1_id !=0) {
-    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"'";
+    var product_list = product_list +" where  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"' ";
   }else{
-    var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid where  cmp.cid='"+req.cid+"' ";
+    var product_list = product_list +" where  cmp.cid='"+req.cid+"' ";
+  }
+
+
+
+  if (brandlist !== undefined) {
+    product_list = product_list +"  and (" +brandquery;
+  }
+
+  if (req.sortid==1) {
+  
+    product_list = product_list+ " ORDER BY pm.Productname ASC ";
+   
+  }else if (req.sortid==2) {
+
+    product_list = product_list+ " ORDER BY pm.mrp ASC ";
+
+  }else if (req.sortid==3) {
+
+    product_list = product_list+ " ORDER BY pm.mrp DESC ";
   }
 
   console.log(product_list);
+
 sql.query(product_list,async function(err, res) {
   if (err) {
     result(err, null);
@@ -520,7 +558,26 @@ ProductMaster.get_brand_list = async function get_brand_list(req,result) {
   });
 };
 
+ProductMaster.get_collection_brand_list = async function get_collection_brand_list(cid,result) {
+  
+  var brand_list = "select pm.brand,br.brandname from Collection_mapping_product cmp left join ProductMaster as pm  on cmp.pid=pm.pid left join Brand br on br.id=pm.brand   where cmp.cid= '"+cid+"' group by  pm.brand ";
+  sql.query(brand_list,async function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+     
 
+  
+      let resobj = {
+        success: true,
+        status:true,
+        title :"brand List",
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+};
 ProductMaster.get_sort_list = async function get_sort_list(req,result) {
   
 res =  [{

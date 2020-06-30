@@ -144,3 +144,11 @@ exports.request_zendesk_ticket = function(req, res) {
     res.json(result);
   });
 };
+
+exports.faq_by_type = function(req, res) {
+  Dluser.faq_by_type(req.params.id, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
