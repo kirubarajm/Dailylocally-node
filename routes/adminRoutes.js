@@ -92,4 +92,6 @@ module.exports = function(app) {
   app.route("/admin/stockkeeping/delete").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_delete}));
 
   
+//CRM
+app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
 }
