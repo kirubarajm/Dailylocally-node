@@ -91,7 +91,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
         where = where+" and date(pro.created_at)='"+req.date+"' ";
     }
     if(req.vpid){
-        where = where+" and pro.vpid='"+req.vpid+"' or pm.Productname='"+req.vpid+"' ";
+        where = where+" and (pro.vpid='"+req.vpid+"' or dop.Productname='"+req.vpid+"') ";
     }
     var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as unit,uom.name as unit_name,if(st.quantity,st.quantity,0) as boh,pro.quantity,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+" order by pro.prid";
     var procurement_list = await query(procurement_list_query);
