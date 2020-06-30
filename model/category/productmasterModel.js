@@ -59,6 +59,10 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
   
     }else{
 
+      var productlimit = 20;
+      var page = req.page || 1;
+      var startlimit = (page - 1) * productlimit;
+    
 
       var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
       req.lat +
@@ -108,15 +112,15 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
 
     if (req.sortid==1) {
     
-      product_list = product_list+ " ORDER BY pm.Productname ASC ";
+      product_list = product_list+ " ORDER BY pm.Productname ASC limit " +startlimit +"," +productlimit +"";
      
     }else if (req.sortid==2) {
 
-      product_list = product_list+ " ORDER BY pm.mrp ASC ";
+      product_list = product_list+ " ORDER BY pm.mrp ASC limit " +startlimit +"," +productlimit +"";
 
     }else if (req.sortid==3) {
 
-      product_list = product_list+ " ORDER BY pm.mrp DESC ";
+      product_list = product_list+ " ORDER BY pm.mrp DESC limit " +startlimit +"," +productlimit +"";
     }
     // }else if (req.sortid==5) {
 
@@ -125,7 +129,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
     // }else if (req.sortid==6) {
     //   product_list = product_list+ " ORDER BY br.brandname DESC ";
     // }
-
+console.log(product_list);
   sql.query(product_list,async function(err, res) {
     if (err) {
       result(err, null);
@@ -163,7 +167,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
       //   res.sort((a, b) => b.brandname - a.brandname);
       // }
 
-  
+      var totalcount = res.length;
 
       let resobj = {
         success: true,
@@ -177,6 +181,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
         category_title :"Product List",
+        totalcount:totalcount,
         result: res
       };
       result(null, resobj);
