@@ -40,9 +40,7 @@ exports.get_ProductMaster_list = function(req, res) {
         .send({ error: true, status: false, message: "Please provide userid" });
     } else {
         ProductMaster.get_product_details(req.body, function(err, user) {
-        //console.log("Kitchen List Sort Filter v_2_2 controller");
         if (err) res.send(err);
-        //console.log("res", user);
         res.send(user);
       });
     }
