@@ -172,6 +172,16 @@ exports.move_to_qa = function(req, res) {
     });    
 };
 
+/////////Sorting Missing Quantity Report///////////
+exports.missing_quantity_report = function(req, res) {    
+    SCM.missing_quantity_report(req.body, function(err, ress) {
+        //console.log("missing_quantity_report controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 ////////Get Quality Type List/////////////
 exports.quality_type_list = function(req, res) {    
     SCM.quality_type_list(req.body, function(err, ress) {

@@ -349,6 +349,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
 ///// Day Order List ///////////
 Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
+  //console.log("Dayorde=====>",Dayorder);
   if(Dayorder){
     var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
     var where = "";
@@ -365,7 +366,8 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
-    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" group by drs.id,drs.userid";
+    console.log("getdayorder=====>",getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -441,7 +443,7 @@ Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,
     if(Dayorder.doid){
         where = where+" and drs.id="+Dayorder.id;
     }
-    var getqadayorderquery = "select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'quantity',orp.quantity,'received_quantity',orp.received_quantity,'actival_weight',(orp.quantity*orp.product_weight),'received_weight',(orp.received_quantity*orp.product_weight),'sorting_status',orp.sorting_status)) AS products from Dayorder as drs left join Dayorder_products as orp on orp.doid=drs.id where drs.zoneid='"+Dayorder.zoneid+"' "+where+" and orp.scm_status<=4 and drs.dayorderstatus=1 group by drs.id,drs.userid";
+    var getqadayorderquery = "select drs.date,drs.id as doid,drs.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dopid',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'quantity',orp.quantity,'received_quantity',orp.received_quantity,'actival_weight',(orp.quantity*orp.product_weight),'received_weight',(orp.received_quantity*orp.product_weight),'sorting_status',orp.sorting_status,'report_quantity',0)) AS products,0 as actival_weight,0 as received_weight from Dayorder as drs left join Dayorder_products as orp on orp.doid=drs.id where drs.zoneid='"+Dayorder.zoneid+"' "+where+" and orp.scm_status<=4 and drs.dayorderstatus=1 group by drs.id,drs.userid";
     var get_day_order_list = await query(getqadayorderquery);
     
     if (get_day_order_list.length>0) {    
@@ -452,7 +454,20 @@ Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,
         // get_product.forEach(element => {
         //   get_day_order_list[i].productname=element.productname;
         //   get_day_order_list[i].quantity=element.quantity;
-        // });      
+        // });  
+        
+        var productlist = get_day_order_list[i].products;
+        for (let j = 0; j < productlist.length; j++) {
+          get_day_order_list[i].actival_weight = parseInt(get_day_order_list[i].actival_weight)+parseInt(productlist[j].actival_weight);
+          get_day_order_list[i].received_weight =parseInt(get_day_order_list[i].received_weight)+parseInt(productlist[j].received_weight);
+          
+          var getreprtingqtyquery = "select if(sum(report_quantity),sum(report_quantity),0) as report_quantity from Missing_Quantity_Report where type=1 and dopid="+productlist[j].dopid;
+          var getreprtingqty = await query(getreprtingqtyquery);
+          
+          if(getreprtingqty.length>0){
+              productlist[j].report_quantity = getreprtingqty[0].report_quantity;
+          }
+        }
       }
       let resobj = {
         success: true,
