@@ -593,4 +593,54 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
      
   };
 
+
+///// crm Day Order List ///////////
+Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) {
+  if(Dayorder){
+    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+    var where = "";
+    if(Dayorder.starting_date && Dayorder.end_date){
+        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"')";
+    }else{
+      where = where+" and drs.date='"+tomorrow+"' ";
+    }
+    
+    if(Dayorder.doid){
+        where = where+" and drs.id="+Dayorder.doid;
+    }
+    if(Dayorder.dayorderstatus){
+        where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
+    }
+
+    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid";
+    var getdayorder = await query(getdayorderquery);
+    if(getdayorder.length>0){
+      for (let i = 0; i < getdayorder.length; i++) {
+        getdayorder[i].products = JSON.parse(getdayorder[i].products);
+      }        
+      let resobj = {
+        success: true,
+        status: true,
+        result: getdayorder
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message: "no data"
+      };
+      result(null, resobj);
+    }      
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);
+  }      
+};
+
+
   module.exports = Dayorder;

@@ -5716,7 +5716,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
          req.zendeskuserid=body.user.id;
 
-         Eatuser.new_zendesk_request_create(req);
+         Dluser.new_zendesk_request_create(req);
    
          let resobj = {
            success: true,
@@ -5744,7 +5744,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
               req.zendeskuserid=obj.users[0].id;
 
-              Eatuser.new_zendesk_request_create(req);
+              Dluser.new_zendesk_request_create(req);
         
               let resobj = {
                 success: true,
@@ -5767,7 +5767,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           req.zendeskuserid=res[0].zendeskuserid;
 
           console.log("req------------>",req);
-          Eatuser.new_zendesk_request_create(req);
+          Dluser.new_zendesk_request_create(req);
    
           let resobj = {
             success: true,
@@ -6053,7 +6053,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           req.zendeskuserid=res[0].zendeskuserid;
 
           console.log("req------------>",req);
-          Eatuser.new_zendesk_request_create(req);
+          Dluser.new_zendesk_request_create(req);
    
           let resobj = {
             success: true,
@@ -6238,5 +6238,24 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
      result(null, resobj);
   }
 }
+
+
+
+Dluser.faq_by_type = async function faq_by_type(id, result) {
+
+  sql.query("Select * from Faq where type = ? ", id, function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+      let resobj = {
+        success: true,
+        status:true,
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+
+};
 
 module.exports = Dluser;

@@ -12,6 +12,7 @@ var Orderrating = function(orderrating) {
   this.doid = orderrating.doid;
   this.vpid = orderrating.vpid;
   this.comments = orderrating.comments;
+  this.package_sealed=orderrating.package_sealed;
 };
 
 Orderrating.createOrderrating = function createOrderrating(Order_rating,new_vpid,result) {

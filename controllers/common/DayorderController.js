@@ -43,3 +43,12 @@ exports.day_order_product_cancel = function(req, res) {
   });
 };
  
+
+exports.crm_day_order_list = function(req, res) {
+  Dayorder.crm_day_order_list(req.body, function(err, user) {
+    //console.log("day_order_list controller");
+    if (err) res.send(err);
+    //console.log("res", ress);
+    res.send(user);
+  });
+};
