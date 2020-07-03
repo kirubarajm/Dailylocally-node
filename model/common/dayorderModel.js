@@ -593,6 +593,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     if(Dayorder.doid){
         where = where+" and drs.id="+Dayorder.doid;
     }
+    
     if(Dayorder.dayorderstatus){
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }

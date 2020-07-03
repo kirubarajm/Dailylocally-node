@@ -7,7 +7,7 @@ module.exports = function(app) {
   var procurement = require("../controllers/procurement/ProcurementController");
   var scm = require("../controllers/admin/scmController.js");  
   var stockkeeping = require("../controllers/admin/stockkeepingController.js");
-
+  var dluser = require("../controllers/dluser/DlUserController");
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
@@ -93,5 +93,6 @@ module.exports = function(app) {
 
   
 //CRM
-app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
+app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
+app.route("/admin/crm/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_User_list}));
 }

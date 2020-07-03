@@ -6258,4 +6258,53 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 
 };
 
+
+Dluser.dl_User_list = function dl_User_list(req, result) {
+  var userlimit = 20;
+  var page = req.page || 1;
+  var startlimit = (page - 1) * userlimit;
+
+  var query = "select * from User";
+
+
+ if (req.search) {
+    query =
+      query +
+      " where (phoneno LIKE  '%" +
+      req.search +
+      "%' OR email LIKE  '%" +
+      req.search +
+      "%' OR userid LIKE  '%" +
+      req.search +
+      "%' or name LIKE  '%" +
+      req.search +
+      "% ' )";
+  }
+
+  var limitquery =
+    query + " order by userid desc limit " + startlimit + "," + userlimit + " ";
+
+  sql.query(limitquery, function(err, res) {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+    } else {
+      var totalcount = 0;
+
+      sql.query(query, function(err, res2) {
+        totalcount = res2.length;
+
+        let sucobj = true;
+        let resobj = {
+          success: sucobj,
+          totalcount: totalcount,
+          result: res
+        };
+
+        result(null, resobj);
+      });
+    }
+  });
+};
+
 module.exports = Dluser;

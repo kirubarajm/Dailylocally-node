@@ -152,3 +152,13 @@ exports.faq_by_type = function(req, res) {
   });
 
 };
+
+
+exports.dl_User_list = function(req, res) {
+
+  Dluser.dl_User_list(req.body,req.headers, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};

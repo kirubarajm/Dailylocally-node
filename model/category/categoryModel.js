@@ -178,6 +178,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var product_total_weight = 0;
   var radiuslimit = constant.radiuslimit;
   var product_discount_price=0;
+  var deliverydate_status = true;
  
 
     if (currenthour < 21) {
@@ -239,6 +240,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
         if (orderitems[i].dayorderdate) {
           res1[0].deliverydate=orderitems[i].dayorderdate;
+
+          if ( res1[0].deliverydate < day) {
+            deliverydate_status = false
+          } else {
+            res1[0].deliverydate=orderitems[i].dayorderdate;
+          }
+
         }else{
 
           
@@ -315,6 +323,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           
         }
 
+     
+
 
         subscription_product_list[0].amount = amount;
 
@@ -368,6 +378,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               distance=Math.ceil(res2[0].distance * 1.6);   
 
               if (distance > 5 && distance < 7.5) {
+                console.log("test",delivery_charge);
                 delivery_charge=delivery_charge + 20;
               }else if(distance >=7.5){
                 delivery_charge=delivery_charge + 40;
@@ -572,6 +583,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             resobj.message = constant.product_cost_limit_short_message+constant.minimum_cart_value;
             resobj.status = product_cost_limit_status;
             resobj.product_cost_limit_status=product_cost_limit_status;
+          }
+
+          if (!deliverydate_status) {
+            resobj.message = "Please select feature date";
+            resobj.status = deliverydate_status
           }
 
           resobj.product_cost_limit_status=product_cost_limit_status;
