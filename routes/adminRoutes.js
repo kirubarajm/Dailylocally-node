@@ -78,11 +78,13 @@ module.exports = function(app) {
   app.route("/admin/sorting/getsortinglist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_soring_list}));
   app.route("/admin/sorting/savesorting").post(middleware.checkToken,routesVersioning({"1.0.0": scm.save_sorting}));
   app.route("/admin/sorting/movetoqa").post(middleware.checkToken,routesVersioning({"1.0.0": scm.move_to_qa}));  
+  app.route("/admin/sorting/missingquantityreport").post(middleware.checkToken,routesVersioning({"1.0.0": scm.missing_quantity_report}));  
   /////// SCM QA /////////////
   app.route("/admin/quality/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_list}));
   app.route("/admin/quality/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.quality_day_order_view}));
   app.route("/admin/quality/type").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_type_list}));
   app.route("/admin/quality/qualitycheck").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_check_product}));
+  app.route("/admin/quality/missingquantityreport").post(middleware.checkToken,routesVersioning({"1.0.0": scm.missing_quantity_report}));
   /////// Stock Keeping /////////////
   app.route("/admin/stockkeeping/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_list}));
   app.route("/admin/stockkeeping/openlist").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_openlist}));
