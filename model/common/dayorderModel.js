@@ -4,7 +4,7 @@ const util = require("util");
 const query = util.promisify(sql.query).bind(sql);
 var moment = require("moment");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
-
+var Stock = require('../tableModels/stockTableModel.js');
 
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
@@ -555,8 +555,14 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
     var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
     
     if (product.length !==0) {
-
+      var dayorder= await query("select * from Dayorder where id='"+Dayorder.doid+"'");
       if (product[0].scm_status < 6 ) {
+
+        var req = {};
+        req.quantity = product[0].quantity;
+        req.vpid = Dayorder.vpid;
+        req.zoneid = dayorder[0].zoneid;
+        Stock.cancel_product_quantity_update_Stock(req);
 
         var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
 
@@ -643,5 +649,115 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   }      
 };
 
+Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_cancel(Dayorder,vpid,result) {
+  var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
+  for (let i = 0; i < vpid.length; i++) {
+ 
+    var product= await query("select * from Dayorder_products where id='"+Dayorder.id+"' and vpid='"+vpid[i]+"'");
+
+  
+    if (product.length !==0) {
+      var dayorder= await query("select * from Dayorder where id='"+product[0].doid+"'");
+      if (product[0].scm_status < 6 ) {
+        
+        console.log(product[0].scm_status);
+        var req = {};
+        req.quantity = product[0].quantity;
+        req.vpid = vpid[i];
+        req.zoneid = dayorder[0].zoneid;
+        Stock.cancel_product_quantity_update_Stock(req);
+
+
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
+  
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'Product cancel Sucessfully'
+        };
+    
+        result(null, resobj); 
+      } else {
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'Sorry Cannot Cancel'
+        };
+    
+        result(null, resobj); 
+      }
+  
+    }else{
+  
+      let resobj = {
+        success: true,
+        status: true,
+        message : 'product not available'
+      };
+  
+      result(null, resobj); 
+    }
+
+    
+  }
+ 
+   
+};
+
+
+Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(Dayorder,vpid,result) {
+  var now = moment().format("YYYY-MM-DD,h:mm:ss a");
+
+  for (let i = 0; i < vpid.length; i++) {
+ 
+    var product= await query("select * from Dayorder_products where id='"+Dayorder.id+"' and vpid='"+vpid[i]+"'");
+
+  
+    if (product.length !==0) {
+      var dayorder= await query("select * from Dayorder where id='"+product[0].doid+"'");
+      if (product[0].scm_status < 6 ) {
+  
+        var req = {};
+        req.quantity = product[0].quantity;
+        req.vpid = vpid[i];
+        req.zoneid = dayorder[0].zoneid;
+        Stock.cancel_product_quantity_update_Stock(req);
+
+
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
+  
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'Product cancel Sucessfully'
+        };
+    
+        result(null, resobj); 
+      } else {
+        let resobj = {
+          success: true,
+          status: true,
+          message : 'Sorry Cannot Cancel'
+        };
+    
+        result(null, resobj); 
+      }
+  
+    }else{
+  
+      let resobj = {
+        success: true,
+        status: true,
+        message : 'product not available'
+      };
+  
+      result(null, resobj); 
+    }
+
+    
+  }
+ 
+   
+};
   module.exports = Dayorder;
