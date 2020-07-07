@@ -99,6 +99,7 @@ module.exports = function(app) {
   
 //CRM
 app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
+app.route("/admin/crm/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_view}));
 app.route("/admin/crm/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_User_list}));
 app.route("/admin/crm/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_product_cancel}));
 app.route("/admin/crm/bookreturn").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_book_return}));

@@ -430,6 +430,40 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
   }      
 };
 
+
+
+///// Day Order View ///////////
+Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
+  if(Dayorder.id){
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorder = await query(getdayorderquery);
+    if(getdayorder.length>0){
+      for (let i = 0; i < getdayorder.length; i++) {
+        getdayorder[i].products = JSON.parse(getdayorder[i].products);
+      }        
+      let resobj = {
+        success: true,
+        status: true,
+        result: getdayorder
+      };
+      result(null, resobj);
+    }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message: "no data"
+      };
+      result(null, resobj);
+    }      
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);
+  }      
+};
 ///////QA Day Order List ////////
 Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,result) {
   if(Dayorder.zoneid){
@@ -619,7 +653,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
-    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid";
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -661,13 +695,16 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
       var dayorder= await query("select * from Dayorder where id='"+product[0].doid+"'");
       if (product[0].scm_status < 6 ) {
         
-        console.log(product[0].scm_status);
-        var req = {};
+        if (product[0].scm_status >=1) {
+          
+          var req = {};
         req.quantity = product[0].quantity;
         req.vpid = vpid[i];
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
+        }
+        
 
         var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
   

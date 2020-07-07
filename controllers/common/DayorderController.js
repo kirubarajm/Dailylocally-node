@@ -52,6 +52,15 @@ exports.crm_day_order_list = function(req, res) {
 };
 
 
+
+exports.crm_day_order_view = function(req, res) {
+  Dayorder.crm_day_order_view(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+
 exports.admin_day_order_product_cancel = function(req, res) {
   var vpid = req.body.vpid;
   Dayorder.admin_day_order_product_cancel(req.body,vpid, function(err, result) {

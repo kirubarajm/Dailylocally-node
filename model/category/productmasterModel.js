@@ -130,7 +130,6 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
     //   product_list = product_list+ " ORDER BY br.brandname DESC ";
     // }
 
-    console.log(product_list);
   sql.query(product_list,async function(err, res) {
     if (err) {
       result(err, null);
@@ -411,7 +410,6 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
     product_list = product_list+ " ORDER BY pm.mrp DESC ";
   }
 
-  console.log(product_list);
 
 sql.query(product_list,async function(err, res) {
   if (err) {

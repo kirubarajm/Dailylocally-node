@@ -65,7 +65,7 @@ Category.get_category_list =async function get_category_list(req,result) {
   //var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
     
   // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
-  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 group by ca.catid order by ccm.orderby_category";
+  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
   sql.query(category_query, function(err, res) {
     if (err) {
       result(err, null);
@@ -98,12 +98,8 @@ Category.get_category_list =async function get_category_list(req,result) {
             collection.catid = collection.cid;
             collection.servicable_status=servicable_status;
             collection.query=0;
-           
-            // console.log("collectiontype",collectiontype.length);
-        
-             res.splice(2, 0, collection);
-
-
+                   
+            res.splice(2, 0, collection);
 
             let resobj = {
               success: true,
@@ -641,6 +637,21 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
         } else {
           subscription_product_list[0].availablity = true;
         }
+
+
+   
+     
+        subscription_product_list[0].weight = subscription_product_list[0].weight * 1000;
+        subscription_product_list[0].offer='offer';
+        subscription_product_list[0].discount_cost_status=false;
+        subscription_product_list[0].mrp_discount_amout=0;
+          if ( subscription_product_list[0].discount_cost) {
+            subscription_product_list[0].discount_cost_status=true;
+            subscription_product_list[0].mrp_discount_amout = subscription_product_list[0].mrp - subscription_product_list[0].discount_cost ;
+          }
+          
+  
+
       
         subscription_product.push(subscription_product_list[0]);
         
@@ -684,8 +695,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
           resobj.subscription_plan= res2;
           resobj.result = subscription_product; 
           result(null, resobj);
-      
-          
+                
       } 
 
     });
