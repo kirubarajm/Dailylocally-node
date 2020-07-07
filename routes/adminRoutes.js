@@ -7,13 +7,10 @@ module.exports = function(app) {
   var procurement = require("../controllers/procurement/ProcurementController");
   var scm = require("../controllers/admin/scmController.js");  
   var stockkeeping = require("../controllers/admin/stockkeepingController.js");
-<<<<<<< HEAD
   var Logistics = require("../controllers/admin/logisticsController.js");
-=======
   var dluser = require("../controllers/dluser/DlUserController");
   var darorder = require("../controllers/common/DayorderController"); 
   var darordercomments = require("../controllers/admin/orderCommentsController");
->>>>>>> c705cf367654c95ca48cd1a63c1778920e45789b
 
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
@@ -109,7 +106,7 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/qa_type_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.qa_type_list}));
   app.route("/admin/logistics/submit_qa_checklist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.submit_qa_checklist}));
 
-} 
+
 app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
 app.route("/admin/crm/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_view}));
 app.route("/admin/crm/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_User_list}));
