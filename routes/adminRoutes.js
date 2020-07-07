@@ -104,4 +104,6 @@ app.route("/admin/crm/userlist").post(middleware.checkToken,routesVersioning({"1
 app.route("/admin/crm/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_product_cancel}));
 app.route("/admin/ordercomments").post(routesVersioning({"1.0.0":darordercomments.create_OrderComments}));
 app.route("/admin/crm/bookreturn").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_book_return}));
+//re order
+app.route("/admin/crm/reorder").post(routesVersioning({"1.0.0":dayorder.reorder_order_create}));
 }

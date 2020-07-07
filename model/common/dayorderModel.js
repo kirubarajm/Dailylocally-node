@@ -436,11 +436,11 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
-        getdayorder[i].products = JSON.parse(getdayorder[i].products);
+        getdayorder[i].Products = JSON.parse(getdayorder[i].Products);
       }        
       let resobj = {
         success: true,
@@ -808,6 +808,160 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     
   }
  
+   
+};
+
+Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order_item,result) {
+ 
+  var date  = moment(Dayorder.date).format("YYYY-MM-DD");
+  var startdate =  moment().format("YYYY-MM-DD");
+  var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+
+  if ( date < startdate) {
+    let resobj = {
+      success: true,
+      status: false,
+      message : 'Please choose Feature date'
+    };
+
+    result(null, resobj); 
+  } else {
+    
+  
+
+
+  var create_comments = 're-order created'
+  var New_comments  ={};
+  New_comments.doid=Dayorder.doid;
+  // New_comments.vpid=vpid[i];
+  New_comments.comments=create_comments
+  New_comments.done_by=Dayorder.done_by
+  New_comments.type=2
+  New_comments.done_type=1
+  New_comments.Img1=Dayorder.Img1 || ''
+
+  // console.log(New_comments);
+
+  OrderComments.create_OrderComments_crm(New_comments)
+
+
+  if (dayorders.length !=0) {
+  
+    for (let i = 0; i < order_item.length; i++) {
+     
+      var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+      var getproduct = await query(getproductdetails);
+
+      
+      var new_createDayorderproducts={};
+      new_createDayorderproducts.orderid = getproduct[0].orderid;
+      new_createDayorderproducts.doid=dayorders[0].id;
+      new_createDayorderproducts.vpid=getproduct[0].vpid;
+      new_createDayorderproducts.productname=getproduct[0].productname;
+      new_createDayorderproducts.quantity=getproduct[0].quantity;
+      new_createDayorderproducts.price=getproduct[0].price;
+      /////////////////////Insert Product Details/////////
+      new_createDayorderproducts.product_hsn_code = getproduct[0].hsn_code;
+      new_createDayorderproducts.product_image = getproduct[0].product_image;
+      new_createDayorderproducts.product_brand = getproduct[0].product_brand;
+      new_createDayorderproducts.product_mrp = getproduct[0].product_brand;
+      new_createDayorderproducts.product_basiccost = getproduct[0].product_basiccost;
+      new_createDayorderproducts.product_targetedbaseprice = getproduct[0].product_targetedbaseprice;
+      new_createDayorderproducts.product_discount_cost = getproduct[0].product_discount_cost;
+      new_createDayorderproducts.product_gst = getproduct[0].product_gst;
+      new_createDayorderproducts.product_scl1_id = getproduct[0].product_scl1_id;
+      new_createDayorderproducts.product_scl2_id = getproduct[0].product_scl2_id;
+      new_createDayorderproducts.product_subscription = getproduct[0].product_subscription;
+      new_createDayorderproducts.product_weight = getproduct[0].product_weight;
+      new_createDayorderproducts.product_uom = getproduct[0].product_uom;
+      new_createDayorderproducts.product_packetsize = getproduct[0].product_packetsize;
+      new_createDayorderproducts.product_vegtype = getproduct[0].product_packetsize;
+      new_createDayorderproducts.product_tag = getproduct[0].product_tag;
+      new_createDayorderproducts.product_short_desc = getproduct[0].product_short_desc;
+      new_createDayorderproducts.product_productdetails = getproduct[0].product_productdetails;
+      new_createDayorderproducts.product_Perishable = getproduct[0].product_Perishable;
+      Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
+
+    }
+
+    let resobj = {
+      success: true,
+      status: true,
+      message : 're-order created Sucessfully'
+    };
+
+    result(null, resobj); 
+   
+  }else{
+    // console.log("dayorders.length1",dayorders.length);
+
+    for (let i = 0;i < order_item.length; i++) {
+    
+      var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+      var getproduct = await query(getproductdetails);
+
+      
+    }
+ 
+
+    var new_day_order={};
+    new_day_order.userid=Dayorder.userid;
+    new_day_order.zoneid=Dayorder.zoneid;
+    new_day_order.date=Dayorder.date;       
+    console.log("new_day_order===>1",new_day_order); 
+    sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
+      if (err) {
+        res(err, null);
+      } else {
+        var doid = result.insertId;                
+        for (let i = 0; i < order_item.length; i++) {
+     
+          var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+          var getproduct = await query(getproductdetails);
+    
+          
+          var new_createDayorderproducts={};
+          new_createDayorderproducts.orderid = getproduct[0].orderid;
+          new_createDayorderproducts.doid=doid;
+          new_createDayorderproducts.vpid=getproduct[0].vpid;
+          new_createDayorderproducts.productname=getproduct[0].productname;
+          new_createDayorderproducts.quantity=getproduct[0].quantity;
+          new_createDayorderproducts.price=getproduct[0].price;
+          /////////////////////Insert Product Details/////////
+          new_createDayorderproducts.product_hsn_code = getproduct[0].hsn_code;
+          new_createDayorderproducts.product_image = getproduct[0].product_image;
+          new_createDayorderproducts.product_brand = getproduct[0].product_brand;
+          new_createDayorderproducts.product_mrp = getproduct[0].product_brand;
+          new_createDayorderproducts.product_basiccost = getproduct[0].product_basiccost;
+          new_createDayorderproducts.product_targetedbaseprice = getproduct[0].product_targetedbaseprice;
+          new_createDayorderproducts.product_discount_cost = getproduct[0].product_discount_cost;
+          new_createDayorderproducts.product_gst = getproduct[0].product_gst;
+          new_createDayorderproducts.product_scl1_id = getproduct[0].product_scl1_id;
+          new_createDayorderproducts.product_scl2_id = getproduct[0].product_scl2_id;
+          new_createDayorderproducts.product_subscription = getproduct[0].product_subscription;
+          new_createDayorderproducts.product_weight = getproduct[0].product_weight;
+          new_createDayorderproducts.product_uom = getproduct[0].product_uom;
+          new_createDayorderproducts.product_packetsize = getproduct[0].product_packetsize;
+          new_createDayorderproducts.product_vegtype = getproduct[0].product_packetsize;
+          new_createDayorderproducts.product_tag = getproduct[0].product_tag;
+          new_createDayorderproducts.product_short_desc = getproduct[0].product_short_desc;
+          new_createDayorderproducts.product_productdetails = getproduct[0].product_productdetails;
+          new_createDayorderproducts.product_Perishable = getproduct[0].product_Perishable;
+          Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
+    
+        }
+    
+        let resobj = {
+          success: true,
+          status: true,
+          message : 're-order created Sucessfully'
+        };
+    
+        result(null, resobj); 
+      }
+    });
+  }
+}
    
 };
   module.exports = Dayorder;

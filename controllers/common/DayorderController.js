@@ -76,3 +76,37 @@ exports.admin_day_order_book_return = function(req, res) {
     res.json(result);
   });
 };
+
+exports.reorder_order_create = function(req, res) {
+  var order_item = req.body.orderitems;
+  if (!req.body.orderitems) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide orderitems"
+      });
+  }else if (!req.body.date) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide date"
+      });
+  }else if (!req.body.userid) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide userid"
+      });
+  } else {
+    Dayorder.reorder_order_create(req.body, order_item, function(err, result) {
+      if (err) res.send(err);
+      res.json(result);
+    });
+  }
+};
