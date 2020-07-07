@@ -2,21 +2,21 @@
 var sql = require("../db.js");
 
 //Task object constructor
-var QA_check_list = function(qa_check_list) {
-  this.doid = qa_check_list.doid;
-  this.vpid = qa_check_list.vpid;
-  this.qaid = qa_check_list.qaid;
+var QC_check_list = function(qc_check_list) {
+  this.doid = qc_check_list.doid;
+  this.vpid = qc_check_list.vpid;
+  this.qcid = qc_check_list.qcid;
 };
 
-QA_check_list.create_qa_check_list= function create_qa_check_list(new_check_list, result) {
-  sql.query("INSERT INTO QA_check_list set ?", new_check_list, function(err, res) {
+QC_check_list.create_qc_check_list= function create_qc_check_list(new_check_list, result) {
+  sql.query("INSERT INTO QC_check_list set ?", new_check_list, function(err, res) {
     if (err) {
       result(err, null);
     } else {
       let resobj = {
         success: true,
         status:true,
-        message: "QA_check_list created succesfully",
+        message: "QC_check_list created succesfully",
         faqid: res.insertId
       };
 
@@ -25,4 +25,4 @@ QA_check_list.create_qa_check_list= function create_qa_check_list(new_check_list
   });
 };
 
-module.exports = QA_check_list;
+module.exports = QC_check_list;

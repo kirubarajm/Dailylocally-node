@@ -9,7 +9,7 @@ let config  = require('../config.js');
 var moment  = require('moment');
 var PO = require('../tableModels/poTableModel.js');
 var POProducts = require('../tableModels/poproductsTableModel.js');
-var QA_check_list = require("../../model/common/qualitychecklistModel.js");
+var QC_check_list = require("../../model/common/qualitychecklistModel.js");
 var Stock = require('../tableModels/stockTableModel.js');
 const { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } = require('constants');
 const { parse } = require('path');
@@ -492,7 +492,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
             dn = req.delivery_note;
         }
 
-        var getpopquery = "select poid,popid,vpid,requested_quantity,(received_quantity+aditional_quantity) as total_received_quantity from POproducts where popid="+req.popid;
+        var getpopquery = "select poid,popid,vpid,requested_quantity,(received_quantity+aditional_quantity) as total_received_quantity,stand_by from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
         if(getpop.length>0){
             var checkqty = parseInt(getpop[0].total_received_quantity)+parseInt(req.quantity);
@@ -512,21 +512,23 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
             
             // var updatepopquery  = "update POproducts set pop_status=1, delivery_note='"+dn+"', received_quantity="+receive_qty+", aditional_quantity="+aditional_qty+", sorting_status="+sorting_status+", stand_by="+req.quantity+" where popid="+req.popid;
 
-            var updatepopquery  = "update POproducts set pop_status=1, delivery_note='"+dn+"', received_quantity="+receive_qty+", aditional_quantity="+aditional_qty+", stand_by="+req.quantity+" where popid="+req.popid;
+            //var updatepopquery  = "update POproducts set pop_status=1, delivery_note='"+dn+"', received_quantity="+receive_qty+", aditional_quantity="+aditional_qty+", stand_by="+req.quantity+" where popid="+req.popid;
+            var updatecount = parseInt(getpop[0].stand_by)+parseInt(req.quantity);
+            var updatepopquery  = "update POproducts set delivery_note='"+dn+"', stand_by="+updatecount+" where popid="+req.popid;
 
             var updatepop = await query(updatepopquery);          
             if(updatepop.affectedRows>0){
                 polog_data = [];
-                polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":1,"quantity":req.quantity,"delivery_note":dn,"zoneid":req.zone_id});
+                polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":1,"quantity":updatecount,"delivery_note":dn,"zoneid":req.zone_id});
                 POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){});
-                var checkpostatusquery = "select count(popid) as popcount,count(case when pop_status=1 then popid end) as reccount from POproducts where poid="+getpop[0].poid;
-                var checkpostatus = await query(checkpostatusquery);
-                if(checkpostatus.length>0){
-                    if(checkpostatus[0].popcount == checkpostatus[0].reccount){
-                        var updatepostatusquery = "update PO set po_status=1 where poid="+getpop[0].poid;
-                        var updatepostatus = await query(updatepostatusquery);
-                    }
-                }
+                // var checkpostatusquery = "select count(popid) as popcount,count(case when pop_status=1 then popid end) as reccount from POproducts where poid="+getpop[0].poid;
+                // var checkpostatus = await query(checkpostatusquery);
+                // if(checkpostatus.length>0){
+                //     if(checkpostatus[0].popcount == checkpostatus[0].reccount){
+                //         var updatepostatusquery = "update PO set po_status=1 where poid="+getpop[0].poid;
+                //         var updatepostatus = await query(updatepostatusquery);
+                //     }
+                // }
 
                 let resobj = {
                     success: true,
@@ -625,36 +627,45 @@ SCM.update_po_unreceive =async function update_po_unreceive(req,result) {
             if(getpop[0].stand_by>0){
                 if(req.quantity <= getpop[0].stand_by){
                     var standby_qty = parseInt(getpop[0].stand_by)-parseInt(req.quantity);
-                    var updatepopquery = "update POproducts set stand_by="+standby_qty+" where popid="+req.popid;
-                    var updatepopquery = await query(updatepopquery);                    
-                    if(updatepopquery.affectedRows>0){
-                        polog_data = [];
-                        polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":2,"quantity":req.quantity,"delivery_note":dn,"zoneid":req.zone_id});
-                        POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){
-                            if(polog_datares.status == true){
-                                let resobj = {
-                                    success: true,
-                                    status: true,
-                                    message: "un received successfully"
-                                };
-                                result(null, resobj);
-                            }else{
-                                let resobj = {
-                                    success: true,
-                                    status: false,
-                                    message: "something went wrong in create un receive log try again"
-                                };
-                                result(null, resobj);
-                            }
-                        });
+                    if(standby_qty>0){
+                        var updatepopquery = "update POproducts set stand_by="+standby_qty+" where popid="+req.popid;
+                        var updatepopquery = await query(updatepopquery);                    
+                        if(updatepopquery.affectedRows>0){
+                            polog_data = [];
+                            polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":2,"quantity":req.quantity,"delivery_note":dn,"zoneid":req.zone_id});
+                            POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){
+                                if(polog_datares.status == true){
+                                    let resobj = {
+                                        success: true,
+                                        status: true,
+                                        message: "un received successfully"
+                                    };
+                                    result(null, resobj);
+                                }else{
+                                    let resobj = {
+                                        success: true,
+                                        status: false,
+                                        message: "something went wrong in create un receive log try again"
+                                    };
+                                    result(null, resobj);
+                                }
+                            });
+                        }else{
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong in update po product try again"
+                            };
+                            result(null, resobj); 
+                        }
                     }else{
                         let resobj = {
                             success: true,
                             status: false,
-                            message: "something went wrong in update po product try again"
+                            message: "invalid quantity"
                         };
                         result(null, resobj); 
-                    }
+                    }                    
                 }else{
                     let resobj = {
                         success: true,
@@ -945,7 +956,7 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
 /////////View PO/////////////
 SCM.view_po =async function view_po(req,result) {
     if(req.zone_id && req.poid){   
-        var poviewquery = "select po.poid,po.vid,ven.name as vendor_name,po.cost,po.zoneid,po.po_status,po.created_at,po.updated_at,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'prid',pop.prid,'vpid',pop.vpid,'product_name',pm.Productname,'vid',pop.vid,'vendor_name',ven.name,'cost',pop.cost,'other_charges',pop.other_charges,'requested_quantity',pop.requested_quantity,'received_quantity',pop.received_quantity,'aditional_quantity',pop.aditional_quantity,'pop_status',pop.pop_status,'due_date',pop.due_date,'buyer_comment',pop.buyer_comment,'delivery_note',pop.delivery_note,'sorting_status',pop.sorting_status,'created_at',pop.created_at,'updated_at',pop.updated_at)) as products from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor_products_mapping as vpm on vpm.vid=po.vid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid where po.poid="+req.poid;
+        var poviewquery = "select po.poid,po.vid,ven.name as vendor_name,po.cost,po.zoneid,po.po_status,po.created_at,po.updated_at,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'prid',pop.prid,'vpid',pop.vpid,'product_name',pm.Productname,'vid',pop.vid,'vendor_name',ven.name,'cost',pop.cost,'other_charges',pop.other_charges,'requested_quantity',pop.requested_quantity,'received_quantity',pop.received_quantity,'aditional_quantity',pop.aditional_quantity,'pop_status',pop.pop_status,'due_date',pop.due_date,'buyer_comment',pop.buyer_comment,'delivery_note',pop.delivery_note,'sorting_status',pop.sorting_status,'created_at',pop.created_at,'updated_at',pop.updated_at)) as products from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor_products_mapping as vpm on vpm.vid=po.vid left join Vendor as ven on ven.vid=po.vid left join Product_live as pl on pl.vpid=pop.vpid left join ProductMaster as pm on pm.pid=pl.pid where po.poid="+req.poid+" group by pop.popid";
         var poview = await query(poviewquery);
         if(poview.length>0){
             for (let i = 0; i < poview.length; i++) {
@@ -1314,8 +1325,9 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
     if(req.zone_id && req.popid){
         var getpopquery = "select *,(received_quantity+aditional_quantity) as total_received_quantity from POproducts where popid="+req.popid;
         var getpop = await query(getpopquery);
+        console.log("getpop==>",getpop);
         if(getpop.length>0){
-            if(getpop[0].total_received_quantity >0){
+            //if(getpop[0].total_received_quantity >0){
                 if(getpop[0].stand_by>0){
                     var stockdata = [];
                     stockdata.push({"vpid":getpop[0].vpid,"stand_by":getpop[0].stand_by,"zone_id":req.zone_id});
@@ -1344,7 +1356,8 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                         var updatestockquery2 = "update Stock set quantity="+getstock[0].quantity+" where vpid="+getstock[0].vpid;
                                         var updatestock2 = await query(updatestockquery2);
                                         
-                                        var updatepopquery = "update POproducts set sorting_status=1,stand_by=0 where popid="+req.popid;
+                                        //// 
+                                        var updatepopquery = "update POproducts set pop_status=1,sorting_status=1,stand_by=0,received_quantity="+getpop[0].stand_by+" where popid="+req.popid;
                                         var updatepop = await query(updatepopquery);
                                         
                                         if(updatestock2.affectedRows>0 && updatepop.affectedRows>0){
@@ -1403,14 +1416,14 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                     };
                     result(null, resobj);
                 }
-            }else{
-                let resobj = {
-                    success: true,
-                    status: false,
-                    message: "plz check received quantity"
-                };
-                result(null, resobj);
-            }
+            // }else{
+            //     let resobj = {
+            //         success: true,
+            //         status: false,
+            //         message: "plz check received quantity"
+            //     };
+            //     result(null, resobj);
+            // }
         }else{
             let resobj = {
                 success: true,
@@ -1435,8 +1448,8 @@ SCM.stock_check_update =async function stock_check_update(req, result) {
         var getstockpricequery1 = "select * from Stock where vpid="+req[0].vpid+" and zoneid="+req[0].zone_id;
         var getstockprice1 = await query(getstockpricequery1);
         if(getstockprice1.length > 0){
-            var totalqty = parseInt(getstockprice[0].quantity)+parseInt(req[0].stand_by); 
-            var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req[0].vpid+" and zoneid="+req.zone_id;
+            var totalqty = parseInt(getstockprice1[0].quantity)+parseInt(req[0].stand_by); 
+            var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req[0].vpid+" and zoneid="+req[0].zone_id;
             var updatestock = await query(updatestockquery); 
             if(updatestock.affectedRows>0){
                 var getstockpricequery = "select * from Stock where vpid="+req[0].vpid+" and zoneid="+req[0].zone_id;
@@ -1605,6 +1618,7 @@ SCM.save_sorting =async function save_sorting(req,result) {
 SCM.move_to_qa =async function move_to_qa(req,result) {
     if(req.dopid_list){
         var error_poid= [];
+        var error_poid_msg = "";
         for (let i = 0; i < req.dopid_list.length; i++) {
             var getdopquery = "select * from Dayorder_products where id="+req.dopid_list[i];
             var getdop = await query(getdopquery);
@@ -1617,16 +1631,21 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
                 }
                 var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+",scm_status=4 where id="+req.dopid_list[i];
                 var updatedop = await query(updatedopquery);
+                //////// change po status from 0 to 1 ///////////
             }else{
                 error_poid.push(req.dopid_list[i]);
             }       
         }
 
+        if(error_poid.length>0){
+            error_poid_msg= error_poid+" plz sort this dayorder products";
+        }
         let resobj = {
             success: true,
             status: true,
             message: "moved to QA",
-            error_msg: error_poid+" plz sort this dayorder products"
+            error_msg: error_poid
+                       
         };
         result(null, resobj);      
     }else{
@@ -1708,13 +1727,13 @@ SCM.missing_quantity_report =async function missing_quantity_report(req,result) 
 
 ////////Get Quality Type List/////////////
 SCM.quality_type_list =async function quality_type_list(req,result) {
-    var QA_typesquery = "select * from QA_types";
-    var getpolist = await query(QA_typesquery);
-    if(getpolist.length > 0){
+    var QC_typesquery = "select * from QC_types";
+    var QC_types = await query(QC_typesquery);
+    if(QC_types.length > 0){
         let resobj = {
             success: true,
             status: true,
-            result: getpolist
+            result: QC_types
         };
         result(null, resobj);
     }else{
@@ -1732,15 +1751,15 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
     if (req.type==1) {        
         for (let i = 0; i < req.checklist.length; i++) {
             var Quality = [];
-            Quality = req.checklist[i].qaid;            
+            Quality = req.checklist[i].qcid;            
             for (let j = 0; j <  Quality.length; j++) {           
                 var check_list = {};
                 check_list.vpid =  req.checklist[i].vpid;
-                check_list.qaid = Quality[j];
+                check_list.qcid = Quality[j];
                 check_list.doid = req.doid;
               
-                var new_check_list = new QA_check_list(check_list);
-                QA_check_list.create_qa_check_list(new_check_list, function(err, res2) {
+                var new_check_list = new QC_check_list(check_list);
+                QC_check_list.create_qc_check_list(new_check_list, function(err, res2) {
                   if (err) { 
                     sql.rollback(function() {                     
                       result(err, null);
