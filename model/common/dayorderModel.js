@@ -5,6 +5,7 @@ const query = util.promisify(sql.query).bind(sql);
 var moment = require("moment");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var Stock = require('../tableModels/stockTableModel.js');
+var OrderComments = require("../../model/admin/orderCommentsModel");
 
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
@@ -697,16 +698,28 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
         
         if (product[0].scm_status >=1) {
           
-          var req = {};
+        var req = {};
         req.quantity = product[0].quantity;
         req.vpid = vpid[i];
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
         }
-        
 
-        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
+        var cancel_comments = product[0].productname+' Follwing product cancellled'
+        var New_comments  ={};
+        New_comments.doid=product[0].doid;
+        // New_comments.vpid=vpid[i];
+        New_comments.comments=cancel_comments
+        New_comments.done_by=Dayorder.cancel_by
+        New_comments.type=2
+        New_comments.done_type=1
+
+        // console.log(New_comments);
+
+        OrderComments.create_OrderComments(New_comments)
+
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"',cancel_by='"+Dayorder.cancel_by+"',cancel_type='"+Dayorder.cancel_type+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
   
         let resobj = {
           success: true,

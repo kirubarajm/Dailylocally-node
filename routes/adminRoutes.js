@@ -9,7 +9,7 @@ module.exports = function(app) {
   var stockkeeping = require("../controllers/admin/stockkeepingController.js");
   var dluser = require("../controllers/dluser/DlUserController");
   var darorder = require("../controllers/common/DayorderController"); 
-
+  var darordercomments = require("../controllers/admin/orderCommentsController");
 
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
@@ -102,5 +102,6 @@ app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning
 app.route("/admin/crm/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_view}));
 app.route("/admin/crm/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_User_list}));
 app.route("/admin/crm/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_product_cancel}));
+app.route("/admin/ordercomments").post(routesVersioning({"1.0.0":darordercomments.create_OrderComments}));
 app.route("/admin/crm/bookreturn").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_book_return}));
 }

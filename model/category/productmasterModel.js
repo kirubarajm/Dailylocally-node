@@ -105,9 +105,9 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
 
 
     if (brandlist !== undefined) {
-      product_list = product_list +" where (pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl2_id='"+req.scl2_id+"' or pm.scl1_id= '"+req.scl1_id+"') and (" +brandquery;
+      product_list = product_list +" where pl.zoneid='"+get_nearby_zone[0].id+"' and ( pl.live_status=1 and pm.scl2_id='"+req.scl2_id+"' or pm.scl1_id= '"+req.scl1_id+"') and (" +brandquery;
     }else{
-      product_list = product_list +" where (pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and pm.scl2_id='"+req.scl2_id+"' or pm.scl1_id= '"+req.scl1_id+"')"
+      product_list = product_list +" where pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and (pm.scl2_id='"+req.scl2_id+"' or pm.scl1_id= '"+req.scl1_id+"')"
     }
 
     if (req.sortid==1) {

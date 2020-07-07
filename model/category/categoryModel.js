@@ -158,12 +158,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var refund_coupon_adjustment = 0;
   var coupon_discount_amount = 0;
   var isAvaliableItem = true;
+  var isAvaliableSubscriptionItem = true;
   var calculationdetails = {};
   var couponstatus = true;
   var isAvaliablekitchen = true;
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
-  var startdate =  moment().format("YYYY-MM-DD");
+  var startdate =  moment().format("DD-MM-YYYY");
   var currenthour  = moment(day).format("HH");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
@@ -237,7 +238,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         if (orderitems[i].dayorderdate) {
           res1[0].deliverydate=orderitems[i].dayorderdate;
 
-          if ( res1[0].deliverydate < day) {
+          if ( res1[0].deliverydate < startdate) {
             deliverydate_status = false
           } else {
             res1[0].deliverydate=orderitems[i].dayorderdate;
@@ -273,12 +274,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           // console.log("active_status");
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
-          isAvaliableItem = false;
+          isAvaliableSubscriptionItem = false;
         }else if(subscription_product_list[0].subscription == 0) {
      
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
-          isAvaliableItem = false;
+          isAvaliableSubscriptionItem = false;
         } else {
           subscription_product_list[0].availablity = true;
         }
@@ -567,9 +568,14 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
           
           if (!isAvaliableItem){
-            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.message = tempmessage.slice(0, -1) + " not  available !";
             resobj.status = isAvaliableItem
           }
+          if (!isAvaliableSubscriptionItem){
+            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.status = isAvaliableSubscriptionItem
+          }
+
 
           if (!isAvaliablezone){
             resobj.message = " Service is not available! for your following address";
