@@ -49,7 +49,9 @@ var Order = function(order) {
   this.apartment_name = order.apartment_name;
   this.zoneid=order.zoneid;
   this.address_type=order.address_type;
-
+  this.coupon = order.coupon;
+  this.delivery_charge=order.delivery_charge;
+  this.discount_amount=order.discount_amount;
   
 };
 
@@ -97,6 +99,8 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                     } else {
                       var amountdata = res3.result[0].amountdetails;
 
+                      console.log(amountdata);
+
                       req.gst = amountdata.gstcharge;
                       req.price = amountdata.grandtotal;    
                       req.delivery_charge = amountdata.delivery_charge;
@@ -115,6 +119,8 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                       req.cus_pincode = address_data[0].pincode;
                       req.apartment_name = address_data[0].apartment_name;
                       req.address_type = address_data[0].address_type;
+                      req.coupon = req.cid || 0;
+                      req.discount_amount = amountdata.coupon_discount_amount;
 
 
                       var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
@@ -180,6 +186,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
 
   var new_Order = new Order(req);
 
+  console.log(new_Order);
   //snew_Order.delivery_charge = constant.deliverycharge;
   sql.beginTransaction(function(err) {
     if (err) { 
@@ -642,7 +649,7 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);

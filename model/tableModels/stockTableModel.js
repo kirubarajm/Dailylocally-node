@@ -53,4 +53,25 @@ Stock.updateStock =async function updateStock(req, result) {
     );
 };
 
+Stock.cancel_product_quantity_update_Stock =async function cancel_product_quantity_update_Stock(req, result) {
+    sql.query("UPDATE Stock SET quantity=quantity+? WHERE vpid = ? and zoneid=?", [req.quantity, req.vpid,req.zoneid],async function(err, res) {
+        if (err) {
+            let resobj = {
+                success: true,
+                status: false,
+                message: err
+            };
+            // result(null, resobj);
+        } else {
+            let resobj = {
+                success: true,
+                status: true,
+                result: res
+            };
+            // result(null, resobj);
+        }
+      }
+    );
+};
+
 module.exports = Stock;

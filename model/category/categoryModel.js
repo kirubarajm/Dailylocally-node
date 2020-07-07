@@ -64,8 +64,8 @@ Category.get_category_list =async function get_category_list(req,result) {
 
   //var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
     
-  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
-
+  // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
+  var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
   sql.query(category_query, function(err, res) {
     if (err) {
       result(err, null);
@@ -98,12 +98,8 @@ Category.get_category_list =async function get_category_list(req,result) {
             collection.catid = collection.cid;
             collection.servicable_status=servicable_status;
             collection.query=0;
-           
-            // console.log("collectiontype",collectiontype.length);
-        
-             res.splice(2, 0, collection);
-
-
+                   
+            res.splice(2, 0, collection);
 
             let resobj = {
               success: true,
@@ -162,12 +158,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var refund_coupon_adjustment = 0;
   var coupon_discount_amount = 0;
   var isAvaliableItem = true;
+  var isAvaliableSubscriptionItem = true;
   var calculationdetails = {};
   var couponstatus = true;
   var isAvaliablekitchen = true;
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
-  var startdate =  moment().format("YYYY-MM-DD");
+  var startdate =  moment().format("DD-MM-YYYY");
   var currenthour  = moment(day).format("HH");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
@@ -178,6 +175,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var product_total_weight = 0;
   var radiuslimit = constant.radiuslimit;
   var product_discount_price=0;
+  var deliverydate_status = true;
  
 
     if (currenthour < 21) {
@@ -239,6 +237,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
         if (orderitems[i].dayorderdate) {
           res1[0].deliverydate=orderitems[i].dayorderdate;
+
+          if ( res1[0].deliverydate < startdate) {
+            deliverydate_status = false
+          } else {
+            res1[0].deliverydate=orderitems[i].dayorderdate;
+          }
+
         }else{
 
           
@@ -269,12 +274,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           // console.log("active_status");
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
-          isAvaliableItem = false;
+          isAvaliableSubscriptionItem = false;
         }else if(subscription_product_list[0].subscription == 0) {
      
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
-          isAvaliableItem = false;
+          isAvaliableSubscriptionItem = false;
         } else {
           subscription_product_list[0].availablity = true;
         }
@@ -314,6 +319,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           amount = amount * getplan[0].numberofdays;
           
         }
+
+     
 
 
         subscription_product_list[0].amount = amount;
@@ -368,6 +375,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               distance=Math.ceil(res2[0].distance * 1.6);   
 
               if (distance > 5 && distance < 7.5) {
+                console.log("test",delivery_charge);
                 delivery_charge=delivery_charge + 20;
               }else if(distance >=7.5){
                 delivery_charge=delivery_charge + 40;
@@ -560,9 +568,14 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
           
           if (!isAvaliableItem){
-            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.message = tempmessage.slice(0, -1) + " not  available !";
             resobj.status = isAvaliableItem
           }
+          if (!isAvaliableSubscriptionItem){
+            resobj.message = tempmessage.slice(0, -1) + " not  available Subscription !";
+            resobj.status = isAvaliableSubscriptionItem
+          }
+
 
           if (!isAvaliablezone){
             resobj.message = " Service is not available! for your following address";
@@ -572,6 +585,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             resobj.message = constant.product_cost_limit_short_message+constant.minimum_cart_value;
             resobj.status = product_cost_limit_status;
             resobj.product_cost_limit_status=product_cost_limit_status;
+          }
+
+          if (!deliverydate_status) {
+            resobj.message = "Please select feature date";
+            resobj.status = deliverydate_status
           }
 
           resobj.product_cost_limit_status=product_cost_limit_status;
@@ -625,6 +643,21 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
         } else {
           subscription_product_list[0].availablity = true;
         }
+
+
+   
+     
+        subscription_product_list[0].weight = subscription_product_list[0].weight * 1000;
+        subscription_product_list[0].offer='offer';
+        subscription_product_list[0].discount_cost_status=false;
+        subscription_product_list[0].mrp_discount_amout=0;
+          if ( subscription_product_list[0].discount_cost) {
+            subscription_product_list[0].discount_cost_status=true;
+            subscription_product_list[0].mrp_discount_amout = subscription_product_list[0].mrp - subscription_product_list[0].discount_cost ;
+          }
+          
+  
+
       
         subscription_product.push(subscription_product_list[0]);
         
@@ -668,8 +701,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
           resobj.subscription_plan= res2;
           resobj.result = subscription_product; 
           result(null, resobj);
-      
-          
+                
       } 
 
     });

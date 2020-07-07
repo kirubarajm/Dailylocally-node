@@ -81,8 +81,8 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
  app.route("/user/subscribeplan/totalamount").post(middleware.checkToken,routesVersioning({"1.0.0":category.subscribeplan_totalamount_by_pid}));
  
  //promotions
-  // app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
-  app.route("/user/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+   app.route("/user/promotion/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
+  // app.route("/user/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
 
 //////zen desk//////
