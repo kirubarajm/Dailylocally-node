@@ -7,6 +7,7 @@ module.exports = function(app) {
   var procurement = require("../controllers/procurement/ProcurementController");
   var scm = require("../controllers/admin/scmController.js");  
   var stockkeeping = require("../controllers/admin/stockkeepingController.js");
+  var Logistics = require("../controllers/admin/logisticsController.js");
 
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
@@ -96,4 +97,10 @@ module.exports = function(app) {
   
 //CRM
 app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
-}
+
+  ///////// Logistics //////////////
+  app.route("/admin/logistics/readytodispatchlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.ready_to_dispatch_list}));
+  app.route("/admin/logistics/qa_type_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.qa_type_list}));
+  app.route("/admin/logistics/submit_qa_checklist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.submit_qa_checklist}));
+
+} 
