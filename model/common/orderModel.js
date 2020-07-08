@@ -343,6 +343,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
       };
       result(null, resobj);
     }else{
+
       var transaction_time = moment().format("YYYY-MM-DD HH:mm:ss");
       var transaction_status= order_place.payment_status === 1? 'success':'failed';
       var orderUpdateQuery ="update Orders set payment_status = '" +order_place.payment_status +"',tsid='" + order_place.transactionid +"',transaction_status='"+transaction_status+"', transaction_time= '" +transaction_time +"' WHERE orderid = '" +
@@ -361,7 +362,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
             sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
             
             var getproductdetails = "select op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
-            var getproduct = await query(getproductdetails);
+            var getproduct = await query(getproductdetails,order_place.orderid);
             console.log("getproduct==========>",getproduct);
             dayorder.checkdayorder(order_place,getproduct);
 
