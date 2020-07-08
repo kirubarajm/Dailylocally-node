@@ -19,7 +19,7 @@ var Dayorder = function(Dayorder) {
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   for (let i = 0; i < getproduct.length; i++) {
     if (getproduct[i].subscription==0) {
-      var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
+      var date  = moment(getproduct[i].deliverydate).format("DD-MM-YYYY");
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
       if (dayorders.length !=0) {
         // console.log("dayorders.length",dayorders.length);
@@ -351,44 +351,57 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 ///// Day Order List ///////////
 Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
   //console.log("Dayorde=====>",Dayorder);
+  var orderlimit = 20;
+  var page = Dayorder.page || 1;
+  var startlimit = (page - 1) * orderlimit;
   if(Dayorder){
-    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+    var tomorrow = moment().format("YYYY-MM-DD");
+    var end_date = moment(Dayorder.end_date).add(1, "days").format("YYYY-MM-DD");
     var where = "";
     if(Dayorder.starting_date && Dayorder.end_date){
 
       if (Dayorder.Slot===1) {
  
-        console.log("slot");
 
-        let datetimeA = moment(Dayorder.starting_date + " " + '23:00:00');
-        let datetimeB = moment(Dayorder.end_date + " " + '19:00:00');
-        where = where+" and (drs.date BETWEEN '"+Dayorder.datetimeA +"' AND '"+Dayorder.datetimeB +"')";
+        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
+        let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }else if(Dayorder.Slot===2){
 
         let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
         let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
-        where = where+" and (drs.date BETWEEN '"+Dayorder.datetimeA +"' AND '"+Dayorder.datetimeB +"')";
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
       else{
 
         console.log("slot3");
-        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"')";
+        where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
 
       }
     }else{
-      where = where+" and drs.date='"+tomorrow+"' ";
+      where = where+" and  DATE(drs.created_at) = CURDATE()";
+    }
+
+
+    if(Dayorder.id){
+        where = where+" and drs.id="+Dayorder.id;
     }
     
-    if(Dayorder.doid){
-        where = where+" and drs.id="+Dayorder.doid;
+    if (Dayorder.trip_id) {
+      where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
     }
-    if(Dayorder.dayorderstatus){
+    if(Dayorder.dayorderstatus !=null){
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
-    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" group by drs.id,drs.userid";
+    if (Dayorder.usersearch) {
+      where = where+" and (us.phoneno like '%"+Dayorder.usersearch+"%' or us.email like '%"+Dayorder.usersearch+"%' or us.name like '%"+Dayorder.usersearch+"%') ";
+    }
+    where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +orderlimit +" ";
+
+    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" ";
     console.log("getdayorder=====>",getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -684,23 +697,23 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 
         let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
         let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }else if(Dayorder.Slot===2){
 
         let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
         let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
       else{
 
         console.log("slot3");
-        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
+        where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
 
       }
     }else{
-      where = where+" and drs.date='"+tomorrow+"' ";
+      where = where+" and  DATE(drs.created_at) = CURDATE() ";
     }
 
 

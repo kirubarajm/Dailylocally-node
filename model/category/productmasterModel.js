@@ -59,7 +59,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
   
     }else{
 
-      var productlimit = 20;
+      var productlimit = 5;
       var page = req.page || 1;
       var startlimit = (page - 1) * productlimit;
     

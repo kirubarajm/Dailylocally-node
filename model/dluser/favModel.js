@@ -141,7 +141,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
 
               }
 
-              if (req.catid) {
+              if (req.catid !=0) {
                 product_list = product_list +"  where fa.userid  = '"+req.userid+"' and cat.catid='"+req.catid+"'";
 
               } else {
@@ -170,7 +170,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.mrp DESC ";
               }
 
-
+              console.log(product_list);
                 sql.query(product_list, function (err, res) {
 
                     if(err) {
