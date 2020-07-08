@@ -360,14 +360,14 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
     var where = "";
     if(Dayorder.starting_date && Dayorder.end_date){
 
-      if (Dayorder.Slot===1) {
+      if (Dayorder.slot===1) {
  
 
         let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
         let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
         where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
-      }else if(Dayorder.Slot===2){
+      }else if(Dayorder.slot===2){
 
         let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
         let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
@@ -376,7 +376,6 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
       }
       else{
 
-        console.log("slot3");
         where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
 
       }
@@ -686,7 +685,6 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
     var end_date = moment(Dayorder.end_date).add(1, "days").format("YYYY-MM-DD");
 
-    console.log(end_date);
     var where = "";
     // if(Dayorder.starting_date && Dayorder.end_date){
     //     where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
@@ -696,17 +694,18 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     
     if(Dayorder.starting_date && Dayorder.end_date){
 
-      if (Dayorder.Slot===1) {
+      if (Dayorder.slot===1) {
  
 
         let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
         let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
         where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
-      }else if(Dayorder.Slot===2){
+      }else if(Dayorder.slot===2){
 
-        let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
-        let datetimeB = moment(end_date + " " + '23:00:00');
+        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 19:00:00");
+        let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");
+      
         where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
@@ -719,23 +718,9 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     }else{
 
 
-      // if (Dayorder.Slot===1) {
- 
-
-      //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
-      //   let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
-      //   where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
-
-      // }else if(Dayorder.Slot===2){
-
-      //   let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
-      //   let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
-      //   where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
-
-      // }else{
         where = where+" and  DATE(drs.created_at) = CURDATE() ";
 
-      // }
+
 
     }
 
@@ -792,28 +777,27 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_cancel(Dayorder,vpid,result) {
   var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
+  var product= await query("select * from Dayorder_products where id IN('"+vpid+"') and scm_status >=6 ");
+  if (product.length==0 ) {
   for (let i = 0; i < vpid.length; i++) {
  
-    var product= await query("select * from Dayorder_products where id='"+Dayorder.id+"' and vpid='"+vpid[i]+"'");
+    var product1= await query("select * from Dayorder_products where id ='"+vpid[i]+"' ");
+      var dayorder= await query("select * from Dayorder where id='"+product1[0].doid+"'");
 
-  
-    if (product.length !==0) {
-      var dayorder= await query("select * from Dayorder where id='"+product[0].doid+"'");
-      if (product[0].scm_status < 6 ) {
         
-        if (product[0].scm_status >=1) {
+        if (product1[0].scm_status >=1) {
           
         var req = {};
-        req.quantity = product[0].quantity;
-        req.vpid = vpid[i];
+        req.quantity = product1[0].quantity;
+        req.vpid = product1[0].vpid;
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
         }
 
-        var cancel_comments = product[0].productname+' Follwing product cancellled'
+        var cancel_comments = product1[0].productname+' Following product cancellled'
         var New_comments  ={};
-        New_comments.doid=product[0].doid;
+        New_comments.doid=product1[0].doid;
         // New_comments.vpid=vpid[i];
         New_comments.comments=cancel_comments
         New_comments.done_by=Dayorder.cancel_by
@@ -822,42 +806,36 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 
         // console.log(New_comments);
 
-        OrderComments.create_OrderComments(New_comments)
+        OrderComments.create_OrderComments_crm(New_comments)
 
-        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"',cancel_by='"+Dayorder.cancel_by+"',cancel_type='"+Dayorder.cancel_type+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"',cancel_by='"+Dayorder.cancel_by+"',cancel_type='"+Dayorder.cancel_type+"' where doid='"+Dayorder.doid+"' and id='"+vpid[i]+"'");
   
-        let resobj = {
-          success: true,
-          status: true,
-          message : 'Product cancel Sucessfully'
-        };
-    
-        result(null, resobj); 
-      } else {
-        let resobj = {
-          success: true,
-          status: true,
-          message : 'Sorry Cannot Cancel'
-        };
-    
-        result(null, resobj); 
-      }
-  
-    }else{
-  
-      let resobj = {
-        success: true,
-        status: true,
-        message : 'product not available'
-      };
-  
-      result(null, resobj); 
-    }
-
     
   }
- 
-   
+  var day_order_product = await query("select * from  Dayorder_products where doid='"+Dayorder.doid+"' and scm_status < 11 ");
+
+  if (day_order_product.length ==0) {
+    var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"'");
+  }
+
+  let resobj = {
+    success: true,
+    status: true,
+    message : 'Product cancel Sucessfully'
+  };
+
+  result(null, resobj); 
+} else {
+  let resobj = {
+    success: true,
+    status: true,
+    message : 'Sorry Cannot Cancel Product Is ready to dispatch',
+    product : product
+  };
+
+  result(null, resobj); 
+}
+  
 };
 
 

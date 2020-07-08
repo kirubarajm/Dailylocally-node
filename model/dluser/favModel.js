@@ -294,7 +294,7 @@ Fav.read_a_category_by_userid = function read_a_category_by_userid(req,result) {
             }else{
 
 
-            var query = "Select cat.* from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid where fa.userid  = '"+req.userid+"'  group by fa.vpid "
+            var query = "Select cat.* from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid where fa.userid  = '"+req.userid+"'  group by cat.catid"
 
                 sql.query(query, function (err, res) {
 

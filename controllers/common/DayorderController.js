@@ -69,8 +69,8 @@ exports.crm_day_order_view = function(req, res) {
 
 
 exports.admin_day_order_product_cancel = function(req, res) {
-  var vpid = req.body.vpid;
-  Dayorder.admin_day_order_product_cancel(req.body,vpid, function(err, result) {
+  var id = req.body.id;
+  Dayorder.admin_day_order_product_cancel(req.body,id, function(err, result) {
     if (err) res.send(err);
     res.json(result);
   });

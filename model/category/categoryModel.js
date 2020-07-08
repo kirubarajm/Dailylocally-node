@@ -241,7 +241,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           if ( res1[0].deliverydate < startdate) {
             deliverydate_status = false
           } else {
-            res1[0].deliverydate=orderitems[i].dayorderdate;
+            res1[0].deliverydate= moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"); ;
           }
 
         }else{
