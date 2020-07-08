@@ -6264,12 +6264,12 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
   var page = req.page || 1;
   var startlimit = (page - 1) * userlimit;
 
-  var query = "select * from User";
+  var userquery = "select * from User";
 
 
  if (req.search) {
-    query =
-      query +
+  userquery =
+  userquery +
       " where (phoneno LIKE  '%" +
       req.search +
       "%' OR email LIKE  '%" +
@@ -6281,17 +6281,25 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       "% ' )";
   }
 
-  var limitquery =
-    query + " order by userid desc limit " + startlimit + "," + userlimit + " ";
+  var userquery = userquery + " order by userid desc limit " + startlimit + "," + userlimit + " ";
 
-  sql.query(limitquery, function(err, res) {
+  sql.query(userquery,async function(err, res) {
     if (err) {
       console.log("error: ", err);
       result(err, null);
     } else {
       var totalcount = 0;
 
-      sql.query(query, function(err, res2) {
+
+      for (let i = 0; i < res.length; i++) {
+      
+        var address_details  = await query("select * from Address where userid= '"+res[i].userid+"' order by aid desc limit 1");
+
+        res[i].address_details=address_details;
+      }
+
+
+      sql.query(userquery, function(err, res2) {
         totalcount = res2.length;
 
         let sucobj = true;
@@ -6306,5 +6314,44 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
     }
   });
 };
+
+Dluser.dl_user_send_message = function dl_user_send_message(User, result) { 
+  // console.log(newUser.otpcode);  
+  
+  var otpurl =
+  "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
+  User.phoneno +
+  "&msg=<%23>" +User.message 
+
+  request({method: "GET",rejectUnauthorized: false,url: otpurl},function(error, response, body) {
+    if (error) {
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+  
+      if (body) {
+        let resobj = {
+          success: true,
+          status: true,
+          message: "message sent successfully",
+        };
+
+        result(null, resobj);
+
+      } else {
+        let resobj = {
+          success: true,
+          status: false,
+          message: "message not sent successfully",
+        };
+
+        result(null, resobj);
+      }
+    }
+  }
+);
+  
+};
+
 
 module.exports = Dluser;

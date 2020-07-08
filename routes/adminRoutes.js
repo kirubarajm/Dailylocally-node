@@ -125,7 +125,7 @@ app.route("/admin/crm/userdayorderlist").post(middleware.checkToken,routesVersio
 //////zen desk//////
 app.route("/admin/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
 app.route("/admin/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
-
+app.route("/admin/crm/usersms").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_user_send_message}));
 
 
 }

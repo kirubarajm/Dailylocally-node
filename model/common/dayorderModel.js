@@ -683,6 +683,8 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   if(Dayorder){
     var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
     var end_date = moment(Dayorder.end_date).add(1, "days").format("YYYY-MM-DD");
+
+    console.log(end_date);
     var where = "";
     // if(Dayorder.starting_date && Dayorder.end_date){
     //     where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
@@ -696,13 +698,13 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
  
 
         let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
-        let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
+        let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
         where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }else if(Dayorder.Slot===2){
 
         let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
-        let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
+        let datetimeB = moment(end_date + " " + '23:00:00');
         where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
@@ -713,7 +715,26 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 
       }
     }else{
-      where = where+" and  DATE(drs.created_at) = CURDATE() ";
+
+
+      // if (Dayorder.Slot===1) {
+ 
+
+      //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
+      //   let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
+      //   where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+
+      // }else if(Dayorder.Slot===2){
+
+      //   let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
+      //   let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
+      //   where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+
+      // }else{
+        where = where+" and  DATE(drs.created_at) = CURDATE() ";
+
+      // }
+
     }
 
 
