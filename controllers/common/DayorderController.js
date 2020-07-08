@@ -51,6 +51,13 @@ exports.crm_day_order_list = function(req, res) {
   });
 };
 
+exports.user_crm_day_order_list = function(req, res) {
+  Dayorder.user_crm_day_order_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
 
 
 exports.crm_day_order_view = function(req, res) {
@@ -70,8 +77,7 @@ exports.admin_day_order_product_cancel = function(req, res) {
 };
 
 exports.admin_day_order_book_return = function(req, res) {
-  var vpid = req.body.vpid;
-  Dayorder.admin_day_order_book_return(req.body,vpid, function(err, result) {
+  Dayorder.admin_day_order_book_return(req.body, function(err, result) {
     if (err) res.send(err);
     res.json(result);
   });
@@ -110,3 +116,43 @@ exports.reorder_order_create = function(req, res) {
     });
   }
 };
+
+exports.reorder_reasonlist = function(req, res) {
+  Dayorder.reorder_reasonlist(req.params, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+exports.cancel_reasonlist = function(req, res) {
+  Dayorder.cancel_reasonlist(req.params, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+exports.bookreturn_reasonlist = function(req, res) {
+  Dayorder.bookreturn_reasonlist(req.params, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+
+
+exports.refund_reasonlist = function(req, res) {
+  Dayorder.refund_reasonlist(req.params, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+
+
+exports.refund_create= function(req, res) {
+  Dayorder.refund_create(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+

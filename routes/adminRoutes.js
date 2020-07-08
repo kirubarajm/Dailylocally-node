@@ -11,7 +11,7 @@ module.exports = function(app) {
   var dluser = require("../controllers/dluser/DlUserController");
   var darorder = require("../controllers/common/DayorderController"); 
   var darordercomments = require("../controllers/admin/orderCommentsController");
-
+  var Zendeskissues = require("../controllers/common/ZendeskissuesController");
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
@@ -115,5 +115,17 @@ app.route("/admin/ordercomments").post(routesVersioning({"1.0.0":darordercomment
 app.route("/admin/crm/bookreturn").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_book_return}));
 //re order
 app.route("/admin/crm/reorder").post(routesVersioning({"1.0.0":dayorder.reorder_order_create}));
+app.route("/admin/crm/refund").post(routesVersioning({"1.0.0":dayorder.refund_create}));
+app.route("/admin/crm/reorder/reasonlist").get(routesVersioning({"1.0.0":dayorder.reorder_reasonlist}));
+app.route("/admin/crm/cancel/reasonlist").get(routesVersioning({"1.0.0":dayorder.cancel_reasonlist}));
+app.route("/admin/crm/bookreturn/reasonlist").get(routesVersioning({"1.0.0":dayorder.bookreturn_reasonlist}));
+app.route("/admin/crm/refund/reasonlist").get(routesVersioning({"1.0.0":dayorder.refund_reasonlist}));
+app.route("/admin/crm/userdayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.user_crm_day_order_list}));
+
+//////zen desk//////
+app.route("/admin/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
+app.route("/admin/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
+
+
 
 }
