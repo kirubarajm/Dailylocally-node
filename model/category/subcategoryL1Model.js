@@ -22,6 +22,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
     var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+    var category_details       = await query("select * from Category where catid = "+req.catid+" ");
     
     if (userdetails.length ==0) {
       let resobj = {
@@ -35,7 +36,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Categories",
+        title :category_details[0].name,
         message : 'user not found',
         get_sub_cat_images:[],
         result: []
@@ -89,7 +90,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Sub_Categories_L1",
+        title :category_details[0].name,
         get_sub_cat_images:get_sub_cat_images,
         result: res
       };
@@ -105,6 +106,7 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
   var radiuslimit         = constant.radiuslimit;
   var servicable_status = true;
   var userdetails       = await query("select * from User where userid = "+req.userid+" ");
+  
   
   if (userdetails.length ==0) {
     let resobj = {
