@@ -240,8 +240,14 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
           if ( res1[0].deliverydate < startdate) {
             deliverydate_status = false
+         
           } else {
-            res1[0].deliverydate= moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"); ;
+          
+            console.log("YYYY-MM-DD");
+             console.log(res1[0].deliverydate );
+            // console.log( moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"));
+            res1[0].deliverydate= moment(orderitems[i].dayorderdate,'DD-MM-YYYY').format("YYYY-MM-DD"); 
+             console.log(res1[0].deliverydate);
           }
 
         }else{
@@ -258,6 +264,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         }
   
         productdetails.push(res1[0]);
+
+        // console.log(productdetails);
+
+        // console.log(productdetails1111);
       
       }
     }

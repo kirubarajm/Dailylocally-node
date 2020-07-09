@@ -362,7 +362,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
             sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
             
             var getproductdetails = "select op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
-            var getproduct = await query(getproductdetails,order_place.orderid);
+            var getproduct = await query(getproductdetails,);
             console.log("getproduct==========>",getproduct);
             dayorder.checkdayorder(order_place,getproduct);
 
@@ -651,6 +651,8 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
   var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
+ 
+  console.log(query);
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);
@@ -788,7 +790,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
       
                 if (res1[0].coupon) {
                   couponinfo.title = "Discount (-)";
-                  couponinfo.charges = coupon_discount_amount;
+                  couponinfo.charges = res1[0].discount_amount;
                   couponinfo.status = true;
                   couponinfo.infostatus = false;
                   couponinfo.color_code = "#129612";
