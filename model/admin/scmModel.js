@@ -353,6 +353,21 @@ SCM.create_po =async function create_po(req,result) {
                                                     /////Delete PO Temp///////////
                                                     var updatepotempquery = "update POtemp set delete_status=1 where tempid="+vendor_polist[j].tempid;
                                                     var updatepotemp = await query(updatepotempquery);
+
+                                                    var getstockdataquery = "select * from Stock where vpid="+vendor_polist[j].vpid;
+                                                    var getstockdata = await query(getstockdataquery);
+
+                                                    if(getstockdata.length>0){
+                                                        //// Update ////
+                                                        var updatemapping_qty = parseInt(getstockdata[0].quantity_mapping)+parseInt(vendor_polist[j].qty)
+                                                        var updatestockquery = "update Stock set quantity_mapping="+updatemapping_qty+" where vpid="+vendor_polist[j].vpid;
+                                                        var updatestock = await query(updatestockquery);
+                                                    }else{
+                                                        ////Insert /////
+                                                        var stockdata = [];
+                                                        stockdata.push({"vpid":vendor_polist[j].vpid,"quantity_mapping":vendor_polist[j].qty,"zoneid":req.zone_id});
+                                                        Stock.createStock(stockdata,async function(err,stockres){});
+                                                    }                                                    
                                                 }
                                             });
                                             
@@ -1371,7 +1386,14 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                                 }
                                             }                      
                                         }
-                                        var updatestockquery2 = "update Stock set quantity="+getstock[0].quantity+" where vpid="+getstock[0].vpid;
+                                        
+                                        var qtymapping = 0;
+                                        qtymapping = parseInt(getstock[0].quantity_mapping) - parseInt(getstock[0].quantity);
+                                        if(qtymapping<0){
+                                            qtymapping = 0;
+                                        }
+
+                                        var updatestockquery2 = "update Stock set quantity="+getstock[0].quantity+",quantity_mapping="+qtymapping+" where vpid="+getstock[0].vpid;
                                         var updatestock2 = await query(updatestockquery2);
                                         
                                         //// update pop status //////// 
