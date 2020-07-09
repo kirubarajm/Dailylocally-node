@@ -64,7 +64,7 @@ StockKeeping.stockkeeping_list =async function stockkeeping_list(req,result) {
 //////////show Stockkeeping Open List///////////
 StockKeeping.stockkeeping_openlist =async function stockkeeping_openlist(req,result) {
     if(req.zone_id){
-        var showopenstockquery = "select st.stockid,st.vpid,pm.Productname,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,st.quantity as boh,pm.mrp,sum(dop.received_quantity) as insorting from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Dayorder_products as dop on dop.vpid=st.vpid where st.zoneid="+req.zone_id+" and dop.scm_status=3 and st.stockid NOT IN(select stockid from StockKeeping where date(created_at)=CURDATE() and delete_status=0) group by st.vpid";
+        var showopenstockquery = "select pl.zoneid,pl.vpid,pm.Productname,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,if(st.quantity,st.quantity,0) as boh,pm.mrp,if(sum(case when dop.scm_status=3 then dop.received_quantity end),sum(case when dop.scm_status=3 then dop.received_quantity end),0)  as insorting from Product_live as pl left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Stock as st on st.vpid=pl.vpid left join Dayorder_products as dop on dop.vpid=st.vpid where pl.zoneid="+req.zone_id+" and st.vpid NOT IN(select vpid from StockKeeping where date(created_at)=CURDATE() and delete_status=0) group by pl.vpid";
         var showopenstock = await query(showopenstockquery);
         if(showopenstock.length > 0){
             let resobj = {
@@ -94,7 +94,7 @@ StockKeeping.stockkeeping_openlist =async function stockkeeping_openlist(req,res
 /////////Stockkeeping Add///////////
 StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
     if(req.zone_id && req.stockid && req.vpid){
-        var checkSKquery = "select * from StockKeeping where zoneid="+req.zone_id+" and stockid="+req.stockid+" and vpid="+req.vpid+" and date(created_at)=CURDATE() and delete_status=0";
+        var checkSKquery = "select * from StockKeeping where zoneid="+req.zone_id+" and vpid="+req.vpid+" and date(created_at)=CURDATE() and delete_status=0";
         var checkS = await query(checkSKquery);
         if(checkS.length==0){
             if(req.actual_quantity){  var actual_quantity=req.actual_quantity; }else{ var actual_quantity=0; }

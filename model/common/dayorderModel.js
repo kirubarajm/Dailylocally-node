@@ -26,6 +26,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
       var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
       if (dayorders.length !=0) {
+        var updatedayorderstatus = "update Dayorder set dayorderstatus=0 where id="+dayorders[0].id;
+        var updatedayorder = await query(updatedayorderstatus);
         // console.log("dayorders.length",dayorders.length);
         var new_createDayorderproducts={}; 
 
@@ -213,6 +215,9 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
           var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
           if (dayorders.length !=0) {
+            var updatedayorderstatus = "update Dayorder set dayorderstatus=0 where id="+dayorders[0].id;
+            var updatedayorder = await query(updatedayorderstatus);
+            
             var new_createDayorderproducts={};
       
             new_createDayorderproducts.orderid=Dayorder.orderid;
