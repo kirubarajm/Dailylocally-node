@@ -626,6 +626,7 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
              if (history_list[i].items) {
                var items = JSON.parse(history_list[i].items);
                history_list[i].items = items;
+               history_list[i].itemscount = items.length;
              }
 
             
@@ -650,9 +651,9 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
-  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
+  var query = "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',dp.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
  
-  console.log(query);
+
   sql.query(query,function(err, res) {
       if (err) {
         result(err, null);
@@ -669,7 +670,7 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
             history_list =res;
            for (let i = 0; i < history_list.length; i++) {
 
-            history_list[i].dayorderstatus=10
+            // history_list[i].dayorderstatus=10
 
             history_list[i].rating_status = false;
             if (history_list[i].dayorderstatus = 10) {
@@ -679,6 +680,7 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
              if (history_list[i].items) {
                var items = JSON.parse(history_list[i].items);
                history_list[i].items = items;
+               history_list[i].itemscount = items.length;
              }
 
             
