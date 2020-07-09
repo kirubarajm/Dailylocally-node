@@ -125,7 +125,8 @@ app.route("/admin/crm/userdayorderlist").post(middleware.checkToken,routesVersio
 //////zen desk//////
 app.route("/admin/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
 app.route("/admin/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
+app.route("/admin/zendesk/ticketcreate").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.zendesk_ticket_create}));
 app.route("/admin/crm/usersms").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.dl_user_send_message}));
-
+app.route("/admin/dayorderlog").post(routesVersioning({"1.0.0":darordercomments.day_order_log_list}));
 
 }

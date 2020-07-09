@@ -171,3 +171,12 @@ exports.dl_user_send_message = function(req, res) {
   });
 
 };
+
+exports.zendesk_ticket_create = function(req, res) {
+
+  Dluser.zendesk_ticket_check(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};

@@ -523,8 +523,8 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
-    console.log(getdayorderquery);
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -553,6 +553,8 @@ Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) 
     result(null, resobj);
   }      
 };
+
+
 ///////QA Day Order List ////////
 Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,result) {
   if(Dayorder.zoneid){
@@ -796,7 +798,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   
     var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
 
-    console.log(getdayorderquery);
+    // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -894,6 +896,18 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(req,result) {
 
       
+  var cancel_comments = req.return_reason
+  var New_comments  ={};
+  New_comments.doid=req.doid;
+  New_comments.comments=cancel_comments
+  New_comments.done_by=req.done_by
+  New_comments.type=2
+  New_comments.done_type=1
+
+
+  OrderComments.create_OrderComments_crm(New_comments)
+
+
     var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   
     var update_query = "Update Dayorder set dayorderstatus=12 ,return_order_time='"+day+"',return_reason='"+req.return_reason+"',return_booked_by='"+req.done_by+"' where id = "+req.doid+" "
@@ -922,7 +936,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   var startdate =  moment().format("YYYY-MM-DD");
   var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
 
-  if ( date < startdate) {
+  if (date < startdate) {
     let resobj = {
       success: true,
       status: false,
@@ -936,15 +950,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   var New_comments  ={};
   New_comments.doid=Dayorder.doid;
   // New_comments.vpid=vpid[i];
-  New_comments.comments=create_comments
+  New_comments.comments=Dayorder.reorder_reason
   New_comments.done_by=Dayorder.done_by
   New_comments.type=2
   New_comments.done_type=1
   New_comments.Img1=Dayorder.Img1 || ''
   
-
-  // console.log(New_comments);
-
   OrderComments.create_OrderComments_crm(New_comments)
 
 

@@ -9,3 +9,11 @@ exports.create_OrderComments = function(req, res) {
     res.send(OrderComments);
   });
 };
+
+exports.day_order_log_list = function(req, res) {
+  OrderComments.day_order_log_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
