@@ -964,10 +964,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     for (let i = 0; i < order_item.length; i++) {
      
       var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+      console.log(getproductdetails);
       var getproduct = await query(getproductdetails);
 
       var update_query =await query("update Dayorder set reorder_reason='"+Dayorder.reorder_reason+"',reorder_by='"+Dayorder.done_by+"',reorder_id='"+Dayorder.doid+"' where id='"+dayorders[0].id+"' ");
       
+ 
       var new_createDayorderproducts={};
       new_createDayorderproducts.orderid = getproduct[0].orderid;
       new_createDayorderproducts.doid=dayorders[0].id;
@@ -1010,15 +1012,15 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   }else{
     // console.log("dayorders.length1",dayorders.length);
 
-    for (let i = 0;i < order_item.length; i++) {
+    // for (let i = 0;i < order_item.length; i++) {
     
-      var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
-      var getproduct = await query(getproductdetails);
+    //   var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+    //   var getproduct = await query(getproductdetails);
 
       
-    }
+    // }
  
-
+    var dayorders1 = await query("select * from Dayorder where id='"+Dayorder.doid+"' ");
     var new_day_order={};
     new_day_order.userid=Dayorder.userid;
     new_day_order.zoneid=Dayorder.zoneid;
@@ -1026,8 +1028,22 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     new_day_order.reorder_id=Dayorder.doid   
     new_day_order.reorder_by=Dayorder.done_by  
     new_day_order.reorder_reason=Dayorder.reorder_reason  
+
+    new_day_order.cus_lat=dayorders1[0].cus_lat;
+    new_day_order.cus_lon=dayorders1[0].cus_lon;
+    new_day_order.cus_pincode=dayorders1[0].cus_pincode;
+    new_day_order.landmark=dayorders1[0].landmark;
+    new_day_order.apartment_name=dayorders1[0].apartment_name;
+    new_day_order.google_address=dayorders1[0].google_address;
+    new_day_order.complete_address=dayorders1[0].complete_address;
+    new_day_order.flat_house_no=dayorders1[0].flat_house_no;
+    new_day_order.plot_house_no=dayorders1[0].plot_house_no;
+    new_day_order.floor=dayorders1[0].floor;
+    new_day_order.block_name=dayorders1[0].block_name;
+    new_day_order.city=dayorders1[0].city;
+
     console.log("new_day_order===>1",new_day_order); 
-    sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
+    sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, res1) {
       if (err) {
         res(err, null);
       } else {

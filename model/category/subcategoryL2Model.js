@@ -61,9 +61,9 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
       }
     }
 
-    var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
+    // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
 
-
+    var sub_l2_category_query= "Select l2.* from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.vpid=pm.pid where l2.scl2_id=  '"+req.scl1_id+"' and pl.live_status=1  ";
         
   sql.query(sub_l2_category_query,async function(err, res) {
     if (err) {

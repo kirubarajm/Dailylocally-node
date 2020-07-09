@@ -99,7 +99,7 @@ exports.get_ProductMaster_list = function(req, res) {
   };
 
   exports.get_collection_brand_list = function(req, res) {
-    ProductMaster.get_collection_brand_list(req.params.cid, function(err, user) {
+    ProductMaster.get_collection_brand_list(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);
   });

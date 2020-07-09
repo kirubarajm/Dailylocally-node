@@ -55,7 +55,10 @@ OrderComments.create_OrderComments_crm = function create_OrderComments_crm(Order
 
 OrderComments.day_order_log_list = function day_order_log_list(req, result) {
 
+  // var orderquery =  "SELECT iF(oc.type=1,'WAREHOUSE',iF(oc.type=2,'CRM ',iF(oc.type=3,'LOGISTICS','USER'))) AS Dashboard_type,JSON_ARRAYAGG(JSON_OBJECT('doid',oc.doid,'usertype',aur.usertype,'name', au.name,'comments',comments,'Img1',oc.Img1,'Img2',oc.Img2,'created_at',oc.created_at,'done_type',iF(oc.done_type=1,'Admin User','User'))) AS command_details from Dayorder as ors left join DayOrderComments oc on oc.doid=ors.id left join Admin_users au on au.admin_userid=oc.done_by left join Admin_user_roles aur on aur.userroleid=au.user_roleid where ors.id='"+req.doid+"' group by oc.type";
+
   var orderquery =  "SELECT iF(oc.type=1,'WAREHOUSE',iF(oc.type=2,'CRM ',iF(oc.type=3,'LOGISTICS','USER'))) AS Dashboard_type,JSON_ARRAYAGG(JSON_OBJECT('doid',oc.doid,'usertype',aur.usertype,'name', au.name,'comments',comments,'Img1',oc.Img1,'Img2',oc.Img2,'created_at',oc.created_at,'done_type',iF(oc.done_type=1,'Admin User','User'))) AS command_details from Dayorder as ors left join DayOrderComments oc on oc.doid=ors.id left join Admin_users au on au.admin_userid=oc.done_by left join Admin_user_roles aur on aur.userroleid=au.user_roleid where ors.id='"+req.doid+"' group by oc.type";
+
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);

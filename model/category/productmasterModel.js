@@ -562,8 +562,9 @@ ProductMaster.get_brand_list = async function get_brand_list(req,result) {
   });
 };
 
-ProductMaster.get_collection_brand_list = async function get_collection_brand_list(cid,result) {  
-  var brand_list = "select pm.brand,br.brandname from Collection_mapping_product cmp left join ProductMaster as pm  on cmp.pid=pm.pid left join Brand br on br.id=pm.brand   where cmp.cid= '"+cid+"' group by  pm.brand ";
+ProductMaster.get_collection_brand_list = async function get_collection_brand_list(req,result) {  
+
+  var brand_list = "select pm.brand,br.brandname from Collection_mapping_product cmp left join ProductMaster as pm  on cmp.pid=pm.pid left join Brand br on br.id=pm.brand left join Product_live pl on pl.vpid=pm.pid  where cmp.cid= pl.live_status=1 and (cmp.cid= '"+req.cid+"' or pm.scl1_id='"+req.scl1_id+"') group by  pm.brand ";
   sql.query(brand_list,async function(err, res) {
     if (err) {
       result(err, null);
