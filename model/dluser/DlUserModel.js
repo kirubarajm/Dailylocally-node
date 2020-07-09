@@ -13,7 +13,7 @@ var Notification = require("../../model/common/notificationModel.js");
 var PushConstant = require("../../push/PushConstant.js");
 var Zendeskrequest = require("../../model/common/ZendeskRequestsModel");
 var clusteruser = require("../../model/Cluster/clusterUserModel");
-
+var OrderComments = require("../../model/admin/orderCommentsModel");
 
 // var instance = new Razorpay({
 //     key_id: 'rzp_test_3cduMl5T89iR9G',
@@ -5872,7 +5872,101 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
   );
 };
 
-Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
+
+  ///Click to call////
+  Dluser.zendesk_ticket_check= async function zendesk_ticket_check(req,result) { 
+  var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
+  var headers= {
+    'Content-Type': 'application/json',
+    'Authorization': auth,
+   };
+  var checkTicketDetail = await query("select zendesk_ticketid from Dayorder where id="+req.doid);
+  if(checkTicketDetail.length>0&&checkTicketDetail[0].zendesk_ticketid){
+    let resobj = {
+      success: true,
+      status: false,
+      message : "Already ticket created.",
+    };
+     result(null, resobj);
+     return;
+  }else{
+
+    sql.query("Select * from User where  userid = ? ",req.userid,async function(err, res) {
+      if (err) {
+        result(err, null);
+      } else {
+        //console.log("res[0].zendeskuserid--",res[0].zendeskuserid);
+        if (!res[0].zendeskuserid) {
+          var user ={};
+          var userdetails={}
+          user.name=res[0].name;
+          user.email=res[0].email;
+          user.phone=res[0].phoneno;
+          userdetails.user = user;
+          var Userapi="/api/v2/users.json?"
+          var UserURL=constant.zendesk_url+Userapi;
+       request.post({headers: headers, url: UserURL, json: userdetails, method: 'POST'},async function (e, r, body) {
+        var objUser = body;
+        //console.log("user body--",body);
+        if (typeof body === "string") { 
+          try {
+            objUser = JSON.parse(body);
+          } catch (e) {
+              console.log("e--",e);
+          } 
+        }
+        
+       if (!objUser.error) {
+         var updatedetails = await query("update User set zendeskuserid= '"+objUser.user.id+"' where userid = "+req.userid+ " ")
+         zendeskuserid=objUser.user.id;
+         req.zendeskuserid=objUser.user.id;
+         Dluser.zendesk_ticket_create(req,result);
+       }else{
+         var url = constant.zendesk_url+"api/v2/users/search.json?query=email:"+res[0].email+""
+         //console.log("user search url--",url);
+         request.get({headers: headers, url:url, method: 'GET'},async function (e, r, body) {
+            var obj = body;
+            console.log("user search body--",body);
+            if (typeof body === "string") {
+              try {
+                obj = JSON.parse(body);
+              } catch (e) {
+                console.log("e--",e);
+              }
+            }
+            if (obj.users[0].id) {
+              //console.log("obj.users[0].id--",obj.users[0].id);
+              var updatedetails = await query("update User set zendeskuserid= '"+obj.users[0].id+"' where userid = "+req.userid+ " ")
+              zendeskuserid=obj.users[0].id;  
+              req.zendeskuserid=obj.users[0].id;
+              Dluser.zendesk_ticket_create(req,result);
+            }else{
+              //console.log("obj--",obj);
+              let resobj = {
+                success: true,
+                status: false,
+                message : "User not created.",
+              };
+               result(null, resobj);
+               return;
+            }
+          });
+       }
+       });
+        }else{
+          zendeskuserid=res[0].zendeskuserid;
+          req.zendeskuserid=res[0].zendeskuserid;
+          Dluser.zendesk_ticket_create(req,result);
+        }
+      }
+    });
+
+  }
+ 
+};
+
+
+Dluser.zendesk_ticket_create= async function Dluser(req,result) {
   var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
   var headers= {
     'Content-Type': 'application/json',
@@ -5893,15 +5987,17 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
     var detail={};
     var ticketdetails={}
     detail.priority='high';
-    detail.subject='Ticket raised from admin for order '+req.orderid;
+    detail.subject='Ticket raised from admin for DayOrderid '+req.doid;
     detail.description=description;
     detail.requester_id=req.zendeskuserid;
     detail.tags=tags;
     ticketdetails.ticket = detail;
-    var url = constant.zendesk_url+"/api/v2/tickets.json"
+    var url = constant.zendesk_url+"api/v2/tickets.json"
+    console.log("url--",url);
+    console.log("detail--",ticketdetails);
     request.post({headers: headers, url:url, json: ticketdetails,method: 'POST'},async function (e, r, body) {
       var obj = body;
-      //console.log("Ticket boday--",body);
+      console.log("Ticket boday--",body);
       if (typeof body === "string") { 
         try {
           obj = JSON.parse(body);
@@ -5916,13 +6012,17 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
           req.tagid=0;
           req.type=3;
           var updateOrderQuery="update Orders set zendesk_ticketid= "+ticketid+" where orderid= "+req.orderid; 
+          var update_orders=await query(updateOrderQuery);
           
-          var orderactionlog={};
-          orderactionlog.orderid=req.orderid;
-          orderactionlog.app_type=req.app_type||0;
-          orderactionlog.userid=req.admin_id || 0;
-          orderactionlog.action=5;
-          await Eatuser.createOrderActionLog(orderactionlog);
+    
+          var New_comments  ={};
+          New_comments.doid=req.doid;
+          New_comments.comments=description
+          New_comments.done_by=req.done_by
+          New_comments.type=2
+          New_comments.done_type=1
+
+             OrderComments.create_OrderComments_crm(New_comments)
 
                 for(var i=0;i<req.issues.length;i++){
                   req.issueid=req.issues[i].id;
@@ -6264,12 +6364,12 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
   var page = req.page || 1;
   var startlimit = (page - 1) * userlimit;
 
-  var query = "select * from User";
+  var userquery = "select * from User";
 
 
  if (req.search) {
-    query =
-      query +
+  userquery =
+  userquery +
       " where (phoneno LIKE  '%" +
       req.search +
       "%' OR email LIKE  '%" +
@@ -6281,17 +6381,25 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       "% ' )";
   }
 
-  var limitquery =
-    query + " order by userid desc limit " + startlimit + "," + userlimit + " ";
+  var userquery = userquery + " order by userid desc limit " + startlimit + "," + userlimit + " ";
 
-  sql.query(limitquery, function(err, res) {
+  sql.query(userquery,async function(err, res) {
     if (err) {
       console.log("error: ", err);
       result(err, null);
     } else {
       var totalcount = 0;
 
-      sql.query(query, function(err, res2) {
+
+      for (let i = 0; i < res.length; i++) {
+      
+        var address_details  = await query("select * from Address where userid= '"+res[i].userid+"' order by aid desc limit 1");
+
+        res[i].address_details=address_details;
+      }
+
+
+      sql.query(userquery, function(err, res2) {
         totalcount = res2.length;
 
         let sucobj = true;
@@ -6306,5 +6414,124 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
     }
   });
 };
+
+Dluser.dl_user_send_message = function dl_user_send_message(User, result) { 
+  // console.log(newUser.otpcode);  
+  
+  var otpurl =
+  "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
+  User.phoneno +
+  "&msg=<%23>" +User.message 
+
+  request({method: "GET",rejectUnauthorized: false,url: otpurl},function(error, response, body) {
+    if (error) {
+      console.log("error: ", err);
+      result(null, err);
+    } else {
+  
+      if (body) {
+        let resobj = {
+          success: true,
+          status: true,
+          message: "message sent successfully",
+        };
+
+        result(null, resobj);
+
+      } else {
+        let resobj = {
+          success: true,
+          status: false,
+          message: "message not sent successfully",
+        };
+
+        result(null, resobj);
+      }
+    }
+  }
+);
+  
+};
+
+Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
+  var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
+  var headers= {
+    'Content-Type': 'application/json',
+    'Authorization': auth,
+   };
+
+   var description="";
+   var tags=['admin_ticket'];
+
+   if(req.issues.length>0){
+     for(var i=0;i<req.issues.length;i++){
+      description=description===""?(i+1)+". "+req.issues[i].issues:description+"\n"+(i+1)+". "+req.issues[i].issues
+      tags.push(req.issues[i].tag_name.replace(/\s+/g,"_"));
+     }
+   }
+
+  if(req.zendeskuserid){
+    var detail={};
+    var ticketdetails={}
+    detail.priority='high';
+    detail.subject='Ticket raised from admin for dayorderIId '+req.doid;
+    detail.description=description;
+    detail.requester_id=req.zendeskuserid;
+    detail.tags=tags;
+    ticketdetails.ticket = detail;
+    var url = constant.zendesk_url+"api/v2/tickets.json"
+    console.log("url--",url);
+    console.log("detail--",ticketdetails);
+    request.post({headers: headers, url:url, json: ticketdetails,method: 'POST'},async function (e, r, body) {
+      var obj = body;
+      console.log("Ticket boday--",body);
+      if (typeof body === "string") { 
+        try {
+          obj = JSON.parse(body);
+        } catch (e) {
+          console.log("e--",e);
+        }
+      }
+      if (obj.ticket.id){
+          var ticketid=obj.ticket.id;
+          req.ticketid=ticketid;
+          req.app_type=0;
+          req.tagid=0;
+          req.type=3;
+          var updateOrderQuery="update Dayorder set zendesk_ticketid= "+ticketid+" where id= "+req.doid; 
+          var update_orders=await query(updateOrderQuery);
+          
+          var create_comments = 're-order created'
+          var New_comments  ={};
+          New_comments.doid=req.doid;
+          New_comments.comments=req.reason
+          New_comments.done_by=req.done_by
+          New_comments.type=2
+          New_comments.done_type=1
+          New_comments.Img1=req.Img1 || ''
+          OrderComments.create_OrderComments_crm(New_comments)
+
+                for(var i=0;i<req.issues.length;i++){
+                  req.issueid=req.issues[i].id;
+                  Zendeskrequest.new_zendesk_request_create(req);
+                }
+
+          let resobj = {
+            success: true,
+            status: true,
+            message : "Ticket created successfully",
+          };
+         result(null, resobj);
+        }
+    });
+  }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message : "Ticket not created.Please try again later.",
+      };
+     result(null, resobj);
+  }
+}
 
 module.exports = Dluser;

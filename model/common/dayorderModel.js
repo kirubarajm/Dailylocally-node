@@ -13,6 +13,9 @@ var Dayorder = function(Dayorder) {
   this.zoneid=Dayorder.zoneid;
   this.dayorderstatus=Dayorder.dayorderstatus || 0 ;
   this.rating_skip=Dayorder.rating_skip || 0;
+  this.reorder_id=Dayorder.reorder_id || 0;
+  this.reorder_by=Dayorder.reorder_by || 0;
+  
 };
 
 
@@ -21,6 +24,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     if (getproduct[i].subscription==0) {
       var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+      var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
       if (dayorders.length !=0) {
         var updatedayorderstatus = "update Dayorder set dayorderstatus=0 where id="+dayorders[0].id;
         var updatedayorder = await query(updatedayorderstatus);
@@ -59,7 +63,24 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         var new_day_order={};
         new_day_order.userid=Dayorder.userid;
         new_day_order.zoneid=Dayorder.zoneid;
-        new_day_order.date=getproduct[i].deliverydate;       
+        new_day_order.date=getproduct[i].deliverydate;    
+        //address
+
+        new_day_order.cus_lat=ordersdetails[0].cus_lat;
+        new_day_order.cus_lon=ordersdetails[0].cus_lon;
+        new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
+        new_day_order.landmark=ordersdetails[0].landmark;
+        new_day_order.apartment_name=ordersdetails[0].apartment_name;
+        new_day_order.google_address=ordersdetails[0].google_address;
+        new_day_order.complete_address=ordersdetails[0].complete_address;
+        new_day_order.flat_house_no=ordersdetails[0].flat_house_no;
+        new_day_order.plot_house_no=ordersdetails[0].plot_house_no;
+        new_day_order.floor=ordersdetails[0].floor;
+        new_day_order.block_name=ordersdetails[0].block_name;
+        new_day_order.city=ordersdetails[0].city;
+    
+        
+
         console.log("new_day_order===>1",new_day_order); 
         sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
           if (err) {
@@ -231,6 +252,21 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.userid=Dayorder.userid;
             new_day_order.date=date;
             new_day_order.zoneid=Dayorder.zoneid;   
+                //address
+
+            new_day_order.cus_lat=ordersdetails[0].cus_lat;
+            new_day_order.cus_lon=ordersdetails[0].cus_lon;
+            new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
+            new_day_order.landmark=ordersdetails[0].landmark;
+            new_day_order.apartment_name=ordersdetails[0].apartment_name;
+            new_day_order.google_address=ordersdetails[0].google_address;
+            new_day_order.complete_address=ordersdetails[0].complete_address;
+            new_day_order.flat_house_no=ordersdetails[0].flat_house_no;
+            new_day_order.plot_house_no=ordersdetails[0].plot_house_no;
+            new_day_order.floor=ordersdetails[0].floor;
+            new_day_order.block_name=ordersdetails[0].block_name;
+            new_day_order.city=ordersdetails[0].city;
+        
             console.log("new_day_order===>2",new_day_order);    
             sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
@@ -308,7 +344,23 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               var new_day_order={};
               new_day_order.userid=Dayorder.userid;
               new_day_order.date=date;
-              new_day_order.zoneid=Dayorder.zoneid;              
+              new_day_order.zoneid=Dayorder.zoneid;   
+              
+                  //address
+
+                new_day_order.cus_lat=ordersdetails[0].cus_lat;
+                new_day_order.cus_lon=ordersdetails[0].cus_lon;
+                new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
+                new_day_order.landmark=ordersdetails[0].landmark;
+                new_day_order.apartment_name=ordersdetails[0].apartment_name;
+                new_day_order.google_address=ordersdetails[0].google_address;
+                new_day_order.complete_address=ordersdetails[0].complete_address;
+                new_day_order.flat_house_no=ordersdetails[0].flat_house_no;
+                new_day_order.plot_house_no=ordersdetails[0].plot_house_no;
+                new_day_order.floor=ordersdetails[0].floor;
+                new_day_order.block_name=ordersdetails[0].block_name;
+                new_day_order.city=ordersdetails[0].city;
+    
               console.log("new_day_order===>3",new_day_order); 
               sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
@@ -356,44 +408,58 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 ///// Day Order List ///////////
 Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
   //console.log("Dayorde=====>",Dayorder);
+  var orderlimit = 20;
+  var page = Dayorder.page || 1;
+  var startlimit = (page - 1) * orderlimit;
   if(Dayorder){
-    var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+    var tomorrow = moment().format("YYYY-MM-DD");
+    var end_date = moment(Dayorder.end_date).add(1, "days").format("YYYY-MM-DD");
     var where = "";
     if(Dayorder.starting_date && Dayorder.end_date){
 
-      if (Dayorder.Slot===1) {
+      if (Dayorder.slot===1) {
  
-        console.log("slot");
 
-        let datetimeA = moment(Dayorder.starting_date + " " + '23:00:00');
-        let datetimeB = moment(Dayorder.end_date + " " + '19:00:00');
-        where = where+" and (drs.date BETWEEN '"+Dayorder.datetimeA +"' AND '"+Dayorder.datetimeB +"')";
+        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
+        let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
-      }else if(Dayorder.Slot===2){
+      }else if(Dayorder.slot===2){
 
         let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
         let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
-        where = where+" and (drs.date BETWEEN '"+Dayorder.datetimeA +"' AND '"+Dayorder.datetimeB +"')";
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
       else{
 
-        console.log("slot3");
-        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date +"')";
+        where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
 
       }
     }else{
-      where = where+" and drs.date='"+tomorrow+"' ";
+      where = where+" and  DATE(drs.created_at) = CURDATE()";
+    }
+
+
+    if(Dayorder.id){
+        where = where+" and drs.id="+Dayorder.id;
     }
     
-    if(Dayorder.doid){
-        where = where+" and drs.id="+Dayorder.doid;
+    if (Dayorder.trip_id) {
+      where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
     }
-    if(Dayorder.dayorderstatus){
+    if(Dayorder.dayorderstatus !=null){
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
-    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" group by drs.id,drs.userid";
+    if (Dayorder.usersearch) {
+      where = where+" and (us.phoneno like '%"+Dayorder.usersearch+"%' or us.email like '%"+Dayorder.usersearch+"%' or us.name like '%"+Dayorder.usersearch+"%') ";
+    }
+    where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +orderlimit +" ";
+
+    var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" ";
+    console.log("getdayorder=====>",getdayorderquery);
+    // var getdayorderquery = "select drs.*,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id where zoneid="+Dayorder.zoneid+" " +where+" group by drs.id,drs.userid";
     //console.log("getdayorder=====>",getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -462,8 +528,8 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
-    console.log(getdayorderquery);
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -492,6 +558,8 @@ Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) 
     result(null, resobj);
   }      
 };
+
+
 ///////QA Day Order List ////////
 Dayorder.quality_day_order_list =async function quality_day_order_list(Dayorder,result) {
   if(Dayorder.zoneid){
@@ -675,6 +743,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   if(Dayorder){
     var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
     var end_date = moment(Dayorder.end_date).add(1, "days").format("YYYY-MM-DD");
+
     var where = "";
     // if(Dayorder.starting_date && Dayorder.end_date){
     //     where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
@@ -684,28 +753,34 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     
     if(Dayorder.starting_date && Dayorder.end_date){
 
-      if (Dayorder.Slot===1) {
+      if (Dayorder.slot===1) {
  
 
         let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
-        let datetimeB = moment(Dayorder.end_date).format("YYYY-MM-DD 19:00:00");
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+        let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
-      }else if(Dayorder.Slot===2){
+      }else if(Dayorder.slot===2){
 
-        let datetimeA = moment(Dayorder.starting_date + " " + '19:00:00');
-        let datetimeB = moment(Dayorder.end_date + " " + '23:00:00');
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
+        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 19:00:00");
+        let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");
+      
+        where = where+" and (drs.created_at BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')";
 
       }
       else{
 
         console.log("slot3");
-        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
+        where = where+" and (drs.created_at BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
 
       }
     }else{
-      where = where+" and drs.date='"+tomorrow+"' ";
+
+
+        where = where+" and  DATE(drs.created_at) = CURDATE() ";
+
+
+
     }
 
 
@@ -728,7 +803,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   
     var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
 
-    console.log(getdayorderquery);
+    // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -761,28 +836,27 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_cancel(Dayorder,vpid,result) {
   var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
+  var product= await query("select * from Dayorder_products where id IN('"+vpid+"') and scm_status >=6 ");
+  if (product.length==0 ) {
   for (let i = 0; i < vpid.length; i++) {
  
-    var product= await query("select * from Dayorder_products where id='"+Dayorder.id+"' and vpid='"+vpid[i]+"'");
+    var product1= await query("select * from Dayorder_products where id ='"+vpid[i]+"' ");
+      var dayorder= await query("select * from Dayorder where id='"+product1[0].doid+"'");
 
-  
-    if (product.length !==0) {
-      var dayorder= await query("select * from Dayorder where id='"+product[0].doid+"'");
-      if (product[0].scm_status < 6 ) {
         
-        if (product[0].scm_status >=1) {
+        if (product1[0].scm_status >=1) {
           
         var req = {};
-        req.quantity = product[0].quantity;
-        req.vpid = vpid[i];
+        req.quantity = product1[0].quantity;
+        req.vpid = product1[0].vpid;
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
         }
 
-        var cancel_comments = product[0].productname+' Follwing product cancellled'
+        var cancel_comments = product1[0].productname+' Following product cancellled'
         var New_comments  ={};
-        New_comments.doid=product[0].doid;
+        New_comments.doid=product1[0].doid;
         // New_comments.vpid=vpid[i];
         New_comments.comments=cancel_comments
         New_comments.done_by=Dayorder.cancel_by
@@ -791,48 +865,54 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 
         // console.log(New_comments);
 
-        OrderComments.create_OrderComments(New_comments)
+        OrderComments.create_OrderComments_crm(New_comments)
 
-        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"',cancel_by='"+Dayorder.cancel_by+"',cancel_type='"+Dayorder.cancel_type+"' where doid='"+Dayorder.doid+"' and vpid='"+vpid[i]+"'");
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"',product_cancel_reason='"+Dayorder.product_cancel_reason+"',cancel_by='"+Dayorder.cancel_by+"',cancel_type='"+Dayorder.cancel_type+"' where doid='"+Dayorder.doid+"' and id='"+vpid[i]+"'");
   
-        let resobj = {
-          success: true,
-          status: true,
-          message : 'Product cancel Sucessfully'
-        };
-    
-        result(null, resobj); 
-      } else {
-        let resobj = {
-          success: true,
-          status: true,
-          message : 'Sorry Cannot Cancel'
-        };
-    
-        result(null, resobj); 
-      }
-  
-    }else{
-  
-      let resobj = {
-        success: true,
-        status: true,
-        message : 'product not available'
-      };
-  
-      result(null, resobj); 
-    }
-
     
   }
- 
-   
+  var day_order_product = await query("select * from  Dayorder_products where doid='"+Dayorder.doid+"' and scm_status < 11 ");
+
+  if (day_order_product.length ==0) {
+    var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"'");
+  }
+
+  let resobj = {
+    success: true,
+    status: true,
+    message : 'Product cancel Sucessfully'
+  };
+
+  result(null, resobj); 
+} else {
+  let resobj = {
+    success: true,
+    status: true,
+    message : 'Sorry Cannot Cancel Product Is ready to dispatch',
+    product : product
+  };
+
+  result(null, resobj); 
+}
+  
 };
 
 
 Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(req,result) {
 
       
+  var cancel_comments = req.return_reason
+  var New_comments  ={};
+  New_comments.doid=req.doid;
+  New_comments.comments=cancel_comments
+  New_comments.done_by=req.done_by
+  New_comments.type=2
+  New_comments.done_type=1
+
+
+  OrderComments.create_OrderComments_crm(New_comments)
+
+
     var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   
     var update_query = "Update Dayorder set dayorderstatus=12 ,return_order_time='"+day+"',return_reason='"+req.return_reason+"',return_booked_by='"+req.done_by+"' where id = "+req.doid+" "
@@ -861,7 +941,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   var startdate =  moment().format("YYYY-MM-DD");
   var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
 
-  if ( date < startdate) {
+  if (date < startdate) {
     let resobj = {
       success: true,
       status: false,
@@ -871,21 +951,16 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     result(null, resobj); 
   } else {
     
-  
-
-
   var create_comments = 're-order created'
   var New_comments  ={};
   New_comments.doid=Dayorder.doid;
   // New_comments.vpid=vpid[i];
-  New_comments.comments=create_comments
+  New_comments.comments=Dayorder.reorder_reason
   New_comments.done_by=Dayorder.done_by
   New_comments.type=2
   New_comments.done_type=1
   New_comments.Img1=Dayorder.Img1 || ''
-
-  // console.log(New_comments);
-
+  
   OrderComments.create_OrderComments_crm(New_comments)
 
 
@@ -894,9 +969,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     for (let i = 0; i < order_item.length; i++) {
      
       var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+      console.log(getproductdetails);
       var getproduct = await query(getproductdetails);
 
+      var update_query =await query("update Dayorder set reorder_reason='"+Dayorder.reorder_reason+"',reorder_by='"+Dayorder.done_by+"',reorder_id='"+Dayorder.doid+"' where id='"+dayorders[0].id+"' ");
       
+ 
       var new_createDayorderproducts={};
       new_createDayorderproducts.orderid = getproduct[0].orderid;
       new_createDayorderproducts.doid=dayorders[0].id;
@@ -939,21 +1017,38 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   }else{
     // console.log("dayorders.length1",dayorders.length);
 
-    for (let i = 0;i < order_item.length; i++) {
+    // for (let i = 0;i < order_item.length; i++) {
     
-      var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
-      var getproduct = await query(getproductdetails);
+    //   var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
+    //   var getproduct = await query(getproductdetails);
 
       
-    }
+    // }
  
-
+    var dayorders1 = await query("select * from Dayorder where id='"+Dayorder.doid+"' ");
     var new_day_order={};
     new_day_order.userid=Dayorder.userid;
     new_day_order.zoneid=Dayorder.zoneid;
-    new_day_order.date=Dayorder.date;       
+    new_day_order.date=Dayorder.date;   
+    new_day_order.reorder_id=Dayorder.doid   
+    new_day_order.reorder_by=Dayorder.done_by  
+    new_day_order.reorder_reason=Dayorder.reorder_reason  
+
+    new_day_order.cus_lat=dayorders1[0].cus_lat;
+    new_day_order.cus_lon=dayorders1[0].cus_lon;
+    new_day_order.cus_pincode=dayorders1[0].cus_pincode;
+    new_day_order.landmark=dayorders1[0].landmark;
+    new_day_order.apartment_name=dayorders1[0].apartment_name;
+    new_day_order.google_address=dayorders1[0].google_address;
+    new_day_order.complete_address=dayorders1[0].complete_address;
+    new_day_order.flat_house_no=dayorders1[0].flat_house_no;
+    new_day_order.plot_house_no=dayorders1[0].plot_house_no;
+    new_day_order.floor=dayorders1[0].floor;
+    new_day_order.block_name=dayorders1[0].block_name;
+    new_day_order.city=dayorders1[0].city;
+
     console.log("new_day_order===>1",new_day_order); 
-    sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
+    sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, res1) {
       if (err) {
         res(err, null);
       } else {

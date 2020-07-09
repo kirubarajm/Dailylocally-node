@@ -22,7 +22,7 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
     var userdetails       = await query("select * from User where userid = "+req.userid+" ");
-    
+    var SubcategoryL1_details       = await query("select * from SubcategoryL1 where scl1_id=   '"+req.scl1_id+"' ");
     if (userdetails.length ==0) {
       let resobj = {
         success: true,
@@ -35,7 +35,7 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Categories",
+        title : SubcategoryL1_details[0].name,
         message : 'user not found',
         result: []
       };  
@@ -61,9 +61,9 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
       }
     }
 
-    var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
+    // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
 
-
+    var sub_l2_category_query= "Select l2.* from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.vpid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id where l2.scl1_id=   '"+req.scl1_id+"' and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"' group by l2.scl2_id";
         
   sql.query(sub_l2_category_query,async function(err, res) {
     if (err) {
@@ -93,7 +93,7 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
         empty_subconent :"Daily Locally",
         header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
         header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-        category_title :"Sub_Categories_L2",
+        title : SubcategoryL1_details[0].name,
         product_list:product_list,
         get_sub_cat2_images:get_sub_cat2_images,
         result: res

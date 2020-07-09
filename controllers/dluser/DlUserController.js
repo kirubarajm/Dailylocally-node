@@ -157,6 +157,24 @@ exports.faq_by_type = function(req, res) {
 exports.dl_User_list = function(req, res) {
 
   Dluser.dl_User_list(req.body, function(err, user) {
+    if (err) res.send(err);  
+    res.send(user);
+  });
+
+};
+
+exports.dl_user_send_message = function(req, res) {
+
+  Dluser.dl_user_send_message(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
+
+exports.zendesk_ticket_create = function(req, res) {
+
+  Dluser.zendesk_ticket_check(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);
   });
