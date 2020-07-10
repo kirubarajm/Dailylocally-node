@@ -17,6 +17,7 @@ var POReceiveUnReceiveLog = require('../tableModels/poreceiveunreceivelogTableMo
 var MissingQuantity_Report = require('../tableModels/missingquantityreportTableModel.js');
 var WasteManagement = require('../tableModels/wastemanagementTableModel.js');
 const { tunnel_refund_amout } = require('../constant.js');
+var DayOrderComment = require('../admin/orderCommentsModel.js');
 
 var SCM = function(scm) {};
 
@@ -1685,7 +1686,13 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
 
                 if(getdop[0].revoke_flag==1){
                     var updateDO_revoke = await query("update Dayorder set revoke_flag=0 where id = '"+getdop[0].doid+"'");
-                }                
+                }
+
+                ////////Create Day order Log ////////////
+                var insertlogdata = [];
+                if(req.admin_userid){ }else{ req.admin_userid=0}
+                insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.admin_userid,"doid":getdop[0].doid,"type":1,"done_type":1});
+                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
                 //////// change po status from 0 to 1 ///////////
             }else{
                 error_poid.push(req.dopid_list[i]);
@@ -1824,6 +1831,13 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         }
         var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
         var updateDO = await query("update Dayorder set dayorderstatus=6 where id = '"+req.doid+"'");
+
+        ////////Create Day order Log ////////////
+        var insertlogdata = [];
+        if(req.admin_userid){ }else{ req.admin_userid=0}
+        insertlogdata.push({"comments":"moved from qc to ready to dispatch","done_by":req.admin_userid,"doid":req.doid,"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+
         let resobj = {
             success: true,
             status: true,
@@ -1833,6 +1847,13 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
     } else {        
         var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"'");
         var updateDO_revoke = await query("update Dayorder set revoke_flag=1 where id = '"+req.doid+"'");
+
+        ////////Create Day order Log ////////////
+        var insertlogdata = [];
+        if(req.admin_userid){ }else{ req.admin_userid=0}
+        insertlogdata.push({"comments":"revoke moved from qc to sorting","done_by":req.admin_userid,"doid":req.doid,"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+
         let resobj = {
             success: true,
             status: true,

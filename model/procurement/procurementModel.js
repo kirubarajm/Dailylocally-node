@@ -6,6 +6,7 @@ var moment = require("moment");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var POtepm = require('../../model/tableModels/potempTableModel.js');
 var Dayorder = require('../../model/common/dayorderModel.js');
+var DayOrderComment = require('../admin/orderCommentsModel.js');
 
 var Procurement = function(procurement) {
   this.vpid = procurement.vpid;
@@ -64,9 +65,21 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
           var get_doid_query="select * from Dayorder_products where id="+get_product[i].dopid+"";
           var get_doid=await query(get_doid_query);
           Dayorder.update_scm_status(get_doid[0].doid);
+          
         }
       });
     }
+
+    ////////Create Day order Log ////////////
+    if(new_Procurement.doid.length>0){
+      for (let i = 0; i < new_Procurement.doid.length; i++) {        
+        var insertlogdata = [];
+        if(new_Procurement.admin_userid){ }else{ new_Procurement.admin_userid=0}
+        insertlogdata.push({"comments":"procurement_created","done_by":new_Procurement.admin_userid,"doid":new_Procurement.doid[i],"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});        
+      }
+    }
+    
     let resobj = {  
       success: true,
       status: true,
