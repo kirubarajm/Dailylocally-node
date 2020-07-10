@@ -10,7 +10,8 @@ var QC_check_list = function(qc_check_list) {
 };
 
 QC_check_list.create_qc_check_list= function create_qc_check_list(new_check_list, result) {
-  sql.query("INSERT INTO QC_check_list set ?", new_check_list, function(err, res) {
+  var insertdata = new QC_check_list(new_check_list);
+  sql.query("INSERT INTO QC_check_list set ?", insertdata, function(err, res) {
     if (err) {
       result(err, null);
     } else {

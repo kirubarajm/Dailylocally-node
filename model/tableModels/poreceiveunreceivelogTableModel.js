@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var POReceiveUnReceiveLog = function(poreceiveunreceivelog) {
+  this.id = poreceiveunreceivelog.id;
   this.poid = poreceiveunreceivelog.poid;
   this.popid = poreceiveunreceivelog.popid;
   this.type = poreceiveunreceivelog.type;
@@ -16,7 +17,8 @@ var POReceiveUnReceiveLog = function(poreceiveunreceivelog) {
 //For Admin
 POReceiveUnReceiveLog.createPOlog = async function createPOlog(req, result) {
     req.active_status=0;
-    sql.query("INSERT INTO PO_Receive_Unreceive_Log set ?", req,async function(err, res) {
+    var insertdata = new POReceiveUnReceiveLog(req);
+    sql.query("INSERT INTO PO_Receive_Unreceive_Log set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -36,7 +38,8 @@ POReceiveUnReceiveLog.createPOlog = async function createPOlog(req, result) {
 };
 
 POReceiveUnReceiveLog.updatePOlog =async function updatePOlog(req, result) {
-    sql.query("UPDATE PO_Receive_Unreceive_Log SET ? WHERE id = ?", [req, req.id],async function(err, res) {
+    var updatedata = new POReceiveUnReceiveLog(req);
+    sql.query("UPDATE PO_Receive_Unreceive_Log SET ? WHERE id = ?", [updatedata, updatedata.id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

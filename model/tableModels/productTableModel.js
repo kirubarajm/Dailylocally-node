@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var Product = function(product) {
+  this.pid = product.pid;
   this.hsn_code = product.hsn_code;
   this.Productname = product.productname;
   this.image = product.image;
@@ -17,7 +18,6 @@ var Product = function(product) {
   this.scl2_id = product.scl2_id;
   this.subscription = product.subscription;
   this.weight = product.weight;
-  this.packettype = product.packettype;
   this.uom = product.uom;
   this.packetsize = product.packetsize;
   this.vegtype = product.vegtype;
@@ -30,9 +30,10 @@ var Product = function(product) {
 }
 
 //For Admin
-Product.createProduct = async function createProduct(req, result) {
+Product.createProduct = async function createProduct(req, result) {    
     req.active_status=1;
-    sql.query("INSERT INTO ProductMaster set ?", req,async function(err, res) {
+    var newproduct = new Product(req); 
+    sql.query("INSERT INTO ProductMaster set ?", newproduct,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -52,7 +53,8 @@ Product.createProduct = async function createProduct(req, result) {
 };
 
 Product.updateProduct =async function updateProduct(req, result) {
-    sql.query("UPDATE ProductMaster SET ? WHERE pid = ?", [req, req.pid],async function(err, res) {
+    var updateproduct = new Product(req); 
+    sql.query("UPDATE ProductMaster SET ? WHERE pid = ?", [updateproduct, updateproduct.pid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

@@ -129,6 +129,7 @@ Catalog.get_product_list =async function get_product_list(req,result) {
         if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
         if(req.scl2_id==0){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }else if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
         var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
+        console.log("getproductquery==>",getproductquery);
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
             let resobj = {
@@ -445,7 +446,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
             if(updatestatus==1){
                 var checkprevousstatesquery = "select pm.pid,zcm.master_catid as catid,zcm.active_status cat_status,pm.scl1_id,zl1sc.active_status as scl1_status,pm.scl2_id,zl2sc.active_status as scl2_status from ProductMaster as pm left join Zone_l2_subcategory_mapping as zl2sc on zl2sc.master_l2_subcatid=pm.scl2_id left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=pm.scl1_id left join SubcategoryL1 as sl1 on sl1.scl1_id=pm.scl1_id left join Zone_category_mapping as zcm on zcm.master_catid=sl1.catid where pm.pid="+req.pid+" and zl2sc.zoneid="+req.zone_id+" and zl1sc.zoneid="+req.zone_id+" and zcm.zoneid="+req.zone_id;
                 var checkprevousstates = await query(checkprevousstatesquery);
-                //console.log("checkprevousstates --->",checkprevousstates);
+                console.log("checkprevousstates --->",checkprevousstates);
                 if(checkprevousstates[0].scl2_status==0){
                     //console.log("l2 sub out");
                     let resobj = {
@@ -726,13 +727,23 @@ Catalog.edit_category =async function edit_category(req,result) {
         var checkcategoryquery = "select * from Category where name='"+req.name+"' and catid NOT IN("+req.catid+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
-            var updatecategory = await Category.updateCategory(req);           
-            let resobj = {
-                success: true,
-                status: true,
-                message: "category Updated susccessfully"
-            };
-            result(null, resobj);
+            var updatecategory = await Category.updateCategory(req, async function(err,popres){
+                if(popres.status == true){
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "category Updated susccessfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "somethinfg went wrong plz try again"
+                    };
+                    result(null, resobj);
+                }
+            }); 
         }else{
             let resobj = {
                 success: true,
@@ -843,13 +854,23 @@ Catalog.edit_subcategoryl1 =async function edit_subcategoryl1(req,result) {
         var checkcategoryquery = "select * from SubcategoryL1 where name='"+req.name+"' and scl1_id NOT IN("+req.scl1_id+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
-            var updatesubcategoryl1 = await Subcategoryl1.updateSubcategoryl1(req);           
-            let resobj = {
-                success: true,
-                status: true,
-                message: "subcategoryl1 Updated susccessfully"
-            };
-            result(null, resobj);
+            var updatesubcategoryl1 = await Subcategoryl1.updateSubcategoryl1(req,async function(err,subl1res){
+                if(subl1res.status == true){
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "subcategoryl1 Updated susccessfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "something went wrong plz try again"
+                    };
+                    result(null, resobj);
+                } 
+            });
         }else{
             let resobj = {
                 success: true,
@@ -900,7 +921,7 @@ Catalog.view_subcategoryl2 =async function view_subcategoryl2(req,result) {
 
 /////////Add SubCategoryL2///////////
 Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
-    if(req.name && req.image && req.scl1_id){
+    if(req.name && req.scl1_id){
         var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' ";
         var checksubcategoryl2 = await query(checksubcategoryl2query);
         if(checksubcategoryl2.length ==0 ){
@@ -960,13 +981,23 @@ Catalog.edit_subcategoryl2 =async function edit_subcategoryl2(req,result) {
         var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' and scl2_id NOT IN("+req.scl2_id+")";
         var checksubcategoryl2 = await query(checksubcategoryl2query);
         if(checksubcategoryl2.length ==0 ){
-            var updatesubcategoryl2 = await Subcategoryl2.updateSubcategoryl2(req);           
-            let resobj = {
-                success: true,
-                status: true,
-                message: "subcategoryl1 Updated susccessfully"
-            };
-            result(null, resobj);
+            var updatesubcategoryl2 = await Subcategoryl2.updateSubcategoryl2(req,async function(err,subl2res){
+                if(subl2res.status == true){
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "subcategoryl2 Updated susccessfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "something went wrong plz try again"
+                    };
+                    result(null, resobj);
+                }
+            });     
         }else{
             let resobj = {
                 success: true,
@@ -1162,44 +1193,27 @@ Catalog.view_product =async function view_product(req,result) {
 /////////Add Product///////////
 Catalog.add_product =async function add_product(req,result) {
     if(req){
-        var checkproductquery = "select * from ProductMaster where Productname='"+req.Productname+"' ";
+        var checkproductquery = "select * from ProductMaster where Productname='"+req.productname+"' ";
         var checkproduct = await query(checkproductquery);
         if(checkproduct.length ==0 ){
             Product.createProduct(req,async function(err,productres){
-                if(productres.status==true){               
+                if(productres.status==true){
+                    if(req.vendor_details.length>0){                        
+                        req.vendor_details[0].pid = productres.result.insertId;
+                        var vendordetails = req.vendor_details[0];
+                        Catalog.add_vendor_product_mapping(vendordetails,async function(err,vendordetailsres){});
+                    }
                     Catalog.get_zone_list(req,async function(err,zoneres){
                         var lpcount = 0;
                         for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
                             senddata.push({"zoneid":zoneres.result[i].id,"pid":productres.result.insertId,"live_status":0});
-                            //console.log("senddata -->",senddata);
-                            ProductLive.createProductLive(senddata, async function(err,productliveres){
-                                // //console.log("productliveres -->",productliveres);
-                                // //if(productliveres.status==true){ lpcount++; }
-                            }); 
-
-                            // if(zoneres.result.length == lpcount){
-                            //     let resobj = {
-                            //         success: true,
-                            //         status: true,
-                            //         result: productres.result,
-                            //         message: "Product added susccessfully"
-                            //     };
-                            //     result(null, resobj);
-                            // }else{
-                            //     let resobj = {
-                            //         success: true,
-                            //         status: false,
-                            //         result: productres.result,
-                            //         message: "product live insert error try again"
-                            //     };
-                            //     result(null, resobj);
-                            // }                             
+                            ProductLive.createProductLive(senddata, async function(err,productliveres){  }); 
+                                                       
                         }
                         let resobj = {
                             success: true,
                             status: true,
-                            //result: productres.result,
                             message: "Product added susccessfully"
                         };
                         result(null, resobj);
@@ -1263,6 +1277,47 @@ Catalog.edit_product =async function edit_product(req,result) {
             };
             result(null, resobj);
         }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
+/////// Add Vendor Product Mapping ////////////////
+Catalog.add_vendor_product_mapping =async function add_vendor_product_mapping(req,result) {
+    if(req.pid && req.vid){  
+        var checkvendorquery = "select * from Vendor_products_mapping where pid="+req.pid+" and vid="+req.vid+" and date(expiry_date) >= CURDATE()";
+        var checkvendor = await query(checkvendorquery);
+        if(checkvendor.length == 0){
+            VendorProductMapping.createVendorProductMapping(req,async function(err,vendorproductmapres){
+                if(vendorproductmapres.status==true){ 
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "vendor product mapping added susccessfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "something went wrong plz try again"
+                    };
+                    result(null, resobj);
+                }
+            });
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "already this product mapped to this vendor"
+            };
+            result(null, resobj);
+        }          
     }else{
         let resobj = {
             success: true,

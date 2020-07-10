@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var Stock = function(stock) {
+  this.stockid = stock.stockid;
   this.vpid = stock.vpid;
   this.quantity = stock.quantity;
   this.zoneid = stock.zoneid;
@@ -13,7 +14,8 @@ var Stock = function(stock) {
 
 //For Admin
 Stock.createStock = async function createStock(req, result) {
-    sql.query("INSERT INTO Stock set ?", req,async function(err, res) {
+    var insertdata = new Stock(req);
+    sql.query("INSERT INTO Stock set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -33,7 +35,8 @@ Stock.createStock = async function createStock(req, result) {
 };
 
 Stock.updateStock =async function updateStock(req, result) {
-    sql.query("UPDATE Stock SET ? WHERE vpid = ?", [req, req.vpid],async function(err, res) {
+    var updatedata = new Stock(req);
+    sql.query("UPDATE Stock SET ? WHERE vpid = ?", [updatedata, updatedata.vpid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

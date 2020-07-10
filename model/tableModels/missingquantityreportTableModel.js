@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var MissingQuantityReport = function(missingquantityreport) {
+  this.report_id = missingquantityreport.report_id;
   this.dopid = missingquantityreport.dopid;
   this.vpid = missingquantityreport.vpid;
   this.report_quantity = missingquantityreport.report_quantity;
@@ -16,7 +17,8 @@ var MissingQuantityReport = function(missingquantityreport) {
 //For Admin
 MissingQuantityReport.createMissingQuantityReport = async function createMissingQuantityReport(req, result) {
     req.active_status=0;
-    sql.query("INSERT INTO Missing_Quantity_Report set ?", req,async function(err, res) {
+    var insertdata = new MissingQuantityReport(req);
+    sql.query("INSERT INTO Missing_Quantity_Report set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -36,7 +38,8 @@ MissingQuantityReport.createMissingQuantityReport = async function createMissing
 };
 
 MissingQuantityReport.updateMissingQuantityReport =async function updateMissingQuantityReport(req, result) {
-    sql.query("UPDATE Missing_Quantity_Report SET ? WHERE report_id = ?", [req, req.id],async function(err, res) {
+    var updatedata = new MissingQuantityReport(req);
+    sql.query("UPDATE Missing_Quantity_Report SET ? WHERE report_id = ?", [updatedata, updatedata.report_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

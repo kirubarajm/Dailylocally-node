@@ -54,6 +54,7 @@ module.exports = function(app) {
   app.route("/admin/fileUpload").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.fileUpload}));   
 
   /////// Edit Vendor Product Mapping ////////////////
+  app.route("/admin/add/vendorproductmapping").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.add_vendor_product_mapping}));
   app.route("/admin/edit/vendorproductmapping").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.edit_vendor_product_mapping}));
 
   /////// SCM Precurment /////////////

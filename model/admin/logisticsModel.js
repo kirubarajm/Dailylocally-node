@@ -52,9 +52,32 @@ Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,resu
 
 /////////Get QC Type List///////////
 Logistics.qa_type_list =async function qa_type_list(req,result) {
-    var qachecklistquery = "select * from QA_types";
+    // var qachecklistquery = "select * from QA_types";
+    // var qachecklist = await query(qachecklistquery);
+    // if(qachecklist.length > 0){            
+    //     let resobj = {
+    //         success: true,
+    //         status: true,
+    //         result: qachecklist
+    //     };
+    //     result(null, resobj);
+    // }else{
+    //     let resobj = {
+    //         success: true,
+    //         status: false,
+    //         message: "no data found"
+    //     };
+    //     result(null, resobj);
+    // }      
+
+
+    var qachecklistquery = "select * from ProductMaster";
     var qachecklist = await query(qachecklistquery);
-    if(qachecklist.length > 0){            
+    if(qachecklist.length > 0){  
+        for (let i = 0; i < qachecklist.length; i++) {
+            var updatequery = "update ProductMaster set Productname='dev_"+qachecklist[i].Productname+"' where pid="+qachecklist[i].pid;
+            var update = await query(updatequery);            
+        }          
         let resobj = {
             success: true,
             status: true,
@@ -68,7 +91,7 @@ Logistics.qa_type_list =async function qa_type_list(req,result) {
             message: "no data found"
         };
         result(null, resobj);
-    }      
+    } 
 };
 
 /////////Save QA Check List///////////

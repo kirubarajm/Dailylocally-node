@@ -74,8 +74,8 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
     if(new_Procurement.doid.length>0){
       for (let i = 0; i < new_Procurement.doid.length; i++) {        
         var insertlogdata = [];
-        if(new_Procurement.admin_userid){ }else{ new_Procurement.admin_userid=0}
-        insertlogdata.push({"comments":"procurement_created","done_by":new_Procurement.admin_userid,"doid":new_Procurement.doid[i],"type":1,"done_type":1});
+        if(new_Procurement.done_by){ }else{ new_Procurement.done_by=0}
+        insertlogdata.push({"comments":"procurement_created","done_by":new_Procurement.done_by,"doid":new_Procurement.doid[i],"type":1,"done_type":1});
         DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});        
       }
     }

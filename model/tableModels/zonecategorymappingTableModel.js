@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var ZoneCategoryMapping = function(zonecategorymapping) {
+  this.virtual_catid = zonecategorymapping.virtual_catid
   this.master_catid = zonecategorymapping.master_catid;
   this.zoneid = zonecategorymapping.zoneid;
   this.active_status = zonecategorymapping.active_status;
@@ -12,7 +13,8 @@ var ZoneCategoryMapping = function(zonecategorymapping) {
 
 //For Admin
 ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategoryMapping(req, result) {
-    sql.query("INSERT INTO Zone_category_mapping set ?", req,async function(err, res) {
+    var insertdata = new ZoneCategoryMapping(req);
+    sql.query("INSERT INTO Zone_category_mapping set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -32,7 +34,8 @@ ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategor
 };
 
 ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategoryMapping(req, result) {
-    sql.query("UPDATE Zone_category_mapping SET ? WHERE virtual_catid = ?", [req, req.virtual_catid],async function(err, res) {
+    var updatedata = new ZoneCategoryMapping(req);
+    sql.query("UPDATE Zone_category_mapping SET ? WHERE virtual_catid = ?", [updatedata, updatedata.virtual_catid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

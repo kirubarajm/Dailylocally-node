@@ -9,7 +9,7 @@ let config  = require('../config.js');
 var moment  = require('moment');
 var PO = require('../tableModels/poTableModel.js');
 var POProducts = require('../tableModels/poproductsTableModel.js');
-var QC_check_list = require("../../model/common/qualitychecklistModel.js");
+var QC_check_list = require("../tableModels/qualitychecklistTableModel.js");
 var Stock = require('../tableModels/stockTableModel.js');
 const { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } = require('constants');
 const { parse } = require('path');
@@ -1668,7 +1668,7 @@ SCM.save_sorting =async function save_sorting(req,result) {
 
 /////////Move to QA///////////
 SCM.move_to_qa =async function move_to_qa(req,result) {
-    if(req.dopid_list){
+    if(req.dopid_list && req.done_by){
         var error_poid= [];
         var error_poid_msg = "";
         for (let i = 0; i < req.dopid_list.length; i++) {
@@ -1690,8 +1690,7 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
 
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                if(req.admin_userid){ }else{ req.admin_userid=0}
-                insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.admin_userid,"doid":getdop[0].doid,"type":1,"done_type":1});
+                insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
                 DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
                 //////// change po status from 0 to 1 ///////////
             }else{
@@ -1834,8 +1833,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 
         ////////Create Day order Log ////////////
         var insertlogdata = [];
-        if(req.admin_userid){ }else{ req.admin_userid=0}
-        insertlogdata.push({"comments":"moved from qc to ready to dispatch","done_by":req.admin_userid,"doid":req.doid,"type":1,"done_type":1});
+        insertlogdata.push({"comments":"moved from qc to ready to dispatch","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
 
         let resobj = {
@@ -1850,8 +1848,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 
         ////////Create Day order Log ////////////
         var insertlogdata = [];
-        if(req.admin_userid){ }else{ req.admin_userid=0}
-        insertlogdata.push({"comments":"revoke moved from qc to sorting","done_by":req.admin_userid,"doid":req.doid,"type":1,"done_type":1});
+        insertlogdata.push({"comments":"revoke moved from qc to sorting","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
 
         let resobj = {
