@@ -14,7 +14,7 @@ var ClusterCategoryMapping = function(clustercategorymapping) {
 //For Admin
 ClusterCategoryMapping.createClusterCategoryMapping = async function createClusterCategoryMapping(req, result) {   
     req.active_status=1;
-    var insertdata = new ClusterCategoryMapping(req[0]);
+    var insertdata = new ClusterCategoryMapping(req);
     sql.query("INSERT INTO Cluster_Category_mapping set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {

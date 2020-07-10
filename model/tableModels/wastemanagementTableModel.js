@@ -15,7 +15,6 @@ var WasteManagement = function(wastemanagement) {
 
 //For Admin
 WasteManagement.createWasteManagement = async function createWasteManagement(req, result) {
-    req.active_status=0;
     var insertdata = new WasteManagement(req);
     sql.query("INSERT INTO Waste_Management set ?", insertdata,async function(err, res) {
         if (err) {

@@ -16,7 +16,6 @@ var MissingQuantityReport = function(missingquantityreport) {
 
 //For Admin
 MissingQuantityReport.createMissingQuantityReport = async function createMissingQuantityReport(req, result) {
-    req.active_status=0;
     var insertdata = new MissingQuantityReport(req);
     sql.query("INSERT INTO Missing_Quantity_Report set ?", insertdata,async function(err, res) {
         if (err) {

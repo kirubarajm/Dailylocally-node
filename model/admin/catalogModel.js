@@ -130,7 +130,6 @@ Catalog.get_product_list =async function get_product_list(req,result) {
         if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
         if(req.scl2_id==0){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }else if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
         var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
-        console.log("getproductquery==>",getproductquery);
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
             let resobj = {
@@ -447,7 +446,6 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
             if(updatestatus==1){
                 var checkprevousstatesquery = "select pm.pid,zcm.master_catid as catid,zcm.active_status cat_status,pm.scl1_id,zl1sc.active_status as scl1_status,pm.scl2_id,zl2sc.active_status as scl2_status from ProductMaster as pm left join Zone_l2_subcategory_mapping as zl2sc on zl2sc.master_l2_subcatid=pm.scl2_id left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=pm.scl1_id left join SubcategoryL1 as sl1 on sl1.scl1_id=pm.scl1_id left join Zone_category_mapping as zcm on zcm.master_catid=sl1.catid where pm.pid="+req.pid+" and zl2sc.zoneid="+req.zone_id+" and zl1sc.zoneid="+req.zone_id+" and zcm.zoneid="+req.zone_id;
                 var checkprevousstates = await query(checkprevousstatesquery);
-                console.log("checkprevousstates --->",checkprevousstates);
                 if(checkprevousstates[0].scl2_status==0){
                     //console.log("l2 sub out");
                     let resobj = {
@@ -690,7 +688,7 @@ Catalog.add_category =async function add_category(req,result) {
                         for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
                             senddata.push({"zoneid":zoneres.result[i].id,"master_catid":categoryres.result.insertId,"active_status":0});
-                            await CategoryMapping.createZoneCategoryMapping(senddata, async function(err,productliveres){ });
+                            await CategoryMapping.createZoneCategoryMapping(senddata[0], async function(err,productliveres){ });
                         }
                         var getclustersquery = "select * from Cluster_table";
                         var getclusters = await query(getclustersquery);
@@ -699,7 +697,7 @@ Catalog.add_category =async function add_category(req,result) {
                             for (let j = 0; j < getclusters.length; j++) {
                                 var insertCCMdata = [];
                                 insertCCMdata.push({"catid":categoryres.result.insertId,"cluid":getclusters[j].cluid,"orderby_category":j+1});
-                                await ClusterCategoryMapping.createClusterCategoryMapping(insertCCMdata, async function(err,CCMres){ });
+                                await ClusterCategoryMapping.createClusterCategoryMapping(insertCCMdata[0], async function(err,CCMres){ });
                             }
                         }
 
@@ -1217,7 +1215,7 @@ Catalog.add_product =async function add_product(req,result) {
                         for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
                             senddata.push({"zoneid":zoneres.result[i].id,"pid":productres.result.insertId,"live_status":0});
-                            ProductLive.createProductLive(senddata, async function(err,productliveres){  }); 
+                            ProductLive.createProductLive(senddata[0], async function(err,productliveres){  }); 
                                                        
                         }
                         let resobj = {

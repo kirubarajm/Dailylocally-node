@@ -13,7 +13,7 @@ var ProductLive = function(productlive) {
 
 //For Admin
 ProductLive.createProductLive = async function createProductLive(req, result) {
-    var insertdata = new ProductLive(req[0]);
+    var insertdata = new ProductLive(req);
     sql.query("INSERT INTO Product_live set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
