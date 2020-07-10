@@ -35,7 +35,7 @@ const s3 = new AWS.S3({
 /////////Get Category List///////////
 Catalog.get_category_list =async function get_category_list(req,result) {
     if(req.zone_id){
-        var getcategoryquery = "select ca.catid,ca.name,zcm.active_status,ca.image from Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.zoneid="+req.zone_id;
+        var getcategoryquery = "select ca.catid,ca.name,zcm.active_status,ca.image,ca.thumbimage from Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.zoneid="+req.zone_id;
         var getcategory = await query(getcategoryquery);
         if(getcategory.length > 0){
             let resobj = {
