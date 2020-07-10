@@ -63,7 +63,7 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
       }
     }
 
-    var sub_category_query= "Select l1.* from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.vpid=pm.pid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where l1.catid=  '"+req.catid+"' and pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' group by l1.scl1_id ";
+    var sub_category_query= "Select l1.*,ca.image as cat_header_image from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.vpid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where l1.catid=  '"+req.catid+"' and pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' group by l1.scl1_id ";
  
   sql.query(sub_category_query,async function(err, res) {
     if (err) {
