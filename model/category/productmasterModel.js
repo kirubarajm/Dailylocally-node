@@ -139,7 +139,11 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
 
       for (let i = 0; i < res.length; i++) {
      
-        res[i].weight = res[i].weight * 1000;
+        if (res[i].uom== 1 || res[i].uom==7) {
+          res[i].weight = res[i].weight * 1000;
+        }
+        
+
         res[i].servicable_status=servicable_status;
         res[i].offer='offer';
         res[i].discount_cost_status=false;
@@ -419,7 +423,11 @@ sql.query(product_list,async function(err, res) {
 
     for (let i = 0; i < res.length; i++) {
      
-      res[i].weight = res[i].weight * 1000;
+      
+      if (res[i].uom== 1 || res[i].uom==7) {
+        res[i].weight = res[i].weight * 1000;
+      }
+      
       res[i].servicable_status=servicable_status;
       res[i].offer='offer';
       res[i].discount_cost_status=false;

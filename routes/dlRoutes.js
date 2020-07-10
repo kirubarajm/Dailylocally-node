@@ -61,7 +61,7 @@ app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1
 
  //order  cancel
  app.route("/user/dayorder/productcancel").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.day_order_product_cancel}));
-
+ 
 
  //live order list
  app.route("/user/liveorders/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":orders.live_order_list_byuserid}));
