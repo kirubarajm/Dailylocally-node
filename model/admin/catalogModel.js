@@ -577,7 +577,7 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
                 catid=req.id;
                 break;
             case 'scl1_id':
-                var getidsquery = "select catid,scl1_id from SubcategoryL1 where scl1_id="+req.id;
+                var getidsquery = "select catid,scl1_id,image from SubcategoryL1 where scl1_id="+req.id;
                 var getids = await query(getidsquery);
                 if(getids.length>0){
                     catid = getids[0].catid;
@@ -585,7 +585,7 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
                 }
                 break;
             case 'scl2_id':
-                var getidsquery = "select l1.catid,l2.scl1_id,l2.scl2_id from SubcategoryL2 as l2 left join SubcategoryL1 as l1 on l1.scl1_id=l2.scl1_id where l2.scl2_id="+req.id+" group by l2.scl2_id";
+                var getidsquery = "select l1.catid,l2.scl1_id,l2.scl2_id,l1.image,l2.image from SubcategoryL2 as l2 left join SubcategoryL1 as l1 on l1.scl1_id=l2.scl1_id where l2.scl2_id="+req.id+" group by l2.scl2_id";
                 var getids = await query(getidsquery);
                 if(getids.length>0){
                     catid = getids[0].catid;
@@ -594,7 +594,7 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
                 }
                 break;
             case 'pid': 
-                var getidsquery = "select l1.catid,pm.scl1_id,pm.scl2_id,pm.pid from ProductMaster as pm left join SubcategoryL1 as l1 on l1.scl1_id=pm.scl1_id where pm.pid="+req.id+" group by pm.pid";
+                var getidsquery = "select l1.catid,pm.scl1_id,pm.scl2_id,pm.pid,pm.image from ProductMaster as pm left join SubcategoryL1 as l1 on l1.scl1_id=pm.scl1_id where pm.pid="+req.id+" group by pm.pid";
                 var getids = await query(getidsquery);
                 if(getids.length>0){
                     catid = getids[0].catid;
@@ -608,22 +608,22 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
         }
 
         if(catid>0){
-            var categorydataquery = "select catid,name,active_status from Category where catid="+catid;
+            var categorydataquery = "select catid,name,image,thumbimage,active_status from Category where catid="+catid;
             category = await query(categorydataquery);            
         }
 
         if(scl1_id>0){
-            var l1subcategorydataquery = "select l1.scl1_id,l1.name,l1.active_status,l1.catid,if(scl2_id,1,0) as l2_status from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id where l1.scl1_id="+scl1_id+" group by l1.scl1_id";
+            var l1subcategorydataquery = "select l1.scl1_id,l1.name,l1.active_status,l1.catid,if(scl2_id,1,0) as l2_status,l1.image,l2.image from SubcategoryL1 as l1 left join SubcategoryL2 as l2 on l1.scl1_id=l2.scl1_id where l1.scl1_id="+scl1_id+" group by l1.scl1_id";
             l1subcategory = await query(l1subcategorydataquery);            
         }
 
         if(scl2_id>0){
-            var l2subcategorydataquery = "select scl2_id,name,active_status,scl1_id from SubcategoryL2 where scl2_id="+scl2_id;
+            var l2subcategorydataquery = "select scl2_id,name,active_status,scl1_id,image from SubcategoryL2 where scl2_id="+scl2_id;
             l2subcategory = await query(l2subcategorydataquery);            
         }
 
         if(pid>0){
-            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id from ProductMaster where pid="+pid;
+            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id,image from ProductMaster where pid="+pid;
             product = await query(productdataquery);            
         }
         
