@@ -19,6 +19,7 @@ var CategoryMapping = require('../tableModels/zonecategorymappingTableModel.js')
 var sub_category_L1 = require("../../model/category/subcategoryL1Model");
 var Sub_Category_L2 = require("../../model/category/subcategoryL2Model");
 var Productlist = require("../../model/category/productmasterModel");
+var ClusterCategoryMapping = require("../tableModels/clustercategorymappingTableModel.js");
 
 var Catalog = function(catalog) {};
 
@@ -689,11 +690,19 @@ Catalog.add_category =async function add_category(req,result) {
                         for (let i = 0; i < zoneres.result.length; i++) {
                             let senddata = [];
                             senddata.push({"zoneid":zoneres.result[i].id,"master_catid":categoryres.result.insertId,"active_status":0});
-                            CategoryMapping.createZoneCategoryMapping(senddata, async function(err,productliveres){
-                                // //console.log("productliveres -->",productliveres);
-                                // //if(productliveres.status==true){ lpcount++; }
-                            });
+                            await CategoryMapping.createZoneCategoryMapping(senddata, async function(err,productliveres){ });
                         }
+                        var getclustersquery = "select * from Cluster_table";
+                        var getclusters = await query(getclustersquery);
+
+                        if(getclusters.length>0){
+                            for (let j = 0; j < getclusters.length; j++) {
+                                var insertCCMdata = [];
+                                insertCCMdata.push({"catid":categoryres.result.insertId,"cluid":getclusters[j].cluid,"orderby_category":j+1});
+                                await ClusterCategoryMapping.createClusterCategoryMapping(insertCCMdata, async function(err,CCMres){ });
+                            }
+                        }
+
                         let resobj = {
                             success: true,
                             status: true,
