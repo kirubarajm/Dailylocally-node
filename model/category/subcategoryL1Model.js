@@ -71,7 +71,9 @@ Sub_Category_L1.get_Sub_Category_L1_list = async function get_Sub_Category_L1_li
     } else {
 
 
-      var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
+      // var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
+
+      var get_sub_cat_images = await query("select * from Category where catid='"+req.catid+"'");
 
       for (let i = 0; i < res.length; i++) {
      
@@ -155,7 +157,8 @@ sql.query(sub_category_query,async function(err, res) {
   } else {
 
 
-    var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
+    // var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
+    var get_sub_cat_images = await query("select *,image as image_url from Category where catid='"+req.catid+"'");
 
     for (let i = 0; i < res.length; i++) {
    
