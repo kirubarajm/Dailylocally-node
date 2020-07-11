@@ -5,13 +5,15 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var QACheckList = function(qachecklist) {
+  this.qacid = qachecklist.qacid;
   this.doid = qachecklist.doid;
   this.qaid = qachecklist.qaid;
 }
 
 //For Admin
 QACheckList.createQACheckList = async function createQACheckList(req, result) {
-    sql.query("INSERT INTO QA_check_list set ?", req,async function(err, res) {
+    var insertdata = QACheckList(req);
+    sql.query("INSERT INTO QA_check_list set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -31,7 +33,8 @@ QACheckList.createQACheckList = async function createQACheckList(req, result) {
 };
 
 QACheckList.updateQACheckList =async function updateQACheckList(req, result) {
-    sql.query("UPDATE QA_check_list SET ? WHERE qacid = ?", [req, req.qacid],async function(err, res) {
+    var updatedata = QACheckList(req);
+    sql.query("UPDATE QA_check_list SET ? WHERE qacid = ?", [updatedata, updatedata.qacid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

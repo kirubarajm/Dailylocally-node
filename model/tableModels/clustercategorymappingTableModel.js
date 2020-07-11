@@ -4,17 +4,18 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var ZoneCategoryMapping = function(zonecategorymapping) {
-  this.virtual_catid = zonecategorymapping.virtual_catid
-  this.master_catid = zonecategorymapping.master_catid;
-  this.zoneid = zonecategorymapping.zoneid;
-  this.active_status = zonecategorymapping.active_status;
+var ClusterCategoryMapping = function(clustercategorymapping) {
+  this.catmid = clustercategorymapping.catmid
+  this.catid = clustercategorymapping.catid;
+  this.cluid = clustercategorymapping.cluid;
+  this.orderby_category = clustercategorymapping.orderby_category;
+  this.active_status = clustercategorymapping.active_status;
 }
 
 //For Admin
-ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategoryMapping(req, result) {
-    var insertdata = new ZoneCategoryMapping(req);
-    sql.query("INSERT INTO Zone_category_mapping set ?", insertdata,async function(err, res) {
+ClusterCategoryMapping.createClusterCategoryMapping = async function createClusterCategoryMapping(req, result) {   
+    var insertdata = new ClusterCategoryMapping(req);
+    sql.query("INSERT INTO Cluster_Category_mapping set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -33,9 +34,9 @@ ZoneCategoryMapping.createZoneCategoryMapping = async function createZoneCategor
     });    
 };
 
-ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategoryMapping(req, result) {
-    var updatedata = new ZoneCategoryMapping(req);
-    sql.query("UPDATE Zone_category_mapping SET ? WHERE virtual_catid = ?", [updatedata, updatedata.virtual_catid],async function(err, res) {
+ClusterCategoryMapping.updateClusterCategoryMapping =async function updateClusterCategoryMapping(req, result) {
+    var updatedata = new ClusterCategoryMapping(req);
+    sql.query("UPDATE Cluster_Category_mapping SET ? WHERE catmid = ?", [updatedata, updatedata.catmid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -55,4 +56,4 @@ ZoneCategoryMapping.updateZoneCategoryMapping =async function updateZoneCategory
     );
 };
 
-module.exports = ZoneCategoryMapping;
+module.exports = ClusterCategoryMapping;

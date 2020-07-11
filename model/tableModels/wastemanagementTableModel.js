@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var WasteManagement = function(wastemanagement) {
+  this.waste_id = wastemanagement.waste_id;
   this.dopid = wastemanagement.dopid;
   this.vpid = wastemanagement.vpid;
   this.quantity = wastemanagement.quantity;
@@ -14,8 +15,8 @@ var WasteManagement = function(wastemanagement) {
 
 //For Admin
 WasteManagement.createWasteManagement = async function createWasteManagement(req, result) {
-    req.active_status=0;
-    sql.query("INSERT INTO Waste_Management set ?", req,async function(err, res) {
+    var insertdata = new WasteManagement(req);
+    sql.query("INSERT INTO Waste_Management set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -35,7 +36,8 @@ WasteManagement.createWasteManagement = async function createWasteManagement(req
 };
 
 WasteManagement.updateWasteManagement =async function updateWasteManagement(req, result) {
-    sql.query("UPDATE Waste_Management SET ? WHERE waste_id = ?", [req, req.waste_id],async function(err, res) {
+    var updatedata = new WasteManagement(req);
+    sql.query("UPDATE Waste_Management SET ? WHERE waste_id = ?", [updatedata, updatedata.waste_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

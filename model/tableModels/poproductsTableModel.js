@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var POproducts = function(poproducts) {
+  this.popid = poproducts.popid;
   this.prid = poproducts.prid;
   this.vpid = poproducts.vpid;
   this.vid = poproducts.vid;
@@ -20,7 +21,8 @@ var POproducts = function(poproducts) {
 
 //For Admin
 POproducts.createPOProducts = async function createPOProducts(req, result) {
-    sql.query("INSERT INTO POproducts set ?", req,async function(err, res) {
+    var insertdata = new POproducts(req);
+    sql.query("INSERT INTO POproducts set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -40,10 +42,8 @@ POproducts.createPOProducts = async function createPOProducts(req, result) {
 };
 
 POproducts.updatePOProducts =async function updatePOProducts(req,popid, result) {
-    console.log("updatePOProducts req--->",req,"popid->",popid);
-    sql.query("UPDATE POproducts set ? where popid = ?", [req, popid],function(err, res) {
-        //sql.query("UPDATE PackagingBox set ? where id =?", [packagingboxdetails,id], function(err, res) {
-        console.log("updatePOProducts res-->",res);
+    var updatedata = new POproducts(req);
+    sql.query("UPDATE POproducts set ? where popid = ?", [updatedata, popid],function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

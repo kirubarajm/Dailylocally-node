@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var StockKeeping = function(stockkeeping) {
+    this.skid = stockkeeping.skid;
     this.stockid = stockkeeping.stockid;
     this.vpid = stockkeeping.vpid;
     this.product_name = stockkeeping.product_name;
@@ -29,7 +30,8 @@ var StockKeeping = function(stockkeeping) {
 
 //For Admin
 StockKeeping.createStockKeeping = async function createStockKeeping(req, result) {
-    sql.query("INSERT INTO StockKeeping set ?", req,async function(err, res) {
+    var insertdata = new StockKeeping(req);
+    sql.query("INSERT INTO StockKeeping set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -49,7 +51,8 @@ StockKeeping.createStockKeeping = async function createStockKeeping(req, result)
 };
 
 StockKeeping.updateStockKeeping =async function updateStockKeeping(req, result) {
-    sql.query("UPDATE StockKeeping SET ? WHERE skid = ?", [req, req.skid],async function(err, res) {
+    var updatedata = new StockKeeping(req);
+    sql.query("UPDATE StockKeeping SET ? WHERE skid = ?", [updatedata, updatedata.skid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var PO = function(po) {
+  this.poid = po.poid;
   this.vid = po.vid;
   this.cost = po.cost;
   this.zoneid = po.zoneid;
@@ -13,7 +14,8 @@ var PO = function(po) {
 
 //For Admin
 PO.createPO = async function createPO(req, result) {
-    sql.query("INSERT INTO PO set ?", req,async function(err, res) {
+    var insertdata = new PO(req);
+    sql.query("INSERT INTO PO set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -33,7 +35,8 @@ PO.createPO = async function createPO(req, result) {
 };
 
 PO.updatePO =async function updatePO(req, result) {
-    sql.query("UPDATE PO SET ? WHERE poid = ?", [req, req.poid],async function(err, res) {
+    var updatedata = new PO(req);
+    sql.query("UPDATE PO SET ? WHERE poid = ?", [updatedata, updatedata.poid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

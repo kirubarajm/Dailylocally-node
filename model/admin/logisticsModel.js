@@ -8,6 +8,7 @@ let jwt     = require('jsonwebtoken');
 let config  = require('../config.js');
 var moment  = require('moment');
 var QACheckList = require('../tableModels/qachecklistTableModel.js');
+var ProductLive = require('../tableModels/productliveTableModel.js');
 
 
 var Logistics = function(stockkeeping) {};
@@ -52,9 +53,36 @@ Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,resu
 
 /////////Get QC Type List///////////
 Logistics.qa_type_list =async function qa_type_list(req,result) {
-    var qachecklistquery = "select * from QA_types";
+    // var qachecklistquery = "select * from QA_types";
+    // var qachecklist = await query(qachecklistquery);
+    // if(qachecklist.length > 0){            
+    //     let resobj = {
+    //         success: true,
+    //         status: true,
+    //         result: qachecklist
+    //     };
+    //     result(null, resobj);
+    // }else{
+    //     let resobj = {
+    //         success: true,
+    //         status: false,
+    //         message: "no data found"
+    //     };
+    //     result(null, resobj);
+    // }      
+
+
+    var qachecklistquery = "select * from ProductMaster";
     var qachecklist = await query(qachecklistquery);
-    if(qachecklist.length > 0){            
+    if(qachecklist.length > 0){  
+        for (let i = 0; i < qachecklist.length; i++) {
+            for (let j = 1; j < 3; j++) {                
+                let senddata = [];
+                senddata.push({"zoneid":j,"pid":qachecklist[i].pid,"live_status":0});
+                ProductLive.createProductLive(senddata[0], async function(err,productliveres){  });                                                       
+            }
+                        
+        }          
         let resobj = {
             success: true,
             status: true,
@@ -68,7 +96,7 @@ Logistics.qa_type_list =async function qa_type_list(req,result) {
             message: "no data found"
         };
         result(null, resobj);
-    }      
+    } 
 };
 
 /////////Save QA Check List///////////

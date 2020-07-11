@@ -5,15 +5,18 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var Category = function(category) {
+  this.catid = category.catid
   this.name = category.name;
   this.image = category.image;
+  this.thumbimage = category.thumbimage;
   this.active_status = category.active_status;
 }
 
 //For Admin
-Category.createCategory = async function createCategory(req, result) {
+Category.createCategory = async function createCategory(req, result) {   
     req.active_status=0;
-    sql.query("INSERT INTO Category set ?", req,async function(err, res) {
+    var insertdata = new Category(req);
+    sql.query("INSERT INTO Category set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -33,7 +36,8 @@ Category.createCategory = async function createCategory(req, result) {
 };
 
 Category.updateCategory =async function updateCategory(req, result) {
-    sql.query("UPDATE Category SET ? WHERE catid = ?", [req, req.catid],async function(err, res) {
+    var updatedata = new Category(req);
+    sql.query("UPDATE Category SET ? WHERE catid = ?", [updatedata, updatedata.catid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

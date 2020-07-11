@@ -282,6 +282,16 @@ exports.edit_product = function(req, res) {
     });    
 };
 
+/////// Add Vendor Product Mapping ////////////////
+exports.add_vendor_product_mapping = function(req, res) {    
+    catalog.add_vendor_product_mapping(req.body, function(err, ress) {
+        //console.log("add_vendor_product_mapping controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////// Edit Vendor Product Mapping ////////////////
 exports.edit_vendor_product_mapping = function(req, res) {    
     catalog.edit_vendor_product_mapping(req.body, function(err, ress) {

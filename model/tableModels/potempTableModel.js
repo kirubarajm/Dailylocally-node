@@ -5,6 +5,7 @@ const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
 var POtemp = function(potemp) {
+  this.tempid = potemp.tempid;
   this.prid = potemp.prid;
   this.vpid = potemp.vpid;
   this.vid = potemp.vid;
@@ -19,7 +20,8 @@ var POtemp = function(potemp) {
 //For Admin
 POtemp.createPOtemp = async function createPOtemp(req, result) {
     req.active_status=0;
-    sql.query("INSERT INTO POtemp set ?", req,async function(err, res) {
+    var insertdata = new POtemp(req);
+    sql.query("INSERT INTO POtemp set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -39,7 +41,8 @@ POtemp.createPOtemp = async function createPOtemp(req, result) {
 };
 
 POtemp.updatePOtemp =async function updatePOtemp(req, result) {
-    sql.query("UPDATE POtemp SET ? WHERE tempid = ?", [req, req.tempid],async function(err, res) {
+    var updatedata = new POtemp(req);
+    sql.query("UPDATE POtemp SET ? WHERE tempid = ?", [updatedata, updatedata.tempid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
