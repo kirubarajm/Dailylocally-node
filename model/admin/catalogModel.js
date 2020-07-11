@@ -696,7 +696,7 @@ Catalog.add_category =async function add_category(req,result) {
                         if(getclusters.length>0){
                             for (let j = 0; j < getclusters.length; j++) {
                                 var insertCCMdata = [];
-                                insertCCMdata.push({"catid":categoryres.result.insertId,"cluid":getclusters[j].cluid,"orderby_category":j+1});
+                                insertCCMdata.push({"catid":categoryres.result.insertId,"cluid":getclusters[j].cluid,"orderby_category":j+1,"active_status":1});
                                 await ClusterCategoryMapping.createClusterCategoryMapping(insertCCMdata[0], async function(err,CCMres){ });
                             }
                         }

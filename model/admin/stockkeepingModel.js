@@ -96,7 +96,7 @@ StockKeeping.stockkeeping_openlist =async function stockkeeping_openlist(req,res
 
 /////////Stockkeeping Add///////////
 StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
-    if(req.zone_id && req.stockid && req.vpid){
+    if(req.zone_id && req.vpid){
         var checkSKquery = "select * from StockKeeping where zoneid="+req.zone_id+" and vpid="+req.vpid+" and date(created_at)=CURDATE() and delete_status=0";
         var checkS = await query(checkSKquery);
         if(checkS.length==0){

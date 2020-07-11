@@ -9,11 +9,11 @@ var ClusterCategoryMapping = function(clustercategorymapping) {
   this.catid = clustercategorymapping.catid;
   this.cluid = clustercategorymapping.cluid;
   this.orderby_category = clustercategorymapping.orderby_category;
+  this.active_status = clustercategorymapping.active_status;
 }
 
 //For Admin
 ClusterCategoryMapping.createClusterCategoryMapping = async function createClusterCategoryMapping(req, result) {   
-    req.active_status=1;
     var insertdata = new ClusterCategoryMapping(req);
     sql.query("INSERT INTO Cluster_Category_mapping set ?", insertdata,async function(err, res) {
         if (err) {
