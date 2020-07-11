@@ -815,10 +815,7 @@ Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
                             for (let i = 0; i < zoneres.result.length; i++) {
                                 let senddata = [];
                                 senddata.push({"zoneid":zoneres.result[i].id,"master_l1_subcatid":subcategory1res.result.insertId,"active_status":0});
-                                L1SubCategoryMapping.createL1SubcategoryMapping(senddata, async function(err,productliveres){
-                                    // //console.log("productliveres -->",productliveres);
-                                    // //if(productliveres.status==true){ lpcount++; }
-                                });
+                                L1SubCategoryMapping.createL1SubcategoryMapping(senddata[0], async function(err,productliveres){});
                             }
                             let resobj = {
                                 success: true,
@@ -942,10 +939,7 @@ Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
                             for (let i = 0; i < zoneres.result.length; i++) {
                                 let senddata = [];
                                 senddata.push({"zoneid":zoneres.result[i].id,"master_l2_subcatid":subcategory2res.result.insertId,"active_status":0});
-                                L2SubCategoryMapping.createL2SubcategoryMapping(senddata, async function(err,productliveres){
-                                    // //console.log("productliveres -->",productliveres);
-                                    // //if(productliveres.status==true){ lpcount++; }
-                                });
+                                L2SubCategoryMapping.createL2SubcategoryMapping(senddata[0], async function(err,productliveres){ });
                             }
                             let resobj = {
                                 success: true,
