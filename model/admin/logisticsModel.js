@@ -8,6 +8,7 @@ let jwt     = require('jsonwebtoken');
 let config  = require('../config.js');
 var moment  = require('moment');
 var QACheckList = require('../tableModels/qachecklistTableModel.js');
+var ProductLive = require('../tableModels/productliveTableModel.js');
 
 
 var Logistics = function(stockkeeping) {};
@@ -75,8 +76,12 @@ Logistics.qa_type_list =async function qa_type_list(req,result) {
     var qachecklist = await query(qachecklistquery);
     if(qachecklist.length > 0){  
         for (let i = 0; i < qachecklist.length; i++) {
-            var updatequery = "update ProductMaster set Productname='dev_"+qachecklist[i].Productname+"' where pid="+qachecklist[i].pid;
-            var update = await query(updatequery);            
+            for (let j = 1; j < 3; j++) {                
+                let senddata = [];
+                senddata.push({"zoneid":j,"pid":qachecklist[i].pid,"live_status":0});
+                ProductLive.createProductLive(senddata[0], async function(err,productliveres){  });                                                       
+            }
+                        
         }          
         let resobj = {
             success: true,
