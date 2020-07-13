@@ -63,36 +63,37 @@ Orderrating.createOrderrating = function createOrderrating(Order_rating,new_vpid
 
 Orderrating.day_order_rating_check =async function day_order_rating_check(Order_rating,result) {
 
- get_day_details = await query("select * from Dayorder WHERE userid='"+Order_rating.userid +"'  order by id desc limit 1");
+ get_day_details = await query("select * from Dayorder WHERE userid='"+Order_rating.userid +"'  and dayorderstatus=0 order by id desc limit 1");
 
 if (get_day_details.length !==0) {
-  sql.query("Select * from day_order_rating where doid = '" + get_day_details[0].id + "'",function(err, res) {
-    if (err) {
-      result(err, null);
-    } else {
-      if (res.length === 0) {
-        let resobj = {
-          success: true,
-          status: false,
-          rating_status:true,
-          message:  "Please completed rating",
-          result: res
-        };
-        result(null, resobj);
-       
-      } else {
-        let resobj = {
-          success: true,
-          status: false,
-          rating_status:false,
-          message:  "Already order rating completed",
-          result: res
-        };
-        result(null, resobj);
-      }
-    }
+
+  get_day_details[0].rating_skip_available = 2;
+  res = await query("Select * from day_order_rating where doid = '" + get_day_details[0].id + "'");
+
+  if (res.length == 0) {      
+        
+    let resobj = {
+      success: true,
+      status: false,
+      rating_status:true,
+      message:  "Please completed rating",
+      title : 'How was the rating?',
+      result: get_day_details
+    };
+    result(null, resobj);
+   
+  } else {
+
+    let resobj = {
+      success: true,
+      status: true,
+      rating_status: false,
+      message:  "Already order rating completed",
+      title : 'how was the rating?',
+      result: get_day_details
+    };
+    result(null, resobj);
   }
-  );
 } else {
   let resobj = {
     success: true,

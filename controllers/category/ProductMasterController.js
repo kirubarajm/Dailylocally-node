@@ -89,7 +89,7 @@ exports.get_ProductMaster_list = function(req, res) {
   };
 
   exports.get_brand_list = function(req, res) {
-        ProductMaster.get_brand_list(req.params, function(err, user) {
+        ProductMaster.get_brand_list(req.body, function(err, user) {
         //console.log("Kitchen List Sort Filter v_2_2 controller");
         if (err) res.send(err);
         //console.log("res", user);

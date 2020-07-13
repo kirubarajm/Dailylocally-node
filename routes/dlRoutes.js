@@ -111,7 +111,7 @@ app.route("/user/fav/subcategoryL1").post(middleware.checkToken,routesVersioning
 app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.0.0":fav.read_category_by_userid}));
 
 //master
- app.route("/user/filterlist/:scl2_id").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
+ app.route("/user/filterlist/").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
  app.route("/user/collection/filterlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_brand_list}));
 
