@@ -533,7 +533,7 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
     // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -941,7 +941,8 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
 };
 
 Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order_item,result) {
-   var day = moment().format("YYYY-MM-DD , h:mm:ss");
+
+  var day = moment().format("YYYY-MM-DD , h:mm:ss");
   var date  = moment(Dayorder.date).format("YYYY-MM-DD");
   var startdate =  moment().format("YYYY-MM-DD");
   var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
@@ -1056,8 +1057,8 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
       if (err) {
         res(err, null);
       } else {
-        var doid = result.insertId;                
-        for (let i = 0; i < order_item.length; i++) {
+        var doid = res1.insertId;   
+       for (let i = 0; i < order_item.length; i++) {
      
           var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
           var getproduct = await query(getproductdetails);
@@ -1090,6 +1091,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
           new_createDayorderproducts.product_short_desc = getproduct[0].product_short_desc;
           new_createDayorderproducts.product_productdetails = getproduct[0].product_productdetails;
           new_createDayorderproducts.product_Perishable = getproduct[0].product_Perishable;
+
           Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
     
         }
