@@ -689,7 +689,7 @@ Dayorder.update_scm_status = async function update_scm_status(Dayorder){
 Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayorder,result) {
     var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
-    var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
+    var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"'");
     
     if (product.length !==0) {
       var dayorder= await query("select * from Dayorder where id='"+Dayorder.doid+"'");
@@ -701,7 +701,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
-        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and vpid='"+Dayorder.vpid+"'");
+        var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"'");
 
         let resobj = {
           success: true,

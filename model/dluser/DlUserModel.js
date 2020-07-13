@@ -3808,16 +3808,18 @@ Dluser.user_referral_code = function user_referral_code(req,headers,result) {
               
            if (headers.apptype === '1' || headers.apptype === 1) {
         
-            res[0].applink = refferalcontent+" "+constant.applink +". Use Refferal Code :"+ res[0].referalcode
+            res[0].message = refferalcontent+" "+constant.applink +". Use Refferal Code :"+ res[0].referalcode
            
               
             }else if (headers.apptype === '2' || headers.apptype === 2) {
-              res[0].applink = refferalcontent+" "+constant.iosapplink +". Use Refferal Code :"+ res[0].referalcode
+              res[0].message = refferalcontent+" "+constant.iosapplink +". Use Refferal Code :"+ res[0].referalcode
       
             }else{
-              res[0].applink = refferalcontent+" "+constant.applink +". Use Refferal Code :"+ res[0].referalcode
+              res[0].message = refferalcontent+" "+constant.applink +". Use Refferal Code :"+ res[0].referalcode
             }
 
+            res[0].title= 'Refer and Spread the word!';
+            res[0].sub_title= 'Refer a friend, and earn an offer of Rs. 100 after his first order';
           
                let resobj = {  
                success: true,
