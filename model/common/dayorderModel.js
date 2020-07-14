@@ -740,9 +740,9 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
 ///// crm Day Order List ///////////
 Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) {
 
-  var orderlimit = 20;
+  var pagelimit = 20;
   var page = Dayorder.page || 1;
-  var startlimit = (page - 1) * orderlimit;
+  var startlimit = (page - 1) * pagelimit;
 
 
   if(Dayorder){
@@ -821,6 +821,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
         success: true,
         status: true,
         totalcount:totalcount,
+        pagelimit:pagelimit,
         result: getdayorder
       };
       result(null, resobj);
