@@ -740,9 +740,9 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
 ///// crm Day Order List ///////////
 Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) {
 
-  var orderlimit = 20;
+  var pagelimit = 20;
   var page = Dayorder.page || 1;
-  var startlimit = (page - 1) * orderlimit;
+  var startlimit = (page - 1) * pagelimit;
 
 
   if(Dayorder){
@@ -814,9 +814,14 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
       for (let i = 0; i < getdayorder.length; i++) {
         getdayorder[i].products = JSON.parse(getdayorder[i].products);
       }        
+
+      var totalcount = getdayorder.length;
+
       let resobj = {
         success: true,
         status: true,
+        totalcount:totalcount,
+        pagelimit:pagelimit,
         result: getdayorder
       };
       result(null, resobj);
@@ -824,6 +829,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
       let resobj = {
         success: true,
         status: false,
+        totalcount:0,
         message: "no data"
       };
       result(null, resobj);
@@ -832,6 +838,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     let resobj = {
       success: true,
       status: false,
+      totalcount:0,
       message: "check your post values"
     };
     result(null, resobj);

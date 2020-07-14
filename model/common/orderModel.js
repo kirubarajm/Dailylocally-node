@@ -886,4 +886,63 @@ Order.payment_check = function payment_check(orderid, result) {
   );
 };
 
+
+
+
+Order.orderlistbymoveituserid = async function(moveit_user_id, result) {
+
+  const rows = await query(
+    "select mt.trip_id,dors.* from Dayorder dors left join Moviet_Trip mt on mt.trip_id=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id=" +moveit_user_id +"  and  DATE(mt.created_at) = CURDATE() group by mt.trip_id"
+);
+
+  // const cod_amount = await query(
+  //   "select sum(price) as totalamount from Orders where DATE(created_at) = CURDATE() and orderstatus = 6  and payment_status = 1 and payment_type = 0  and lock_status = 0 and  moveit_user_id = " +moveit_user_id +"");
+
+  if (rows.length == 0) {
+    var res = {
+      result: "Order not found!",
+      status: false,
+      success: true,
+    };
+    result(null, res);
+    return;
+  }else{
+
+    
+
+    for (let i = 0; i < rows.length; i++) {
+
+      var moveitstatusquery ="select * from Moveit_status  where orderid = " +rows[i].orderid +" order by id desc limit 1";
+      var statuslist = await query(moveitstatusquery);
+      if (statuslist.length !==0 ) {
+        rows[i].status = statuslist[0].status
+
+      }
+     
+
+      var url =
+        "Select ot.productid,pt.product_name,ot.quantity from OrderItem ot join Product pt on ot.productid=pt.productid where ot.orderid = " +
+        rows[i].orderid +
+        "";
+      let products = await query(url);
+      rows[i].items = products;
+      rows[i].locality = "Guindy";
+
+     
+    }
+
+    let resobj = {
+      success: true,
+      status: true,
+      result: rows
+    };
+  
+    result(null, resobj);
+
+  }
+};
+
+
+
+
 module.exports = Order;
