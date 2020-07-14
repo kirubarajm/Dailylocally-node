@@ -141,4 +141,13 @@ exports.payment_check = function(req, res) {
 };
 
 
-
+exports.orderlist_by_moveit_userid = function(req, res) {
+  console.log("V1--> 1.0.0");
+  Order.orderlistbymoveituserid(req.params.moveit_user_id, function(
+    err,
+    result
+  ) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};

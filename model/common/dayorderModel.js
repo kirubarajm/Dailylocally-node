@@ -814,9 +814,13 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
       for (let i = 0; i < getdayorder.length; i++) {
         getdayorder[i].products = JSON.parse(getdayorder[i].products);
       }        
+
+      var totalcount = getdayorder.length;
+
       let resobj = {
         success: true,
         status: true,
+        totalcount:totalcount,
         result: getdayorder
       };
       result(null, resobj);
@@ -824,6 +828,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
       let resobj = {
         success: true,
         status: false,
+        totalcount:0,
         message: "no data"
       };
       result(null, resobj);
@@ -832,6 +837,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     let resobj = {
       success: true,
       status: false,
+      totalcount:0,
       message: "check your post values"
     };
     result(null, resobj);
