@@ -4,24 +4,21 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var POtemp = function(potemp) {
-  this.tempid = potemp.tempid;
-  this.prid = potemp.prid;
-  this.vpid = potemp.vpid;
-  this.vid = potemp.vid;
-  this.requested_quantity = potemp.requested_quantity;
-  this.due_date = potemp.due_date;
-  this.buyer_comment = potemp.buyer_comment;
-  this.actual_quantity = potemp.actual_quantity;
-  this.zoneid = potemp.zoneid;
-  this.delete_status = potemp.delete_status || 0;
+var StockLog = function(stocklog) {
+  this.stockid = stocklog.stockid;
+  this.vpid = stocklog.vpid;
+  this.popid = stocklog.popid;
+  this.dopid = stocklog.dopid;
+  this.type = stocklog.type;
+  this.from_type = stocklog.from_type;
+  this.quantity = stocklog.quantity;
+  this.zoneid = stocklog.zoneid;
 }
 
 //For Admin
-POtemp.createPOtemp = async function createPOtemp(req, result) {
-    req.active_status=0;
-    var insertdata = new POtemp(req);
-    sql.query("INSERT INTO POtemp set ?", insertdata,async function(err, res) {
+StockLog.createStockLog = async function createStockLog(req, result) {
+    var insertdata = new StockLog(req);
+    sql.query("INSERT INTO Stock_Log set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -40,9 +37,9 @@ POtemp.createPOtemp = async function createPOtemp(req, result) {
     });    
 };
 
-POtemp.updatePOtemp =async function updatePOtemp(req, result) {
-    var updatedata = new POtemp(req);
-    sql.query("UPDATE POtemp SET ? WHERE tempid = ?", [updatedata, updatedata.tempid],async function(err, res) {
+StockLog.updateStockLog =async function updateStockLog(req, result) {
+    var updatedata = new StockLog(req);
+    sql.query("UPDATE Stock_Log SET ? WHERE id = ?", [updatedata, updatedata.id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -62,4 +59,4 @@ POtemp.updatePOtemp =async function updatePOtemp(req, result) {
     );
 };
 
-module.exports = POtemp;
+module.exports = StockLog;

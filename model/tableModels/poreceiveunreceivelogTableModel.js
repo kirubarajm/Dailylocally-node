@@ -16,7 +16,6 @@ var POReceiveUnReceiveLog = function(poreceiveunreceivelog) {
 
 //For Admin
 POReceiveUnReceiveLog.createPOlog = async function createPOlog(req, result) {
-    req.active_status=0;
     var insertdata = new POReceiveUnReceiveLog(req);
     sql.query("INSERT INTO PO_Receive_Unreceive_Log set ?", insertdata,async function(err, res) {
         if (err) {

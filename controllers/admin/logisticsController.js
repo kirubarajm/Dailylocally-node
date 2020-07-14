@@ -31,3 +31,13 @@ exports.submit_qa_checklist = function(req, res) {
         res.send(ress);
     });    
 };
+
+/////////Get Moveit List///////////
+exports.get_moveit_list = function(req, res) {    
+    Logistics.get_moveit_list(req.body, function(err, ress) {
+        //console.log("moveit_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};

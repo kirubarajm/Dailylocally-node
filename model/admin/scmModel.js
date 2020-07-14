@@ -18,6 +18,7 @@ var MissingQuantity_Report = require('../tableModels/missingquantityreportTableM
 var WasteManagement = require('../tableModels/wastemanagementTableModel.js');
 const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
+var StockLog = require('../tableModels/stocklogTableModel.js');
 
 var SCM = function(scm) {};
 
@@ -322,20 +323,19 @@ SCM.create_po =async function create_po(req,result) {
             }
             // console.log("Step 2: sortreq1--->",polist);
             var poids = [];
-            for (let i = 0; i < uniquevendors.length; i++) {
-                //// Insert PO  and get id /// 
-                var podata = [];
-                podata.push({"vid":uniquevendors[i],"zoneid":req.zone_id,"po_status":0});
-                // console.log("podata --->",podata);
+            for (let i = 0; i < uniquevendors.length; i++) {               
                 /////Vendor with total request quantity//////////
                 var checkvendorquery = "select sum(requested_quantity) as tot_vendor_qty,vid from POtemp where tempid in("+req.templist+") and vid="+uniquevendors[i];
                 var checkvendor = await query(checkvendorquery);
                 if(checkvendor.length>0){
                     if(checkvendor[0].tot_vendor_qty>0){
-                        PO.createPO(podata,async function(err,pores){
+                        //// Insert PO  and get id /// 
+                        var podata = [];
+                        podata.push({"vid":uniquevendors[i],"zoneid":req.zone_id,"po_status":0});
+                        PO.createPO(podata[0],async function(err,pores){
                             if(pores.status==true){
                                 poids.push(pores.result.insertId);
-                                // console.log("Step 3: inserted pores createPO-->",pores.result.insertId);
+                                //  console.log("Step 3: inserted pores createPO-->",pores.result.insertId);
         
                                 var  vendor_polist = polist.filter(item => item.vid == uniquevendors[i]);
                                 // console.log("Step 4: filter by vendorid in polist-->",vendor_polist);
@@ -344,11 +344,11 @@ SCM.create_po =async function create_po(req,result) {
                                     if(vendor_polist[j].vid == uniquevendors[i]){
                                         var getvendorcostquery = "select * from Vendor_products_mapping where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
                                         var getvendorcost = await query(getvendorcostquery);
-                                        // console.log("getvendorcost -->",j,"=>",getvendorcost);
+                                        //  console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
                                             var inserpopdata = [];
                                             inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price*vendor_polist[j].qty,"other_charges":getvendorcost[0].other_charges*vendor_polist[j].qty,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
-                                            POProducts.createPOProducts(inserpopdata,async function(err,popres){
+                                            POProducts.createPOProducts(inserpopdata[0],async function(err,popres){
                                                 // console.log("Step 5: after popres createPOProducts ==>",popres);
                                                 if(popres.status==true){
                                                     /////Delete PO Temp///////////
@@ -489,7 +489,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
             where = where+" and po.poid="+req.poid;
         }
         var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zone_id+" and po.po_status=0 "+where+" group by pop.popid";
-        console.log("getpolistquery ==>",getpolistquery);
+        // console.log("getpolistquery ==>",getpolistquery);
 
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
@@ -553,7 +553,7 @@ SCM.update_po_receive =async function update_po_receive(req,result) {
             if(updatepop.affectedRows>0){
                 polog_data = [];
                 polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":1,"quantity":updatecount,"delivery_note":dn,"zoneid":req.zone_id});
-                POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){});
+                POReceiveUnReceiveLog.createPOlog(polog_data[0],async function(err,polog_datares){});
                 // var checkpostatusquery = "select count(popid) as popcount,count(case when pop_status=1 then popid end) as reccount from POproducts where poid="+getpop[0].poid;
                 // var checkpostatus = await query(checkpostatusquery);
                 // if(checkpostatus.length>0){
@@ -666,7 +666,7 @@ SCM.update_po_unreceive =async function update_po_unreceive(req,result) {
                         if(updatepopquery.affectedRows>0){
                             polog_data = [];
                             polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":2,"quantity":req.quantity,"delivery_note":dn,"zoneid":req.zone_id});
-                            POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){
+                            POReceiveUnReceiveLog.createPOlog(polog_data[0],async function(err,polog_datares){
                                 if(polog_datares.status == true){
                                     let resobj = {
                                         success: true,
@@ -855,7 +855,7 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
         var dn = "";
         if(req[0].from_type==1){
             dn = "unreceive from Sorting";
-        }else if(req[0].from_type==1){
+        }else if(req[0].from_type==2){
             dn = "unreceive from QA";
         }else{
             dn = "";
@@ -876,7 +876,16 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
                                 var updatedop = await query(updatedopquery);
                                 if(updatedop.affectedRows>0){
                                     /////add reduced_qty in stock///
-    
+                                    var getstockquery = "select * from Stock where vpid="+req[0].vpid;
+                                    var getstock = await query(getstockquery);
+
+                                    if(getstock.length>0){
+                                        ////////Stock in Log//////////////
+                                        var stocklogdataout = [];
+                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"dopid":req[0].dopid,"type":1,"from_type":req[0].from_type+1,"quantity":req[0].report_quantity,"zoneid":req.zone_id});
+                                        StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
+                                    }                                    
+
                                     /////reduce quantity in pop////
                                     var popstock_qty = parseInt(getpop[0].totalreceivedqty)-parseInt(req[0].report_quantity);
                                     var addition_qty = 0;
@@ -893,9 +902,15 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
                                     var updatepopquery = "update POproducts set received_quantity="+received_qty+",aditional_quantity="+addition_qty+" where popid="+getdop[0].popid;
                                     var updatepop = await query(updatepopquery);
                                     if(updatepop.affectedRows>0){
+                                        if(getstock.length>0){
+                                            ////////Stock out Log//////////////
+                                            var stocklogdataout = [];
+                                            stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":getdop[0].popid,"type":2,"from_type":req[0].from_type+1,"quantity":req[0].report_quantity,"zoneid":req.zone_id,"dopid":req[0].dopid});
+                                            StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
+                                        }
                                         polog_data = [];
                                         polog_data.push({"poid":getpop[0].poid,"popid":getpop[0].popid,"type":2,"quantity":req[0].report_quantity,"delivery_note":dn,"zoneid":req[0].zone_id});
-                                        POReceiveUnReceiveLog.createPOlog(polog_data,async function(err,polog_datares){
+                                        POReceiveUnReceiveLog.createPOlog(polog_data[0],async function(err,polog_datares){
                                             if(polog_datares.status == true){
                                                 let resobj = {
                                                     success: true,
@@ -1383,6 +1398,13 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                                 if(getstock[0].quantity >= qty){
                                                     var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
                                                     var updateDOP = await query(updateDOPquery);
+                                                    //////Stock Log//////////
+                                                    if(updateDOP.affectedRows>0){
+                                                        var stocklogdataout = [];
+                                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zone_id});
+                                                        StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
+                                                    }
+
                                                     getstock[0].quantity = parseInt(getstock[0].quantity) - parseInt(qty);
                                                 }
                                             }                      
@@ -1396,6 +1418,13 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
 
                                         var updatestockquery2 = "update Stock set quantity="+getstock[0].quantity+",quantity_mapping="+qtymapping+" where vpid="+getstock[0].vpid;
                                         var updatestock2 = await query(updatestockquery2);
+                                        // console.log("updatestock2 ===>",updatestock2);
+                                        //////Stock Log//////////
+                                        if(updatestock2.affectedRows>0){
+                                            var stocklogdatain = [];
+                                            stocklogdatain.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"type":1,"from_type":1,"quantity":getstock[0].quantity,"zoneid":req.zone_id});
+                                            StockLog.createStockLog(stocklogdatain[0], async function(err,stocklogdatares){ });
+                                        }
                                         
                                         //// update pop status //////// 
                                         var updatepopquery = "update POproducts set pop_status=1,sorting_status=1,stand_by=0,received_quantity="+getpop[0].stand_by+" where popid="+req.popid;
@@ -1524,7 +1553,7 @@ SCM.stock_check_update =async function stock_check_update(req, result) {
         }else{
             var stockdata = [];
             stockdata.push({"vpid":req[0].vpid,"quantity":req[0].stand_by,"zoneid":req[0].zone_id});
-            Stock.createStock(stockdata,async function(err,stockres){
+            Stock.createStock(stockdata[0],async function(err,stockres){
                 if(stockres.status==true){
                     var getstockpricequery = "select * from Stock where vpid="+req[0].vpid+" and zoneid="+req[0].zone_id;
                     var getstockprice = await query(getstockpricequery);

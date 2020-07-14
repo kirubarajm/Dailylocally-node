@@ -184,4 +184,25 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
     } 
 };
 
+/////////Get Moveit List///////////
+Logistics.get_moveit_list =async function get_moveit_list(req,result) {
+    var qachecklistquery = "select * from MoveitUser";
+    var qachecklist = await query(qachecklistquery);
+    if(qachecklist.length > 0){
+        let resobj = {
+            success: true,
+            status: true,
+            result: qachecklist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data found"
+        };
+        result(null, resobj);
+    } 
+};
+
 module.exports = Logistics;
