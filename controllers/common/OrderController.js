@@ -60,16 +60,12 @@ exports.live_order_list_byuserid = function(req, res) {
 
 
 exports.day_order_skip_count = function(req, res) {
-  if (!req.body.orderid) {
-    res.status(400).send({ error: true,status:false, message: "Please provide orderid" });
-  }else{
+
   Order.order_skip_count(req.body, function(err, user) {
-    console.log("controller");
     if (err) res.send(err);
-    console.log("res", user);
     res.send(user);
   });
-}
+
 };
 
 

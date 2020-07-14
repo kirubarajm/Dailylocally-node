@@ -470,13 +470,13 @@ Order.live_order_list_byuserid = async function live_order_list_byuserid(req,res
 
 Order.order_skip_count = async function order_skip_count(req,result) {
 
-  var orderdetails = await query("select * from Dayorder where orderid = '"+req.doid+"'");
+  var orderdetails = await query("select * from Dayorder where id = "+req.doid+" ");
 
   if (orderdetails.length !==0) {
     
     rating_skip =  orderdetails[0].rating_skip + 1;
 
-    var skipupdatequery = await query("update Dayorder set rating_skip = "+rating_skip+"  where orderid = '"+req.doid+"'");
+    var skipupdatequery = await query("update Dayorder set rating_skip = "+rating_skip+"  where id = '"+req.doid+"'");
     if (skipupdatequery.err) {
       let resobj = {
         success: true,
