@@ -6,6 +6,7 @@ const query = util.promisify(sql.query).bind(sql);
 
 var POproducts = function(poproducts) {
   this.popid = poproducts.popid;
+  this.poid = poproducts.poid;
   this.prid = poproducts.prid;
   this.vpid = poproducts.vpid;
   this.vid = poproducts.vid;

@@ -146,9 +146,9 @@ Procurement.move_to_purchase=async function move_to_purchase(req,result) {
         var checkpotemp = await query(checkpotempquery);
         if(checkpotemp.length == 0){
           var insertdata = [];
-          insertdata.push({"vpid":getprocurement[i].vpid,"prid":getprocurement[i].prid,"actual_quantity":getprocurement[i].procurement_qty,"zoneid":req.zone_id});
+          insertdata.push({"vpid":getprocurement[i].vpid,"prid":getprocurement[i].prid,"actual_quantity":getprocurement[i].procurement_qty,"zoneid":req.zone_id,"delete_status":0});
           // console.log("insertdata ==>",insertdata);
-          POtepm.createPOtemp(insertdata,async function(err,potempres){ 
+          POtepm.createPOtemp(insertdata[0],async function(err,potempres){ 
             //console.log("potempres -->",potempres); 
           });
         }        
