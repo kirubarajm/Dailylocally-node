@@ -73,8 +73,8 @@ exports.moveit_edit = function(req, res) {
 };
 
 /////////Assign to Dunzo//////////
-exports.assign_to_dunzo = function(req, res) {    
-    Logistics.assign_to_dunzo(req.body, function(err, ress) {
+exports.dunzo_assign = function(req, res) {    
+    Logistics.dunzo_assign(req.body, function(err, ress) {
         //console.log("assign_to_dunzo controller");
         if (err) res.send(err);
         //console.log("res", ress);
