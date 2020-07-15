@@ -12,7 +12,7 @@ var moment = require("moment");
 
 //Task object constructor
 var MoveitStatus = function (moveitstatus) {
-    this.orderid = moveitstatus.orderid ;
+    this.doid = moveitstatus.doid ;
     this.moveitid = moveitstatus.moveitid;
     this.status = moveitstatus.status || 1;
   //  this.created_at = new Date();   

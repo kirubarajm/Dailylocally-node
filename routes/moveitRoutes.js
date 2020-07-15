@@ -2,7 +2,7 @@
 module.exports = function(app) {
     var routesVersioning = require('express-routes-versioning')();
     var moveituser = require("../controllers/moveit/MoveitUserController");
-    // var documents = require("../controllers/common/DocumentsController");
+    // var documents = require("../controllers/common/DocumentsController");fv
     var faq = require("../controllers/common/FaqController");
     var orders = require("../controllers/common/OrderController");
     // var moveitdocument = require("../controllers/common/DocumentmoveitController");

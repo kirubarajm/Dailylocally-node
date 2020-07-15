@@ -1587,10 +1587,11 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip Details/////////
   Moveituser.moveit_trip_details =async function moveit_trip_details(req, result) {
     if(req.moveit_userid && req.tripid){
-      var gettripdetailsquery = "select ord.id,COUNT(dp.vpid) as item_count,ord.trip_id,mt.trip_status,CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg,mkh.*,ord.*,us.name as cus_name,us.phoneno as cus_phoneno from Dayorder as ord left join User as us on us.userid=ord.userid left join Dayorder_products as dp on ord.id=dp.doid left join Moveit_trip as mt on mt.tripid=ord.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Zone as mkh on mkh.id=mu.zone where mt.moveit_id='"+req.moveituserid+"' and ord.trip_id='"+req.trip_id+"' order by ord.id";
+      var gettripdetailsquery = "select ord.id,COUNT(dp.vpid) as item_count,ord.trip_id,mt.trip_status,CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg,mkh.*,ord.*,us.name as cus_name,us.phoneno as cus_phoneno from Dayorder as ord left join User as us on us.userid=ord.userid left join Dayorder_products as dp on ord.id=dp.doid left join Moveit_trip as mt on mt.tripid=ord.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Zone as mkh on mkh.id=mu.zone where mt.moveit_id='"+req.moveit_userid+"' and ord.trip_id='"+req.tripid+"' order by ord.id";
+        console.log(gettripdetailsquery);
       var gettripdetails = await query(gettripdetailsquery);      
 
-      if(gettripdetails.length>0 && gettripdetails[0].id !=null){
+      if(gettripdetails.length>0 ){
         for(let i=0; i<gettripdetails.length; i++){
           var moveitstatusquery ="select * from Moveit_status  where doid = " +gettripdetails[i].id +" order by id desc limit 1";
           var statuslist = await query(moveitstatusquery);
@@ -1604,6 +1605,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
           gettripdetails[i].itemlist = items;
   
         }
+
         let resobj = {
           success: true,
           status : true,
@@ -1663,11 +1665,12 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip Start/////////
   Moveituser.moveit_trip_start =async function moveit_trip_start(req, result) {
     if(req.moveit_userid && req.tripid){
-      var tripstatuscheckquery = "select * from Moveit_trip where tripid="+req.tripid+" and moveit_id="+req.moveituserid;
+      var tripstatuscheckquery = "select * from Moveit_trip where tripid="+req.tripid+" and moveit_id="+req.moveit_userid;
       var tripstatuscheck = await query(tripstatuscheckquery);
+
       if(tripstatuscheck.length>0 && tripstatuscheck[0].trip_status==0){
         var curtime =  moment().format("YYYY-MM-DD HH:mm:ss");
-        var updatetripstatusquery = "update Moveit_trip set start_time='"+curtime+"', trip_status=1 where tripid="+req.tripid+" and moveit_id="+req.moveituserid;
+        var updatetripstatusquery = "update Moveit_trip set start_time='"+curtime+"', trip_status=1 where tripid="+req.tripid+" and moveit_id="+req.moveit_userid;
         var updatetripstatus = await query(updatetripstatusquery);
         if(updatetripstatus.affectedRows>0){
           let resobj = {

@@ -16,6 +16,7 @@ var orderproductModel = require("../../model/common/orderproductModel");
 var dayorder = require("../../model/common/dayorderModel");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var MoveitStatus = require("../../model/moveit/moveitStatusModel");
+var MoveitUser = require("../../model/moveit/moveitUserModel");
 
 
 
@@ -998,4 +999,307 @@ Order.moveit_order_accept = async function moveit_order_accept(req, result) {
   }
 };
 
+Order.order_pickup_status_by_moveituser = function order_pickup_status_by_moveituser( req,result) {
+  var order_pickup_time = moment().format("YYYY-MM-DD HH:mm:ss");
+  var twentyMinutesLater = moment().add(0, "seconds").add(constant.foodpreparationtime, "minutes").format("YYYY-MM-DD HH:mm:ss");
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  req.imgurl = req.imgurl || '';
+  req.checklist_img1 = req.checklist_img1 || '';
+  req.checklist_img2 = req.checklist_img2 || '';
+
+sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+      
+      if (res1.length !==0) {
+        
+      
+      if (res1[0].dayorderstatus == 10) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Sorry! This order already deliverd."
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus == 11) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Order already cancelled"
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus == 12) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Order already return"
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus < 6 ) {
+
+        let resobj = {
+          success: true,
+          status:false,
+          message: "order not dispatched"
+        };
+        result(null, resobj);
+      //  return;
+      }else if (res1[0].dayorderstatus == 8 ) {
+    
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Already pickup has beed done"
+        };
+        result(null, resobj);
+      //  return;
+      }else if (res1[0].dayorderstatus < 8 ){
+     
+  
+        req.moveitid = req.moveit_userid;
+        req.status = 3 // order pickup by moveit
+        await Order.insert_order_status(req);
+
+        // for (let i = 0; i < kitchenqualitylist.length; i++) {
+        //   var qualitylist = new MoveitRatingForMakeit(kitchenqualitylist[i]);
+        //   qualitylist.orderid = req.orderid;
+        //   qualitylist.makeit_userid = req.makeit_userid;
+        //   qualitylist.moveit_userid = req.moveit_userid;
+  
+        //   MoveitRatingForMakeit.create_moveit_kitchen_qualitycheck(
+        //     qualitylist,
+        //     function(err, res2) {
+        //       if (err) result(err, null);
+        //     }
+        //   );
+        // }
+
+        sql.query(
+          "UPDATE Dayorder SET dayorderstatus = ? ,moveit_pickup_time = ?,moveit_Pickup_lat=?,moveit_Pickup_long=?,order_pickup_img=?,checklist_img1=?,checklist_img2=? WHERE id = ? ",
+          [
+            8,
+            order_pickup_time,
+            req.lat,
+            req.lon,
+            req.imgurl,
+            req.checklist_img1,
+            req.checklist_img2,
+            req.id
+          ],
+          async function(err, res2) {
+            if (err) {
+              result(err, null);
+            } else {
+              // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
+
+      
+
+              let response = {
+                success: true,
+                status: true,
+                message: "Order Pickedup successfully.",
+             
+              };
+              result(null, response);
+    
+           
+            }
+          }
+        );
+      
+      }
+    }else{
+      let response = {
+        success: true,
+        status: false,
+        message: "Order not found.",
+     
+      };
+      result(null, response);
+    }
+    }
+});
+};
+
+
+Order.moveit_kitchen_reached_status = function(req, result) {
+  var reachtime = moment().format("YYYY-MM-DD HH:mm:ss");
+  var twentyMinutesLater = new Date();
+  twentyMinutesLater.setMinutes(twentyMinutesLater.getMinutes() + 20);
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  sql.query("Select * from Dayorder where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+      // var getmoveitid = res1[0].moveit_user_id;
+        req.moveitid = req.moveit_user_id
+        req.status = 2
+        req.doid=req.id;
+        await Order.insert_order_status(req);
+
+        sql.query(
+          "UPDATE Dayorder SET moveit_reached_time = ?,moveit_kitchen_reached_lat=?,moveit_kitchen_reached_long=? WHERE id = ? ",
+          [           
+            reachtime,
+            req.lat,
+            req.lon,
+            req.id
+          ],
+         async  function(err, res) {
+            if (err) {
+              result(err, null);
+            } else {
+              let resobj = {
+                success: true,
+                status:true,
+                message: "kitchen reached successfully"
+              };
+              ////Insert Order History////
+              
+              ////////////////////////////
+              result(null, resobj);
+            }
+          }
+        );
+      
+    }
+  });
+};
+
+Order.moveit_customer_location_reached_by_userid = function(req, result) {
+  var customerlocationreachtime = moment().format("YYYY-MM-DD HH:mm:ss");
+req.lat=req.lat || 0;
+req.lon=req.lon || 0;
+  sql.query("Select * from Dayorder where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+     
+
+        req.moveitid = req.moveit_user_id;
+        req.status = 5 
+        req.doid = req.id// order pickup by moveit
+        await Order.insert_order_status(req);
+
+        sql.query(
+          "UPDATE Dayorder SET moveit_customerlocation_reached_time = ?,moveit_customer_location_reached_lat=?,moveit_customer_location_reached_long=? WHERE id = ? ",
+          [           
+            customerlocationreachtime,
+            req.lat,
+            req.lon,
+            req.id
+          ],
+         async function(err, res) {
+            if (err) {
+              result(err, null);
+            } else {
+              let resobj = {
+                success: true,
+                status:true,
+                message: "Customer location reached successfully"
+              };
+              //PushConstant.Pageid_eat_order_pickedup = 6;
+              // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
+              result(null, resobj); 
+            }
+          }
+        );
+     
+    }
+  });
+};
+
+
+
+Order.order_delivery_status_by_moveituser =async function(req, result) {
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  var order_delivery_time = moment().format("YYYY-MM-DD HH:mm:ss");
+  sql.query("Select * from Dayorder where id = ? ",[req.id],async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length !== 0) {
+   
+
+          if (res1[0].dayorderstatus == 11) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order was already cancellled.",
+              status:false
+            };
+            result(null, resobj);
+          }else if (res1[0].orderstatus == 12) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order already returned.",
+              status:false
+            };
+            result(null, resobj);
+          }else if (res1[0].orderstatus < 6) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order not dispatched.",
+              status:false
+            };
+            result(null, resobj);
+          }else{
+
+       
+
+            req.moveitid = req.moveit_user_id;
+            req.status = 7;
+            req.doid= req.id;
+            await Order.insert_order_status(req); 
+
+
+            sql.query("UPDATE Dayorder SET dayorderstatus = ?,moveit_actual_delivered_time = ?,moveit_delivery_lat=?,moveit_delivery_long=? WHERE id = ? ",[10, order_delivery_time,req.lat,req.lon, req.id],async function(err, res) {
+              if (err) {
+                result(err, null);
+              } else {
+                /////Check Trip Status////
+                // if(trip_id && trip_id>0){
+                //   var trip_status = await MoveitUser.updatetripstatus(trip_id);
+                // }
+              
+                let resobj = {
+                  success: true,
+                  message: "Order Delivery successfully",
+                  status:true,
+                  // trip_status:trip_status,
+                  orderdeliverystatus: true
+                };
+                // await Notification.orderEatPushNotification(
+                //   req.orderid,
+                //   null,
+                //   PushConstant.Pageid_eat_order_delivered
+                // );
+                result(null, resobj);
+             
+               
+              }
+            });
+
+
+           
+          
+        }
+        } else {
+          let resobj = {
+            success: true,
+            message: "Following order is not assigned to you!.",
+            status:false
+          };
+          result(null, resobj);
+        }
+      }
+    }
+  );
+};
 module.exports = Order;
