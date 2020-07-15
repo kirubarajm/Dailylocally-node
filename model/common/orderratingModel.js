@@ -15,38 +15,64 @@ var Orderrating = function(orderrating) {
   this.package_sealed=orderrating.package_sealed;
 };
 
-Orderrating.createOrderrating = function createOrderrating(Order_rating,new_vpid,result) {
-  sql.query(
-    "Select * from day_order_rating where doid = '" + Order_rating.doid + "'",
-    function(err, res) {
+Orderrating.createOrderrating = function createOrderrating(Order_rating,result) {
+  var new_vpid=  Order_rating.vpid;
+
+  sql.query("Select * from day_order_rating where doid = '" + Order_rating.doid + "'",function(err, res) {
       if (err) {
         result(err, null);
       } else {
         if (res.length === 0) {
 
-          for (let i = 0; i < new_vpid.length; i++) {
-
-            var new_rating = new Orderrating(Order_rating);
-            new_rating.vpid=new_vpid[i];
-    
-            sql.query("INSERT INTO day_order_rating set ?", new_rating, function(err,res) {
-              if (err) {
-                result(err, null);
-              } else {
-
-          
-                let resobj = {
-                  success: true,
-                  status: true,
-                  message: "Thanks for your Order Rating"
-                };
-                result(null, resobj);
-              }
-            });
+       
+          if (Order_rating.product_received==0) {
             
+            for (let i = 0; i < new_vpid.length; i++) {
+
+              var new_rating = new Orderrating(Order_rating);
+              new_rating.vpid=new_vpid[i];
+      
+              sql.query("INSERT INTO day_order_rating set ?", new_rating, function(err,res) {
+                if (err) {
+                  result(err, null);
+                } else {
+  
+            
+                 
+                }
+              });
+              
+            }
+            let resobj = {
+              success: true,
+              status: true,
+              message: "Thanks for your Order Rating"
+            };
+            result(null, resobj);
+          }else{
+            var new_rating = new Orderrating(Order_rating);
+               new_rating.vpid=0;
+      
+              sql.query("INSERT INTO day_order_rating set ?", new_rating, function(err,res) {
+                if (err) {
+                  result(err, null);
+                } else {
+  
+            
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    message: "Thanks for your Order Rating"
+                  };
+                  result(null, resobj);
+                }
+              });
           }
          
+         
         } else {
+          console.log("test4");
+
           let resobj = {
             success: true,
             status: false,

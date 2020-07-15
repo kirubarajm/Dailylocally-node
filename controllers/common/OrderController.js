@@ -151,3 +151,54 @@ exports.orderlist_by_moveit_userid = function(req, res) {
     res.json(result);
   });
 };
+
+//moveit order accept
+exports.moveit_order_accept = function(req, res) {
+  if (!req.body.trip_id) {
+   res 
+     .status(400)
+     .send({ error: true, status: false, message: "Please provide tripid" });
+ }
+  else {
+   Order.moveit_order_accept(req.body, function(err, ordercancel) {
+     if (err) res.send(err);
+     res.send(ordercancel);
+   });
+ }
+};
+
+exports.order_pickup_status = function(req, res) {
+  // var kitchenqualitylist = req.body.qualitychecklist;
+
+  Order.order_pickup_status_by_moveituser(req.body,function(err, result) {
+      if (err) res.send(err);
+      res.json(result);
+    }
+  );
+  // }
+};
+
+exports.moveit_kitchen_reached = function(req, res) {
+  Order.moveit_kitchen_reached_status(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+
+exports.moveit_customer_location_reached = function(req, res) {
+  Order.moveit_customer_location_reached_by_userid(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+
+
+exports.order_delivery_status = function(req, res) {
+ 
+    Order.order_delivery_status_by_moveituser(req.body, function(err, result) {
+      if (err) res.send(err);
+      res.json(result);
+    });
+ 
+};

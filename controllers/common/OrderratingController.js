@@ -13,11 +13,11 @@ exports.list_all_Orderrating = function(req, res) {
 
 exports.createorderrating = function(req, res) {
   
-  var new_vpid=  req.body.vpid;
+
   if (!req.body.doid) {
     res.status(400).send({ error: true, message: "Please provide day doid" });
   } else {
-    Orderrating.createOrderrating(req.body,new_vpid, function(err, result) {
+    Orderrating.createOrderrating(req.body, function(err, result) {
       if (err) res.send(err);
       res.json(result);
     });

@@ -15,6 +15,8 @@ var CouponUsed = require("../../model/common/couponUsedModel");
 var orderproductModel = require("../../model/common/orderproductModel");
 var dayorder = require("../../model/common/dayorderModel");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
+var MoveitStatus = require("../../model/moveit/moveitStatusModel");
+var MoveitUser = require("../../model/moveit/moveitUserModel");
 
 
 
@@ -651,7 +653,8 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
-  var query1 = "select dr.id,dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('doid',dr.id,'dayorderpid',dp.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
+  var pkts='pkts';
+  var query1 = "select dr.id,dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('pkts','"+pkts+"','doid',dr.id,'dayorderpid',dp.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"' and dp.scm_status < 11 group by dr.id order by dr.date ";
  
 
   sql.query(query1,async function(err, res) {
@@ -670,10 +673,8 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
             history_list =res;
            for (let i = 0; i < history_list.length; i++) {
 
-            // history_list[i].dayorderstatus=10
-
             history_list[i].rating_status = false;
-            if (history_list[i].dayorderstatus = 10) {
+            if (history_list[i].dayorderstatus == 10) {
 
               var rating_detail = await query("select * from day_order_rating where doid='"+history_list[i].id+"'");
               if (rating_detail.length==0) {
@@ -745,7 +746,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
 //,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items
   // var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where ors.orderid  ='"+req.orderid+"' " ;//and dm.active_status=1
 
-  var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
+  var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -943,6 +944,362 @@ Order.orderlistbymoveituserid = async function(moveit_user_id, result) {
 };
 
 
+Order.insert_order_status = function insert_order_status(req) {
+  var new_MoveitStatus = new MoveitStatus(req);
+  MoveitStatus.createMoveitStatus(new_MoveitStatus, function(err, res) {
+   if (err) return err;
+   else return res;
+ });
+};
+
+Order.moveit_order_accept = async function moveit_order_accept(req, result) {
+  const orderdetails = await query("select dor.*,mt.moveit_id from Dayorder dor left join Moveit_trip mt on mt.tripid=dor.trip_id where dor.trip_id="+ req.trip_id);
+  if (orderdetails.length !== 0) {    
+    for(let i=0; i<orderdetails.length; i++){                  
+      var new_MoveitStatus = new Array();
+      new_MoveitStatus.push({"doid":orderdetails[i].id,"moveitid":orderdetails[i].moveit_id,"status":1});
+      await MoveitStatus.createMoveitStatus(new_MoveitStatus, function(err, res) {
+        if (err) return err;
+        else return res;
+      });
+    }        
+    var orderaccepttime = moment().format("YYYY-MM-DD HH:mm:ss");
+    req.lat = req.lat || 0;
+    req.lon = req.lon || 0;
+    const updateorderdetails = await query("UPDATE Moveit_trip SET moveit_accept_time = '"+orderaccepttime+"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE tripid ='" +req.trip_id+"'");
+    // for(let j=0; j<orderdetails.length; j++){  
+    //   updatequery ="UPDATE Orders SET moveit_status = 1 ,moveit_accept_time= '" + orderaccepttime +"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE orderid ='"+orderdetails[j].orderid+"'";      
+    //   sql.query(updatequery, async function(err, res) {
+    //     if (err) {
+    //       result(err, null);
+    //     } else {
+    //       let response = {
+    //         success: true,
+    //         status: true,
+    //         message: "Order accepted successfully."
+    //       };
+    //       result(null, response);
+    //     }
+    //   });  
+    // }     
+
+    let response = {
+      success: true,
+      status: true,
+      message: "Order accepted successfully."
+    };
+    result(null, response);
+  } else {
+    let response = {
+      success: true,
+      status: false,
+      message: "Following trip is not assigned to you!"
+    };
+    result(null, response);
+  }
+};
+
+Order.order_pickup_status_by_moveituser = function order_pickup_status_by_moveituser( req,result) {
+  var order_pickup_time = moment().format("YYYY-MM-DD HH:mm:ss");
+  var twentyMinutesLater = moment().add(0, "seconds").add(constant.foodpreparationtime, "minutes").format("YYYY-MM-DD HH:mm:ss");
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  req.imgurl = req.imgurl || '';
+  req.checklist_img1 = req.checklist_img1 || '';
+  req.checklist_img2 = req.checklist_img2 || '';
+
+sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+      
+      if (res1.length !==0) {
+        
+      
+      if (res1[0].dayorderstatus == 10) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Sorry! This order already deliverd."
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus == 11) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Order already cancelled"
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus == 12) {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Order already return"
+        };
+        result(null, resobj);
+       // return;
+      }else if (res1[0].dayorderstatus < 6 ) {
+
+        let resobj = {
+          success: true,
+          status:false,
+          message: "order not dispatched"
+        };
+        result(null, resobj);
+      //  return;
+      }else if (res1[0].dayorderstatus == 8 ) {
+    
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Already pickup has beed done"
+        };
+        result(null, resobj);
+      //  return;
+      }else if (res1[0].dayorderstatus < 8 ){
+     
+  
+        req.moveitid = req.moveit_userid;
+        req.status = 3 // order pickup by moveit
+        await Order.insert_order_status(req);
+
+        // for (let i = 0; i < kitchenqualitylist.length; i++) {
+        //   var qualitylist = new MoveitRatingForMakeit(kitchenqualitylist[i]);
+        //   qualitylist.orderid = req.orderid;
+        //   qualitylist.makeit_userid = req.makeit_userid;
+        //   qualitylist.moveit_userid = req.moveit_userid;
+  
+        //   MoveitRatingForMakeit.create_moveit_kitchen_qualitycheck(
+        //     qualitylist,
+        //     function(err, res2) {
+        //       if (err) result(err, null);
+        //     }
+        //   );
+        // }
+
+        sql.query(
+          "UPDATE Dayorder SET dayorderstatus = ? ,moveit_pickup_time = ?,moveit_Pickup_lat=?,moveit_Pickup_long=?,order_pickup_img=?,checklist_img1=?,checklist_img2=? WHERE id = ? ",
+          [
+            8,
+            order_pickup_time,
+            req.lat,
+            req.lon,
+            req.imgurl,
+            req.checklist_img1,
+            req.checklist_img2,
+            req.id
+          ],
+          async function(err, res2) {
+            if (err) {
+              result(err, null);
+            } else {
+              // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
+
+      
+
+              let response = {
+                success: true,
+                status: true,
+                message: "Order Pickedup successfully.",
+             
+              };
+              result(null, response);
+    
+           
+            }
+          }
+        );
+      
+      }
+    }else{
+      let response = {
+        success: true,
+        status: false,
+        message: "Order not found.",
+     
+      };
+      result(null, response);
+    }
+    }
+});
+};
 
 
+Order.moveit_kitchen_reached_status = function(req, result) {
+  var reachtime = moment().format("YYYY-MM-DD HH:mm:ss");
+  var twentyMinutesLater = new Date();
+  twentyMinutesLater.setMinutes(twentyMinutesLater.getMinutes() + 20);
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  sql.query("Select * from Dayorder where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+      // var getmoveitid = res1[0].moveit_user_id;
+        req.moveitid = req.moveit_user_id
+        req.status = 2
+        req.doid=req.id;
+        await Order.insert_order_status(req);
+
+        sql.query(
+          "UPDATE Dayorder SET moveit_reached_time = ?,moveit_kitchen_reached_lat=?,moveit_kitchen_reached_long=? WHERE id = ? ",
+          [           
+            reachtime,
+            req.lat,
+            req.lon,
+            req.id
+          ],
+         async  function(err, res) {
+            if (err) {
+              result(err, null);
+            } else {
+              let resobj = {
+                success: true,
+                status:true,
+                message: "kitchen reached successfully"
+              };
+              ////Insert Order History////
+              
+              ////////////////////////////
+              result(null, resobj);
+            }
+          }
+        );
+      
+    }
+  });
+};
+
+Order.moveit_customer_location_reached_by_userid = function(req, result) {
+  var customerlocationreachtime = moment().format("YYYY-MM-DD HH:mm:ss");
+req.lat=req.lat || 0;
+req.lon=req.lon || 0;
+  sql.query("Select * from Dayorder where id = ?", [req.id],async function(err,res1) {
+    if (err) {
+      result(err, null);
+    } else {
+     
+
+        req.moveitid = req.moveit_user_id;
+        req.status = 5 
+        req.doid = req.id// order pickup by moveit
+        await Order.insert_order_status(req);
+
+        sql.query(
+          "UPDATE Dayorder SET moveit_customerlocation_reached_time = ?,moveit_customer_location_reached_lat=?,moveit_customer_location_reached_long=? WHERE id = ? ",
+          [           
+            customerlocationreachtime,
+            req.lat,
+            req.lon,
+            req.id
+          ],
+         async function(err, res) {
+            if (err) {
+              result(err, null);
+            } else {
+              let resobj = {
+                success: true,
+                status:true,
+                message: "Customer location reached successfully"
+              };
+              //PushConstant.Pageid_eat_order_pickedup = 6;
+              // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
+              result(null, resobj); 
+            }
+          }
+        );
+     
+    }
+  });
+};
+
+
+
+Order.order_delivery_status_by_moveituser =async function(req, result) {
+  req.lat = req.lat || 0;
+  req.lon = req.lon || 0;
+  var order_delivery_time = moment().format("YYYY-MM-DD HH:mm:ss");
+  sql.query("Select * from Dayorder where id = ? ",[req.id],async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length !== 0) {
+   
+
+          if (res1[0].dayorderstatus == 11) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order was already cancellled.",
+              status:false
+            };
+            result(null, resobj);
+          }else if (res1[0].orderstatus == 12) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order already returned.",
+              status:false
+            };
+            result(null, resobj);
+          }else if (res1[0].orderstatus < 6) {
+            let resobj = {
+              success: true,
+              message: "Sorry!  order not dispatched.",
+              status:false
+            };
+            result(null, resobj);
+          }else{
+
+       
+
+            req.moveitid = req.moveit_user_id;
+            req.status = 7;
+            req.doid= req.id;
+            await Order.insert_order_status(req); 
+
+
+            sql.query("UPDATE Dayorder SET dayorderstatus = ?,moveit_actual_delivered_time = ?,moveit_delivery_lat=?,moveit_delivery_long=? WHERE id = ? ",[10, order_delivery_time,req.lat,req.lon, req.id],async function(err, res) {
+              if (err) {
+                result(err, null);
+              } else {
+                /////Check Trip Status////
+                // if(trip_id && trip_id>0){
+                //   var trip_status = await MoveitUser.updatetripstatus(trip_id);
+                // }
+              
+                let resobj = {
+                  success: true,
+                  message: "Order Delivery successfully",
+                  status:true,
+                  // trip_status:trip_status,
+                  orderdeliverystatus: true
+                };
+                // await Notification.orderEatPushNotification(
+                //   req.orderid,
+                //   null,
+                //   PushConstant.Pageid_eat_order_delivered
+                // );
+                result(null, resobj);
+             
+               
+              }
+            });
+
+
+           
+          
+        }
+        } else {
+          let resobj = {
+            success: true,
+            message: "Following order is not assigned to you!.",
+            status:false
+          };
+          result(null, resobj);
+        }
+      }
+    }
+  );
+};
 module.exports = Order;
