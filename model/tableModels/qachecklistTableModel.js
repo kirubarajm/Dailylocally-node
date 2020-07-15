@@ -8,11 +8,12 @@ var QACheckList = function(qachecklist) {
   this.qacid = qachecklist.qacid;
   this.doid = qachecklist.doid;
   this.qaid = qachecklist.qaid;
+  this.qavalue = qachecklist.qavalue;
 }
 
 //For Admin
 QACheckList.createQACheckList = async function createQACheckList(req, result) {
-    var insertdata = QACheckList(req);
+    var insertdata = new QACheckList(req);
     sql.query("INSERT INTO QA_check_list set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
@@ -33,7 +34,7 @@ QACheckList.createQACheckList = async function createQACheckList(req, result) {
 };
 
 QACheckList.updateQACheckList =async function updateQACheckList(req, result) {
-    var updatedata = QACheckList(req);
+    var updatedata = new QACheckList(req);
     sql.query("UPDATE QA_check_list SET ? WHERE qacid = ?", [updatedata, updatedata.qacid],async function(err, res) {
         if (err) {
             let resobj = {
