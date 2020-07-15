@@ -304,7 +304,7 @@ Moveituser.update_online_status =async function (req, result) {
         }    
         
         //and DATE(order_delivery_day) = CURDATE()
-        var orderdetails = await query("select dors.* from Dayorder dors left join Moviet_Trip mt on mt.trip_id=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id = "+req.userid+"");
+        var orderdetails = await query("select dors.* from Dayorder dors left join Moviet_Trip mt on mt.tripid=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id = "+req.userid+"");
         if (orderdetails.length == 0) {
           sql.query("UPDATE MoveitUser SET online_status = ? WHERE userid = ?", [req.online_status, req.userid],async function (err, res) {
             if (err) {
@@ -1557,7 +1557,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip List/////////
   Moveituser.moveit_trip_list =async function moveit_trip_list(req, result) {
     if(req.moveit_userid){
-      var gettriplistquery = "select mt.id as trip_id,mt.moveit_userid,mu.name as moveit_user_name, COUNT(orderid) as order_count, mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip as mt left join MoveitUser as mu on mu.userid=mt.moveit_userid left join Orders as ord on ord.trip_id=mt.id where date(mt.created_at)=CURDATE() and mt.moveit_userid="+req.moveit_userid+" group by mt.id order by mt.trip_status";
+      var gettriplistquery = "select mt.tripid as trip_id,mt.moveit_id,mu.name as moveit_user_name, COUNT(ord.id) as order_count, mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip as mt left join MoveitUser as mu on mu.userid=mt.moveit_id left join Dayorder as ord on ord.trip_id=mt.tripid where date(mt.created_at)=CURDATE() and mt.moveit_id="+req.moveit_userid+" group by mt.tripid order by mt.trip_status";
       var gettriplist = await query(gettriplistquery);
       if(gettriplist.length>0){
         let resobj = {
@@ -1587,18 +1587,18 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip Details/////////
   Moveituser.moveit_trip_details =async function moveit_trip_details(req, result) {
     if(req.moveit_userid && req.tripid){
-      var gettripdetailsquery = "select ord.orderid,COUNT(oi.productid) as item_count,ord.trip_id,mt.trip_status,CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg,mu.brandname,mu.phoneno,mu.address,mu.lat,mu.lon,ord.*,us.name as cus_name,us.phoneno as cus_phoneno,0 status,0 itemlistcount,0 itemlist,mkh.makeithub_name as hub_name,mkh.lat as hub_lat,mkh.lon as hub_lon,mkh.address as hub_address,mkh.phone_number as hub_phoneno,mu.virtualkey from Orders as ord left join MakeitUser as mu on mu.userid=ord.makeit_user_id left join User as us on us.userid=ord.userid left join OrderItem as oi on oi.orderid=ord.orderid left join Product pro on pro.productid = oi.productid left join Moveit_trip as mt on mt.id=ord.trip_id left join Makeit_hubs as mkh on mkh.makeithub_id=mu.makeithub_id where ord.moveit_user_id="+req.moveit_userid+" and ord.trip_id="+req.tripid+" group by oi.orderid order by ord.orderid";
+      var gettripdetailsquery = "select ord.id,COUNT(dp.vpid) as item_count,ord.trip_id,mt.trip_status,CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg,mkh.*,ord.*,us.name as cus_name,us.phoneno as cus_phoneno from Dayorder as ord left join User as us on us.userid=ord.userid left join Dayorder_products as dp on ord.id=dp.doid left join Moveit_trip as mt on mt.tripid=ord.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Zone as mkh on mkh.id=mu.zone where mt.moveit_id='"+req.moveituserid+"' and ord.trip_id='"+req.trip_id+"' order by ord.id";
       var gettripdetails = await query(gettripdetailsquery);      
 
-      if(gettripdetails.length>0){
+      if(gettripdetails.length>0 && gettripdetails[0].id !=null){
         for(let i=0; i<gettripdetails.length; i++){
-          var moveitstatusquery ="select * from Moveit_status  where orderid = " +gettripdetails[i].orderid +" order by id desc limit 1";
+          var moveitstatusquery ="select * from Moveit_status  where doid = " +gettripdetails[i].id +" order by id desc limit 1";
           var statuslist = await query(moveitstatusquery);
           if (statuslist.length !==0 ) {
             gettripdetails[i].status = statuslist[0].status;
           }
 
-          var itemsquery = "select oi.productid,pro.product_name,oi.quantity from OrderItem as oi left join Product as pro on pro.productid=oi.productid where oi.orderid="+gettripdetails[i].orderid;
+          var itemsquery = "select * from Dayorder_products  where doid="+gettripdetails[i].id;
           var items = await query(itemsquery);
           gettripdetails[i].itemlistcount = items.length;
           gettripdetails[i].itemlist = items;
@@ -1632,7 +1632,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Order Details/////////
   Moveituser.moveit_order_details =async function moveit_order_details(req, result) {
     if(req.moveit_userid && req.tripid && req.orderid){
-      var getorderdetailsquery = "select ord.orderid,oi.productid,pro.product_name,oi.quantity,pro.image,ord.orderstatus,ord.trip_id,mt.trip_status,CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join Moveit_trip as mt on mt.id=ord.trip_id where ord.orderid="+req.orderid+" and ord.moveit_user_id="+req.moveit_userid+" and trip_id="+req.tripid;
+      var getorderdetailsquery = "";
       var getorderdetails = await query(getorderdetailsquery);
       if(getorderdetails.length>0){
         let resobj = {
@@ -1663,11 +1663,11 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip Start/////////
   Moveituser.moveit_trip_start =async function moveit_trip_start(req, result) {
     if(req.moveit_userid && req.tripid){
-      var tripstatuscheckquery = "select * from Moveit_trip where id="+req.tripid+" and moveit_userid="+req.moveit_userid;
+      var tripstatuscheckquery = "select * from Moveit_trip where tripid="+req.tripid+" and moveit_id="+req.moveituserid;
       var tripstatuscheck = await query(tripstatuscheckquery);
       if(tripstatuscheck.length>0 && tripstatuscheck[0].trip_status==0){
         var curtime =  moment().format("YYYY-MM-DD HH:mm:ss");
-        var updatetripstatusquery = "update Moveit_trip set start_time='"+curtime+"', trip_status=1 where id="+req.tripid+" and moveit_userid="+req.moveit_userid;
+        var updatetripstatusquery = "update Moveit_trip set start_time='"+curtime+"', trip_status=1 where tripid="+req.tripid+" and moveit_id="+req.moveituserid;
         var updatetripstatus = await query(updatetripstatusquery);
         if(updatetripstatus.affectedRows>0){
           let resobj = {
@@ -1712,11 +1712,11 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip End/////////
   Moveituser.moveit_trip_end =async function moveit_trip_end(req, result) {
     if(req.moveit_userid && req.tripid){
-      var chekordersquery = "select COUNT(orderid)as total_orders,COUNT(CASE WHEN orderstatus=6 THEN orderid END) as completed_orders from Orders where trip_id="+req.tripid+" and moveit_user_id="+req.moveit_userid;
+      var chekordersquery = "select COUNT(id)as total_orders,COUNT(CASE WHEN dayorderstatus=10 THEN id END) as completed_orders from Dayorder where trip_id="+req.tripid+" ";
       var chekorders = await query(chekordersquery);
       if(chekorders>0 && chekorders[0].total_orders == chekorders[0].completed_orders){
         var curtime =  moment().format("YYYY-MM-DD HH:mm:ss");
-        var updatetripstatusquery = "update Moveit_trip set end_time='"+curtime+"', trip_status=2 where id="+req.tripid+" and moveit_userid="+req.moveit_userid;
+        var updatetripstatusquery = "update Moveit_trip set end_time='"+curtime+"', trip_status=2 where tripid="+req.tripid+" and moveit_id="+req.moveit_userid;
         var updatetripstatus = await query(updatetripstatusquery);
         if(updatetripstatus.affectedRows>0){
           let resobj = {
@@ -1753,8 +1753,8 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
 
   ////Update Order Pickup Image/////////
   Moveituser.update_orderpickup_img =async function update_orderpickup_img(req, result) {
-    if(req.moveit_userid && req.tripid && req.orderid && req.imgurl){
-      var updateorderpickupimgquery = "update Orders set order_pickup_img='"+req.imgurl+"' where orderid="+req.orderid+" and trip_id="+req.tripid+" and moveit_user_id="+req.moveit_userid;
+    if(req.moveit_userid && req.tripid && req.id && req.imgurl){
+      var updateorderpickupimgquery = "update Dayorder set order_pickup_img='"+req.imgurl+"' where id="+req.id+" and trip_id="+req.tripid+" ";
       var updateorderpickupimg = await query(updateorderpickupimgquery);
       if(updateorderpickupimg.affectedRows>0){
         let resobj = {

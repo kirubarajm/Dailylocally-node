@@ -15,6 +15,7 @@ var CouponUsed = require("../../model/common/couponUsedModel");
 var orderproductModel = require("../../model/common/orderproductModel");
 var dayorder = require("../../model/common/dayorderModel");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
+var MoveitStatus = require("../../model/moveit/moveitStatusModel");
 
 
 
@@ -652,7 +653,7 @@ Order.order_list_calendar_by_month_wise = async function order_list_calendar_by_
 Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_day_wise(req,result) {
 
   var pkts='pkts';
-  var query1 = "select dr.id,dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('pkts','"+pkts+"','doid',dr.id,'dayorderpid',dp.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"'  group by dr.id order by dr.date ";
+  var query1 = "select dr.id,dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('pkts','"+pkts+"','doid',dr.id,'dayorderpid',dp.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'quantity_info',dp.quantity)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid left join UOM um on um.uomid=dp.product_uom left join Fav faa on faa.vpid = dp.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=dp.product_brand where dr.userid ='"+req.userid+"' and DATE(dr.date) = '"+req.date+"' and dp.scm_status < 11 group by dr.id order by dr.date ";
  
 
   sql.query(query1,async function(err, res) {
@@ -744,7 +745,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
 //,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items
   // var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where ors.orderid  ='"+req.orderid+"' " ;//and dm.active_status=1
 
-  var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
+  var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',dp.product_weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -942,6 +943,59 @@ Order.orderlistbymoveituserid = async function(moveit_user_id, result) {
 };
 
 
+Order.insert_order_status = function insert_order_status(req) {
+  var new_MoveitStatus = new MoveitStatus(req);
+  MoveitStatus.createMoveitStatus(new_MoveitStatus, function(err, res) {
+   if (err) return err;
+   else return res;
+ });
+};
 
+Order.moveit_order_accept = async function moveit_order_accept(req, result) {
+  const orderdetails = await query("select dor.*,mt.moveit_id from Dayorder dor left join Moveit_trip mt on mt.tripid=dor.trip_id where dor.trip_id="+ req.trip_id);
+  if (orderdetails.length !== 0) {    
+    for(let i=0; i<orderdetails.length; i++){                  
+      var new_MoveitStatus = new Array();
+      new_MoveitStatus.push({"doid":orderdetails[i].id,"moveitid":orderdetails[i].moveit_id,"status":1});
+      await MoveitStatus.createMoveitStatus(new_MoveitStatus, function(err, res) {
+        if (err) return err;
+        else return res;
+      });
+    }        
+    var orderaccepttime = moment().format("YYYY-MM-DD HH:mm:ss");
+    req.lat = req.lat || 0;
+    req.lon = req.lon || 0;
+    const updateorderdetails = await query("UPDATE Moveit_trip SET moveit_accept_time = '"+orderaccepttime+"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE tripid ='" +req.trip_id+"'");
+    // for(let j=0; j<orderdetails.length; j++){  
+    //   updatequery ="UPDATE Orders SET moveit_status = 1 ,moveit_accept_time= '" + orderaccepttime +"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE orderid ='"+orderdetails[j].orderid+"'";      
+    //   sql.query(updatequery, async function(err, res) {
+    //     if (err) {
+    //       result(err, null);
+    //     } else {
+    //       let response = {
+    //         success: true,
+    //         status: true,
+    //         message: "Order accepted successfully."
+    //       };
+    //       result(null, response);
+    //     }
+    //   });  
+    // }     
+
+    let response = {
+      success: true,
+      status: true,
+      message: "Order accepted successfully."
+    };
+    result(null, response);
+  } else {
+    let response = {
+      success: true,
+      status: false,
+      message: "Following trip is not assigned to you!"
+    };
+    result(null, response);
+  }
+};
 
 module.exports = Order;

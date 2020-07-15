@@ -151,3 +151,18 @@ exports.orderlist_by_moveit_userid = function(req, res) {
     res.json(result);
   });
 };
+
+//moveit order accept
+exports.moveit_order_accept = function(req, res) {
+  if (!req.body.trip_id) {
+   res 
+     .status(400)
+     .send({ error: true, status: false, message: "Please provide tripid" });
+ }
+  else {
+   Order.moveit_order_accept(req.body, function(err, ordercancel) {
+     if (err) res.send(err);
+     res.send(ordercancel);
+   });
+ }
+};

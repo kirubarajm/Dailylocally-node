@@ -55,7 +55,7 @@ app.route("/moveit/moveittripdetails").post(routesVersioning({"1.0.0":moveituser
 ////Moveit Order Details/////////
 app.route("/moveit/moveitorderdetails").post(routesVersioning({"1.0.0":moveituser.moveit_order_details}));
 ////Moveit Trip Start/////////
-app.route("/moveit/moveittripstart").post(routesVersioning({"1.0.0":moveituser.moveit_trip_start}));
+app.route("/moveit/moveittripstart").put(routesVersioning({"1.0.0":moveituser.moveit_trip_start}));
 ////Moveit Trip End/////////
 app.route("/moveit/moveittripend").post(routesVersioning({"1.0.0":moveituser.moveit_trip_end}));
 ////Update Order Pickup Image/////////
