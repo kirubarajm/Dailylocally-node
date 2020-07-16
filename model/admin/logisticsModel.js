@@ -18,11 +18,17 @@ var Logistics = function(stockkeeping) {};
 //////////show Stockkeeping Open List///////////
 Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,result) {
     if(req.zone_id){
-        var readytodispatchlistquery = "select dayo.id,dayo.userid,us.name,us.phoneno,dayo.date,dayo.created_at,sum(dop.received_quantity) as total_quantity,if(HOUR(time(dayo.created_at))>=19,'10 AM','10 AM') as eta,if(HOUR(time(dayo.created_at))>=19,'slot 2','slot 1') as eat,if(dayo.trip_id IS NOT NULL,'assgned','not assign')as status,dayo.trip_id,if(qac.qacid,'yes','no') as qac_checklist_show, JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid',dop.vpid,'productname',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight))) AS products from Dayorder as dayo left join User as us on us.userid=dayo.userid left join Dayorder_products as dop on dop.doid=dayo.id left join QA_check_list as qac on qac.doid=dayo.id where dayo.dayorderstatus=5 group by dayo.id";
+        var readytodispatchlistquery = "select dayo.id,dayo.userid,us.name,us.phoneno,dayo.date,dayo.created_at,dayo.city as area,dayo.cus_pincode,sum(dop.received_quantity) as total_quantity,CONCAT(if(HOUR(time(dayo.created_at))>=19,'10 AM','07 AM'),' ',DAY(dayo.date),' ',MONTHNAME(dayo.date)) as eta,dayo.order_place_time,if(HOUR(time(dayo.order_place_time))>=19,'slot 2','slot 1') as slot,if(dayo.dayorderstatus>6,'Assigned','Not Asign') as assign_status,dayo.trip_id,if(qac.qacid,'yes','no') as qac_checklist_show,'0' as qachecklist, JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid',dop.vpid,'productname',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight))) AS products,'0' as actival_weight,'0' as received_weight from Dayorder as dayo left join User as us on us.userid=dayo.userid left join Dayorder_products as dop on dop.doid=dayo.id left join QA_check_list as qac on qac.doid=dayo.id where dayo.dayorderstatus IN(5) group by dayo.id,dop.vpid";
         var readytodispatchlist = await query(readytodispatchlistquery);
         if(readytodispatchlist.length > 0){
             for (let i = 0; i < readytodispatchlist.length; i++) {
                 readytodispatchlist[i].products = JSON.parse(readytodispatchlist[i].products); 
+                var qachecklistquery = "select * from QA_check_list where doid="+readytodispatchlist[i].id;
+                var qachecklist = await query(qachecklistquery);
+                if(qachecklist.length>0){
+                    readytodispatchlist[i].qachecklist = qachecklist;
+                }
+
                 var productlist = readytodispatchlist[i].products;
                 for (let j = 0; j < productlist.length; j++) {
                     readytodispatchlist[i].actival_weight = parseInt(readytodispatchlist[i].actival_weight)+parseInt(productlist[j].actival_weight);
@@ -74,7 +80,7 @@ Logistics.qa_type_list =async function qa_type_list(req,result) {
     }
 };
 
-/////////Save QA Check List///////////
+/////////Save QA Check List Not Used ///////////
 Logistics.save_qa_checklist =async function save_qa_checklist(req,result) {
     if(req.zone_id && req.doid && req.qa_checklist.length>0){
         for (let i = 0; i < req.qa_checklist.length; i++) {
@@ -180,27 +186,6 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
         };
         result(null, resobj);
     }
-};
-
-/////////Get Moveit List///////////
-Logistics.get_moveit_list =async function get_moveit_list(req,result) {
-    var qachecklistquery = "select * from MoveitUser";
-    var qachecklist = await query(qachecklistquery);
-    if(qachecklist.length > 0){
-        let resobj = {
-            success: true,
-            status: true,
-            result: qachecklist
-        };
-        result(null, resobj);
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "no data found"
-        };
-        result(null, resobj);
-    } 
 };
 
 /////////Add Moveit//////////
@@ -337,7 +322,265 @@ Logistics.moveit_edit =async function moveit_edit(req,result) {
     }
 };
 
-/////////Assign to Dunzo//////////
+/////////Moveit List//////////
+Logistics.moveit_list =async function moveit_list(req,result) {
+    var moveitlistquery = "select * from MoveitUser";
+    var moveitlist = await query(moveitlistquery);
+    if(moveitlist.length>0){
+        let resobj = {
+            success: true,
+            status: true,
+            result: moveitlist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data found"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Trip Temp List//////////
+Logistics.trip_temp_list =async function trip_temp_list(req,result) {
+    if(req.zone_id && req.doid.length>0){
+        var dayorders = req.doid;
+        var resultdata = [];
+        var getdayorderlistquery = "select * from Dayorder where id IN("+dayorders+") and dayorderstatus=6";
+        var getdayorderlist = await query(getdayorderlistquery);
+        if(getdayorderlist.length>0){
+            for (let i = 0; i < getdayorderlist.length; i++) {
+                resultdata.push({"doid":"orderid "+getdayorderlist[i].id,"Locality":getdayorderlist[i].city,"pincode":getdayorderlist[i].cus_pincode,"order_status":"(selected order)","tripid":""});
+            }
+        }
+
+        if(req.moveit_id){
+            var getmoveitordersquery ="select * from Dayorder where dayorderstatus IN(5,6,7) and trip_id IN((select tripid from Moveit_trip where trip_status=0 and moveit_id="+req.moveit_id+"));"
+            var getmoveitorders = await query(getmoveitordersquery);
+            if(getmoveitorders.length>0){
+                for (let j = 0; j < getmoveitorders.length; j++) {
+                    resultdata.push({"doid":"orderid "+getmoveitorders[j].id,"Locality":getmoveitorders[j].city,"pincode":getmoveitorders[j].cus_pincode,"order_status":"(live trip "+getmoveitorders[j].trip_id+")","tripid":getmoveitorders[j].trip_id});                    
+                }                
+            }
+        }
+
+        let resobj = {
+            success: true,
+            status: true,
+            result:resultdata
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Get Moveit List///////////
+Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
+    var resultdata = [];
+    var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.zone=1";
+    var getmoveittrip = await query(getmoveittripquery);
+    if(getmoveittrip.length > 0){
+        for (let i = 0; i < getmoveittrip.length; i++) {
+            if(getmoveittrip[i].after_start_tripid>0){ }else{
+                resultdata.push({"userid":getmoveittrip[i].userid,"name":getmoveittrip[i].name,"tripid":getmoveittrip[i].tripid});
+            } 
+        }
+        if(resultdata.length>0){
+            let resobj = {
+                success: true,
+                status: true,
+                result: resultdata
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data found"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data found"
+        };
+        result(null, resobj);
+    }
+};
+
+///////// Create Moveit Trip //////////
+Logistics.trip_create =async function trip_create(req,result) {
+    if(req.zone_id && req.doid.length>0 && req.moveit_id && req.done_by){
+        var dayorderids = req.doid;
+        var moveittripdata = [];
+        if(req.trip_id!=''){
+            var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7 where id IN("+dayorderids+")";
+            var updatedayorder = await query(updatedayorderquery);  
+            if(updatedayorder.affectedRows>0){
+                var updatedonebyquery = "update Moveit_trip set done_by="+req.done_by+" where tripid="+req.trip_id;
+                var updatedoneby = await query(updatedonebyquery);
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "trip created Successfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "something went wrong plz try again"
+                };
+                result(null, resobj); 
+            }
+        }
+        moveittripdata.push({"moveit_id":req.moveit_id,"done_by":req.done_by});
+        await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
+            if(moveittripres.status==true){                
+                for (let i = 0; i < dayorderids.length; i++) {
+                    var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
+                    var updatedayorder = await query(updatedayorderquery);                   
+                }
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "trip created Successfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "something went wrong plz try again"
+                };
+                result(null, resobj);
+            }
+        });
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Unassign Moveit Trip//////////
+Logistics.trip_unassign =async function trip_unassign(req,result) {
+    if(req.doid.length>0){
+        var dayorders = req.doid;
+        var updatedids = [];
+        var errorids = [];
+        for (let i = 0; i < dayorders.length; i++) {
+            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstatus IN(7,8) and moveit_type=1";
+            var checkdayorder = await query(checkdayorderquery);
+            if(checkdayorder.length>0){
+                var updatedayorderquery = "update Dayorder set dayorderstatus=6, trip_id=NULL,moveit_type=NULL where id="+dayorders[i];
+                var updatedayorder = await query(updatedayorderquery);
+                if(updatedayorder.affectedRows>0){
+                    updatedids.push(dayorders[i]);
+                }else{
+                    errorids.push(dayorders[i]);
+                }
+            }else{
+                errorids.push(dayorders[i]);
+            }            
+        }
+
+        let resobj = {
+            success: true,
+            status: true,
+            success_data: updatedids,
+            error_data: errorids
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Trip Moveit Filters//////////
+Logistics.trip_moveit_filters =async function trip_moveit_filters(req,result) {
+    var moveitlistquery = "select mt.moveit_id,mu.name from Moveit_trip as mt left join MoveitUser as mu on mu.userid=mt.moveit_id";
+    var moveitlist = await query(moveitlistquery);
+    var triplistquery = "select tripid from Moveit_trip";
+    var triplist = await query(triplistquery);
+
+    let resobj = {
+        success: true,
+        status: true,
+        moveitlist: moveitlist,
+        triplist: triplist
+    };
+    result(null, resobj);
+};
+
+/////////Moveit Trip List//////////
+Logistics.trip_list =async function trip_list(req,result) {
+    var wherecon="";
+    if(req.moveit_id){
+        wherecon = wherecon+" and mt.moveit_id='"+req.moveit_id+"' ";
+    }
+    if(req.tripid){
+        wherecon = wherecon+" and dayo.trip_id='"+req.tripid+"' ";
+    }
+    var moveittriplistquery = "select dayo.*,mu.name,mt.moveit_id,au.name as assigned_by,mt.created_at assigned_datetime from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Admin_users as au on au.admin_userid=mt.done_by where dayo.moveit_type=1 "+wherecon+" order by dayo.id desc";
+    var moveittriplist = await query(moveittriplistquery);
+    if(moveittriplist.length > 0){            
+        let resobj = {
+            success: true,
+            status: true,
+            result: moveittriplist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data found"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Dunzo Order List//////////
+Logistics.dunzo_trip_list =async function dunzo_trip_list(req,result) {
+    var dunzoorderlistquery = "select * from Dayorder where moveit_type=2 order by id desc";
+    var dunzoorderlist = await query(dunzoorderlistquery);
+    if(dunzoorderlist.length > 0){            
+        let resobj = {
+            success: true,
+            status: true,
+            result: dunzoorderlist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data found"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Dunzo Assign//////////
 Logistics.dunzo_assign =async function dunzo_assign(req,result) {
     if(req.zone_id && req.doid){
         var getdayorderquery = "select * from Dayorder where id="+req.doid;
@@ -396,99 +639,19 @@ Logistics.dunzo_assign =async function dunzo_assign(req,result) {
     }
 };
 
-///////// Create Moveit Trip //////////
-Logistics.create_moveit_trip =async function create_moveit_trip(req,result) {
-    if(req.zone_id && req.doid.length>0 && req.moveit_id){
-        var moveittripdata = [];
-        moveittripdata.push({"moveit_id":req.moveit_id});
-        await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
-            if(moveittripres.status==true){
-                var dayorderids = req.doid;
-                for (let i = 0; i < dayorderids.length; i++) {
-                    var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
-                    var updatedayorder = await query(updatedayorderquery);                   
-                }
-                let resobj = {
-                    success: true,
-                    status: true,
-                    message: "trip created Successfully"
-                };
-                result(null, resobj);
-            }else{
-                let resobj = {
-                    success: true,
-                    status: false,
-                    message: "something went wrong plz try again"
-                };
-                result(null, resobj);
-            }
-        });
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "check your post values"
-        };
-        result(null, resobj);
-    }
-};
-
-/////////Moveit Trip List//////////
-Logistics.moveit_trip_list =async function moveit_trip_list(req,result) {
-    var moveittriplistquery = "select * from Dayorder where moveit_type=1 order by id desc";
-    var moveittriplist = await query(moveittriplistquery);
-    if(moveittriplist.length > 0){            
-        let resobj = {
-            success: true,
-            status: true,
-            result: moveittriplist
-        };
-        result(null, resobj);
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "no data found"
-        };
-        result(null, resobj);
-    }
-};
-
-/////////Dunzo Order List//////////
-Logistics.dunzo_trip_list =async function dunzo_trip_list(req,result) {
-    var dunzoorderlistquery = "select * from Dayorder where moveit_type=2 order by id desc";
-    var dunzoorderlist = await query(dunzoorderlistquery);
-    if(dunzoorderlist.length > 0){            
-        let resobj = {
-            success: true,
-            status: true,
-            result: dunzoorderlist
-        };
-        result(null, resobj);
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "no data found"
-        };
-        result(null, resobj);
-    }
-};
-
 ////////Dunzo Pickup//////////////
-Logistics.dunzo_pickp =async function dunzo_pickp(req,result) {
+Logistics.dunzo_pickup =async function dunzo_pickup(req,result) {
     if(req.doid.length>0){
-        var errormsg = "";
-        var dayorders = req.req.doid;
+        var dayorders = req.doid;
         var updatedids = [];
         var errorids = [];
         for (let i = 0; i < dayorders.length; i++) {
-            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstaus=7 and moveit_type=2";
+            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstatus=7 and moveit_type=2";
             var checkdayorder = await query(checkdayorderquery);
-            if(checkdayorder.length){
+            if(checkdayorder.length>0){
                 var updatedayorderquery = "update Dayorder set dayorderstatus=8 where id="+dayorders[i];
                 var updatedayorder = await query(updatedayorderquery);
-                if(updatedayorder.length>0){
+                if(updatedayorder.affectedRows>0){
                     updatedids.push(dayorders[i]);
                 }else{
                     errorids.push(dayorders[i]);
@@ -501,8 +664,8 @@ Logistics.dunzo_pickp =async function dunzo_pickp(req,result) {
         let resobj = {
             success: true,
             status: true,
-            success_message: updatedids+"updated successfuly",
-            error_message: errorids+"errors"
+            success_data: updatedids,
+            error_data: errorids
         };
         result(null, resobj);
     }else{
@@ -515,6 +678,43 @@ Logistics.dunzo_pickp =async function dunzo_pickp(req,result) {
     }
 };
 
-////////Dunzo Deliverd////////////
+////////Dunzo Delivered//////////////
+Logistics.dunzo_delivered =async function dunzo_delivered(req,result) {
+    if(req.doid.length>0){
+        var dayorders = req.doid;
+        var updatedids = [];
+        var errorids = [];
+        for (let i = 0; i < dayorders.length; i++) {
+            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstatus=8 and moveit_type=2";
+            var checkdayorder = await query(checkdayorderquery);
+            if(checkdayorder.length>0){
+                var updatedayorderquery = "update Dayorder set dayorderstatus=9 where id="+dayorders[i];
+                var updatedayorder = await query(updatedayorderquery);
+                if(updatedayorder.affectedRows>0){
+                    updatedids.push(dayorders[i]);
+                }else{
+                    errorids.push(dayorders[i]);
+                }
+            }else{
+                errorids.push(dayorders[i]);
+            }            
+        }
+
+        let resobj = {
+            success: true,
+            status: true,
+            success_data: updatedids,
+            error_data: errorids
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
 
 module.exports = Logistics;

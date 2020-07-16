@@ -104,18 +104,23 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
 
   ///////// Logistics //////////////
   app.route("/admin/logistics/readytodispatchlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.ready_to_dispatch_list}));
-  app.route("/admin/logistics/qa_type_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.qa_type_list}));
-  app.route("/admin/logistics/submit_qa_checklist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.submit_qa_checklist}));
-  app.route("/admin/logistics/get_moveit_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.get_moveit_list}));
+  app.route("/admin/logistics/qa/type_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.qa_type_list}));
+  app.route("/admin/logistics/qa/submit_checklist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.submit_qa_checklist}));
   app.route("/admin/logistics/moveit/add").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_add}));
   app.route("/admin/logistics/moveit/view").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_view}));
-  app.route("/admin/logistics/moveit/edit").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_edit}));  
-  app.route("/admin/logistics/createtrip").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.create_moveit_trip}));
-  app.route("/admin/logistics/moveittriplist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_trip_list}));
-  app.route("/admin/logistics/dunzoorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_trip_list}));
+  app.route("/admin/logistics/moveit/edit").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_edit}));
+  app.route("/admin/logistics/moveit/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list}));
+  app.route("/admin/logistics/trip/templist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_temp_list}));
+  app.route("/admin/logistics/moveit/listwithtrip").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list_trip}));
+  app.route("/admin/logistics/trip/create").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_create}));
+  app.route("/admin/logistics/trip/unassign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_unassign}));
+  app.route("/admin/logistics/trip/tripmoveitfilters").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_moveit_filters}));
+  app.route("/admin/logistics/trip/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_list}));
+  app.route("/admin/logistics/dunzo/orderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_trip_list}));
   app.route("/admin/logistics/dunzo/assign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_assign}));
   app.route("/admin/logistics/dunzo/pickup").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_pickup}));
-  app.route("/admin/logistics/dunzo/deliverd").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_delivered}));
+  app.route("/admin/logistics/dunzo/delivered").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_delivered}));
+  
 
 
 app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));

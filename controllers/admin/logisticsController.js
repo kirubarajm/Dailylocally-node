@@ -32,16 +32,6 @@ exports.submit_qa_checklist = function(req, res) {
     });    
 };
 
-/////////Get Moveit List///////////
-exports.get_moveit_list = function(req, res) {    
-    Logistics.get_moveit_list(req.body, function(err, ress) {
-        //console.log("moveit_list controller");
-        if (err) res.send(err);
-        //console.log("res", ress);
-        res.send(ress);
-    });    
-};
-
 /////////Add Moveit//////////
 exports.moveit_add = function(req, res) {    
     Logistics.moveit_add(req.body, function(err, ress) {
@@ -72,10 +62,30 @@ exports.moveit_edit = function(req, res) {
     });    
 };
 
-/////////Assign to Dunzo//////////
-exports.dunzo_assign = function(req, res) {    
-    Logistics.dunzo_assign(req.body, function(err, ress) {
-        //console.log("assign_to_dunzo controller");
+/////////Moveit List//////////
+exports.moveit_list = function(req, res) {    
+    Logistics.moveit_list(req.body, function(err, ress) {
+        //console.log("moveit_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Trip Temp List//////////
+exports.trip_temp_list = function(req, res) {    
+    Logistics.trip_temp_list(req.body, function(err, ress) {
+        //console.log("trip_temp_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Get Moveit List///////////
+exports.moveit_list_trip = function(req, res) {    
+    Logistics.moveit_list_trip(req.body, function(err, ress) {
+        //console.log("moveit_list_trip controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -83,9 +93,29 @@ exports.dunzo_assign = function(req, res) {
 };
 
 /////////Create Moveit Trip//////////
-exports.create_moveit_trip = function(req, res) {    
-    Logistics.create_moveit_trip(req.body, function(err, ress) {
-        //console.log("create_moveit_trip controller");
+exports.trip_create = function(req, res) {    
+    Logistics.trip_create(req.body, function(err, ress) {
+        //console.log("trip_create controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Unassign Moveit Trip//////////
+exports.trip_unassign = function(req, res) {    
+    Logistics.trip_unassign(req.body, function(err, ress) {
+        //console.log("trip_unassign controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Trip Moveit Filters//////////
+exports.trip_moveit_filters = function(req, res) {    
+    Logistics.trip_moveit_filters(req.body, function(err, ress) {
+        //console.log("trip_moveit_filters controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -93,9 +123,9 @@ exports.create_moveit_trip = function(req, res) {
 };
 
 /////////Moveit Trip List//////////
-exports.moveit_trip_list = function(req, res) {    
-    Logistics.moveit_trip_list(req.body, function(err, ress) {
-        //console.log("moveit_trip_list controller");
+exports.trip_list = function(req, res) {    
+    Logistics.trip_list(req.body, function(err, ress) {
+        //console.log("trip_list controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -112,4 +142,32 @@ exports.dunzo_trip_list = function(req, res) {
     });    
 };
 
+/////////Dunzo Assign//////////
+exports.dunzo_assign = function(req, res) {    
+    Logistics.dunzo_assign(req.body, function(err, ress) {
+        //console.log("dunzo_assign controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
 
+/////////Dunzo Pickup//////////
+exports.dunzo_pickup = function(req, res) {   
+    Logistics.dunzo_pickup(req.body, function(err, ress) {
+        //console.log("dunzo_pickup controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Dunzo Deliverd//////////
+exports.dunzo_delivered = function(req, res) {    
+    Logistics.dunzo_delivered(req.body, function(err, ress) {
+        //console.log("dunzo_delivered controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};

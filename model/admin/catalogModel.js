@@ -444,56 +444,119 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
             }
 
             if(updatestatus==1){
-                var checkprevousstatesquery = "select pm.pid,zcm.master_catid as catid,zcm.active_status cat_status,pm.scl1_id,zl1sc.active_status as scl1_status,pm.scl2_id,zl2sc.active_status as scl2_status from ProductMaster as pm left join Zone_l2_subcategory_mapping as zl2sc on zl2sc.master_l2_subcatid=pm.scl2_id left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=pm.scl1_id left join SubcategoryL1 as sl1 on sl1.scl1_id=pm.scl1_id left join Zone_category_mapping as zcm on zcm.master_catid=sl1.catid where pm.pid="+req.pid+" and zl2sc.zoneid="+req.zone_id+" and zl1sc.zoneid="+req.zone_id+" and zcm.zoneid="+req.zone_id;
-                var checkprevousstates = await query(checkprevousstatesquery);
-                if(checkprevousstates[0].scl2_status==0){
-                    //console.log("l2 sub out");
-                    let resobj = {
-                        success: true,
-                        status: false,
-                        message: "product can be lived only if L2 subcategory should be mode live",
-                    };
-                    result(null, resobj);
-                }else if(checkprevousstates[0].scl1_status==0){
-                    //console.log("l1 sub out");
-                    let resobj = {
-                        success: true,
-                        status: false,
-                        message: "product can be lived only if L1 subcategory should be mode live",
-                    };
-                    result(null, resobj);
-                }else if(checkprevousstates[0].cat_status==0){
-                    //console.log("l2 sub out");
-                    let resobj = {
-                        success: true,
-                        status: false,
-                        message: "product can be lived only if category should be mode live",
-                    };
-                    result(null, resobj);
-                }else{
-                    //console.log("done");
-                    var statusupdatequery = "update Product_live set live_status="+updatestatus+" where pid="+req.pid+" and zoneid="+req.zone_id;
-                    var statusupdate = await query(statusupdatequery);
-                    if(statusupdate.affectedRows > 0){
-                        var updatedselectquery = "select pm.pid,pm.Productname,pl.live_status from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.pid="+req.pid+" and pl.zoneid="+req.zone_id;
-                        var updatedselect = await query(updatedselectquery);
-                        let resobj = {
-                            success: true,
-                            status: true,
-                            message: "ProductMaster updated successfully",
-                            result: updatedselect
-                        };
-                        result(null, resobj);
+                var productcheckl2query = "select * from ProductMaster where pid="+req.pid;
+                var productcheckl2 = await query(productcheckl2query);
+                if(productcheckl2.length>0){
+                    if(productcheckl2[0].scl2_id){
+                        var checkprevousstatesquery = "select pm.pid,zcm.master_catid as catid,zcm.active_status cat_status,pm.scl1_id,zl1sc.active_status as scl1_status,pm.scl2_id,zl2sc.active_status as scl2_status from ProductMaster as pm left join Zone_l2_subcategory_mapping as zl2sc on zl2sc.master_l2_subcatid=pm.scl2_id left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=pm.scl1_id left join SubcategoryL1 as sl1 on sl1.scl1_id=pm.scl1_id left join Zone_category_mapping as zcm on zcm.master_catid=sl1.catid where pm.pid="+req.pid+" and zl2sc.zoneid="+req.zone_id+" and zl1sc.zoneid="+req.zone_id+" and zcm.zoneid="+req.zone_id;
+                        var checkprevousstates = await query(checkprevousstatesquery);
+                        if(checkprevousstates[0].scl2_status==0){
+                            //console.log("l2 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if L2 subcategory should be mode live",
+                            };
+                            result(null, resobj);
+                        }else if(checkprevousstates[0].scl1_status==0){
+                            //console.log("l1 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if L1 subcategory should be mode live",
+                            };
+                            result(null, resobj);
+                        }else if(checkprevousstates[0].cat_status==0){
+                            //console.log("l2 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if category should be mode live",
+                            };
+                            result(null, resobj);
+                        }else{
+                            //console.log("done");
+                            var statusupdatequery = "update Product_live set live_status="+updatestatus+" where pid="+req.pid+" and zoneid="+req.zone_id;
+                            var statusupdate = await query(statusupdatequery);
+                            if(statusupdate.affectedRows > 0){
+                                var updatedselectquery = "select pm.pid,pm.Productname,pl.live_status from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.pid="+req.pid+" and pl.zoneid="+req.zone_id;
+                                var updatedselect = await query(updatedselectquery);
+                                let resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "ProductMaster updated successfully",
+                                    result: updatedselect
+                                };
+                                result(null, resobj);
+                            }else{
+                                let resobj = {
+                                    success: true,
+                                    status: false,
+                                    message: "something went please try again"
+                                };
+                                result(null, resobj);
+                            }
+                        }
                     }else{
-                        let resobj = {
-                            success: true,
-                            status: false,
-                            message: "something went please try again"
-                        };
-                        result(null, resobj);
+                        var checkprevousstatesquery = "select pm.pid,zcm.master_catid as catid,zcm.active_status cat_status,pm.scl1_id,zl1sc.active_status as scl1_status,pm.scl2_id,zl2sc.active_status as scl2_status from ProductMaster as pm left join Zone_l2_subcategory_mapping as zl2sc on zl2sc.master_l2_subcatid=pm.scl2_id left join Zone_l1_subcategory_mapping as zl1sc on zl1sc.master_l1_subcatid=pm.scl1_id left join SubcategoryL1 as sl1 on sl1.scl1_id=pm.scl1_id left join Zone_category_mapping as zcm on zcm.master_catid=sl1.catid where pm.pid="+req.pid+" and zl1sc.zoneid="+req.zone_id+" and zcm.zoneid="+req.zone_id;
+                        var checkprevousstates = await query(checkprevousstatesquery);
+                        if(checkprevousstates[0].scl2_status==0){
+                            //console.log("l2 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if L2 subcategory should be mode live",
+                            };
+                            result(null, resobj);
+                        }else if(checkprevousstates[0].scl1_status==0){
+                            //console.log("l1 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if L1 subcategory should be mode live",
+                            };
+                            result(null, resobj);
+                        }else if(checkprevousstates[0].cat_status==0){
+                            //console.log("l2 sub out");
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "product can be lived only if category should be mode live",
+                            };
+                            result(null, resobj);
+                        }else{
+                            //console.log("done");
+                            var statusupdatequery = "update Product_live set live_status="+updatestatus+" where pid="+req.pid+" and zoneid="+req.zone_id;
+                            var statusupdate = await query(statusupdatequery);
+                            if(statusupdate.affectedRows > 0){
+                                var updatedselectquery = "select pm.pid,pm.Productname,pl.live_status from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.pid="+req.pid+" and pl.zoneid="+req.zone_id;
+                                var updatedselect = await query(updatedselectquery);
+                                let resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "ProductMaster updated successfully",
+                                    result: updatedselect
+                                };
+                                result(null, resobj);
+                            }else{
+                                let resobj = {
+                                    success: true,
+                                    status: false,
+                                    message: "something went please try again"
+                                };
+                                result(null, resobj);
+                            }
+                        }
                     }
-                }
-
+                }else{
+                    ////Invalid product id////
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "invalid product id"
+                    };
+                    result(null, resobj);
+                }         
             }else{
                 var statusupdatequery = "update Product_live set live_status="+updatestatus+" where pid="+req.pid+" and zoneid="+req.zone_id;
                 var statusupdate = await query(statusupdatequery);
