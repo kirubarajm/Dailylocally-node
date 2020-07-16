@@ -71,7 +71,7 @@ Sub_Category_L2.get_Sub_Category_L2_list = async function get_Sub_Cget_Sub_Categ
 
       //  var get_sub_cat2_images = await query("select * from Sub_category_images where type=3");
 
-       var get_sub_cat2_images = await query("select scl1_id,name,image aS image_url from SubcategoryL1 where scl1_id=   '"+req.scl1_id+"'");
+       var get_sub_cat2_images = await query("select scl1_id,name,image  from SubcategoryL1 where scl1_id=   '"+req.scl1_id+"'");
       for (let i = 0; i < res.length; i++) {
      
         res[i].servicable_status=servicable_status;
