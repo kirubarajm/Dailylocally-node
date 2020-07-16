@@ -170,7 +170,6 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.mrp DESC ";
               }
 
-              console.log(product_list);
                 sql.query(product_list, function (err, res) {
 
                     if(err) {
@@ -181,7 +180,11 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                     
                         for (let i = 0; i < res.length; i++) {
      
-                            res[i].weight = res[i].weight * 1000;
+      
+                            if (res[i].uom== 1 || res[i].uom==7) {
+                              res[i].weight = res[i].weight * 1000;
+                            }
+                            
                             // res[i].servicable_status=servicable_status;
                             res[i].offer='offer';
                             res[i].discount_cost_status=false;

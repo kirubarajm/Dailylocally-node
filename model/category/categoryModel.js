@@ -197,7 +197,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var res1 = await query("Select pm.*,pl.*,um.name as unit From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +orderitems[i].vpid +"' ");
+        var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +orderitems[i].vpid +"' ");
       
        
         if (res1[0].live_status == 0) {
@@ -209,6 +209,19 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           res1[0].availablity = true;
         }
   
+        if (res1[0].uom== 1 ||res1[0].uom==7) {
+          res[0].weight = res[0].weight * 1000;
+        }
+        
+        res1[0].offer='offer';
+        res1[0].discount_cost_status=false;
+        res1[0].mrp_discount_amout=0;
+        if ( res1[0].discount_cost) {
+          res1[0].discount_cost_status=true;
+          res1[0].mrp_discount_amout = res[0].mrp - res[0].discount_cost ;
+        }
+
+
         var amount = 0;
         ///get amount each product
         amount = res1[0].mrp * orderitems[i].quantity;
@@ -277,7 +290,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +subscription[i].vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,,br.brandname  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +subscription[i].vpid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -294,6 +307,19 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           subscription_product_list[0].availablity = true;
         }
   
+
+        if ( subscription_product_list[0].uom== 1 || subscription_product_list[0].uom==7) {
+          subscription_product_list[0].weight =  subscription_product_list[0].weight * 1000;
+        }
+        
+        subscription_product_list[0].offer='offer';
+        subscription_product_list[0].discount_cost_status=false;
+        subscription_product_list[0].mrp_discount_amout=0;
+        if (  subscription_product_list[0].discount_cost) {
+          subscription_product_list[0].discount_cost_status=true;
+          subscription_product_list[0].mrp_discount_amout =  subscription_product_list[0].mrp -  subscription_product_list[0].discount_cost ;
+        }
+
         var amount = 0;
         ///get amount each product
         amount = subscription_product_list[0].mrp * subscription[i].quantity;

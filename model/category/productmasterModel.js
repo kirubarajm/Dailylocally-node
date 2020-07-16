@@ -141,7 +141,6 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
         if (res[i].uom== 1 || res[i].uom==7) {
           res[i].weight = res[i].weight * 1000;
         }
-        
 
         res[i].servicable_status=servicable_status;
         res[i].offer='offer';
@@ -154,6 +153,9 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
         
         
       }
+
+     
+
 
       // if (req.sortid==1) {
     
@@ -232,8 +234,6 @@ ProductMaster.get_product_details = async function get_product_details(req,resul
 
 
   if (get_nearby_zone.length !=0) {
-    
-
     if (get_nearby_zone[0].distance > radiuslimit) {
       servicable_status =false;
     }
@@ -244,8 +244,6 @@ ProductMaster.get_product_details = async function get_product_details(req,resul
   // var sub_l2_category_query= "Select * from SubcategoryL2 where scl1_id=  '"+req.scl1_id+"' ";
   var product_detail = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  where  pl.vpid='"+req.vpid+"' "
 
-
- 
 
 sql.query(product_detail,async function(err, res) {
   if (err) {
@@ -263,7 +261,7 @@ sql.query(product_detail,async function(err, res) {
       res[i].offer='offer';
       res[i].discount_cost_status=false;
 
-      if ( res[i].discount_cost) {
+      if (res[i].discount_cost) {
         res[i].discount_cost_status=true;
         res[i].mrp_discount_amout = res[i].mrp - res[i].discount_cost ;
       }
@@ -388,7 +386,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
 
   brandquery = brandquery.slice(0, -2) + ")";
 
-  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid ";
+  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid  left join Brand br on br.id=pm.brand ";
 
 
   if (req.scl1_id !=0) {

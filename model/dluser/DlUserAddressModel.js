@@ -1,6 +1,8 @@
 'user strict';
 var sql = require('../db.js');
-
+const util = require("util");
+const query = util.promisify(sql.query).bind(sql);
+var constant = require('../constant.js');
 
 //Task object constructor
 var UserAddress = function(useraddress){
@@ -120,9 +122,73 @@ UserAddress.getAllAddress = function getAllAddress(result) {
             });   
 };
 
-UserAddress.updateById = function(req, result){
+UserAddress.updateById =async function updateById(req, result){
 
-  staticquery = "UPDATE Address SET updated_at = ?,";
+ var servicable_status = false;
+
+ var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+ req.lat +
+ "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+ req.lon +
+ "') ) + sin( radians('" +
+ req.lat +
+ "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+
+
+if (get_nearby_zone.length !=0) {
+ 
+ if (get_nearby_zone[0].distance > constant.radiuslimit) {
+   servicable_status =false;
+ }
+}
+
+var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
+
+if (user_day_order_details.length !=0) {
+    
+  if (!servicable_status) {
+    let resobj = {
+        success: true,
+        status: false,
+        message: "Your location is unserviceable",
+    };
+
+    result(null, resobj);
+  }else{
+    staticquery = "UPDATE Address SET updated_at = ?,";
+    var column = '';
+    for (const [key, value] of Object.entries(req)) {
+        //  console.log(`${key} ${value}`); 
+
+        if (key !== 'userid') {
+            // var value = `=${value}`;
+            column = column + key + "='" + value + "',";
+        }
+    }
+
+  var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
+    sql.query(query1,[new Date()], function (err, res) {
+        if (err) {
+            console.log("error: ", err);
+            result(err, null);
+        }
+        else {
+
+            let resobj = {
+                success: true,
+                status:true,
+                message: "Address Updated successfully",
+
+            };
+
+            result(null, resobj);
+        }
+
+    });
+  }
+
+} else {
+    staticquery = "UPDATE Address SET updated_at = ?,";
         var column = '';
         for (const [key, value] of Object.entries(req)) {
             //  console.log(`${key} ${value}`); 
@@ -133,8 +199,8 @@ UserAddress.updateById = function(req, result){
             }
         }
 
-      var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-        sql.query(query,[new Date()], function (err, res) {
+      var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
+        sql.query(query1,[new Date()], function (err, res) {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -152,6 +218,38 @@ UserAddress.updateById = function(req, result){
             }
 
         });
+}
+
+//   staticquery = "UPDATE Address SET updated_at = ?,";
+//         var column = '';
+//         for (const [key, value] of Object.entries(req)) {
+//             //  console.log(`${key} ${value}`); 
+
+//             if (key !== 'userid') {
+//                 // var value = `=${value}`;
+//                 column = column + key + "='" + value + "',";
+//             }
+//         }
+
+//       var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
+//         sql.query(query,[new Date()], function (err, res) {
+//             if (err) {
+//                 console.log("error: ", err);
+//                 result(err, null);
+//             }
+//             else {
+
+//                 let resobj = {
+//                     success: true,
+//                     status:true,
+//                     message: "Address Updated successfully",
+
+//                 };
+
+//                 result(null, resobj);
+//             }
+
+//         });
 };
 
 UserAddress.remove = function(id, result){

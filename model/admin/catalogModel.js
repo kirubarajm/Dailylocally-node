@@ -1446,7 +1446,8 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
       if(req.search){
         var suggestion_list = {};
         var products_title ='Products';
-        var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname,sum(pm.weight*1000) as weight FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
+        var offer = 'offer';
+        var products_list  = await query("SELECT pm.Productname ,'4' as type,pl.vpid,pm.scl1_id,pm.scl2_id,sub1.name,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname,IF(pm.uom= 1 || pm.uom=7 , sum(pm.weight*1000),pm.weight)as weight,IF(pm.discount_cost=0,false,true)as discount_cost_status,IF(pm.discount_cost=0,0,pm.mrp-pm.discount_cost)as mrp_discount_amout,'offer','"+offer+"',pm.short_desc,pm.packetsize,pm.subscription,discount_cost,pm.image FROM ProductMaster pm  join Product_live pl on pl.pid = pm.pid left join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand WHERE  pl.live_status=1 and pm.Productname LIKE '%"+req.search+"%' group by pl.vpid ");
         if (products_list.length !=0) {
             suggestion_list.products_title=products_title;
             suggestion_list.products_list=products_list;

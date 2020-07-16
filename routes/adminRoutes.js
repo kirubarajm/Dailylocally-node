@@ -13,7 +13,9 @@ module.exports = function(app) {
   var darordercomments = require("../controllers/admin/orderCommentsController");
   var Zendeskissues = require("../controllers/common/ZendeskissuesController");
   var orders = require("../controllers/common/OrderController");
+  var useraddress = require("../controllers/dluser/UserAddressController");
 
+  
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
@@ -152,4 +154,5 @@ app.route("/admin/dayorderlog").post(routesVersioning({"1.0.0":darordercomments.
 app.route("/admin/transaction").post(middleware.checkToken,routesVersioning({"1.0.0":orders.transaction_list}));
 app.route("/admin/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
 
-}
+
+app.route("/admin/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address}));}
