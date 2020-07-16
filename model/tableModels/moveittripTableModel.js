@@ -16,6 +16,7 @@ var MovietTrip = function(moviettrip) {
   this.moveit_accept_long = moviettrip.moveit_accept_long;
   this.moveit_accept_time = moviettrip.moveit_accept_time;
   this.moveit_notification_time = moviettrip.moveit_notification_time;
+  this.done_by = moviettrip.done_by;
 }
 
 //For Admin
