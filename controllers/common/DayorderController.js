@@ -83,6 +83,14 @@ exports.admin_day_order_book_return = function(req, res) {
   });
 };
 
+exports.day_order_book_return_by_moveit = function(req, res) {
+  Dayorder.day_order_book_return_by_moveit(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
+ 
+
 exports.reorder_order_create = function(req, res) {
   var order_item = req.body.orderitems;
   if (!req.body.orderitems) {

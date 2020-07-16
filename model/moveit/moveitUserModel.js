@@ -152,7 +152,7 @@ Moveituser.checkLogin = function checkLogin(req, result) {
 
 
 Moveituser.getUserById = function getUserById(userId, result) {
-    sql.query("Select userid,name,email,bank_account_no,phoneno,Vehicle_no,verified_status,online_status,referalcode,localityid,bank_name,ifsc,bank_holder_name,moveit_hub,driver_lic,vech_insurance,vech_rcbook,photo,legal_document,branch,pushid_android,address,pushid_ios From MoveitUser where userid = ? ", userId, function (err, res) {
+    sql.query("Select userid,name,email,bank_account_no,phoneno,Vehicle_no,verified_status,online_status,referalcode,bank_name,ifsc,bank_holder_name,moveit_hub,driver_lic,vech_insurance,vech_rcbook,photo,legal_document,branch,pushid_android,address,pushid_ios From MoveitUser where userid = ? ", userId, function (err, res) {
         if (err) {
             console.log("error: ", err);
             result(err, null);
@@ -304,7 +304,7 @@ Moveituser.update_online_status =async function (req, result) {
         }    
         
         //and DATE(order_delivery_day) = CURDATE()
-        var orderdetails = await query("select dors.* from Dayorder dors left join Moviet_Trip mt on mt.tripid=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id = "+req.userid+"");
+        var orderdetails = await query("select dors.* from Dayorder dors left join Moveit_trip mt on mt.tripid=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id = "+req.userid+"");
         if (orderdetails.length == 0) {
           sql.query("UPDATE MoveitUser SET online_status = ? WHERE userid = ?", [req.online_status, req.userid],async function (err, res) {
             if (err) {
@@ -395,7 +395,7 @@ Moveituser.update_online_status =async function (req, result) {
 };
 
 Moveituser.get_a_hub_navigation = function get_a_hub_navigation(req, result) {
-    sql.query("select userid,name,mh.* from MoveitUser mu join Makeit_hubs mh on mh.makeithub_id=mu.moveit_hub where mu.userid  = ? ", req.userid, function (err, res) {
+    sql.query("select userid,name,mh.* from MoveitUser mu join Zone mh on mh.id=mu.zone where mu.userid  = ? ", req.userid, function (err, res) {
         if (err) {
           let error = {
             success: true,
@@ -789,7 +789,7 @@ Moveituser.update_pushid = function(req, result) {
 
   //////////Moveit Logout///////////////////
   Moveituser.Moveituser_logout = async function Moveituser_logout(req, result) {
-    var orderdetails = await query("select * from Orders where orderstatus < 6 and moveit_user_id = "+req.userid+"");
+    var orderdetails = await query("select dors.* from Dayorder dors left join Moveit_trip mt on mt.tripid=dors.trip_id where dors.dayorderstatus < 9 and mt.moveit_id = "+req.userid+"");
     if (orderdetails.length == 0) {      
       sql.query("select * from MoveitUser where userid = "+req.userid+" ",async function(err,userdetails) {
         if (err) {
@@ -1632,34 +1632,37 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   };
 
   ////Moveit Order Details/////////
-  Moveituser.moveit_order_details =async function moveit_order_details(req, result) {
-    if(req.moveit_userid && req.tripid && req.orderid){
-      var getorderdetailsquery = "";
-      var getorderdetails = await query(getorderdetailsquery);
-      if(getorderdetails.length>0){
+  Moveituser.moveit_order_details =async function moveit_order_details(Dayorder, result) {
+    if(Dayorder.id){
+      var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+      // console.log(getdayorderquery);
+      var getdayorder = await query(getdayorderquery);
+      if(getdayorder.length>0){
+        for (let i = 0; i < getdayorder.length; i++) {
+          getdayorder[i].Products = JSON.parse(getdayorder[i].Products);
+        }        
         let resobj = {
           success: true,
-          status : true,
-          orderid: getorderdetails[0].orderid,
-          result : getorderdetails
+          status: true,
+          result: getdayorder
         };
         result(null, resobj);
       }else{
         let resobj = {
           success: true,
-          status : false,
-          message : "sorry no products"
+          status: false,
+          message: "no data"
         };
         result(null, resobj);
-      }
+      }      
     }else{
       let resobj = {
         success: true,
-        status : false,
-        message : "check post values"
+        status: false,
+        message: "check your post values"
       };
       result(null, resobj);
-    }    
+    }   
   };
 
   ////Moveit Trip Start/////////
@@ -1956,12 +1959,12 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
         var wherecon = wherecon+" and trip_status="+req.trip_status+" ";
       }
 
-      var gettriphistoryquery = "select id as trip_id,trip_status,case when trip_status=0 then 'waiting for trip start' when trip_status=1 then 'trip started' when trip_status=2 then 'trip completed' when trip_status=3 then 'trip canceled' end as trip_status_msg,start_time,end_time,cancel_time,0 order_list,0 order_count from Moveit_trip where moveit_userid="+req.moveit_userid+" "+wherecon+"and trip_status>1";   
+      var gettriphistoryquery = "select tripid,trip_status,case when trip_status=0 then 'waiting for trip start' when trip_status=1 then 'trip started' when trip_status=2 then 'trip completed' when trip_status=3 then 'trip canceled' end as trip_status_msg,start_time,end_time,cancel_time,0 order_list,0 order_count from Moveit_trip where moveit_id="+req.moveit_userid+" "+wherecon+" ";   
       var gettriphistory = await query(gettriphistoryquery);
       
       if(gettriphistory.length>0){
         for(let i=0; i<gettriphistory.length; i++){
-          var ordersquery = "select orderid,orderstatus from Orders where moveit_user_id="+req.moveit_userid+" and trip_id="+gettriphistory[i].trip_id;
+          var ordersquery = " select * from Dayorder where  trip_id= "+gettriphistory[i].tripid+" " ;
           var orders = await query(ordersquery);
           gettriphistory[i].order_count = orders.length;
           gettriphistory[i].order_list = orders;  
@@ -2240,14 +2243,12 @@ Moveituser.pickup_to_accept_order =async function pickup_to_accept_order(req, re
 };
 
 Moveituser.check_latlng_boundaries = function check_latlng_boundaries(req,result) {
-  //console.log(req);
   var latlng=[];
   sql.query("Select * from Zone", function( err,res) {
     if (err) {
       console.log(err);
       result(err, null);
     } else {
-      console.log(res);
       var isZone=false;
       var zoneName='';
       if(res.length>0){
@@ -2275,5 +2276,20 @@ Moveituser.check_latlng_boundaries = function check_latlng_boundaries(req,result
     }
   });
 };
+
+
+Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list(req,result) {
+  var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
+      var orders = await query(ordersquery);
+    
+  
+    let resobj = {
+      success: true,
+      status : true,
+      result : orders
+    };
+    result(null, resobj);
+};
+
 
 module.exports = Moveituser;

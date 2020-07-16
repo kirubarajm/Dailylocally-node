@@ -1326,4 +1326,67 @@ Dayorder.refund_create = async function refund_create(req,result) {
     result(null, response);
   }
 };
+
+
+Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by_moveit(req,result) {
+
+      
+  // var cancel_comments = req.return_reason
+  // var New_comments  ={};
+  // New_comments.doid=req.doid;
+  // New_comments.comments=cancel_comments
+  // New_comments.done_by=req.done_by
+  // New_comments.type=2
+  // New_comments.done_type=1
+
+
+  // OrderComments.create_OrderComments_crm(New_comments)
+
+  var day_order = await query("select * from Dayorder where id = "+req.id+" ");
+
+  if (day_order.length==0) {
+    let resobj = {
+      success: true,
+      message: "Order not found .",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else if (day_order[0].dayorderstatus !=12) {
+    let resobj = {
+      success: true,
+      message: "Following order not returned. Please check admin.",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else{
+
+    var day = moment().format("YYYY-MM-DD HH:mm:ss");;
+  
+    var update_query = "Update Dayorder set return_status=1,moveit_order_return_time='"+day+"'  where id = "+req.id+" "
+  
+    var update = await query(update_query);
+
+    // var product_update_query = "Update Dayorder_products set scm_status=12  where doid = "+req.doid+" "
+  
+    // var product_update = await query(product_update_query);
+   
+    let resobj = {
+      success: true,
+      message: "Order returned successfully .",
+      status: true
+    };
+    result(null, resobj);
+
+  }
+   
+  
+   
+
+   
+};
+
+
+
   module.exports = Dayorder;
