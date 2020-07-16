@@ -2279,7 +2279,9 @@ Moveituser.check_latlng_boundaries = function check_latlng_boundaries(req,result
 
 
 Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list(req,result) {
-  var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
+  // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
+
+  var ordersquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where trip_id= "+req.tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
       var orders = await query(ordersquery);
     
   
