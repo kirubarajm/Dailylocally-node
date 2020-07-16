@@ -165,7 +165,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
   var startdate =  moment().format("DD-MM-YYYY");
-  var currenthour  = moment(day).format("HH");
+  var currenthour  = moment(day).format("HH::mm");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
   var convenience_charge = 0;
@@ -178,7 +178,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var deliverydate_status = true;
  
 
-    if (currenthour < 21) {
+    if (currenthour < 24) {
       var order_delivery_day_message = "Your Order delivery will be Tomorrow 12 pm";
       var order_delivery_day = tomorrow;
     } else {
@@ -266,7 +266,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         }else{
 
           
-              if (currenthour < 21) {
+              if (currenthour < 24) {
     
                 res1[0].deliverydate = tomorrow;
               } else {
