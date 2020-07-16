@@ -1596,7 +1596,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
           var moveitstatusquery ="select * from Moveit_status  where doid = " +gettripdetails[i].id +" order by id desc limit 1";
           var statuslist = await query(moveitstatusquery);
           if (statuslist.length !==0 ) {
-            gettripdetails[i].status = statuslist[0].status;
+            gettripdetails[i].status = statuslist[0].status || 0;
           }
 
           var itemsquery = "select * from Dayorder_products  where doid="+gettripdetails[i].id;
@@ -2282,15 +2282,47 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
 
   var ordersquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where trip_id= "+req.tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
-      var orders = await query(ordersquery);
+  var orders = await query(ordersquery);
     
   
+  if(orders.length>0 ){
+    for(let i=0; i<orders.length; i++){
+      var moveitstatusquery ="select * from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
+      var statuslist = await query(moveitstatusquery);
+      orders[i].status = 0;
+      if (statuslist.length !==0 ) {
+        orders[i].status = statuslist[0].status || 0;
+      }
+
+      var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
+      var items = await query(itemsquery);
+      orders[i].itemlistcount = items.length;
+      orders[i].itemlist = items;
+
+    }
+
     let resobj = {
       success: true,
       status : true,
+      trip_id: orders[0].trip_id,
       result : orders
     };
     result(null, resobj);
+  }else{
+    let resobj = {
+      success: true,
+      status : false,
+      message : "sorry no trip today"
+    };
+    result(null, resobj);
+  }
+
+    // let resobj = {
+    //   success: true,
+    //   status : true,
+    //   result : orders
+    // };
+    // result(null, resobj);
 };
 
 

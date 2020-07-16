@@ -37,10 +37,16 @@ exports.read_a_user_address_aid = function(req, res) {
 };
 
 exports.update_a_user_address = function(req, res) {
+
+  console.log(req.body);
+  if (!req.body.lat || !req.body.lon) {
+    res.status(400).send({ error: true, message: "Please provide lat/lon" });
+  } else {
   UserAddress.updateById(req.body, function(err, user) {
     if (err) res.send(err);
     res.json(user);
   });
+}
 };
 
 exports.delete_a_user_address = function(req, res) {
@@ -83,3 +89,4 @@ exports.user_default_address_update = function(req, res) {
     });
   }
 };
+
