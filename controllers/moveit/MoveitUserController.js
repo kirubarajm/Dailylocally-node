@@ -46,8 +46,7 @@ exports.checklogin = function(req, res) {
 };
 
 exports.Moveituser_logout = function(req, res) {
-  //var new_user = new Eatuser(req.body);
-  //handles null error
+
   if (!req.body.userid) {
     res
       .status(400)
@@ -59,6 +58,7 @@ exports.Moveituser_logout = function(req, res) {
     });
   }
 };
+
 exports.read_a_user = function(req, res) {
   Moveituser.getUserById(req.params.userid, function(err, user) {
     if (err) res.send(err);
@@ -508,6 +508,15 @@ exports.pickup_to_accept_order = function(req, res) {
 
 exports.check_latlng_boundaries = function(req, res) {
   Moveituser.check_latlng_boundaries(req.body,function(err, user) {
+    if (err) res.send(err);
+    res.json(user);
+  });
+};
+
+
+////Moveit Trip History/////////
+exports.moveit_trip_day_order_list = function(req, res) {
+  Moveituser.moveit_trip_day_order_list(req.body,function(err, user) {
     if (err) res.send(err);
     res.json(user);
   });

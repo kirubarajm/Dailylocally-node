@@ -8,6 +8,7 @@ module.exports = function(app) {
     // var moveitdocument = require("../controllers/common/DocumentmoveitController");
     let middleware = require('../model/middleware.js');
     // var moveitlogtime = require("../controllers/moveit/MoveitTimelogController");
+    var dayorder = require("../controllers/common/DayorderController");
 
 // Moveit
 app.route("/moveit/registration").post(routesVersioning({"1.0.0":moveituser.create_a_user}));
@@ -29,7 +30,7 @@ app.route("/moveit/ordershistory/:moveit_user_id").get(middleware.checkToken,rou
 //app.route("/moveit/makeitrating").put(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_kitchen_rating}));
 app.route("/moveit/qualitychecklist").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_quality_checklist}));
 app.route("/moveit/pushid/add").put(routesVersioning({"1.0.0":moveituser.add_a_pushid}));
-app.route("/moveit/hub").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.read_a_hub_details}));
+app.route("/moveit/zone").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.read_a_hub_details}));
 app.route("/moveit/setlocation").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.setGeoLocation}));
 app.route("/moveit/getlocation").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.getGeoLocation}));
 app.route("/moveitusers").get(middleware.checkToken,routesVersioning({"1.0.0":moveituser.list_all_user})).post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.create_a_user}));
@@ -63,8 +64,12 @@ app.route("/moveit/updateorderpickupimage").post(routesVersioning({"1.0.0":movei
 ////Moveit Trip History/////////
 app.route("/moveit/moveittriphistory").post(routesVersioning({"1.0.0":moveituser.moveit_trip_history}));
 
+app.route("/moveit/dayorderlist").post(routesVersioning({"1.0.0":moveituser.moveit_trip_day_order_list}));
+
 ////Moveit test push notification/////////
 app.route("/moveit/push_notification").post(routesVersioning({"1.0.0":moveituser.push_notification}));
 app.route("/latlng/check").post(routesVersioning({"1.0.0":moveituser.check_latlng_boundaries}));
+app.route("/moveit/dayorderreturn").post(routesVersioning({"1.0.0":dayorder.day_order_book_return_by_moveit}));
+
 
 }

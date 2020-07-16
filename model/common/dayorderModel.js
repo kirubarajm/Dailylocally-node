@@ -808,7 +808,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
   
     var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
 
-    // console.log(getdayorderquery);
+     console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
@@ -1326,4 +1326,67 @@ Dayorder.refund_create = async function refund_create(req,result) {
     result(null, response);
   }
 };
+
+
+Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by_moveit(req,result) {
+
+      
+  // var cancel_comments = req.return_reason
+  // var New_comments  ={};
+  // New_comments.doid=req.doid;
+  // New_comments.comments=cancel_comments
+  // New_comments.done_by=req.done_by
+  // New_comments.type=2
+  // New_comments.done_type=1
+
+
+  // OrderComments.create_OrderComments_crm(New_comments)
+
+  var day_order = await query("select * from Dayorder where id = "+req.id+" ");
+
+  if (day_order.length==0) {
+    let resobj = {
+      success: true,
+      message: "Order not found .",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else if (day_order[0].dayorderstatus !=12) {
+    let resobj = {
+      success: true,
+      message: "Following order not returned. Please check admin.",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else{
+
+    var day = moment().format("YYYY-MM-DD HH:mm:ss");;
+  
+    var update_query = "Update Dayorder set return_status=1,moveit_order_return_time='"+day+"'  where id = "+req.id+" "
+  
+    var update = await query(update_query);
+
+    // var product_update_query = "Update Dayorder_products set scm_status=12  where doid = "+req.doid+" "
+  
+    // var product_update = await query(product_update_query);
+   
+    let resobj = {
+      success: true,
+      message: "Order returned successfully .",
+      status: true
+    };
+    result(null, resobj);
+
+  }
+   
+  
+   
+
+   
+};
+
+
+
   module.exports = Dayorder;

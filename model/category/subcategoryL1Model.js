@@ -150,7 +150,6 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
 
   var sub_category_query = "select sub1.* from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid  join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id  where cmp.cid='"+req.cid+"' group by pm.scl1_id";
 
-  console.log(sub_category_query);
 sql.query(sub_category_query,async function(err, res) {
   if (err) {
     result(err, null);
@@ -178,8 +177,8 @@ sql.query(sub_category_query,async function(err, res) {
       empty_subconent :"Daily Locally",
       header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
       header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title :collection_details[0].name,
-      get_sub_cat_images:get_sub_cat_images,
+      category_title : collection_details[0].name,
+      get_sub_cat_images: get_sub_cat_images,
       result: res
     };
     result(null, resobj);
