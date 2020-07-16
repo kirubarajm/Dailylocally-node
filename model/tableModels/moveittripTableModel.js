@@ -21,7 +21,7 @@ var MovietTrip = function(moviettrip) {
 //For Admin
 MovietTrip.createMovietTrip = async function createMovietTrip(req, result) {
     var insertdata = req;
-    sql.query("INSERT INTO Moviet_Trip set ?", insertdata,async function(err, res) {
+    sql.query("INSERT INTO Moveit_trip set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -42,7 +42,7 @@ MovietTrip.createMovietTrip = async function createMovietTrip(req, result) {
 
 MovietTrip.updateMovietTrip =async function updateMovietTrip(req, result) {
     var updatedata = new MovietTrip(req);
-    sql.query("UPDATE Moviet_Trip SET ? WHERE trip_id = ?", [updatedata, updatedata.trip_id],async function(err, res) {
+    sql.query("UPDATE Moveit_trip SET ? WHERE trip_id = ?", [updatedata, updatedata.trip_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,

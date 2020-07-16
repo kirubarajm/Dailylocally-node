@@ -149,7 +149,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
 
             var updatedayorderquery = "update Dayorder set dayorderstatus=6 where id="+req.doid;
             var updatedayorder = await query(updatedayorderquery);
-            if(updatedayorder.affectedRow>0){
+            if(updatedayorder.affectedRows>0){
                 let resobj = {
                     success: true,
                     status: true,
@@ -338,20 +338,20 @@ Logistics.moveit_edit =async function moveit_edit(req,result) {
 };
 
 /////////Assign to Dunzo//////////
-Logistics.assign_to_dunzo =async function assign_to_dunzo(req,result) {
+Logistics.dunzo_assign =async function dunzo_assign(req,result) {
     if(req.zone_id && req.doid){
         var getdayorderquery = "select * from Dayorder where id="+req.doid;
         var getdayorder = await query(getdayorderquery);
         if(getdayorder.length>0){
             if(getdayorder[0].dayorderstatus==6){
-                if(getdayorder[0].moveit_type==NULL){
-                    var updatedayorderquery = "update Dayorder set moveit_type=2 where id="+req.doid;
+                if(!getdayorder[0].moveit_type){
+                    var updatedayorderquery = "update Dayorder set moveit_type=2,dayorderstatus=7 where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
-                    if(updatedayorder.affectedRow>0){
+                    if(updatedayorder.affectedRows>0){
                         let resobj = {
                             success: true,
                             status: true,
-                            message: "Order successfully assigned to  dunzo"
+                            message: "Order successfully assigned to dunzo"
                         };
                         result(null, resobj);
                     }else{
@@ -405,7 +405,7 @@ Logistics.create_moveit_trip =async function create_moveit_trip(req,result) {
             if(moveittripres.status==true){
                 var dayorderids = req.doid;
                 for (let i = 0; i < dayorderids.length; i++) {
-                    var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1 where id="+dayorderids[i];
+                    var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
                     var updatedayorder = await query(updatedayorderquery);                   
                 }
                 let resobj = {
@@ -474,5 +474,47 @@ Logistics.dunzo_trip_list =async function dunzo_trip_list(req,result) {
         result(null, resobj);
     }
 };
+
+////////Dunzo Pickup//////////////
+Logistics.dunzo_pickp =async function dunzo_pickp(req,result) {
+    if(req.doid.length>0){
+        var errormsg = "";
+        var dayorders = req.req.doid;
+        var updatedids = [];
+        var errorids = [];
+        for (let i = 0; i < dayorders.length; i++) {
+            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstaus=7 and moveit_type=2";
+            var checkdayorder = await query(checkdayorderquery);
+            if(checkdayorder.length){
+                var updatedayorderquery = "update Dayorder set dayorderstatus=8 where id="+dayorders[i];
+                var updatedayorder = await query(updatedayorderquery);
+                if(updatedayorder.length>0){
+                    updatedids.push(dayorders[i]);
+                }else{
+                    errorids.push(dayorders[i]);
+                }
+            }else{
+                errorids.push(dayorders[i]);
+            }            
+        }
+
+        let resobj = {
+            success: true,
+            status: true,
+            success_message: updatedids+"updated successfuly",
+            error_message: errorids+"errors"
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
+////////Dunzo Deliverd////////////
 
 module.exports = Logistics;

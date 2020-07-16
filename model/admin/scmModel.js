@@ -1603,9 +1603,9 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
             where = where+" and date(dayo.date)='"+req.date+"' ";
         }
 
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id=(select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zone_id+" "+where+" group by dayo.id";
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id IN (select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zone_id+" "+where+" group by dayo.id";
         var getpolist = await query(getpolistquery);
-        // console.log("getpolist==>",getpolist);
+        //  console.log("getpolist==>",getpolist);
         if(getpolist.length > 0){
             for (let i = 0; i < getpolist.length; i++) {
                 getpolist[i].products = JSON.parse(getpolist[i].products);
@@ -1614,36 +1614,35 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
                     getpolist[i].actival_weight = parseInt(getpolist[i].actival_weight)+parseInt(productlist[j].actival_weight);
                     getpolist[i].received_weight =parseInt(getpolist[i].received_weight)+parseInt(productlist[j].received_weight);
                     
-                    var getreprtingqtyquery = "select if(sum(report_quantity),sum(report_quantity),0) as report_quantity from Missing_Quantity_Report where report_type=1 and dopid="+productlist[j].dopid;
-                    var getreprtingqty = await query(getreprtingqtyquery);
+                    // var getreprtingqtyquery = "select if(sum(report_quantity),sum(report_quantity),0) as report_quantity from Missing_Quantity_Report where report_type=1 and dopid="+productlist[j].dopid;
+                    // var getreprtingqty = await query(getreprtingqtyquery);
                     
-                    if(getreprtingqty.length>0){
-                        productlist[j].report_quantity = getreprtingqty[0].report_quantity;
+                    // if(getreprtingqty.length>0){
+                    //     productlist[j].report_quantity = getreprtingqty[0].report_quantity;
                         
-                    }
-
+                    // }
                 }
 
-                var checkscmquery = "select count(id) as dop_count,count(case when scm_status>=2 then id end) as scm2_count,count(case when received_quantity>0 then id end) as recevied_count from Dayorder_products where doid="+getpolist[i].doid;        
-                var checkscm = await query(checkscmquery);
-                if(checkscm.length>0){
-                    if(checkscm[0].recevied_count>0){
-                        getpolist[i].action = 1;
-                    }
-                }
+                // var checkscmquery = "select count(id) as dop_count,count(case when scm_status>=2 then id end) as scm2_count,count(case when received_quantity>0 then id end) as recevied_count from Dayorder_products where doid="+getpolist[i].doid;        
+                // var checkscm = await query(checkscmquery);
+                // if(checkscm.length>0){
+                //     if(checkscm[0].recevied_count>0){
+                //         getpolist[i].action = 1;
+                //     }
+                // }
             }
-            if (!getpolist.action) {
-                getpolist.sort((a, b) => parseFloat(b.action) - parseFloat(a.action));
-            }
+            // if (!getpolist.action) {
+            //     getpolist.sort((a, b) => parseFloat(b.action) - parseFloat(a.action));
+            // }
             
-            if(getpolist[0].actival_weight > 0 || getpolist[0].received_weight > 0){
+            // if(getpolist[0].actival_weight > 0 || getpolist[0].received_weight > 0){
                 let resobj = {
                     success: true,
                     status: true,
                     result: getpolist
                 };
                 result(null, resobj);
-            }            
+            // }            
         }else{
             let resobj = {
                 success: true,
