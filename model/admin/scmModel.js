@@ -1173,6 +1173,11 @@ SCM.close_po =async function close_po(req,result) {
                             var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
                             var updatepo = await query(updatepoquery);
                             if(updatepo.affectedRows>0){
+                                /////Remove Mapping Stock Quantity//////////
+                                var checkpoid= [];
+                                checkpoid.push({"poid":req.poid});
+                                await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });                              
+
                                 resobj = {
                                     success: true,
                                     status: true,
@@ -1267,6 +1272,78 @@ SCM.close_po =async function close_po(req,result) {
     }     
 };
 
+//////////////Update product wise Stock Mapping Quantity//////////
+SCM.update_stock_mapping_quantity =async function update_stock_mapping_quantity(req,result) {
+    if(req.poid){ 
+        /////Remove Mapping Stock Quantity//////////
+        var popdatasquery = "select * from POproducts where poid="+req.poid;
+        var popdatas = await query(popdatasquery);
+        if(popdatas.length>0){
+            for (let i = 0; i < popdatas.length; i++) {
+                var reqqty = popdatas[i].requested_quantity;
+                var receivedqty =parseInt(popdatas[i].received_quantity) + parseInt(popdatas[i].ditional_quantity);                       
+                if(reqqty>receivedqty){
+                    var updatedqty = parseInt(reqqty) - parseInt(receivedqty);
+                    var getstockmappingquery = "select * from Stock where vpid="+popdatas[i].vpid;
+                    var getstockmapping = await query(getstockmappingquery);
+                    if(getstockmapping.length>0){
+                        var upqty =parseInt(getstockmapping[0].quantity_mapping)-parseInt(updatedqty);
+                        var updatemappinqty = 0;
+                        if(upqty>0){
+                            updatemappinqty = upqty;
+                        }
+                        var updatestockmappingquery = "update Stock set quantity_mapping="+upqty+" where vpid="+popdatas[i].vpid;
+                        var updatestockmapping = await query(updatestockmappingquery);
+                        if(updatestockmapping.affectedRows>0){
+                            let resobj = {
+                                success: true,
+                                status: true,
+                                message: "updated successfully"
+                            };
+                            result(null, resobj);
+                        }else{
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong"
+                            };
+                            result(null, resobj);
+                        }
+                    }else{
+                        let resobj = {
+                            success: true,
+                            status: false,
+                            message: "no stock"
+                        };
+                        result(null, resobj);
+                    }                
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "in valid quantity"
+                    };
+                    result(null, resobj);
+                }                
+            }
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no products available"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check post values"
+        };
+        result(null, resobj);
+    }
+};
+
 /////////Delete POtemp///////////
 SCM.delete_po_temp =async function delete_po_temp(req,result) {
     if(req.zone_id && req.temppoid){   
@@ -1307,6 +1384,36 @@ SCM.delete_po_temp =async function delete_po_temp(req,result) {
             success: true,
             status: false,
             message: "fill all required fields"
+        };
+        result(null, resobj);
+    }     
+};
+
+/////////Remove BOH Mapping///////////
+SCM.remove_boh_mapping =async function remove_boh_mapping(req,result) {
+    if(req.zone_id){   
+        var emptybohmappingqtyquery = "update Stock set quantity_mapping=0";
+        var emptybohmappingqty = await query(emptybohmappingqtyquery);
+        if(emptybohmappingqty.affectedRows>0){            
+            let resobj = {
+                success: true,
+                status: true,
+                message: "potemp deleted successfully"
+            };
+            result(null, resobj);                     
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "something went wrong plz try again"
+            };
+            result(null, resobj);  
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check post values"
         };
         result(null, resobj);
     }     
@@ -1417,6 +1524,7 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                         }
 
                                         var updatestockquery2 = "update Stock set quantity="+getstock[0].quantity+",quantity_mapping="+qtymapping+" where vpid="+getstock[0].vpid;
+                                        console.log("updatestockquery2 ==>",updatestockquery2);
                                         var updatestock2 = await query(updatestockquery2);
                                         // console.log("updatestock2 ===>",updatestock2);
                                         //////Stock Log//////////

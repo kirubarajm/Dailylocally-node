@@ -83,6 +83,7 @@ module.exports = function(app) {
   app.route("/admin/po/delete").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po}));
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
+  app.route("/admin/po/removebohmapping").post(middleware.checkToken,routesVersioning({"1.0.0": scm.remove_boh_mapping}));
   /////// SCM Sorting /////////////
   app.route("/admin/sorting/getsortinglist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_soring_list}));
   app.route("/admin/sorting/savesorting").post(middleware.checkToken,routesVersioning({"1.0.0": scm.save_sorting}));
@@ -120,7 +121,7 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/trip/unassign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_unassign}));
   app.route("/admin/logistics/trip/tripmoveitfilters").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_moveit_filters}));
   app.route("/admin/logistics/trip/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_list}));
-  app.route("/admin/logistics/dunzo/orderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_trip_list}));
+  app.route("/admin/logistics/dunzo/orderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_order_list}));
   app.route("/admin/logistics/dunzo/assign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_assign}));
   app.route("/admin/logistics/dunzo/pickup").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_pickup}));
   app.route("/admin/logistics/dunzo/delivered").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_delivered}));

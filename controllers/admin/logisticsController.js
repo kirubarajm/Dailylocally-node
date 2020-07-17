@@ -133,9 +133,9 @@ exports.trip_list = function(req, res) {
 };
 
 /////////Dunzo Order List//////////
-exports.dunzo_trip_list = function(req, res) {    
-    Logistics.dunzo_trip_list(req.body, function(err, ress) {
-        //console.log("dunzo_trip_list controller");
+exports.dunzo_order_list = function(req, res) {    
+    Logistics.dunzo_order_list(req.body, function(err, ress) {
+        //console.log("dunzo_order_list controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
