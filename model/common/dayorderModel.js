@@ -792,6 +792,11 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     if(Dayorder.id){
         where = where+" and drs.id="+Dayorder.id;
     }
+
+    if(Dayorder.userid){
+      where = where+" and drs.userid="+Dayorder.userid;
+  }
+  
     
     if (Dayorder.trip_id) {
       where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
@@ -815,7 +820,11 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
         getdayorder[i].products = JSON.parse(getdayorder[i].products);
       }        
 
-      var totalcount = getdayorder.length;
+      var getdayorder1 = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+"  group by drs.id,drs.userid order by drs.id ";
+
+      var totalcountgetdayorder = await query(getdayorder1);
+         var totalcount = totalcountgetdayorder.length;
+      // var totalcount = getdayorder.length;
 
       let resobj = {
         success: true,
