@@ -17,7 +17,7 @@ var dayorder = require("../../model/common/dayorderModel");
 var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var MoveitStatus = require("../../model/moveit/moveitStatusModel");
 var MoveitUser = require("../../model/moveit/moveitUserModel");
-
+var OrderComments = require("../../model/admin/orderCommentsModel");
 
 
 var instance = new Razorpay({
@@ -1097,7 +1097,17 @@ sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,re
             } else {
               // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
 
-      
+              
+              
+              var cancel_comments = 'Pickup has done by moveit'
+              var New_comments  ={};
+              New_comments.doid=req.id;
+              New_comments.comments=cancel_comments
+              New_comments.done_by=req.moveit_userid
+              New_comments.type=4
+              New_comments.done_type=0
+               OrderComments.create_OrderComments_crm(New_comments)
+
 
               let response = {
                 success: true,
@@ -1155,6 +1165,21 @@ Order.moveit_kitchen_reached_status = function(req, result) {
             if (err) {
               result(err, null);
             } else {
+
+
+              var cancel_comments = ' Zone reached by moveit'
+              var New_comments  ={};
+              New_comments.doid=req.id;
+              // New_comments.vpid=vpid[i];
+              New_comments.comments=cancel_comments
+              New_comments.done_by=req.moveit_user_id
+              New_comments.type=4
+              New_comments.done_type=0
+
+        // console.log(New_comments);
+
+               OrderComments.create_OrderComments_crm(New_comments)
+
               let resobj = {
                 success: true,
                 status:true,
@@ -1174,8 +1199,8 @@ Order.moveit_kitchen_reached_status = function(req, result) {
 
 Order.moveit_customer_location_reached_by_userid = function(req, result) {
   var customerlocationreachtime = moment().format("YYYY-MM-DD HH:mm:ss");
-req.lat=req.lat || 0;
-req.lon=req.lon || 0;
+  req.lat=req.lat || 0;
+  req.lon=req.lon || 0;
   sql.query("Select * from Dayorder where id = ?", [req.id],async function(err,res1) {
     if (err) {
       result(err, null);
@@ -1199,6 +1224,17 @@ req.lon=req.lon || 0;
             if (err) {
               result(err, null);
             } else {
+
+              
+              var cancel_comments = 'customer location reach by moveit'
+              var New_comments  ={};
+              New_comments.doid=req.id;
+              New_comments.comments=cancel_comments
+              New_comments.done_by=req.moveit_user_id
+              New_comments.type=4
+              New_comments.done_type=0
+               OrderComments.create_OrderComments_crm(New_comments)
+
               let resobj = {
                 success: true,
                 status:true,
@@ -1264,10 +1300,20 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                 result(err, null);
               } else {
                 /////Check Trip Status////
-                // if(trip_id && trip_id>0){
-                //   var trip_status = await MoveitUser.updatetripstatus(trip_id);
-                // }
+                if(trip_id && trip_id>0){
+                  var trip_status = await MoveitUser.updatetripstatus(trip_id);
+                }
               
+
+                var cancel_comments = 'Delivered by moveit'
+                var New_comments  ={};
+                New_comments.doid=req.id;
+                New_comments.comments=cancel_comments
+                New_comments.done_by=req.moveit_user_id
+                New_comments.type=4
+                New_comments.done_type=0
+                 OrderComments.create_OrderComments_crm(New_comments)
+
                 let resobj = {
                   success: true,
                   message: "Order Delivery successfully",

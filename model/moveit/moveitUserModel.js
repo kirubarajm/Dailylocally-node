@@ -2027,23 +2027,23 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////check and update Trip Status////////
   Moveituser.updatetripstatus =async function updatetripstatus(trip_id) {
     if(trip_id){
-      var checktripquery = "select if(count(orderid),count(orderid),0) as order_count,if(count(CASE WHEN orderstatus<6 THEN orderid END),count(CASE WHEN orderstatus<6 THEN orderid END),0) as last_order from Orders where trip_id="+trip_id;
+      var checktripquery = "select if(count(id),count(id),0) as order_count,if(count(CASE WHEN dayorderstatus<10 THEN id END),count(CASE WHEN dayorderstatus<10 THEN id END),0) as last_order from Dayorder where trip_id="+trip_id;
       var checktrip = await query(checktripquery);
       var curtime =  moment().format("YYYY-MM-DD HH:mm:ss");
       if(checktrip[0].last_order==0 && checktrip[0].order_count==0){
-        var updatretripquery = "update Moveit_trip set trip_status=3,cancel_time='"+curtime+"' where id="+trip_id;
+        var updatretripquery = "update Moveit_trip set trip_status=3,cancel_time='"+curtime+"' where tripid="+trip_id;
         var updatretrip = await query(updatretripquery);
         if(updatretrip.affectedRows>0){
           return 3;
         }        
       }else if(checktrip[0].last_order==0 && checktrip[0].order_count!=0){      
-        var updatretripquery = "update Moveit_trip set trip_status=2,end_time='"+curtime+"' where id="+trip_id;
+        var updatretripquery = "update Moveit_trip set trip_status=2,end_time='"+curtime+"' where tripid="+trip_id;
         var updatretrip = await query(updatretripquery);
         if(updatretrip.affectedRows>0){
           return 2;
         }          
       }else{
-        var gettripstatusquery = "select trip_status from Moveit_trip where id="+trip_id;
+        var gettripstatusquery = "select trip_status from Moveit_trip where tripid="+trip_id;
         var gettripstatus = await query(gettripstatusquery);
         if(gettripstatus.length>0){
           return gettripstatus[0].trip_status;
