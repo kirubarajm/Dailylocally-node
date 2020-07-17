@@ -17,8 +17,7 @@ var Logistics = function(stockkeeping) {};
 
 //////////show Stockkeeping Open List///////////
 Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,result) {
-    if(req.zoneid && req.page){
-        
+    if(req.zoneid){        
         var pagelimit = 20;
         var page = req.page || 1;
         var startlimit = (page - 1) * pagelimit;
@@ -56,6 +55,10 @@ Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,resu
 
         var readytodispatchlistquery = "select dayo.id,dayo.userid,us.name,us.phoneno,dayo.date,dayo.created_at,dayo.city as area,dayo.cus_pincode,sum(dop.received_quantity) as total_quantity,CONCAT(if(HOUR(time(dayo.created_at))>=19,'10 AM','07 AM'),' ',DAY(dayo.date),' ',MONTHNAME(dayo.date)) as eta,dayo.order_place_time,if(HOUR(time(dayo.order_place_time))>=19,'slot 2','slot 1') as slot,dayo.moveit_type,dayo.trip_id,dayo.dayorderstatus, case when dayo.dayorderstatus=5 then 'QC' when dayo.dayorderstatus=6 then 'QA' when dayo.dayorderstatus=7 then 'Moveit Assigned' when dayo.dayorderstatus=8 then 'Moveit Pickup' when dayo.dayorderstatus=9 then 'Moveit Delivered' when dayo.dayorderstatus=10 then 'Completed' when dayo.dayorderstatus=11 then 'Cancel' when dayo.dayorderstatus=12 then 'return' end as dayorderstatus_msg,'0' as trip_status,'0' as qachecklist, JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid',dop.vpid,'productname',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight))) AS products,'0' as actival_weight,'0' as received_weight from Dayorder as dayo left join User as us on us.userid=dayo.userid left join Dayorder_products as dop on dop.doid=dayo.id left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id where dayo.dayorderstatus IN(5,6,7,8,9) "+wherecon+" and dayo.zoneid="+req.zoneid+" group by dayo.id limit " +startlimit +"," +pagelimit +" ";
         var readytodispatchlist = await query(readytodispatchlistquery);
+
+        var getcountquery = "select count(dayo.id) as totalcount from Dayorder as dayo left join User as us on us.userid=dayo.userid left join Dayorder_products as dop on dop.doid=dayo.id left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id where dayo.dayorderstatus IN(5,6,7,8,9) "+wherecon+" and dayo.zoneid="+req.zoneid+" group by dayo.id";
+        var getcount = await query(getcountquery);
+
         if(readytodispatchlist.length > 0){
             for (let i = 0; i < readytodispatchlist.length; i++) {
                 if(readytodispatchlist[i].dayorderstatus>6 && readytodispatchlist[i].moveit_type==1){
@@ -77,7 +80,7 @@ Logistics.ready_to_dispatch_list =async function ready_to_dispatch_list(req,resu
                     readytodispatchlist[i].received_weight =parseInt(readytodispatchlist[i].received_weight)+parseInt(productlist[j].received_weight);
                 }             
             }
-            var totalcount = readytodispatchlist.length;
+            var totalcount = getcount[0].totalcount;
             let resobj = {
                 success: true,
                 status: true,
@@ -505,29 +508,41 @@ Logistics.trip_create =async function trip_create(req,result) {
                 };
                 result(null, resobj); 
             }
-        }
-        moveittripdata.push({"moveit_id":req.moveit_id,"done_by":req.done_by,"zoneid":req.zoneid});
-        await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
-            if(moveittripres.status==true){                
-                for (let i = 0; i < dayorderids.length; i++) {
-                    var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
-                    var updatedayorder = await query(updatedayorderquery);                   
-                }
-                let resobj = {
-                    success: true,
-                    status: true,
-                    message: "trip created Successfully"
-                };
-                result(null, resobj);
+        }else{
+            var checktripquery = "select * from Moveit_trip where moveit_id="+req.moveit_id+" and trip_status IN (0,1)";
+            var checktrip = await query(checktripquery);
+            if(checktrip.length ==0){
+                moveittripdata.push({"moveit_id":req.moveit_id,"done_by":req.done_by,"zoneid":req.zoneid});
+                await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
+                    if(moveittripres.status==true){                
+                        for (let i = 0; i < dayorderids.length; i++) {
+                            var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
+                            var updatedayorder = await query(updatedayorderquery);                   
+                        }
+                        let resobj = {
+                            success: true,
+                            status: true,
+                            message: "trip created Successfully"
+                        };
+                        result(null, resobj);
+                    }else{
+                        let resobj = {
+                            success: true,
+                            status: false,
+                            message: "something went wrong plz try again"
+                        };
+                        result(null, resobj);
+                    }
+                });
             }else{
                 let resobj = {
                     success: true,
                     status: false,
-                    message: "something went wrong plz try again"
+                    message: "already moveit have trip, completed and try again"
                 };
                 result(null, resobj);
-            }
-        });
+            }            
+        }        
     }else{
         let resobj = {
             success: true,
@@ -595,22 +610,32 @@ Logistics.trip_moveit_filters =async function trip_moveit_filters(req,result) {
 
 /////////Moveit Trip List//////////
 Logistics.trip_list =async function trip_list(req,result) {
-    if(req.zoneid && req.page){
+    if(req.zoneid){
         var pagelimit = 20;
         var page = req.page || 1;
         var startlimit = (page - 1) * pagelimit;
 
         var wherecon="";
         if(req.moveit_id){
-            wherecon = wherecon+" and mt.moveit_id='"+req.moveit_id+"' ";
+            wherecon = wherecon+" and (mt.moveit_id='"+req.moveit_id+"' or mu.name='"+req.moveit_id+"' )";
         }
         if(req.tripid){
             wherecon = wherecon+" and dayo.trip_id='"+req.tripid+"' ";
         }
-        var moveittriplistquery = "select dayo.*,case when dayo.dayorderstatus=5 then 'QC' when dayo.dayorderstatus=6 then 'QA' when dayo.dayorderstatus=7 then 'Moveit Assigned' when dayo.dayorderstatus=8 then 'Moveit Pickup' when dayo.dayorderstatus=9 then 'Moveit Delivered' when dayo.dayorderstatus=10 then 'Completed' when dayo.dayorderstatus=11 then 'Cancel' when dayo.dayorderstatus=12 then 'return' end as dayorderstatus_msg,mu.name,mt.moveit_id,au.name as assigned_by,mt.created_at assigned_datetime from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Admin_users as au on au.admin_userid=mt.done_by where dayo.moveit_type=1 "+wherecon+" and mt.zoneid="+req.zoneid+" order by dayo.id desc limit " +startlimit +"," +pagelimit +" ";
+        if(req.from_date && req.to_date){
+            wherecon = wherecon+" and (dayo.date between '"+req.from_date+"' and  '"+req.to_date+"') ";
+        }
+        if(req.order_status){
+            wherecon = wherecon+" and dayo.dayorderstatus="+req.order_status+" ";
+        }
+        var moveittriplistquery = "select dayo.*,if(HOUR(time(dayo.order_place_time))>=19,'slot 2','slot 1') as slot,case when dayo.dayorderstatus=5 then 'QC' when dayo.dayorderstatus=6 then 'QA' when dayo.dayorderstatus=7 then 'Moveit Assigned' when dayo.dayorderstatus=8 then 'Moveit Pickup' when dayo.dayorderstatus=9 then 'Moveit Delivered' when dayo.dayorderstatus=10 then 'Completed' when dayo.dayorderstatus=11 then 'Cancel' when dayo.dayorderstatus=12 then 'return' end as dayorderstatus_msg,mu.name,mt.moveit_id,au.name as assigned_by,mt.created_at assigned_datetime from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Admin_users as au on au.admin_userid=mt.done_by where dayo.moveit_type=1 "+wherecon+" and mt.zoneid="+req.zoneid+" order by dayo.id desc limit " +startlimit +"," +pagelimit +" ";
         var moveittriplist = await query(moveittriplistquery);
+
+        var totalcountquery = "select count(dayo.id) as total_count from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id left join Admin_users as au on au.admin_userid=mt.done_by where dayo.moveit_type=1 "+wherecon+" and mt.zoneid="+req.zoneid+" order by dayo.id desc";
+        var total_count = await query(totalcountquery);
+
         if(moveittriplist.length > 0){ 
-            var totalcount = moveittriplist.length;           
+            var totalcount = total_count[0].total_count;           
             let resobj = {
                 success: true,
                 status: true,
@@ -641,19 +666,26 @@ Logistics.trip_list =async function trip_list(req,result) {
 
 /////////Dunzo Order List//////////
 Logistics.dunzo_trip_list =async function dunzo_trip_list(req,result) {
-    if(req.zoneid && req.page){
+    if(req.zoneid){
         var pagelimit = 20;
         var page = req.page || 1;
         var startlimit = (page - 1) * pagelimit;
         
         var wherecon = "";
         if(req.doid){
-            wherecon = wherecon+" and id="+req.doid+" ";
+            wherecon = wherecon+" and dayo.id="+req.doid+" ";
         }
-        var dunzoorderlistquery = "select *,case when dayorderstatus=5 then 'QC' when dayorderstatus=6 then 'QA' when dayorderstatus=7 then 'Moveit Assigned' when dayorderstatus=8 then 'Moveit Pickup' when dayorderstatus=9 then 'Moveit Delivered' when dayorderstatus=10 then 'Completed' when dayorderstatus=11 then 'Cancel' when dayorderstatus=12 then 'return' end as dayorderstatus_msg from Dayorder where moveit_type=2 and zoneid="+req.zoneid+" "+wherecon+" order by id desc limit " +startlimit +"," +pagelimit +" ";
+        if(req.from_date && req.to_date){
+            wherecon = wherecon+" and (dayo.date between '"+req.from_date+"' and  '"+req.to_date+"') ";
+        }
+        
+        var dunzoorderlistquery = "select dayo.*,case when dayo.dayorderstatus=5 then 'QC' when dayo.dayorderstatus=6 then 'QA' when dayo.dayorderstatus=7 then 'Moveit Assigned' when dayo.dayorderstatus=8 then 'Moveit Pickup' when dayo.dayorderstatus=9 then 'Moveit Delivered' when dayo.dayorderstatus=10 then 'Completed' when dayo.dayorderstatus=11 then 'Cancel' when dayo.dayorderstatus=12 then 'return' end as dayorderstatus_msg from Dayorder as dayo where dayo.moveit_type=2 and dayo.zoneid="+req.zoneid+" "+wherecon+" order by dayo.id desc limit " +startlimit +"," +pagelimit +" ";
         var dunzoorderlist = await query(dunzoorderlistquery);
+
+        var totalcountquery = "select count(id) as total_count from Dayorder where moveit_type=2 and zoneid="+req.zoneid+" "+wherecon+" order by id desc limit " +startlimit +"," +pagelimit +" ";
+        var total_count = await query(totalcountquery);
         if(dunzoorderlist.length > 0){  
-            var totalcount = dunzoorderlist.length;          
+            var totalcount = total_count[0].total_count;          
             let resobj = {
                 success: true,
                 status: true,
