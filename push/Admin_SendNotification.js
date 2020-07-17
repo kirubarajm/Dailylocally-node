@@ -1,5 +1,5 @@
 const firebase = require("firebase-admin");
-var AdminserverKey = require("../eat-admin-firebase-adminsdk-znfbj-1be0493d85.json");
+var AdminserverKey = require("../dl-admin-firebase-adminsdk-znfbj-1be0493d85.json");
 var Admin = null;
 
 function initializeAppName() {

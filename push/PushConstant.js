@@ -6,17 +6,17 @@ const PushConstant={
     masteridOrder_Pickedup:5,
     masteridOrder_Delivered:6,
 
-    Pageid_eat_order_post:1,
-    Pageid_eat_order_accept:2,
-    Pageid_eat_order_preparing:3,
-    Pageid_eat_order_Prepared:4,
-    Pageid_eat_order_pickedup:5,
-    Pageid_eat_order_reached:6,
-    Pageid_eat_order_delivered:7,
-    Pageid_eat_order_cancel:8,
-    Pageid_eat_query_replay:9,
-    Pageid_eat_send_notification:0,//bulk nofication
-    Pageid_eat_zendesk_notification:13,//zendesk
+    Pageid_dl_order_post:1,
+    // Pageid_dl_order_accept:2,
+    // Pageid_dl_order_preparing:3,
+    // Pageid_dl_order_Prepared:4,
+    Pageid_dl_order_pickedup:5,
+    Pageid_dl_order_reached:6,
+    Pageid_dl_order_delivered:7,
+    Pageid_dl_order_cancel:8,
+    Pageid_dl_query_replay:9,
+    Pageid_dl_send_notification:0,//bulk nofication
+    Pageid_dl_zendesk_notification:13,//zendesk
 
 
     pageidMoveit_Order_Assigned:1,

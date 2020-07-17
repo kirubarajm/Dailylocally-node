@@ -2289,7 +2289,7 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
     for(let i=0; i<orders.length; i++){
       var moveitstatusquery ="select * from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
       var statuslist = await query(moveitstatusquery);
-      orders[i].status = 0;
+      orders[i].moveit_status = 0;
       if (statuslist.length !==0 ) {
         orders[i].moveit_status = statuslist[0].status || 0;
       }

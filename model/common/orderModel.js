@@ -970,7 +970,6 @@ Order.moveit_order_accept = async function moveit_order_accept(req, result) {
  
 
 
-OrderComments.create_OrderComments_crm(New_comments)   
 
     let response = {
       success: true,
@@ -1049,7 +1048,7 @@ sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,re
       //  return;
       }else if (res1[0].dayorderstatus < 8 ){
      
-  
+        req.doid = req.id;
         req.moveitid = req.moveit_userid;
         req.status = 3 // order pickup by moveit
         await Order.insert_order_status(req);

@@ -1,19 +1,19 @@
 const firebase = require("firebase-admin");
-var EatserverKey = require("../eat-app-9c47f-firebase-adminsdk-dgp75-7c570f4349.json");
-var EAT = null;
+var DLserverKey = require("../dl-app-9c47f-firebase-adminsdk-dgp75-7c570f4349.json");
+var DL = null;
 
 
 function initializeAppName () {
-  if (!EAT) {
-    EAT=firebase.initializeApp(
+  if (!DL) {
+    DL=firebase.initializeApp(
       {
-        credential: firebase.credential.cert(EatserverKey),
+        credential: firebase.credential.cert(DLserverKey),
         databaseURL: "https://eat-app.firebaseio.com"
       },
-      "eat-app"
+      "DL-app"
     );
   } else{
-    console.log("EAT name--->" + EAT.name);
+    console.log("DL name--->" + DL.name);
   }
   
   
@@ -44,5 +44,5 @@ exports.sendNotificationAndroid = function(token,dat,app_type) {
     }
   }
   console.log("token-->",token+""+payload.data);
-  EAT.messaging().sendToDevice(token, payload, options);
+  DL.messaging().sendToDevice(token, payload, options);
 };

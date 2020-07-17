@@ -2,10 +2,10 @@
 module.exports = function(app) {
     var routesVersioning = require('express-routes-versioning')();
     var moveituser = require("../controllers/moveit/MoveitUserController");
-    // var documents = require("../controllers/common/DocumentsController");fv
+    var documents = require("../controllers/common/DocumentsController");
     var faq = require("../controllers/common/FaqController");
     var orders = require("../controllers/common/OrderController");
-    // var moveitdocument = require("../controllers/common/DocumentmoveitController");
+    //  var moveitdocument = require("../controllers/common/DocumentmoveitController");
     let middleware = require('../model/middleware.js');
     // var moveitlogtime = require("../controllers/moveit/MoveitTimelogController");
     var dayorder = require("../controllers/common/DayorderController");
@@ -25,7 +25,7 @@ app.route("/moveit/makeitrating").put(middleware.checkToken,routesVersioning({"1
 app.route("/moveit/qualitycheck").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_kitchen_qualitycheck}));
 app.route("/moveit/paymentstatus").put(middleware.checkToken,routesVersioning({"1.0.0":orders.order_payment_status}));
 app.route("/moveit/ordershistory/:moveit_user_id").get(middleware.checkToken,routesVersioning({"1.0.0":orders.orderhistory_by_moveit_userid}));
-// app.route("/moveit/documentUpload").post(middleware.checkToken,routesVersioning({"1.0.0":documents.moveit_upload_a_documents}));
+ app.route("/moveit/documentUpload").post(middleware.checkToken,routesVersioning({"1.0.0":documents.moveit_upload_a_documents}));
 // app.route("/moveit/documentstore").post(middleware.checkToken,routesVersioning({"1.0.0":moveitdocument.create_a_documents}));
 //app.route("/moveit/makeitrating").put(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_kitchen_rating}));
 app.route("/moveit/qualitychecklist").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_quality_checklist}));
