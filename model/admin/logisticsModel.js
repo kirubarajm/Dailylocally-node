@@ -678,6 +678,9 @@ Logistics.dunzo_trip_list =async function dunzo_trip_list(req,result) {
         if(req.from_date && req.to_date){
             wherecon = wherecon+" and (dayo.date between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
+        if(req.order_status){
+            wherecon = wherecon+" and dayo.dayorderstatus="+req.order_status+" ";
+        }
         
         var dunzoorderlistquery = "select dayo.*,case when dayo.dayorderstatus=5 then 'QC' when dayo.dayorderstatus=6 then 'QA' when dayo.dayorderstatus=7 then 'Moveit Assigned' when dayo.dayorderstatus=8 then 'Moveit Pickup' when dayo.dayorderstatus=9 then 'Moveit Delivered' when dayo.dayorderstatus=10 then 'Completed' when dayo.dayorderstatus=11 then 'Cancel' when dayo.dayorderstatus=12 then 'return' end as dayorderstatus_msg from Dayorder as dayo where dayo.moveit_type=2 and dayo.zoneid="+req.zoneid+" "+wherecon+" order by dayo.id desc limit " +startlimit +"," +pagelimit +" ";
         var dunzoorderlist = await query(dunzoorderlistquery);
