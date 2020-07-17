@@ -6,7 +6,7 @@ const constant = require('../constant.js');
 
 //Task object constructor
 var Zendeskrequest = function(zendeskrequest) {
-  this.orderid = zendeskrequest.orderid;
+  this.doid = zendeskrequest.doid;
   this.userid = zendeskrequest.userid;
   this.ticketid = zendeskrequest.ticketid;
   this.zendeskuserid = zendeskrequest.zendeskuserid;
@@ -18,11 +18,11 @@ var Zendeskrequest = function(zendeskrequest) {
 
 Zendeskrequest.createZendeskrequest =async function createZendeskrequest(req, result) {
 
- //   console.log("---------------->new_zendesk_request_create",req);
+  //  console.log("---------------->new_zendesk_request_create",req);
 
-var get_zendesk= await query("select * from Zendesk_chat_requests where orderid= "+req.orderid+"  and issueid= "+req.issueid+" ")
+var get_zendesk= await query("select * from Zendesk_chat_requests where doid= "+req.doid+"  and issueid= "+req.issueid+" ")
 
-var get_ticketid= await query("select * from Zendesk_chat_requests where orderid= "+req.orderid+"  order by id desc limit 1 ")
+var get_ticketid= await query("select * from Zendesk_chat_requests where doid= "+req.doid+"  order by id desc limit 1 ")
 
     if (get_zendesk.length==0) {
 

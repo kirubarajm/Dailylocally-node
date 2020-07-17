@@ -967,21 +967,10 @@ Order.moveit_order_accept = async function moveit_order_accept(req, result) {
     req.lat = req.lat || 0;
     req.lon = req.lon || 0;
     const updateorderdetails = await query("UPDATE Moveit_trip SET moveit_accept_time = '"+orderaccepttime+"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE tripid ='" +req.trip_id+"'");
-    // for(let j=0; j<orderdetails.length; j++){  
-    //   updatequery ="UPDATE Orders SET moveit_status = 1 ,moveit_accept_time= '" + orderaccepttime +"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE orderid ='"+orderdetails[j].orderid+"'";      
-    //   sql.query(updatequery, async function(err, res) {
-    //     if (err) {
-    //       result(err, null);
-    //     } else {
-    //       let response = {
-    //         success: true,
-    //         status: true,
-    //         message: "Order accepted successfully."
-    //       };
-    //       result(null, response);
-    //     }
-    //   });  
-    // }     
+ 
+
+
+OrderComments.create_OrderComments_crm(New_comments)   
 
     let response = {
       success: true,
@@ -1300,8 +1289,8 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                 result(err, null);
               } else {
                 /////Check Trip Status////
-                if(trip_id && trip_id>0){
-                  var trip_status = await MoveitUser.updatetripstatus(trip_id);
+                if(req.trip_id && req.trip_id>0){
+                  var trip_status = await MoveitUser.updatetripstatus(req.trip_id);
                 }
               
 

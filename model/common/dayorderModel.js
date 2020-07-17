@@ -1341,16 +1341,9 @@ Dayorder.refund_create = async function refund_create(req,result) {
 Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by_moveit(req,result) {
 
       
-  // var cancel_comments = req.return_reason
-  // var New_comments  ={};
-  // New_comments.doid=req.doid;
-  // New_comments.comments=cancel_comments
-  // New_comments.done_by=req.done_by
-  // New_comments.type=2
-  // New_comments.done_type=1
 
 
-  // OrderComments.create_OrderComments_crm(New_comments)
+
 
   var day_order = await query("select * from Dayorder where id = "+req.id+" ");
 
@@ -1372,6 +1365,15 @@ Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by
   
   }else{
 
+    var cancel_comments = 'return requested by moveit'
+    var New_comments  ={};
+    New_comments.doid=req.id;
+    New_comments.comments=cancel_comments
+    New_comments.done_by=req.moveit_userid
+    New_comments.type=4
+    New_comments.done_type=0
+    OrderComments.create_OrderComments_crm(New_comments)
+    
     var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   
     var update_query = "Update Dayorder set return_status=1,moveit_order_return_time='"+day+"'  where id = "+req.id+" "

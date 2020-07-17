@@ -5833,7 +5833,7 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
      if (!objUser.error) {
        zendeskuserid=objUser.user.id;
        req.zendeskuserid=objUser.user.id;
-       Eatuser.zendesk_ticket_create(req,result);
+       Dluser.zendesk_ticket_create(req,result);
      }else{
        var url = constant.zendesk_url+"/api/v2/users/search.json?query=email:"+res[0].email+""
        //console.log("user search url--",url);
@@ -5850,7 +5850,7 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
           if (obj.users[0].id) {
             zendeskuserid=obj.users[0].id;  
             req.zendeskuserid=obj.users[0].id;
-            Eatuser.zendesk_ticket_create(req,result);
+            Dluser.zendesk_ticket_create(req,result);
           }else{
             //console.log("obj--",obj);
             let resobj = {
@@ -5867,7 +5867,7 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
       }else{
         zendeskuserid=res[0].zendeskuserid;
         req.zendeskuserid=res[0].zendeskuserid;
-        Eatuser.zendesk_ticket_create(req,result);
+        Dluser.zendesk_ticket_create(req,result);
       }
     }
   }
@@ -5905,8 +5905,9 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
           user.email=res[0].email;
           user.phone=res[0].phoneno;
           userdetails.user = user;
-          var Userapi="/api/v2/users.json?"
+          var Userapi="api/v2/users.json?"
           var UserURL=constant.zendesk_url+Userapi;
+          console.log("user search url--",UserURL);
        request.post({headers: headers, url: UserURL, json: userdetails, method: 'POST'},async function (e, r, body) {
         var objUser = body;
         //console.log("user body--",body);
@@ -5925,7 +5926,7 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
          Dluser.zendesk_ticket_create(req,result);
        }else{
          var url = constant.zendesk_url+"api/v2/users/search.json?query=email:"+res[0].email+""
-         //console.log("user search url--",url);
+         console.log("user search url--",url);
          request.get({headers: headers, url:url, method: 'GET'},async function (e, r, body) {
             var obj = body;
             console.log("user search body--",body);
@@ -6028,7 +6029,7 @@ Dluser.zendesk_ticket_create= async function Dluser(req,result) {
 
                 for(var i=0;i<req.issues.length;i++){
                   req.issueid=req.issues[i].id;
-                  Eatuser.new_zendesk_request_create(req);
+                  Dluser.new_zendesk_request_create(req);
                 }
 
           let resobj = {
@@ -6101,7 +6102,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
          req.zendeskuserid=body.user.id;
 
-         Eatuser.new_zendesk_request_create(req);
+         Dluser.new_zendesk_request_create(req);
    
          let resobj = {
            success: true,
@@ -6320,7 +6321,7 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
 
                 for(var i=0;i<req.issues.length;i++){
                   req.issueid=req.issues[i].id;
-                  Eatuser.new_zendesk_request_create(req);
+                  Dluser.new_zendesk_request_create(req);
                 }
 
           let resobj = {
@@ -6515,7 +6516,7 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
 
                 for(var i=0;i<req.issues.length;i++){
                   req.issueid=req.issues[i].id;
-                  Zendeskrequest.new_zendesk_request_create(req);
+                  Dluser.new_zendesk_request_create(req);
                 }
 
           let resobj = {

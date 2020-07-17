@@ -142,8 +142,8 @@ const calculate = {
     Xfactor_status:false,
     Xfactor_moveit_count:5,
     order_waiting_min:30, //min
-    zendesk_url:"https://dailylocallyapp.zendesk.com/",
-    Username:"dailylocally@gmail.com",
+    zendesk_url:"https://dailylocallytest.zendesk.com/",
+    Username:"aravind@tovogroup.com",
     Password:"Dailylocally12!",
     isCronStart:false,
     zoho_refresh_token:"1000.86b2dd470174b25acacf0817f4353584.5f33e9df83931f63717d24fa1a022198",
@@ -158,7 +158,7 @@ const calculate = {
     makeit_package_alert_count:25,
     makeit_live_quantity_restrict_count:10,
 
-    email_user:'dailylocally@gmail.com',
+    email_user:'aravind@tovogroup.com',
     email_pass:'Dailylocally12!',
 
     virtual_order_sms_contact_number:'9150265900',
