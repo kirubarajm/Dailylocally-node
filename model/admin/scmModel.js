@@ -1413,7 +1413,7 @@ SCM.remove_boh_mapping =async function remove_boh_mapping(req,result) {
         let resobj = {
             success: true,
             status: false,
-            message: "check pst values"
+            message: "check post values"
         };
         result(null, resobj);
     }     

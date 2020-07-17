@@ -121,7 +121,7 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/trip/unassign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_unassign}));
   app.route("/admin/logistics/trip/tripmoveitfilters").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_moveit_filters}));
   app.route("/admin/logistics/trip/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_list}));
-  app.route("/admin/logistics/dunzo/orderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_trip_list}));
+  app.route("/admin/logistics/dunzo/orderlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_order_list}));
   app.route("/admin/logistics/dunzo/assign").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_assign}));
   app.route("/admin/logistics/dunzo/pickup").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_pickup}));
   app.route("/admin/logistics/dunzo/delivered").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_delivered}));
