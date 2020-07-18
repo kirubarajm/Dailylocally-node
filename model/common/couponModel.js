@@ -102,7 +102,6 @@ Coupon.getAllcoupon_by_user = function getAllcoupon_by_user(userid,result) {
    
       if (coupon1tomany.length !== 0 ) {
   
-        console.log(coupon1tomany.length);
         var kitchens = await Coupon.getcouponlist(coupon1tomany,req)
 
 

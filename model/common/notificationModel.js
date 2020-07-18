@@ -47,7 +47,7 @@ Notification.getMakeitDetail = async function(userid) {
   return MakeitUser[0];
 };
 
-Notification.orderEatPushNotification = async function(orderid,userid,pageid) {
+Notification.orderdlPushNotification = async function(orderid,userid,pageid) {
   if (orderid) {
     var orders = await Notification.getPushOrderDetail(orderid);
     var user = JSON.parse(orders.userdetail);

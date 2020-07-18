@@ -5877,6 +5877,19 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
 
   ///Click to call////
   Dluser.zendesk_ticket_check= async function zendesk_ticket_check(req,result) { 
+
+      
+    var cancel_comments = req.return_reason
+    var New_comments  ={};
+    New_comments.doid=req.doid;
+    New_comments.comments=  'New ticket created'
+    New_comments.done_by=req.done_by
+    New_comments.type=2
+    New_comments.done_type=1
+  
+  
+    OrderComments.create_OrderComments_crm(New_comments)
+
   var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
   var headers= {
     'Content-Type': 'application/json',
@@ -5907,7 +5920,6 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
           userdetails.user = user;
           var Userapi="api/v2/users.json?"
           var UserURL=constant.zendesk_url+Userapi;
-          console.log("user search url--",UserURL);
        request.post({headers: headers, url: UserURL, json: userdetails, method: 'POST'},async function (e, r, body) {
         var objUser = body;
         //console.log("user body--",body);
@@ -6363,9 +6375,9 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 
 
 Dluser.dl_User_list = function dl_User_list(req, result) {
-  var userlimit = 20;
+  var pagelimit = 20;
   var page = req.page || 1;
-  var startlimit = (page - 1) * userlimit;
+  var startlimit = (page - 1) * pagelimit;
 
   var userquery = "select * from User";
 
@@ -6384,7 +6396,7 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       "% ' )";
   }
 
-  var userquery = userquery + " order by userid desc limit " + startlimit + "," + userlimit + " ";
+  var userquery = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
 
   sql.query(userquery,async function(err, res) {
     if (err) {
@@ -6408,6 +6420,7 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
         let sucobj = true;
         let resobj = {
           success: sucobj,
+          pagelimit:pagelimit,
           totalcount: totalcount,
           result: res
         };
