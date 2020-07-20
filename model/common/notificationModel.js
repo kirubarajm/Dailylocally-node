@@ -14,7 +14,7 @@ var Notification = function(notification) {
 };
 
 Notification.getPushOrderDetail_old = async function(orderid) {
-  var orders = await query("SELECT ors.*,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,"+
+  var orders = await query("SELECT ors.*,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail"+
     "from Orders as ors "+
     "left join User as us on ors.userid=us.userid "+
     "where ors.orderid ='" +orderid +"'"
@@ -46,10 +46,12 @@ Notification.getMovieitDetail = async function(userid) {
 
 
 
-Notification.orderdlPushNotification = async function(orderid,userid,pageid) {
+Notification.orderdlPushNotification = async function(orders,userid,pageid) {
   // if (orderid) {
-    var orders = await Notification.getPushOrderDetail(orderid);
-    var user = JSON.parse(orders.userdetail);
+    // var orders = await Notification.getPushOrderDetail(orderid);
+
+    // console.log(orders);
+    // var user = JSON.parse(orders.userdetail);
     // var makeituser = JSON.parse(orders.makeitdetail);
     // var moveituser = JSON.parse(orders.moveitdetail);
   // }else{
@@ -167,12 +169,12 @@ Notification.orderdlPushNotification = async function(orderid,userid,pageid) {
  
   //const user = await Notification.getEatUserDetail(userid);
    console.log("data->", data);
-  if (user && user.pushid_android) {
-    FCM_DL.sendNotificationAndroid(user.pushid_android, data,1 );
+  if (orders[0].pushid_android) {
+    FCM_DL.sendNotificationAndroid(orders[0].pushid_android, data,1 );
   }
  
-  if (user && user.pushid_ios) {
-    FCM_DL.sendNotificationAndroid(user.pushid_ios, data,2);
+  if (orders[0].pushid_ios) {
+    FCM_DL.sendNotificationAndroid(orders[0].pushid_ios, data,2);
   }
 };
 
