@@ -1104,8 +1104,6 @@ sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,re
             } else {
                await Notification.orderdlPushNotification(req.orderid,null,PushConstant.Pageid_dl_order_pickedup);
 
-              
-              
               var cancel_comments = 'Pickup has done by moveit'
               var New_comments  ={};
               New_comments.doid=req.id;
@@ -1113,7 +1111,7 @@ sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,re
               New_comments.done_by=req.moveit_userid
               New_comments.type=4
               New_comments.done_type=0
-               OrderComments.create_OrderComments_crm(New_comments)
+              OrderComments.create_OrderComments_crm(New_comments)
 
 
               let response = {
