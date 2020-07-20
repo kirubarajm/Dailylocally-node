@@ -13,7 +13,7 @@ var Notification = function(notification) {
   this.message = notification.message;
 };
 
-Notification.getPushOrderDetail = async function(orderid) {
+Notification.getPushOrderDetail_old = async function(orderid) {
   var orders = await query("SELECT ors.*,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,"+
     "JSON_OBJECT('userid',ms.userid,'name',ms.name,'brandName',ms.brandName,'virtualkey',ms.virtualkey,'pushid_android',ms.pushid_android,'pushid_ios',ms.pushid_ios) as makeitdetail,"+
     "JSON_OBJECT('userid',mu.userid,'name',mu.name,'Vehicle_no',mu.Vehicle_no,'pushid_android',mu.pushid_android) as moveitdetail "+
@@ -23,6 +23,11 @@ Notification.getPushOrderDetail = async function(orderid) {
     "left join MoveitUser mu on mu.userid = ors.moveit_user_id "+
     "where ors.orderid ='" +orderid +"'"
   );
+  return orders[0];
+};
+
+Notification.getPushOrderDetail = async function(orderid) {
+  var orders = await query("select mt.tripid as orderid,dayo.id as price,dayo.complete_address as cus_address,mt.moveit_id as moveit_user_id,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Moveit_trip as mt left join Dayorder as dayo on dayo.trip_id=mt.tripid left join User as us on us.userid=dayo.userid where mt.tripid="+orderid+" group by mt.tripid");
   return orders[0];
 };
 
@@ -399,7 +404,7 @@ Notification.orderMakeItPackagePushNotification = async function(makeit_userid,m
 };
 
 Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it_user_detail) {
-  
+  console.log("moveit send notification file ----2");
   const orders = await Notification.getPushOrderDetail(orderid);
  // const moveitdetails = await Notification.getMovieitDetail()
   var Eatuserdetail = JSON.parse(orders.userdetail);

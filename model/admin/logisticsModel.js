@@ -14,6 +14,8 @@ var MoveitTrip = require('../tableModels/moveittripTableModel.js');
 var MoveitTripHistory = require('../tableModels/moveitriphistoryTableModel.js');
 var DunzoTrip = require('../tableModels/dunzotripTableModel.js');
 var DunzoTripHistory = require('../tableModels/dunzotriphistoryTableModel.js');
+var Notification = require('../common/notificationModel.js');
+var PushConstant = require('../../push/PushConstant.js');
 
 var Logistics = function(stockkeeping) {};
 
@@ -501,6 +503,14 @@ Logistics.trip_create =async function trip_create(req,result) {
                     historydata.push({"doid":dayorderids[i],"tripid":req.trip_id,"type":1,"zoneid":req.zoneid,"created_by":req.done_by});
                     await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ });                    
                 }
+
+                var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
+                var getmoveitdetails = await query(getmoveitdetailsquery);
+                if(getmoveitdetails.length>0){
+                    console.log("moveit Send Notification ============> For assign 1");
+                    await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+                }
+
                 
                 let resobj = {
                     success: true,
@@ -530,7 +540,17 @@ Logistics.trip_create =async function trip_create(req,result) {
                             var historydata = [];
                             historydata.push({"doid":dayorderids[i],"tripid":moveittripres.result.insertId,"type":1,"zoneid":req.zoneid,"created_by":req.done_by});
                             await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ });
+                        }
+
+                        ////// Send Notification //////////
+                        var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
+                        var getmoveitdetails = await query(getmoveitdetailsquery);
+                        if(getmoveitdetails.length>0){
+                            console.log("moveit Send Notification For assign ============> 2");
+                            await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
                         }                        
+                        //////////////////////////////////
+
                         let resobj = {
                             success: true,
                             status: true,
@@ -572,7 +592,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
         var updatedids = [];
         var errorids = [];
         for (let i = 0; i < dayorders.length; i++) {
-            var checkdayorderquery = "select * from Dayorder where id="+dayorders[i]+" and dayorderstatus IN(7,8) and moveit_type=1";
+            var checkdayorderquery = "select dayo.*,mt.moveit_id from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id where dayo.id="+dayorders[i]+" and dayo.dayorderstatus IN(7,8) and dayo.moveit_type=1";
             var checkdayorder = await query(checkdayorderquery);
             if(checkdayorder.length>0){
                 var updatedayorderquery = "update Dayorder set dayorderstatus=6, trip_id=NULL,moveit_type=NULL where id="+dayorders[i];
@@ -583,6 +603,14 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                 await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ }); 
 
                 if(updatedayorder.affectedRows>0){
+                    ////// Send Notification //////////
+                    var getmoveitdetailsquery = "select * from MoveitUser where userid="+checkdayorder[i].moveit_id;
+                    var getmoveitdetails = await query(getmoveitdetailsquery);
+                    if(getmoveitdetails.length>0){
+                        console.log("moveit Send Notification For unassign============> 1");
+                        await Notification.orderMoveItPushNotification(checkdayorder[i].trip_id,PushConstant.pageidMoveit_Order_unassign,getmoveitdetails[0]);
+                    }
+                    ///////////////////////////////////
                     updatedids.push(dayorders[i]);
                 }else{
                     errorids.push(dayorders[i]);
