@@ -8,7 +8,7 @@ function initializeAppName () {
     DL=firebase.initializeApp(
       {
         credential: firebase.credential.cert(DLserverKey),
-        databaseURL: "https://eat-app.firebaseio.com"
+        databaseURL: "https://daily-locally-v2.firebaseio.com"
       },
       "DL-app"
     );

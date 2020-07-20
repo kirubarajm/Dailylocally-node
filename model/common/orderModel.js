@@ -367,7 +367,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
             var getproduct = await query(getproductdetails,);
             console.log("getproduct==========>",getproduct);
             dayorder.checkdayorder(order_place,getproduct);
-            await Notification.orderdlPushNotification(req.orderid,null,PushConstant.Pageid_dl_order_post);
+            await Notification.orderdlPushNotification(order_place.orderid,null,PushConstant.Pageid_dl_order_post);
 
             let resobj = {
               success: true,
