@@ -5,7 +5,7 @@ var moment = require("moment");
 var zone =require("../model/common/zoneModel")
 var constant = require("../model/constant");
 
-var MoveitserverKey = require("../daily-locally-partner-firebase-adminsdk-b74hd-017992f0ee");
+var MoveitserverKey = require("../daily-locally-partner-firebase-adminsdk-b74hd-080fd6b7a3");
 var Move_it = null;
 var geoFire =null;
 function initializeAppName() {
