@@ -112,6 +112,14 @@ exports.view_po = function(req, res) {
     });    
 };
 
+// /////// PO PDF ////////
+// exports.po_pdf = function(req, res) {
+//     SCM.po_pdf(req.body, function(err, result) {
+//       if (err) res.send(err);
+//       res.json(result);
+//     });
+//   };
+
 /////////Delete PO///////////
 exports.delete_po = function(req, res) {    
     SCM.delete_po(req.body, function(err, ress) {
