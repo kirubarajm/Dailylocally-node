@@ -598,6 +598,8 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                 var updatedayorderquery = "update Dayorder set dayorderstatus=6, trip_id=NULL,moveit_type=NULL where id="+dayorders[i];
                 var updatedayorder = await query(updatedayorderquery);
 
+                ///////check trip status for close //////////
+                
                 var historydata = [];
                 historydata.push({"doid":dayorders[i],"tripid":checkdayorder[0].trip_id,"type":2,"zoneid":req.zoneid,"created_by":req.done_by});
                 await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ }); 
