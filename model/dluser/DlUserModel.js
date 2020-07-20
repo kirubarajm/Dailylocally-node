@@ -6396,9 +6396,9 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       "% ' )";
   }
 
-  var userquery = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
-
-  sql.query(userquery,async function(err, res) {
+  var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+  // console.log(userquery1);
+  sql.query(userquery1,async function(err, res) {
     if (err) {
       console.log("error: ", err);
       result(err, null);
@@ -6414,6 +6414,8 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       }
 
 
+
+      // console.log(userquery);
       sql.query(userquery, function(err, res2) {
         totalcount = res2.length;
 
