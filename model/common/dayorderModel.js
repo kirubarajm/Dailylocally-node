@@ -7,6 +7,8 @@ var Dayorderproducts = require("../../model/common/dayorderproductsModel");
 var Stock = require('../tableModels/stockTableModel.js');
 var OrderComments = require("../../model/admin/orderCommentsModel");
 var RefundOnline = require("../../model/common/refundonlineModel");
+var Notification = require("../../model/common/notificationModel.js");
+
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
   this.userid = Dayorder.userid;
@@ -913,6 +915,12 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 
   if (day_order_product.length ==0) {
     var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"'");
+
+    var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
+
+    PushConstant.Pageid_dl_order_cancel = 8;
+    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_cancel);
+    result(null, resobj);
   }
 
   let resobj = {
@@ -996,6 +1004,13 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     var product_update_query = "Update Dayorder_products set scm_status=12  where doid = "+req.doid+" "
   
     var product_update = await query(product_update_query);
+
+    var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.doid+"'" );
+
+    PushConstant.Pageid_dl_return_notification = 14;
+    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_return_notification);
+    result(null, resobj);
+ 
    
     let resobj = {
       success: true,
@@ -1082,6 +1097,13 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
 
     }
 
+
+    var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
+
+    PushConstant.Pageid_dl_reorder_notification = 14;
+    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
+    result(null, resobj);
+
     let resobj = {
       success: true,
       status: true,
@@ -1167,6 +1189,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
           Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
     
         }
+
+        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+res1.insertId+"'" );
+
+        PushConstant.Pageid_dl_reorder_notification = 14;
+        await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
+        result(null, resobj);
     
         let resobj = {
           success: true,
@@ -1396,9 +1424,6 @@ Dayorder.refund_create = async function refund_create(req,result) {
 Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by_moveit(req,result) {
 
       
-
-
-
 
   var day_order = await query("select * from Dayorder where id = "+req.id+" ");
 
