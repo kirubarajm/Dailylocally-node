@@ -59,6 +59,10 @@ var Order = function(order) {
 
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
+
+  console.log(req);
+  console.log(orderitems);
+  console.log(subscription);
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
 
@@ -367,7 +371,10 @@ Order.online_order_place_conformation = async function(order_place, result) {
             var getproduct = await query(getproductdetails,);
             console.log("getproduct==========>",getproduct);
             dayorder.checkdayorder(order_place,getproduct);
-            await Notification.orderdlPushNotification(order_place.orderid,null,PushConstant.Pageid_dl_order_post);
+
+            var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Orders as ors left join User as us on ors.userid=us.userid where ors.orderid ='" +order_place.orderid +"'" );
+
+            await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_post);
 
             let resobj = {
               success: true,

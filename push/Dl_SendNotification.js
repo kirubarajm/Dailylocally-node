@@ -27,6 +27,9 @@ exports.sendNotificationAndroid = function(token,dat,app_type) {
     timeToLive: 60 * 60 * 24 // 1 day
   };
  // dat.content_available = '1';
+ console.log(token);
+ console.log(dat);
+ console.log(app_type);
   var payload = {
     data: dat,
     // notification: {
