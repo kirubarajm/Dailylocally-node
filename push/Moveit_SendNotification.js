@@ -13,7 +13,7 @@ function initializeAppName() {
     Move_it = firebase.initializeApp(
       {
         credential: firebase.credential.cert(MoveitserverKey),
-        databaseURL: "https://moveit-a9128.firebaseio.com/"
+        databaseURL: "https://daily-locally-partner.firebaseio.com/"
       },
       "move-it-app"
     );
