@@ -13,7 +13,7 @@ var Notification = function(notification) {
   this.message = notification.message;
 };
 
-Notification.getPushOrderDetail = async function(orderid) {
+Notification.getPushOrderDetail_old = async function(orderid) {
   var orders = await query("SELECT ors.*,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,"+
     "from Orders as ors "+
     "left join User as us on ors.userid=us.userid "+
@@ -22,6 +22,16 @@ Notification.getPushOrderDetail = async function(orderid) {
   return orders[0];
 };
 
+Notification.getPushOrderDetail = async function(orderid) {
+  var orders = await query("select mt.tripid as orderid,dayo.id as price,dayo.complete_address as cus_address,mt.moveit_id as moveit_user_id,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Moveit_trip as mt left join Dayorder as dayo on dayo.trip_id=mt.tripid left join User as us on us.userid=dayo.userid where mt.tripid="+orderid+" group by mt.tripid");
+  return orders[0];
+};
+
+Notification.getVirtualMakeitPushId = async function(makeit_id) {
+  var vMkPushId = await query("SELECT au.push_token from MakeitUser mu left join Admin_users au on au.makeit_hubid=mu.makeithub_id where userid ='" +makeit_id +"'"
+  );
+  return vMkPushId[0];
+};
 
 
 Notification.getEatUserDetail = async function(userid) {
@@ -297,7 +307,7 @@ Notification.orderdlPushNotification = async function(orderid,userid,pageid) {
 
 
 Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it_user_detail) {
-  
+  console.log("moveit send notification file ----2");
   const orders = await Notification.getPushOrderDetail(orderid);
  // const moveitdetails = await Notification.getMovieitDetail()
   var Eatuserdetail = JSON.parse(orders.userdetail);
