@@ -20,6 +20,11 @@ const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
 
+// var pdf = require("pdf-creator-node");
+// var fs = require('fs');
+// // Read HTML Template
+// var html = fs.readFileSync('checklisttemplate.html', 'utf8');
+
 var SCM = function(scm) {};
 
 /////////Get Waiting PO List Old///////////
@@ -1033,6 +1038,69 @@ SCM.view_po =async function view_po(req,result) {
         result(null, resobj);
     }     
 };
+
+///////Admin Check List Print////////
+SCM.checklist_print= async function checklist_print(req,result) {
+    var getchecklistquery ="select ord.orderid,ord.userid,us.name,ord.cus_address,us.phoneno,ord.orderid,date(ord.created_at) as orderdate,date(ord.order_delivery_day) as deliverydate from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"' group by ord.orderid";
+    var getchecklist = await query(getchecklistquery);
+  
+    var getchecklistitemquery ="select pro.product_name,oi.quantity from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"'";
+    var getchecklistitem = await query(getchecklistitemquery);
+    getchecklist['items'] = getchecklistitem;
+  
+    if(getchecklist.length != 0){
+      var options = {
+        format: "A4",
+        orientation: "landscap",
+        border: "10mm"
+      };
+      var order = [{
+        order_id: getchecklist[0]['orderid'],
+        order_date: moment(getchecklist[0]['orderdate']).format("DD-MM-YYYY"),
+        delivery_date: moment(getchecklist[0]['deliverydate']).format("DD-MM-YYYY"),
+        cus_name: getchecklist[0]['name'],
+        cus_mobile: getchecklist[0]['phoneno'],
+        cus_address: getchecklist[0]['cus_address']
+      }]
+      var items = getchecklistitem;
+      var document = {
+        html: html,
+        data: {
+            items: items,
+            order: order
+        },
+        path: "./uploads/po_pdf/po1.pdf"
+      };
+      //console.log(document);
+      pdf.create(document, options)
+        .then(res => {
+            console.log(res);
+            let resobj = {
+              success: true,
+              message: "pdf Created Successfully",
+              status:true,
+              url: res
+            };
+            result(null, resobj);
+        })
+        .catch(error => {
+            console.error(error)
+            let resobj = {
+              success: false,
+              message: "something went wrong",
+              status:false
+            };
+            result(null, resobj);
+        });    
+    }else{
+      let resobj = {
+        success: false,
+        message: "no record in this order",
+        status:false
+      };
+      result(null, resobj);
+    }  
+  };
 
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {

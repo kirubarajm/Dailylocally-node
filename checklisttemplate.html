@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {	
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.border {
+  border: 1px solid #000000;
+  text-align: center;
+  margin: 0px;
+}
+
+table.d {
+  table-layout: fixed;
+  width: 100%;  
+}
+
+.css-serial {
+  counter-reset: serial-number;  /* Set the serial number counter to 0 */
+}
+
+.css-serial td:first-child:before {
+  counter-increment: serial-number;  /* Increment the serial number counter */
+  content: counter(serial-number);  /* Display the counter */
+}
+
+.div2 {
+  width: 300px;
+  height: 100px;  
+  padding: 50px;
+  border: 1px solid #000000;
+}
+
+</style>
+</head>
+<body style="border: 1px solid #000000; margin:0%; font-size:12px;">
+    <table style="margin:1%;">
+        
+            <tr>
+                <td> </td>
+                <td>
+                    <div> 
+                        <div style="text-align: center;"> <img src="https://eattovo.s3.amazonaws.com/upload/admin/makeit/1588352989854-Daily-ICons-04.png" width="5%" class="img-fluid" alt="Responsive image"> </div> <br/>
+                        <div style="text-align: center;">Lawyer Jaganathan St, Alandur, Chennai, Tamil Nadu 600032</div> <br/>
+                        <div style="text-align: center; margin-top: -15px;">Email – dailylocally@gmail.com</div>
+                    </div>
+                </td>
+                <td>  </td>
+            </tr>
+            <tr>
+                <td> </td>
+                <td> <div style="text-align: center; font-weight: bold; font-size: 20px; padding-top: 30px;"> ORDER CHECKLIST</div></td>
+                <td> </td>
+            </tr>
+        </table>
+       <table>
+        {{#each order}}
+        <tr>
+            <td style="table-layout: fixed; width: 40%;"> 
+                <div>
+                    <div style="font-weight: bold;">Shipping Address </div>
+                    <div>{{this.cus_name}} </div>
+                    <div>{{this.cus_mobile}} </div>
+                    <div>{{this.cus_address}}</div> 
+                </div>                              
+            </td>
+            <td ></td>
+            <td style="table-layout: fixed; width: 30%;" > 
+                <div>                    
+                    <div>Order id: {{this.order_id}}</div>
+                    <div>Order date: {{this.order_date}}</div>
+                    <div>Delivery date:{{this.delivery_date}}</div>
+                </div>          
+            </td>
+        </tr>
+       </table>
+       <table>
+        {{/each}}
+        <tr>
+            <td colspan="3">
+                <table style="margin: 0px" class="css-serial border d">
+                    <tr class="border">
+                      <th class="border" style="table-layout: fixed; width: 20%;">S.No</th>
+                      <th class="border" style="table-layout: fixed; width: 100%;">Product description</th>
+                      <th class="border" style="table-layout: fixed; width: 20%;">Quantity</th>
+                      <th class="border" style="table-layout: fixed; width: 20%;">PACKED</th>
+                    </tr>
+                    {{#each items}}
+                    <tr class="border">
+                      <td class="border"> </td>
+                      <td class="border">{{this.product_name}}</td>
+                      <td class="border">{{this.quantity}}</td>
+                      <td class="border"></td>
+                    </tr>
+                    {{/each}}
+                  </table> 
+            </td>
+        </tr>
+       </table>
+       <table>
+        <tr>
+            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 70%;">
+                <div style="font-weight: bold; padding-left:10px;">Quality Check</div>
+                <ul>
+                    <li>Our premises go through hygiene checks every morning</li>
+                    <li>Our packaging materials are received and sanitized on premise</li>
+                </ul>
+            </td>
+            <td style="padding-top: 30px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 10px; table-layout: fixed; width: 70%;">
+                <div style="font-weight: bold; padding-left:10px;">Temperature Check and Driver hygiene</div>
+                <ul>
+                    <li>We check the temperature of the driver every morning before delivery</li>
+                    <li>We ensure that our riders are equipped with masks and gloves</li>
+                </ul>
+            </td>
+            <td style="padding-top: 10px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 10px; table-layout: fixed; width: 80%;">
+                <div style="font-weight: bold; padding-left:10px;">Packaging Check</div>
+                <ul>
+                    <li>We ensure that all the products are packaged and sealed in the morning</li>
+                </ul>
+            </td>
+            <td style="padding-top: 30px; table-layout: fixed; width: 20%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
+        </tr>
+        <tr>
+            <td colspan="3"> <div style="text-align: center;"> Thank you for ordering on Daily Locally!</div></td>
+        </tr>
+        <tr>
+            <td colspan="3"> <div style="font-weight: bold; float:right;">Fulfilment manager, Daily Locally &nbsp; &nbsp;</div></td>            
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 70%;">
+                
+            </td>
+            <td style="padding-top: 30px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding-top: 20px; padding-bottom: 20px; padding-right: 10px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 80%;">
+                
+            </td>
+            <td style="padding-top: 30px; table-layout: fixed; width: 20%;"> <div > &nbsp; </span></div> </td>
+        </tr>
+    </table>
+
+</body> 
+</html>
