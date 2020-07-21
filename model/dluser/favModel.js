@@ -105,7 +105,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
             if (res.length === 0) {
 
                 let sucobj=true;
-                let message = "Favourite  dish  not found!";
+                let message = "Favourite  not found!";
                      let resobj = {  
                      success: sucobj,
                      status : false,
@@ -133,13 +133,13 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
   
               brandquery = brandquery.slice(0, -2) + ")";
 
-              if (req.catid !=0) {
-                var product_list = "   Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand"
+            //   if (req.catid !=0) {
+                var product_list = "Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  Fav fa  left join Product_live pl on fa.vpid = pl.vpid left join ProductMaster pt on pt.pid=pl.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand "
 
-              } else {
-                var product_list = "   Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand  "
+            //   } else {
+            //     var product_list = "   Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand  "
 
-              }
+            //   }
 
               if (req.catid !=0) {
                 product_list = product_list +"  where fa.userid  = '"+req.userid+"' and cat.catid='"+req.catid+"'";
@@ -170,6 +170,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.mrp DESC ";
               }
 
+            //   console.log(product_list);
                 sql.query(product_list, function (err, res) {
 
                     if(err) {
@@ -201,6 +202,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                         let resobj = {  
                         success: true,
                         status:true,
+                        tille:"Favourites content will given by sushant",
                         result:res   
 
                         };
