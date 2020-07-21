@@ -491,7 +491,7 @@ Logistics.trip_create =async function trip_create(req,result) {
     if(req.zoneid && req.doid.length>0 && req.moveit_id && req.done_by){
         var dayorderids = req.doid;
         var moveittripdata = [];
-        if(req.trip_id!=''){
+        if(req.trip_id){
             var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7,zoneid="+req.zoneid+" where id IN("+dayorderids+")";
             var updatedayorder = await query(updatedayorderquery);  
             if(updatedayorder.affectedRows>0){
@@ -508,7 +508,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                 var getmoveitdetails = await query(getmoveitdetailsquery);
                 if(getmoveitdetails.length>0){
                     console.log("moveit Send Notification ============> For assign 1");
-                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0].userid);
                 }
 
                 
