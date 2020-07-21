@@ -491,7 +491,7 @@ Logistics.trip_create =async function trip_create(req,result) {
     if(req.zoneid && req.doid.length>0 && req.moveit_id && req.done_by){
         var dayorderids = req.doid;
         var moveittripdata = [];
-        if(req.trip_id!=''){
+        if(req.trip_id){
             var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7,zoneid="+req.zoneid+" where id IN("+dayorderids+")";
             var updatedayorder = await query(updatedayorderquery);  
             if(updatedayorder.affectedRows>0){
@@ -508,7 +508,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                 var getmoveitdetails = await query(getmoveitdetailsquery);
                 if(getmoveitdetails.length>0){
                     console.log("moveit Send Notification ============> For assign 1");
-                    await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0].userid);
                 }
 
                 
@@ -592,13 +592,14 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
         var updatedids = [];
         var errorids = [];
         for (let i = 0; i < dayorders.length; i++) {
-            var checkdayorderquery = "select dayo.*,mt.moveit_id from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id where dayo.id="+dayorders[i]+" and dayo.dayorderstatus IN(7,8) and dayo.moveit_type=1";
+            var checkdayorderquery = "select dayo.*,mt.tripid,mt.moveit_id from Dayorder as dayo left join Moveit_trip as mt on mt.tripid=dayo.trip_id where dayo.id="+dayorders[i]+" and dayo.dayorderstatus IN(7,8) and dayo.moveit_type=1";
             var checkdayorder = await query(checkdayorderquery);
             if(checkdayorder.length>0){
                 var updatedayorderquery = "update Dayorder set dayorderstatus=6, trip_id=NULL,moveit_type=NULL where id="+dayorders[i];
                 var updatedayorder = await query(updatedayorderquery);
 
                 ///////check trip status for close //////////
+                await Logistics.trip_status_update(checkdayorder[0].trip_id,async function(err,tripstatusupdateeres){});
                 
                 var historydata = [];
                 historydata.push({"doid":dayorders[i],"tripid":checkdayorder[0].trip_id,"type":2,"zoneid":req.zoneid,"created_by":req.done_by});
@@ -606,11 +607,11 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
 
                 if(updatedayorder.affectedRows>0){
                     ////// Send Notification //////////
-                    var getmoveitdetailsquery = "select * from MoveitUser where userid="+checkdayorder[i].moveit_id;
+                    var getmoveitdetailsquery = "select * from MoveitUser where userid="+checkdayorder[0].moveit_id;
                     var getmoveitdetails = await query(getmoveitdetailsquery);
                     if(getmoveitdetails.length>0){
                         console.log("moveit Send Notification For unassign============> 1");
-                        await Notification.orderMoveItPushNotification(checkdayorder[i].trip_id,PushConstant.pageidMoveit_Order_unassign,getmoveitdetails[0]);
+                        await Notification.orderMoveItPushNotification(checkdayorder[0].trip_id,PushConstant.pageidMoveit_Order_unassign,getmoveitdetails[0]);
                     }
                     ///////////////////////////////////
                     updatedids.push(dayorders[i]);
@@ -648,6 +649,57 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
         result(null, resobj);
     }
 };
+
+/////Trip Status Update///////////////////
+Logistics.trip_status_update =async function trip_status_update(tripid,result) {
+    if(tripid){
+        var gettripordersquery = "select count(id) as totalordercount from Dayorder where trip_id="+tripid;
+        var gettriporders = await query(gettripordersquery);
+        if(gettriporders.length>0){
+            if(gettriporders[0].totalordercount==0){
+                var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+                var updatetripquery = "update Moveit_trip set trip_status=3,cancel_time='"+currentdate+"' where tripid="+tripid;
+                var updatetrip = await query(updatetripquery);
+                if(updatetrip.affectedRows>0){
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "unassign successfully 1"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "unassign successfully 1"
+                    };
+                    result(null, resobj); 
+                }
+            }else{
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "unassign successfully 2"
+                };
+                result(null, resobj);                
+            }
+        }else{            
+            let resobj = {
+                success: true,
+                status: true,
+                message: "unassign successfully 3"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+}
 
 /////////Trip Moveit Filters//////////
 Logistics.trip_moveit_filters =async function trip_moveit_filters(req,result) {
@@ -920,7 +972,7 @@ Logistics.dunzo_delivered =async function dunzo_delivered(req,result) {
             var checkdayorder = await query(checkdayorderquery);
             if(checkdayorder.length>0){
                 var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
-                var updatedayorderquery = "update Dayorder set dayorderstatus=9,moveit_actual_delivered_time='"+currentdate+"' where id="+dayorders[i];
+                var updatedayorderquery = "update Dayorder set dayorderstatus=10,moveit_actual_delivered_time='"+currentdate+"' where id="+dayorders[i];
                 var updatedayorder = await query(updatedayorderquery);
                 if(updatedayorder.affectedRows>0){
                     var updatedunzquery = "update Dunzo_trip set delivered_by="+req.done_by+",delivered_at='"+currentdate+"' where doid="+dayorders[i];

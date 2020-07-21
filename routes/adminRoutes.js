@@ -80,7 +80,7 @@ module.exports = function(app) {
   app.route("/admin/po/updatepounreceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_unreceive}));
   app.route("/admin/po/popsoring").post(middleware.checkToken,routesVersioning({"1.0.0": scm.pop_to_dayorder}));
   app.route("/admin/po/view").post(middleware.checkToken,routesVersioning({"1.0.0": scm.view_po}));
-  // app.route("/admin/po/pdf").post(middleware.checkToken,routesVersioning({"1.0.0": scm.po_pdf}));
+  app.route("/admin/po/pdf").post(middleware.checkToken,routesVersioning({"1.0.0": scm.po_pdf}));
   app.route("/admin/po/delete").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po}));
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));

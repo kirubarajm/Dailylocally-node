@@ -163,6 +163,18 @@ const calculate = {
 
     virtual_order_sms_contact_number:'9150265900',
     Real_order_sms_link:'https://bit.ly/2WIHsYs',
+
+    tovo_po_header_name:"Tovo Technologies PVT.LTD",
+    tovo_po_header_address:"D2, 15, Featherlite Vaikundam,Urapakkam",
+    tovo_po_header_area:"chennai - 603210",
+    tovo_po_header_gst:"GST : 33AAGCT8518D1ZF",
+    tovo_po_header_email:"waziq@tovogroup.com",
+    tovo_po_contact:"vignesh",
+    tovo_po_contact_number:"8753412345",
+    tovo_po_contact_email:"vignesh@tovo.com",
+    tovo_po_footer_name:"Tovo Technologies PVT.LTD.,",
+    tovo_po_footer_address:"AMG Towers, Lawyer Jaganathan Street,",
+    tovo_po_footer_area:"Alandur, chennai - 600032",
 }
 
 

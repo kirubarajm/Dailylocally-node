@@ -20,10 +20,10 @@ const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
 
-// var pdf = require("pdf-creator-node");
-// var fs = require('fs');
-// // Read HTML Template
-// var html = fs.readFileSync('checklisttemplate.html', 'utf8');
+var pdf = require("pdf-creator-node");
+var fs = require('fs');
+// Read HTML Template
+var html = fs.readFileSync('checklisttemplate.html', 'utf8');
 
 var SCM = function(scm) {};
 
@@ -1040,67 +1040,99 @@ SCM.view_po =async function view_po(req,result) {
 };
 
 /////// PO PDF ////////
-// SCM.po_pdf= async function po_pdf(req,result) {
-//     var getchecklistquery ="select ord.orderid,ord.userid,us.name,ord.cus_address,us.phoneno,ord.orderid,date(ord.created_at) as orderdate,date(ord.order_delivery_day) as deliverydate from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"' group by ord.orderid";
-//     var getchecklist = await query(getchecklistquery);
+SCM.po_pdf= async function po_pdf(req,result) {
+    if(req.poid){
+
+    }else{
+        
+    }
+    // var getchecklistquery ="select ord.orderid,ord.userid,us.name,ord.cus_address,us.phoneno,ord.orderid,date(ord.created_at) as orderdate,date(ord.order_delivery_day) as deliverydate from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"' group by ord.orderid";
+    // var getchecklist = await query(getchecklistquery);
+
+    var getchecklist = [];
+    getchecklist.push({"poid":2,"podate":"2020-07-20 12:00:00","deliveryduedate":"2020-07-20 12:00:00","vendorname":"vendor1","vendoraddress":"no 60, 1st streeet, rayapuram, chennai-659698","vendorphoneno":"9966556622","shipto":"no 48, 5th street, T-nagar, chennai-697898","vendoremail":"vendor1@gmail.com","vendorgst":"GST00988765"});
   
-//     var getchecklistitemquery ="select pro.product_name,oi.quantity from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"'";
-//     var getchecklistitem = await query(getchecklistitemquery);
-//     getchecklist['items'] = getchecklistitem;
-  
-//     if(getchecklist.length != 0){
-//       var options = {
-//         format: "A4",
-//         orientation: "landscap",
-//         border: "10mm"
-//       };
-//       var order = [{
-//         order_id: getchecklist[0]['orderid'],
-//         order_date: moment(getchecklist[0]['orderdate']).format("DD-MM-YYYY"),
-//         delivery_date: moment(getchecklist[0]['deliverydate']).format("DD-MM-YYYY"),
-//         cus_name: getchecklist[0]['name'],
-//         cus_mobile: getchecklist[0]['phoneno'],
-//         cus_address: getchecklist[0]['cus_address']
-//       }]
-//       var items = getchecklistitem;
-//       var document = {
-//         html: html,
-//         data: {
-//             items: items,
-//             order: order
-//         },
-//         path: "./uploads/po_pdf/po1.pdf"
-//       };
-//       //console.log(document);
-//       pdf.create(document, options)
-//         .then(res => {
-//             console.log(res);
-//             let resobj = {
-//               success: true,
-//               message: "pdf Created Successfully",
-//               status:true,
-//               url: res
-//             };
-//             result(null, resobj);
-//         })
-//         .catch(error => {
-//             console.error(error)
-//             let resobj = {
-//               success: false,
-//               message: "something went wrong",
-//               status:false
-//             };
-//             result(null, resobj);
-//         });    
-//     }else{
-//       let resobj = {
-//         success: false,
-//         message: "no record in this order",
-//         status:false
-//       };
-//       result(null, resobj);
-//     }  
-//   };
+    // var getchecklistitemquery ="select pro.product_name,oi.quantity from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"'";
+    // var getchecklistitem = await query(getchecklistitemquery);
+    // getchecklist['items'] = getchecklistitem;
+    var getchecklistitem = [];
+    getchecklistitem.push({"product_name":"product1","quantity":10,"rate":300,"unit":"grams","amount":3000});
+    getchecklist['items'] = getchecklistitem;
+
+    
+    if(getchecklist.length != 0){
+      var options = {
+        format: "A4",
+        orientation: "landscap",
+        border: "10mm"
+      };
+      var order = [{
+        poid: getchecklist[0]['poid'],
+        podate: moment(getchecklist[0]['podate']).format("DD-MM-YYYY"),
+        deliveryduedate: moment(getchecklist[0]['deliveryduedate']).format("DD-MM-YYYY"),
+        vendorname: getchecklist[0]['vendorname'],
+        vendoraddress: getchecklist[0]['vendoraddress'],
+        vendorphoneno: getchecklist[0]['vendorphoneno'],
+        shipto: getchecklist[0]['shipto'],
+        vendoremail: getchecklist[0]['vendoremail'],
+        vendorgst: getchecklist[0]['vendorgst']
+      }]
+      var headerdata = [{
+        headername: constant.tovo_po_header_name,
+        headeraddress: constant.tovo_po_header_address,
+        headerarea: constant.tovo_po_header_area,
+        headergst: constant.tovo_po_header_gst,
+      }]
+      var footerdata = [{
+        contactname: constant.tovo_po_contact,
+        contactnumber: constant.tovo_po_contact_number,
+        contactemail: constant.tovo_po_contact_email,
+        footername: constant.tovo_po_footer_name,
+        footeraddress: constant.tovo_po_footer_address,
+        footerarea: constant.tovo_po_footer_area,
+      }]
+      var items = getchecklistitem;
+      var pathfilename = "./uploads/po_pdf/"+getchecklist[0]['poid']+".pdf";
+      var document = {
+        html: html,
+        data: {
+            items: items,
+            order: order,
+            footer: footerdata,
+            header:headerdata,
+        },
+        path: pathfilename
+      };
+      //console.log(document);
+      pdf.create(document, options)
+        .then(res => {
+            console.log(res);
+            let resobj = {
+              success: true,
+              message: "pdf Created Successfully",
+              status:true,
+              url: res
+            };
+            result(null, resobj);
+        })
+        .catch(error => {
+            console.error(error)
+            let resobj = {
+              success: false,
+              message: "something went wrong",
+              status:false
+            };
+            result(null, resobj);
+        });    
+    }else{
+      let resobj = {
+        success: false,
+        message: "no record in this order",
+        status:false
+      };
+      result(null, resobj);
+    }  
+  };
 
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {
@@ -1126,7 +1158,7 @@ SCM.delete_po =async function delete_po(req,result) {
                                 resobj = {
                                     success: true,
                                     status: true,
-                                    message: "updated successfully"
+                                    message: "po deleted successfully"
                                 };
                                 result(null, resobj);
                             }else{

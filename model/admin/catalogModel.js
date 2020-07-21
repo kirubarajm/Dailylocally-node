@@ -20,6 +20,8 @@ var sub_category_L1 = require("../../model/category/subcategoryL1Model");
 var Sub_Category_L2 = require("../../model/category/subcategoryL2Model");
 var Productlist = require("../../model/category/productmasterModel");
 var ClusterCategoryMapping = require("../tableModels/clustercategorymappingTableModel.js");
+var CatalogLog = require('../tableModels/cataloglogTableModel.js');
+
 
 var Catalog = function(catalog) {};
 
@@ -740,7 +742,8 @@ Catalog.view_category =async function view_category(req,result) {
 
 /////////Add Category///////////
 Catalog.add_category =async function add_category(req,result) {
-    if(req.name && req.image){
+    if(req.name && req.image && req.zoneid && req.done_by){
+        req.created_by = req.done;
         var checkcategoryquery = "select * from Category where name='"+req.name+"' ";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
@@ -763,6 +766,10 @@ Catalog.add_category =async function add_category(req,result) {
                                 await ClusterCategoryMapping.createClusterCategoryMapping(insertCCMdata[0], async function(err,CCMres){ });
                             }
                         }
+
+                        var insertcatalogdata = [];
+                        insertcatalogdata.push({"id":categoryres.result.insertId,"type_id":1,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
+                        await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
 
                         let resobj = {
                             success: true,
