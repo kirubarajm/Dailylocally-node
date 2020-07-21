@@ -74,6 +74,7 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
        
           var productlist = res3.result
            
+          //console.log(productlist);
           
           if (productlist.length !==0) {
             res[i].collectionstatus = true;
@@ -91,7 +92,6 @@ return res
 }
 
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
-  
 
     await sql.query(req.query,[req.cid],async function(err, res1) {
       if (err) {

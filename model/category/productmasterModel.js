@@ -35,7 +35,7 @@ var ProductMaster = function(productMaster) {
 
 ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req,result) {
   
-  req.scl2_id = parseInt(req.scl2_id );
+     req.scl2_id = parseInt(req.scl2_id );
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
     var userdetails       = await query("select * from User where userid = "+req.userid+" ");
@@ -397,13 +397,13 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
 
   brandquery = brandquery.slice(0, -2) + ")";
 
-  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.vpid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid  left join Brand br on br.id=pm.brand ";
+  var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Collection_mapping_product cmp on cmp.pid=pm.pid  left join Brand br on br.id=pm.brand left join Zone_l1_subcategory_mapping z1 on z1.master_l1_subcatid= sub1.scl1_id";
 
 
   if (req.scl1_id !=0) {
-    var product_list = product_list +" where  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"' ";
+    var product_list = product_list +" where   z1.active_status=1 and pl.live_status=1 and  cmp.cid='"+req.cid+"' and sub1.scl1_id= '"+req.scl1_id+"' ";
   }else{
-    var product_list = product_list +" where  cmp.cid='"+req.cid+"' ";
+    var product_list = product_list +" where   z1.active_status=1 and pl.live_status=1 and  cmp.cid='"+req.cid+"' ";
   }
 
 
