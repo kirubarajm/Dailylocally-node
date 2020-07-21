@@ -508,7 +508,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                 var getmoveitdetails = await query(getmoveitdetailsquery);
                 if(getmoveitdetails.length>0){
                     console.log("moveit Send Notification ============> For assign 1");
-                    await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
                 }
 
                 
