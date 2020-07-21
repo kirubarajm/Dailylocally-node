@@ -51,7 +51,6 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
        
 
         if (req.type==1) {
-          console.log("-------------->",req.type);
           note = note +'\n'+"Current order, "+res[0].tag_name;
         }else{
           note = note +'\n'+"Old order, "+res[0].tag_name;
@@ -65,7 +64,7 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
        
       
         res[0].note = note;
-        res[0].department_name = "eat";
+        res[0].department_name = "Daily locally";
 
         
         let resobj = {
@@ -79,7 +78,7 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
   };
 
 Zendeskissues.getZendeskissues = function getZendeskissues(req,result) {
-  sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.type='"+req.type+"'", function(err, res) {
+  sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name, 'daily Locally' as department_name,if(zi.type=1,'Feature order',if(zi.type=3,'query',if(zi.type=4,'completed order','')))as note from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.type='"+req.type+"'", function(err, res) {
     if (err) {
       result(err, null);
     } else {

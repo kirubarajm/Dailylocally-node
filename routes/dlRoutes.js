@@ -34,6 +34,7 @@ app.route("/user/address/:userid").get(middleware.checkToken,routesVersioning({"
 app.route("/user/addresslist/:aid").get(middleware.checkToken,routesVersioning({"1.0.0":useraddress.read_a_user_address_aid}));
 app.route("/user/addressdelete").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_delete_status}));
 app.route("/user/defaultaddress").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.user_default_address_update}));
+app.route("/user/checkaddress").post(middleware.checkToken,routesVersioning({"1.0.0":useraddress.checkaddress}));
 
 
  // category

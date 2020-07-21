@@ -92,12 +92,13 @@ UserAddress.getaddressById = function getaddressById(userId, result) {
                 if (res.length ===0) {
                     
                     status = false;
+                }else{
+                    res[0].note= 'This content will be given by sushant';
                 }
                
                 let resobj = {  
                 success: true,
                 status:status,
-                location_radius:3,
                 result: res
                 }; 
 
@@ -251,6 +252,65 @@ if (user_day_order_details.length !=0) {
 
 //         });
 };
+
+UserAddress.check_address =async function check_address(req, result){
+
+    var servicable_status = false;
+   
+    var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+    req.lat +
+    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+    req.lon +
+    "') ) + sin( radians('" +
+    req.lat +
+    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+   
+   
+   if (get_nearby_zone.length !=0) {
+    
+    if (get_nearby_zone[0].distance > constant.radiuslimit) {
+      servicable_status =false;
+    }
+   }
+   
+   var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
+   
+   if (user_day_order_details.length !=0) {
+       
+     if (!servicable_status) {
+       let resobj = {
+           success: true,
+           status: servicable_status,
+           servicable_status:servicable_status,
+           title : 'Alert',
+           message: "Your current selected location is unserviceable",
+       };
+   
+       result(null, resobj);
+     }else{
+        let resobj = {
+            success: true,
+            status: servicable_status,
+            title : 'Alert',
+            servicable_status:servicable_status,
+            message: "Your current selected location is serviceable",
+        };
+    
+        result(null, resobj);
+     }
+   
+   } else {
+    let resobj = {
+        success: true,
+        status: false,
+        message: "user not found",
+    };
+
+    result(null, resobj);
+   }
+   
+ 
+   };
 
 UserAddress.remove = function(id, result){
      sql.query("DELETE FROM User WHERE userid = ?", [id], function (err, res) {
