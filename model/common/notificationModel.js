@@ -404,6 +404,22 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
       };
 
       break;
+
+      case PushConstant.pageidMoveit_return_book:
+        data = {
+          title: "Return booked for Order"+ orderid,
+          message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer.",
+          pageid: "" + pageid,
+          app: "Move-it",
+          notification_type: "1"
+          // name: "" + Eatuserdetail.name,
+          // price: "" + orders.price,
+          // orderid: "" + orders.orderid,
+          // place: "" + orders.cus_address,
+       
+        };
+  
+        break;
   }
 
   if (data == null) return;

@@ -282,7 +282,7 @@ Fav.read_a_category_by_userid = function read_a_category_by_userid(req,result) {
             if (res.length === 0) {
 
                 let sucobj=true;
-                let message = "Favourite  dish  not found!";
+                let message = "Favourite  Category  not found!";
                      let resobj = {  
                      success: sucobj,
                      status : false,
@@ -297,7 +297,7 @@ Fav.read_a_category_by_userid = function read_a_category_by_userid(req,result) {
             }else{
 
 
-            var query = "Select cat.* from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid where fa.userid  = '"+req.userid+"'  group by cat.catid"
+            var query = "Select cat.* from  Product_live pl left join Fav fa on fa.vpid = pl.vpid left join ProductMaster pm on pm.pid=pl.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join Category cat on cat.catid=sub1.catid where fa.userid  = '"+req.userid+"'  group by cat.catid"
 
                 sql.query(query, function (err, res) {
 

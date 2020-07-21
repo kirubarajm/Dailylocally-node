@@ -8,6 +8,7 @@ var Stock = require('../tableModels/stockTableModel.js');
 var OrderComments = require("../../model/admin/orderCommentsModel");
 var RefundOnline = require("../../model/common/refundonlineModel");
 var Notification = require("../../model/common/notificationModel.js");
+var MoveitStatus = require("../../model/moveit/moveitStatusModel");
 
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
@@ -536,7 +537,7 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
     // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -762,43 +763,53 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     
     if(Dayorder.starting_date && Dayorder.end_date){
 
-      if (Dayorder.slot===1) {
- 
+           where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
 
-        // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
-        // let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
-
-        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
-        let datetimeB = moment(end_date).format("YYYY-MM-DD");
-        let datetimeC =  moment().format("23:00:00");
-        let datetimeD  = moment().format("19:00:00");
-
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"') and HOUR(drs.order_place_time) <= 19";
-
-      }else if(Dayorder.slot===2){
-
-        // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 19:00:00");
-        // let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");
-      
-        let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
-        let datetimeB = moment(end_date).format("YYYY-MM-DD");
-        where = where+" and (drs.date BETWEEN '"+datetimeA +"' AND '"+datetimeB +"')and HOUR(drs.order_place_time) > 19";
-
-      }
-      else{
-
-        where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
-
-      }
     }else{
 
 
-        where = where+" and  DATE(drs.created_at) = CURDATE() ";
-
-
+        // where = where+" and  DATE(drs.created_at) = CURDATE() ";
 
     }
 
+
+    // if (Dayorder.slot===1) {
+ 
+
+    //   // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
+    //   // let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
+
+    //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
+    //   let datetimeB = moment(end_date).format("YYYY-MM-DD");
+    //   let datetimeC =  moment().format("00:00:00");
+    //   let datetimeD  = moment().format("19:00:00");
+    //   //TIME(DATE) BETWEEN '09:00' AND '19:00'
+    //   // where = where+" and HOUR(drs.order_place_time) <= 19 ";
+    //   where = where+" and TIME(drs.order_place_time) BETWEEN '00:00:00' and '19:00:00' ";
+
+    // }else if(Dayorder.slot===2){
+
+    //   // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 19:00:00");
+    //   // let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");
+    
+    //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
+    //   let datetimeB = moment(end_date).format("YYYY-MM-DD");
+    //   // where = where+" and HOUR(drs.order_place_time) > 19";
+    //   where = where+" and TIME(drs.order_place_time) BETWEEN '19:00:00' and '00:00:00' ";
+
+    // }
+    // else{
+
+    //   where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
+
+    // }
+
+
+    if(Dayorder.slot==1){
+      where = where+" and HOUR(time(drs.order_place_time))<=19 ";
+  }else if(Dayorder.slot==2){
+    where = where+" and HOUR(time(drs.order_place_time))>=19 ";
+  } 
 
     if(Dayorder.id){
         where = where+" and drs.id="+Dayorder.id;
@@ -823,15 +834,16 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
         where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
-    if (Dayorder.usersearch) {
-      where = where+" and (us.phoneno like '%"+Dayorder.usersearch+"%' or us.email like '%"+Dayorder.usersearch+"%' or us.name like '%"+Dayorder.usersearch+"%') ";
+    if (Dayorder.search) {
+
+      where = where+" and (us.phoneno like '%"+Dayorder.search+"%' or us.userid like '%"+Dayorder.search+"%' or us.name like '%"+Dayorder.search+"%') ";
     }
 
-  where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
+      where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
   
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus >5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Deliverd' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return'end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot    from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Deliverd' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot    from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
 
-    console.log(getdayorderquery);
+    // console.log(getdayorderquery);
 
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -874,7 +886,45 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 };
 
 Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_cancel(Dayorder,vpid,result) {
+  console.log(Dayorder);
   var now = moment().format("YYYY-MM-DD,h:mm:ss a");
+
+  var day_order = await query("select * from Dayorder where id = "+Dayorder.doid+" ");
+
+  if (day_order.length==0) {
+    let resobj = {
+      success: true,
+      message: "Order not found .",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else if (day_order[0].dayorderstatus ==12) {
+    let resobj = {
+      success: true,
+      message: "Following order not returned. Please check admin.",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else if (day_order[0].dayorderstatus ==11) {
+    let resobj = {
+      success: true,
+      message: "Already order cancelled.",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else if (day_order[0].dayorderstatus ==10) {
+    let resobj = {
+      success: true,
+      message: "Already order delivered.",
+      status: true
+    };
+    result(null, resobj);
+  
+  }else{
+
 
   var product= await query("select * from Dayorder_products where id IN('"+vpid+"') and scm_status >=6 ");
   if (product.length==0 ) {
@@ -940,7 +990,7 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 
   result(null, resobj); 
 }
-  
+  }
 };
 
 
@@ -952,7 +1002,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     let resobj = {
       success: true,
       message: "Order not found .",
-      status: true
+      status: false
     };
     result(null, resobj);
   
@@ -960,7 +1010,8 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     let resobj = {
       success: true,
       message: "Following order not returned. Please check admin.",
-      status: true
+      status: false
+    
     };
     result(null, resobj);
   
@@ -968,7 +1019,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     let resobj = {
       success: true,
       message: "Already order cancelled.",
-      status: true
+      status: false
     };
     result(null, resobj);
   
@@ -976,7 +1027,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     let resobj = {
       success: true,
       message: "Already order delivered.",
-      status: true
+      status: false
     };
     result(null, resobj);
   
@@ -1007,10 +1058,18 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
 
     var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.doid+"'" );
 
-    PushConstant.Pageid_dl_return_notification = 14;
-    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_return_notification);
-    result(null, resobj);
+    // PushConstant.Pageid_dl_return_notification = 14;
+    // await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_return_notification);
+
+    // await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+    // result(null, resobj);
  
+    // var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
+    // var getmoveitdetails = await query(getmoveitdetailsquery);
+    // if(getmoveitdetails.length>0){
+    //     console.log("moveit Send Notification ============> For assign 1");
+    //     await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+    // }
    
     let resobj = {
       success: true,
@@ -1020,10 +1079,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     result(null, resobj);
   
   }
-
-  
-
-   
+ 
 };
 
 Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order_item,result) {
@@ -1421,9 +1477,17 @@ Dayorder.refund_create = async function refund_create(req,result) {
 };
 
 
+Dayorder.insert_order_status = function insert_order_status(req) {
+  var new_MoveitStatus = new MoveitStatus(req);
+  MoveitStatus.createMoveitStatus(new_MoveitStatus, function(err, res) {
+   if (err) return err;
+   else return res;
+ });
+};
+
+
 Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by_moveit(req,result) {
 
-      
 
   var day_order = await query("select * from Dayorder where id = "+req.id+" ");
 
@@ -1444,6 +1508,12 @@ Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by
     result(null, resobj);
   
   }else{
+
+    
+    req.moveitid = req.moveit_userid;
+    req.status = 8;
+    req.doid= req.id;
+    await Dayorder.insert_order_status(req); 
 
     var cancel_comments = 'return requested by moveit'
     var New_comments  ={};
@@ -1472,10 +1542,6 @@ Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by
     result(null, resobj);
 
   }
-   
-  
-   
-
    
 };
 
