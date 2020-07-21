@@ -20,8 +20,6 @@ var MoveitStatus = function (moveitstatus) {
 
 MoveitStatus.createMoveitStatus = function createMoveitStatus(createMoveitStatus, result) {
 
-    //newMoveitTimelog.logtime = moment().format("YYYY-MM-DD HH:mm:ss");
-    console.log(createMoveitStatus);
 sql.query("INSERT INTO Moveit_status set ?", createMoveitStatus, function (err, res1) {
         if (err) {
         console.log("error: ", err);

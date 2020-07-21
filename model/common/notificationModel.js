@@ -114,9 +114,10 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 
     case PushConstant.Pageid_dl_order_reached:
       data = {
-        title: "Your order near to me",
-        message: "Your Order Waiting.Please picked up",
-        pageid: "" + pageid,
+        title: "Your order has reached your location!",
+        message: "Fresh products are waiting for you. Our delivery partner might try to get in touch with you! Request you to assist us in serving you best, by picking up your phone.",
+        pageid: 9,
+        date:orders[0].date,
         app: "Dl",
         notification_type: "1"
       };
@@ -124,28 +125,44 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 
     case PushConstant.Pageid_dl_order_delivered:
       data = {
-        title: "Order Delivered",
-        message: "Hi! your Order Delivered successfully",
-        pageid: "" + pageid,
+        title: "Your order <#"+orders[0].id+"> has been delivered.",
+        message: "Your order has been delivered successfully. We request you to share your valuable feedback or complains through the feedback pop up on your app!",
+        pageid: 9,
+        date:orders[0].date,
         app: "Dl",
         notification_type: "1"
       };
       break;
 
+      case PushConstant.Pageid_dl_return_notification:
+        data = {
+          title: "Your order <#"+orders[0].id+"> could not be delivered and is returning back to our warehouse.",
+          message: "Apologies! Your order could not be delivered and is returning back to our warehouse. Kindly get in touch with us through our chat support for knowing more. ",
+          pageid:29,
+          date:orders[0].date,
+          app: "Dl",
+          notification_type: "1"
+        };
+        break;
+
     case PushConstant.Pageid_dl_order_cancel:
-      var  message = "We apologise for the inconvenience caused. Explore our gold members for uninterrupted service. Kindly contact us for more details.";
-      if(orders.payment_type==="1"){
-        message = "We apologise for the inconvenience caused. Your payment will be refunded within 2 - 4 working days. Kindly contact us for more details. ";
-      }
-      //COD
-      // Content - We apologise for the inconvenience caused. Explore our gold members for uninterrupted service. Kindly contact us for for more details."
-      //online
-      //Content - We apologise for the inconvenience caused. Your payment will be refunded within 2 - 4 working days. Kindly contact us for more details. "
-      data = {
-        title: "Your order has been cancelled due to unforeseen circumstances.",
-        message: message,
-        pageid: "" + pageid,
-        payment_type:orders.payment_type,
+        data = {
+        title: "Your Order <#"+orders[0].id+"> has been cancelled!.",
+        message: "Apologies! Your order has been cancelled due to the following reason",
+        pageid: 29,
+        date:orders[0].date,
+        app: "Eat",
+        notification_type: "2"
+      };
+
+      break;
+
+      case PushConstant.Pageid_dl_reorder_notification:
+        data = {
+        title: "Re-delivery has been booked for your order <#"+orders[0].id+">.",
+        message: "Your new order number is <#"+orders[0].id+">. Your redelivery will be completed by <Date>. Kindly get in touch with us through our chat support to know more",
+        pageid: 9,
+        date:orders[0].date,
         app: "Eat",
         notification_type: "2"
       };
@@ -389,6 +406,22 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
       };
 
       break;
+
+      case PushConstant.pageidMoveit_return_book:
+        data = {
+          title: "Return booked for Order"+ orderid,
+          message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer.",
+          pageid: "" + pageid,
+          app: "Move-it",
+          notification_type: "1"
+          // name: "" + Eatuserdetail.name,
+          // price: "" + orders.price,
+          // orderid: "" + orders.orderid,
+          // place: "" + orders.cus_address,
+       
+        };
+  
+        break;
   }
 
   if (data == null) return;

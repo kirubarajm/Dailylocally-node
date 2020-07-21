@@ -374,7 +374,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
 
             var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Orders as ors left join User as us on ors.userid=us.userid where ors.orderid ='" +order_place.orderid +"'" );
 
-            await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_post);
+            // await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_post);
 
             let resobj = {
               success: true,
@@ -1252,8 +1252,12 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
                 status:true,
                 message: "Customer location reached successfully"
               };
-              //PushConstant.Pageid_eat_order_pickedup = 6;
-              // await Notification.orderEatPushNotification(req.orderid,null,PushConstant.Pageid_eat_order_pickedup);
+              var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.id+"'" );
+
+                PushConstant.Pageid_dl_order_reached = 6;
+               await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_reached);
+
+               // await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_post);
               result(null, resobj); 
             }
           }
@@ -1333,11 +1337,11 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                   // trip_status:trip_status,
                   orderdeliverystatus: true
                 };
-                // await Notification.orderEatPushNotification(
-                //   req.orderid,
-                //   null,
-                //   PushConstant.Pageid_eat_order_delivered
-                // );
+
+                var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.id+"'" );
+
+                PushConstant.Pageid_dl_order_reached = 7;
+                await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_delivered);
                 result(null, resobj);
              
                

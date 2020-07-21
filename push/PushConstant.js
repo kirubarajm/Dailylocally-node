@@ -7,9 +7,9 @@ const PushConstant={
     masteridOrder_Delivered:6,
 
     Pageid_dl_order_post:1,
-    // Pageid_dl_order_accept:2,
-    // Pageid_dl_order_preparing:3,
-    // Pageid_dl_order_Prepared:4,
+    Pageid_dl_order_accept:2,
+    Pageid_dl_order_preparing:3,
+    Pageid_dl_order_Prepared:4,
     Pageid_dl_order_pickedup:5,
     Pageid_dl_order_reached:6,
     Pageid_dl_order_delivered:7,
@@ -17,6 +17,8 @@ const PushConstant={
     Pageid_dl_query_replay:9,
     Pageid_dl_send_notification:0,//bulk nofication
     Pageid_dl_zendesk_notification:13,//zendesk
+    Pageid_dl_return_notification:14,
+    Pageid_dl_reorder_notification:15,
 
 
     pageidMoveit_Order_Assigned:1,
@@ -25,6 +27,7 @@ const PushConstant={
     pageidMoveit_Replies:4,
     pageidMoveit_Order_Reassign:5,
     pageidMoveit_Order_unassign:6,
+    pageidMoveit_return_book:6,
 
     pageidMakeit_Order_Post:1,
     pageidMakeit_Order_Cancel:2,

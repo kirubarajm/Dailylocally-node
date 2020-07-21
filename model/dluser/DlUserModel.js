@@ -5879,16 +5879,16 @@ Dluser.request_zendesk_ticket= async function request_zendesk_ticket(req,result)
   Dluser.zendesk_ticket_check= async function zendesk_ticket_check(req,result) { 
 
       
-    var cancel_comments = req.return_reason
-    var New_comments  ={};
-    New_comments.doid=req.doid;
-    New_comments.comments=  'New ticket created'
-    New_comments.done_by=req.done_by
-    New_comments.type=2
-    New_comments.done_type=1
+    // var cancel_comments = req.return_reason
+    // var New_comments  ={};
+    // New_comments.doid=req.doid;
+    // New_comments.comments=  'New ticket created'
+    // New_comments.done_by=req.done_by
+    // New_comments.type=2
+    // New_comments.done_type=1
   
   
-    OrderComments.create_OrderComments_crm(New_comments)
+    // OrderComments.create_OrderComments_crm(New_comments)
 
   var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
   var headers= {
@@ -6026,17 +6026,18 @@ Dluser.zendesk_ticket_create= async function Dluser(req,result) {
           req.app_type=0;
           req.tagid=0;
           req.type=3;
-          var updateOrderQuery="update Orders set zendesk_ticketid= "+ticketid+" where orderid= "+req.orderid; 
+          var updateOrderQuery="update Dayorder set zendesk_ticketid= "+ticketid+" where id= "+req.doid; 
           var update_orders=await query(updateOrderQuery);
           
     
           var New_comments  ={};
           New_comments.doid=req.doid;
-          New_comments.comments=description
+          New_comments.comments= detail.description + "  TicketId "+obj.ticket.id
           New_comments.done_by=req.done_by
           New_comments.type=2
           New_comments.done_type=1
 
+             console.log("zendesk",New_comments);
              OrderComments.create_OrderComments_crm(New_comments)
 
                 for(var i=0;i<req.issues.length;i++){
@@ -6092,10 +6093,6 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           user.phone=res[0].phoneno;
           userdetails.user = user;
          
-          console.log("userdetails----------->",userdetails);
-
-
-        
         
       //   console.log(user11111);
         var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
@@ -6336,6 +6333,16 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
                   Dluser.new_zendesk_request_create(req);
                 }
 
+                var New_comments  ={};
+          New_comments.doid=req.doid;
+          New_comments.comments= detail.description + " TicketId "+obj.ticket.id
+          New_comments.done_by=req.done_by
+          New_comments.type=2
+          New_comments.done_type=1
+  console.log("zendesk",New_comments);
+             console.log("zendesk",New_comments);
+             OrderComments.create_OrderComments_crm(New_comments)
+
           let resobj = {
             success: true,
             status: true,
@@ -6447,6 +6454,18 @@ Dluser.dl_user_send_message = function dl_user_send_message(User, result) {
       result(null, err);
     } else {
   
+
+
+      var New_comments  ={};
+      New_comments.doid=User.doid;
+      New_comments.comments='Sms sent to customer following reason '+User.message
+      New_comments.done_by=User.done_by
+      New_comments.type=2
+      New_comments.done_type=1
+    
+    
+      OrderComments.create_OrderComments_crm(New_comments)
+
       if (body) {
         let resobj = {
           success: true,
@@ -6519,14 +6538,14 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
           var updateOrderQuery="update Dayorder set zendesk_ticketid= "+ticketid+" where id= "+req.doid; 
           var update_orders=await query(updateOrderQuery);
           
-          var create_comments = 're-order created'
           var New_comments  ={};
           New_comments.doid=req.doid;
-          New_comments.comments=req.reason
+          New_comments.comments= detail.description + " TicketId "+obj.ticket.id
           New_comments.done_by=req.done_by
           New_comments.type=2
           New_comments.done_type=1
           New_comments.Img1=req.Img1 || ''
+          console.log("zendesk",New_comments);
           OrderComments.create_OrderComments_crm(New_comments)
 
                 for(var i=0;i<req.issues.length;i++){
