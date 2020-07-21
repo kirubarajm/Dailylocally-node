@@ -47,6 +47,7 @@ module.exports = function(app) {
   app.route("/admin/view/product").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.view_product}));
   app.route("/admin/add/product").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.add_product}));
   app.route("/admin/edit/product").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.edit_product}));
+  app.route("/admin/delete/product").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.delete_product}));
   app.route("/admin/live/product").put(middleware.checkToken,routesVersioning({"1.0.0": catalog.update_product_livestatus}));
 
   /////////Get Basic List ////////////

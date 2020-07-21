@@ -767,6 +767,7 @@ Catalog.add_category =async function add_category(req,result) {
                             }
                         }
 
+                        ////// Catalog History /////////////////
                         var insertcatalogdata = [];
                         insertcatalogdata.push({"id":categoryres.result.insertId,"type_id":1,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
                         await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
@@ -800,12 +801,17 @@ Catalog.add_category =async function add_category(req,result) {
 
 /////////Edit Category///////////
 Catalog.edit_category =async function edit_category(req,result) {
-    if(req.catid && req.name){
+    if(req.catid && req.name && req.zoneid && req.done_by){
         var checkcategoryquery = "select * from Category where name='"+req.name+"' and catid NOT IN("+req.catid+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
             var updatecategory = await Category.updateCategory(req, async function(err,popres){
                 if(popres.status == true){
+                    ////// Catalog History /////////////////
+                    var insertcatalogdata = [];
+                    insertcatalogdata.push({"id":req.catid,"type_id":1,"action_type":2,"zoneid":req.zoneid,"created_by":req.done_by});
+                    await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
+
                     let resobj = {
                         success: true,
                         status: true,
@@ -871,7 +877,7 @@ Catalog.view_subcategoryl1 =async function view_subcategoryl1(req,result) {
 
 /////////Add SubCategoryL1///////////
 Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
-    if(req.name && req.image && req.catid){
+    if(req.name && req.image && req.catid && req.zoneid && req.done_by){
         var checksubcategoryl1query = "select * from SubcategoryL1 where name='"+req.name+"' ";
         var checksubcategoryl1 = await query(checksubcategoryl1query);
         if(checksubcategoryl1.length ==0 ){
@@ -887,6 +893,10 @@ Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
                                 senddata.push({"zoneid":zoneres.result[i].id,"master_l1_subcatid":subcategory1res.result.insertId,"active_status":0});
                                 L1SubCategoryMapping.createL1SubcategoryMapping(senddata[0], async function(err,productliveres){});
                             }
+                            ////// Catalog History /////////////////
+                            var insertcatalogdata = [];
+                            insertcatalogdata.push({"id":subcategory1res.result.insertId,"type_id":2,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
+                            await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                             let resobj = {
                                 success: true,
                                 status: true,
@@ -924,12 +934,17 @@ Catalog.add_subcategoryl1 =async function add_subcategoryl1(req,result) {
 
 /////////Edit SubCategoryL1///////////
 Catalog.edit_subcategoryl1 =async function edit_subcategoryl1(req,result) {
-    if(req.scl1_id && req.name){
+    if(req.scl1_id && req.name && req.zoneid && req.done_by){
         var checkcategoryquery = "select * from SubcategoryL1 where name='"+req.name+"' and scl1_id NOT IN("+req.scl1_id+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
             var updatesubcategoryl1 = await Subcategoryl1.updateSubcategoryl1(req,async function(err,subl1res){
                 if(subl1res.status == true){
+                    ////// Catalog History /////////////////
+                    var insertcatalogdata = [];
+                    insertcatalogdata.push({"id":req.scl1_id,"type_id":2,"action_type":2,"zoneid":req.zoneid,"created_by":req.done_by});
+                    await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
+
                     let resobj = {
                         success: true,
                         status: true,
@@ -995,7 +1010,7 @@ Catalog.view_subcategoryl2 =async function view_subcategoryl2(req,result) {
 
 /////////Add SubCategoryL2///////////
 Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
-    if(req.name && req.scl1_id){
+    if(req.name && req.scl1_id && req.zoneid && req.done_by){
         var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' ";
         var checksubcategoryl2 = await query(checksubcategoryl2query);
         if(checksubcategoryl2.length ==0 ){
@@ -1011,6 +1026,10 @@ Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
                                 senddata.push({"zoneid":zoneres.result[i].id,"master_l2_subcatid":subcategory2res.result.insertId,"active_status":0});
                                 L2SubCategoryMapping.createL2SubcategoryMapping(senddata[0], async function(err,productliveres){ });
                             }
+                            ////// Catalog History /////////////////
+                            var insertcatalogdata = [];
+                            insertcatalogdata.push({"id":subcategory2res.result.insertId,"type_id":3,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
+                            await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                             let resobj = {
                                 success: true,
                                 status: true,
@@ -1048,12 +1067,16 @@ Catalog.add_subcategoryl2 =async function add_subcategoryl2(req,result) {
 
 /////////Edit SubCategoryL2///////////
 Catalog.edit_subcategoryl2 =async function edit_subcategoryl2(req,result) {
-    if(req.scl2_id && req.name){
+    if(req.scl2_id && req.name && req.zoneid && req.done_by){
         var checksubcategoryl2query = "select * from SubcategoryL2 where name='"+req.name+"' and scl2_id NOT IN("+req.scl2_id+")";
         var checksubcategoryl2 = await query(checksubcategoryl2query);
         if(checksubcategoryl2.length ==0 ){
             var updatesubcategoryl2 = await Subcategoryl2.updateSubcategoryl2(req,async function(err,subl2res){
                 if(subl2res.status == true){
+                    ////// Catalog History /////////////////
+                    var insertcatalogdata = [];
+                    insertcatalogdata.push({"id":req.scl2_id,"type_id":3,"action_type":2,"zoneid":req.zoneid,"created_by":req.done_by});
+                    await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                     let resobj = {
                         success: true,
                         status: true,
@@ -1263,7 +1286,7 @@ Catalog.view_product =async function view_product(req,result) {
 
 /////////Add Product///////////
 Catalog.add_product =async function add_product(req,result) {
-    if(req){
+    if(req && req.zoneid && req.done_by){
         var checkproductquery = "select * from ProductMaster where Productname='"+req.productname+"' ";
         var checkproduct = await query(checkproductquery);
         if(checkproduct.length ==0 ){
@@ -1282,6 +1305,11 @@ Catalog.add_product =async function add_product(req,result) {
                             ProductLive.createProductLive(senddata[0], async function(err,productliveres){  }); 
                                                        
                         }
+                        ////// Catalog History /////////////////
+                        var insertcatalogdata = [];
+                        insertcatalogdata.push({"id":productres.result.insertId,"type_id":4,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
+                        await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
+
                         let resobj = {
                             success: true,
                             status: true,
@@ -1319,12 +1347,16 @@ Catalog.add_product =async function add_product(req,result) {
 
 /////////Edit Product///////////
 Catalog.edit_product =async function edit_product(req,result) {
-    if(req){
+    if(req.pid && req.productname && req.zoneid && req.done_by){
         var checkcategoryquery = "select * from ProductMaster where Productname='"+req.productname+"' and pid NOT IN("+req.pid+")";
         var checkcategory = await query(checkcategoryquery);
         if(checkcategory.length ==0 ){
             Product.updateProduct(req,async function(err,productres){
                 if(productres.status==true){
+                    ////// Catalog History /////////////////
+                    var insertcatalogdata = [];
+                    insertcatalogdata.push({"id":req.pid,"type_id":4,"action_type":2,"zoneid":req.zoneid,"created_by":req.done_by});
+                    await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                     let resobj = {
                         success: true,
                         status: true,
@@ -1358,14 +1390,53 @@ Catalog.edit_product =async function edit_product(req,result) {
     }
 };
 
+/////////Delete Product///////////
+Catalog.delete_product =async function delete_product(req,result) {
+    if(req.pid && req.zoneid && req.done_by){
+        req.delete_status=1;
+        Product.updateProduct(req,async function(err,productres){
+            if(productres.status==true){
+                ////// Catalog History /////////////////
+                var insertcatalogdata = [];
+                insertcatalogdata.push({"id":req.pid,"type_id":4,"action_type":3,"zoneid":req.zoneid,"created_by":req.done_by});
+                await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "Product deleted susccessfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "somthing went wrong plz try again"
+                };
+                result(null, resobj);
+            }
+        });         
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post value"
+        };
+        result(null, resobj);
+    }
+};
+
 /////// Add Vendor Product Mapping ////////////////
 Catalog.add_vendor_product_mapping =async function add_vendor_product_mapping(req,result) {
-    if(req.pid && req.vid){  
+    if(req.pid && req.vid && req.zoneid && req.done_by){  
         var checkvendorquery = "select * from Vendor_products_mapping where pid="+req.pid+" and vid="+req.vid+" and date(expiry_date) >= CURDATE()";
         var checkvendor = await query(checkvendorquery);
         if(checkvendor.length == 0){
-            VendorProductMapping.createVendorProductMapping(req,async function(err,vendorproductmapres){
+            await VendorProductMapping.createVendorProductMapping(req,async function(err,vendorproductmapres){
                 if(vendorproductmapres.status==true){ 
+                    ////// Catalog History /////////////////
+                    var insertcatalogdata = [];
+                    insertcatalogdata.push({"id":vendorproductmapres.result.insertId,"type_id":5,"action_type":1,"zoneid":req.zoneid,"created_by":req.done_by});
+                    await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                     let resobj = {
                         success: true,
                         status: true,
@@ -1401,9 +1472,13 @@ Catalog.add_vendor_product_mapping =async function add_vendor_product_mapping(re
 
 /////// Edit Vendor Product Mapping ////////////////
 Catalog.edit_vendor_product_mapping =async function edit_vendor_product_mapping(req,result) {
-    if(req.vpmid){        
+    if(req.vpmid && req.zoneid && req.done_by){        
         VendorProductMapping.updateVendorProductMapping(req,async function(err,vendorproductmapres){
             if(vendorproductmapres.status==true){ 
+                ////// Catalog History /////////////////
+                var insertcatalogdata = [];
+                insertcatalogdata.push({"id":req.vpmid ,"type_id":5,"action_type":2,"zoneid":req.zoneid,"created_by":req.done_by});
+                await CatalogLog.createCatalogLog(insertcatalogdata[0],async function(err,catalogres){});
                 let resobj = {
                     success: true,
                     status: true,

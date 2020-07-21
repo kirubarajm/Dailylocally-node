@@ -11,8 +11,6 @@ var CatalogLog = function(cataloglog) {
   this.action_type = cataloglog.action_type;
   this.zoneid = cataloglog.zoneid;
   this.created_by = cataloglog.created_by;
-  this.created_at = cataloglog.created_at;
-  this.updated_at = cataloglog.updated_at;
 }
 
 //For Admin
