@@ -6,6 +6,8 @@ table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: 100%;
+  line-height: 1.6;
+  font-size: 14px;
 }
 
 .border {
@@ -37,119 +39,144 @@ table.d {
 
 </style>
 </head>
-<body style="border: 1px solid #000000; margin:0%; font-size:12px;">
-    <table style="margin:1%;">
-        
-            <tr>
-                <td> </td>
-                <td>
-                    <div> 
-                        <div style="text-align: center;"> <img src="https://eattovo.s3.amazonaws.com/upload/admin/makeit/1588352989854-Daily-ICons-04.png" width="5%" class="img-fluid" alt="Responsive image"> </div> <br/>
-                        <div style="text-align: center;">Lawyer Jaganathan St, Alandur, Chennai, Tamil Nadu 600032</div> <br/>
-                        <div style="text-align: center; margin-top: -15px;">Email – dailylocally@gmail.com</div>
-                    </div>
-                </td>
-                <td>  </td>
-            </tr>
-            <tr>
-                <td> </td>
-                <td> <div style="text-align: center; font-weight: bold; font-size: 20px; padding-top: 30px;"> ORDER CHECKLIST</div></td>
-                <td> </td>
-            </tr>
-        </table>
-       <table>
-        {{#each order}}
+<body> <!-- style="border: 1px solid #000000; margin:0%; font-size:12px;" -->
+    
+    <table style="margin:1%;">        
         <tr>
-            <td style="table-layout: fixed; width: 40%;"> 
-                <div>
-                    <div style="font-weight: bold;">Shipping Address </div>
-                    <div>{{this.cus_name}} </div>
-                    <div>{{this.cus_mobile}} </div>
-                    <div>{{this.cus_address}}</div> 
-                </div>                              
+            <td>{{#each header}}                      
+                <table>
+                    <tr>
+                        <td style="padding-left:80px"> <img src="https://eattovo.s3.amazonaws.com/upload/admin/makeit/1588352989854-Daily-ICons-04.png" width="10%" class="img-fluid" alt="Responsive image"> </td>
+                    </tr>
+                    <tr>
+                        <td>{{this.headername}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{this.headeraddress}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{this.headerarea}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{this.headergst}}</td>
+                    </tr>
+                </table> 
             </td>
-            <td ></td>
-            <td style="table-layout: fixed; width: 30%;" > 
-                <div>                    
-                    <div>Order id: {{this.order_id}}</div>
-                    <div>Order date: {{this.order_date}}</div>
-                    <div>Delivery date:{{this.delivery_date}}</div>
-                </div>          
+            {{/each}}
+            {{#each order}}        
+            <td>
+                <table>
+                    <tr>
+                        <td style="font-weight: bold; font-size: 20px; ">PURCHASE ORDER</td>
+                    </tr>
+                    <tr>
+                        <td>PO No : &nbsp; &nbsp; &nbsp; &nbsp; {{this.poid}}</td>
+                    </tr>
+                    <tr>
+                        <td>PO Date : &nbsp; &nbsp; {{this.podate}}</td>
+                    </tr>
+                    <tr>
+                        <td>Delivery Due Date : {{this.deliveryduedate}}</td>
+                    </tr>
+                </table> 
             </td>
         </tr>
-       </table>
-       <table>
-        {{/each}}
+    </table>
+
+    <table style="margin:1%;">        
+        <tr>
+            <td> 
+                <table>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold;"> Vendor Address : </span> {{this.vendorname}} ,<br/> {{this.vendoraddress}}</td>
+                        <td width=50%><span style="font-weight: bold;"> Ship To : </span> {{this.shipto}} </td>
+                    </tr>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold;"> Phone number : </span> {{this.vendorphoneno}} </td>
+                        <td width=50%><span style="font-weight: bold;"> Email : </span> {{this.vendoremail}} </td>
+                    </tr>
+                </table> 
+            </td>
+        </tr>
+    </table>
+    {{/each}}     
+    <table>        
         <tr>
             <td colspan="3">
                 <table style="margin: 0px" class="css-serial border d">
                     <tr class="border">
-                      <th class="border" style="table-layout: fixed; width: 20%;">S.No</th>
-                      <th class="border" style="table-layout: fixed; width: 100%;">Product description</th>
-                      <th class="border" style="table-layout: fixed; width: 20%;">Quantity</th>
-                      <th class="border" style="table-layout: fixed; width: 20%;">PACKED</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">S.No</th>
+                      <th class="border" style="table-layout: fixed; width: 100%; font-weight: bold;">Product description</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;" >Quantity</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Rate</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Unit Measure</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Amount</th>
                     </tr>
                     {{#each items}}
                     <tr class="border">
                       <td class="border"> </td>
                       <td class="border">{{this.product_name}}</td>
                       <td class="border">{{this.quantity}}</td>
-                      <td class="border"></td>
+                      <td class="border">{{this.rate}}</td>
+                      <td class="border">{{this.unit}}</td>
+                      <td class="border">{{this.amount}}</td>
                     </tr>
                     {{/each}}
                   </table> 
             </td>
         </tr>
-       </table>
-       <table>
+    </table>
+
+    <table>
         <tr>
-            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 70%;">
-                <div style="font-weight: bold; padding-left:10px;">Quality Check</div>
-                <ul>
-                    <li>Our premises go through hygiene checks every morning</li>
-                    <li>Our packaging materials are received and sanitized on premise</li>
-                </ul>
-            </td>
-            <td style="padding-top: 30px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="padding-top: 10px; table-layout: fixed; width: 70%;">
-                <div style="font-weight: bold; padding-left:10px;">Temperature Check and Driver hygiene</div>
-                <ul>
-                    <li>We check the temperature of the driver every morning before delivery</li>
-                    <li>We ensure that our riders are equipped with masks and gloves</li>
-                </ul>
-            </td>
-            <td style="padding-top: 10px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="padding-top: 10px; table-layout: fixed; width: 80%;">
-                <div style="font-weight: bold; padding-left:10px;">Packaging Check</div>
-                <ul>
-                    <li>We ensure that all the products are packaged and sealed in the morning</li>
-                </ul>
-            </td>
-            <td style="padding-top: 30px; table-layout: fixed; width: 20%;"> <div > &nbsp; <span class="div2" style="padding: 20px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
-        </tr>
-        <tr>
-            <td colspan="3"> <div style="text-align: center;"> Thank you for ordering on Daily Locally!</div></td>
-        </tr>
-        <tr>
-            <td colspan="3"> <div style="font-weight: bold; float:right;">Fulfilment manager, Daily Locally &nbsp; &nbsp;</div></td>            
-        </tr>
-        <tr>
-            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 70%;">
-                
-            </td>
-            <td style="padding-top: 30px; table-layout: fixed; width: 30%;"> <div > &nbsp; <span class="div2" style="padding-top: 20px; padding-bottom: 20px; padding-right: 10px;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span></span></div> </td>
-        </tr>
-        <tr>
-            <td colspan="2" style="padding-top: 30px; table-layout: fixed; width: 80%;">
-                
-            </td>
-            <td style="padding-top: 30px; table-layout: fixed; width: 20%;"> <div > &nbsp; </span></div> </td>
+            <td>Total Invoice Amount : 3000(three thousand only/-)</td>
         </tr>
     </table>
+<br/>
+    <table>
+        <tr>
+            <td>comment:</td>
+        </tr>
+    </table>
+
+    <table style="margin: 0px; color: white;" class="css-serial border d">
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+    </table>
+<br/>
+    <table>
+        <tr>
+            <td colspan="2"> . Kindly send 2 copies of invoice for each PO</td>
+        </tr>
+        <tr>
+            <td> . please notify us immediately if you are unable to ship as specified</td>
+            <td style="text-align: center; font-weight: bold; font-size: 16px; ">Authorized Sign</td>
+        </tr>
+    </table>
+<br/>
+{{#each footer}}
+    <table style="text-align: center;">
+        <tr>
+            <td > if you any questions about this purchase order please contact {{this.contactname}} ({{this.contactnumber}}, {{this.contactemail}})</td>
+        </tr>
+    </table>
+<br/>
+    <table style="text-align: center;">
+        <tr>
+            <td> {{this.footername}} {{this.footeraddress}} </td>
+        </tr>
+        <tr>
+            <td>{{this.footerarea}}</td>
+        </tr>
+    </table>
+{{/each}}       
 
 </body> 
 </html>
