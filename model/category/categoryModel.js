@@ -256,8 +256,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
          
           } else {
           
-            console.log("YYYY-MM-DD");
-             console.log(res1[0].deliverydate );
+      
             // console.log( moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"));
             res1[0].deliverydate= moment(orderitems[i].dayorderdate,'DD-MM-YYYY').format("YYYY-MM-DD"); 
              console.log(res1[0].deliverydate);
@@ -278,9 +277,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   
         productdetails.push(res1[0]);
 
-        // console.log(productdetails);
-
-        // console.log(productdetails1111);
       
       }
     }
@@ -290,7 +286,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,,br.brandname  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +subscription[i].vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +subscription[i].vpid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -353,6 +349,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           var getplan=await query("select * from Subscription_plan where spid='"+subscription[i].planid+"' ");
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
+          subscription_product_list[0].pkts='pkts';
+          subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
+          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity *  subscription_product_list[0].packetsize);
+
           
         }
 
@@ -847,11 +847,13 @@ Category.subscribeplan_totalamount_by_pid = async function subscribeplan_totalam
       
 
         if (req.planid) {
-
           var getplan=await query("select * from Subscription_plan where spid='"+req.planid+"' ");
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
-          
+          subscription_product_list[0].pkts='pkts';
+          subscription_product_list[0].packet_info = req.quantity *  subscription_product_list[0].packetsize;
+          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity *  subscription_product_list[0].packetsize);
+
         }
 
 
