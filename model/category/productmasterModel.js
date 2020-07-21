@@ -124,11 +124,15 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
     
       product_list = product_list+ " ORDER BY pm.Productname ASC limit " +startlimit +"," +productlimit +"";
      
-    }else if (req.sortid==2) {
+    }else if(req.sortid==2) {
+    
+      product_list = product_list+ " ORDER BY pm.Productname Desc limit " +startlimit +"," +productlimit +"";
+     
+    }else if (req.sortid==3) {
 
       product_list = product_list+ " ORDER BY pm.mrp ASC limit " +startlimit +"," +productlimit +"";
 
-    }else if (req.sortid==3) {
+    }else if (req.sortid==4) {
 
       product_list = product_list+ " ORDER BY pm.mrp DESC limit " +startlimit +"," +productlimit +"";
     }
@@ -417,15 +421,19 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
     product_list = product_list+ " ORDER BY pm.Productname ASC ";
    
   }else if (req.sortid==2) {
+  
+    product_list = product_list+ " ORDER BY pm.Productname DESC ";
+   
+  }else if (req.sortid==3) {
 
     product_list = product_list+ " ORDER BY pm.mrp ASC ";
 
-  }else if (req.sortid==3) {
+  }else if (req.sortid==4) {
 
     product_list = product_list+ " ORDER BY pm.mrp DESC ";
   }
 
-  console.log(product_list);
+
 sql.query(product_list,async function(err, res) {
   if (err) {
     result(err, null);
@@ -608,17 +616,20 @@ res =  [{
             "sortname": "A-Z"
         },
         {
-            "sortid": 2,
-            "sortname": "Low - High"
+          "sortid": 2,
+          "sortname": "Z-A"
+       },
+        {
+            "sortid": 3,
+            "sortname": "Price Low - High"
          }
          ,
         {
-            "sortid": 3,
-            "sortname": "High -Low"
-        }
+            "sortid": 4,
+            "sortname": "Price High -Low"
+        },
+        
     ]
-
-
 
 
 

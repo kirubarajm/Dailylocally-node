@@ -162,10 +162,14 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.Productname ASC ";
                
               }else if (req.sortid==2) {
+              
+                product_list = product_list+ " group by fa.vpid ORDER BY pt.Productname DESC ";
+               
+              }else if (req.sortid==3) {
           
                 product_list = product_list+ "group by fa.vpid ORDER BY pt.mrp ASC ";
           
-              }else if (req.sortid==3) {
+              }else if (req.sortid==4) {
           
                 product_list = product_list+ " group by fa.vpid ORDER BY pt.mrp DESC ";
               }
@@ -208,7 +212,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                         };
                         result(null, resobj);
                 
-                    }
+                    }s
 
                 });   
      }
