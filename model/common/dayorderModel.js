@@ -9,6 +9,7 @@ var OrderComments = require("../../model/admin/orderCommentsModel");
 var RefundOnline = require("../../model/common/refundonlineModel");
 var Notification = require("../../model/common/notificationModel.js");
 var MoveitStatus = require("../../model/moveit/moveitStatusModel");
+var PushConstant = require("../../push/PushConstant.js");
 
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
@@ -970,7 +971,7 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
 
     PushConstant.Pageid_dl_order_cancel = 8;
     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_cancel);
-    result(null, resobj);
+  
   }
 
   let resobj = {
@@ -1158,7 +1159,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
 
     PushConstant.Pageid_dl_reorder_notification = 14;
     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
-    result(null, resobj);
+
 
     let resobj = {
       success: true,
