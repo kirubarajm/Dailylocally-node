@@ -282,6 +282,16 @@ exports.edit_product = function(req, res) {
     });    
 };
 
+/////////Delete Product///////////
+exports.delete_product = function(req, res) {    
+    catalog.delete_product(req.body, function(err, ress) {
+        //console.log("delete_product controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////// Add Vendor Product Mapping ////////////////
 exports.add_vendor_product_mapping = function(req, res) {    
     catalog.add_vendor_product_mapping(req.body, function(err, ress) {
