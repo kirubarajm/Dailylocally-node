@@ -131,7 +131,7 @@ Catalog.get_product_list =async function get_product_list(req,result) {
         var wherecon = "";
         if(req.scl1_id){ wherecon = wherecon+" and pm.scl1_id="+req.scl1_id+" "; }
         if(req.scl2_id==0){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }else if(req.scl2_id){ wherecon = wherecon+" and pm.scl2_id="+req.scl2_id+" "; }
-        var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
+        var getproductquery = "select pm.pid,pm.Productname,pl.live_status,pm.image,pm.scl1_id,pm.scl2_id from ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid where pm.delete_status=0 and pl.zoneid="+req.zone_id+" "+wherecon+" group by pm.pid ";
         var getproduct = await query(getproductquery);
         if(getproduct.length > 0){
             let resobj = {
@@ -595,7 +595,7 @@ Catalog.update_product_livestatus =async function update_product_livestatus(req,
 /////////Search Catalog///////////
 Catalog.search_catalog =async function search_catalog(req,result) {
     if(req.search && req.zone_id){
-        var getsearchquery = "(SELECT ca.catid,ca.name,'categoty' as type FROM Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid WHERE zcm.zoneid="+req.zone_id+" and ca.name LIKE '%"+req.search+"%' group by ca.catid) UNION (SELECT sl1.scl1_id,sl1.name,'l1subcategoty' as type FROM SubcategoryL1 as sl1 left join Zone_l1_subcategory_mapping as zl1sm on zl1sm.master_l1_subcatid=sl1.scl1_id WHERE zl1sm.zoneid="+req.zone_id+" and sl1.name LIKE '%"+req.search+"%' group by sl1.scl1_id) UNION (SELECT sl2.scl2_id,sl2.name,'l2subcategoty' as type FROM SubcategoryL2 as sl2 left join Zone_l2_subcategory_mapping as zl2sm on zl2sm.master_l2_subcatid=sl2.scl2_id WHERE zl2sm.zoneid="+req.zone_id+" and sl2.name LIKE '%"+req.search+"%' group by sl2.scl2_id) UNION (SELECT pm.pid,pm.Productname as name,'product' as type FROM ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid WHERE pl.zoneid="+req.zone_id+" and pm.Productname LIKE '%"+req.search+"%' group by pm.pid)";
+        var getsearchquery = "(SELECT ca.catid,ca.name,'categoty' as type FROM Category as ca left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid WHERE zcm.zoneid="+req.zone_id+" and ca.name LIKE '%"+req.search+"%' group by ca.catid) UNION (SELECT sl1.scl1_id,sl1.name,'l1subcategoty' as type FROM SubcategoryL1 as sl1 left join Zone_l1_subcategory_mapping as zl1sm on zl1sm.master_l1_subcatid=sl1.scl1_id WHERE zl1sm.zoneid="+req.zone_id+" and sl1.name LIKE '%"+req.search+"%' group by sl1.scl1_id) UNION (SELECT sl2.scl2_id,sl2.name,'l2subcategoty' as type FROM SubcategoryL2 as sl2 left join Zone_l2_subcategory_mapping as zl2sm on zl2sm.master_l2_subcatid=sl2.scl2_id WHERE zl2sm.zoneid="+req.zone_id+" and sl2.name LIKE '%"+req.search+"%' group by sl2.scl2_id) UNION (SELECT pm.pid,pm.Productname as name,'product' as type FROM ProductMaster as pm left join Product_live as pl on pl.pid=pm.pid WHERE pm.delete_status=0 and pl.zoneid="+req.zone_id+" and pm.Productname LIKE '%"+req.search+"%' group by pm.pid)";
         var getsearch = await query(getsearchquery);
         if(getsearch.length > 0){
             let resobj = {
@@ -687,7 +687,7 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
         }
 
         if(pid>0){
-            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id,image from ProductMaster where pid="+pid;
+            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id,image from ProductMaster where delete_status=0 and pid="+pid;
             product = await query(productdataquery);            
         }
         
