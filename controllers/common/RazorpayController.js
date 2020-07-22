@@ -20,13 +20,8 @@ exports.razorpay_refund_payment = function(req, res) {
         message: "Please provide amount"
       });
   } else {
-    Razorpay.razorpay_refund_payment_by_paymentid(req.body, function(
-      err,
-      razorpay
-    ) {
-      console.log("controller");
-      if (err) res.send(err);
-      console.log("res", razorpay);
+    Razorpay.razorpay_refund_payment_by_paymentid(req.body, function(err,razorpay) {
+   if (err) res.send(err);
       res.send(razorpay);
     });
   }

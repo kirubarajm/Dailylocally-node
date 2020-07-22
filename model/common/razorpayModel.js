@@ -3,7 +3,8 @@ var sql = require("../db.js");
 const util = require("util");
 const Rpay = require("razorpay");
 var constant = require("../constant.js");
-
+var moment = require("moment");
+var OrderComments = require("../../model/admin/orderCommentsModel");
 // var instance = new Rpay({
 //     key_id: "rzp_test_3cduMl5T89iR9G",
 //     key_secret: "BSdpKV1M07sH9cucL5uzVnol"
@@ -71,96 +72,141 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
   Razorpay.razorpay_refund_payment_by_paymentid = async function razorpay_refund_payment_by_paymentid(req,result) {
     
     const onlinerefunddetails = await query("select * from Refund_Online where  rs_id ="+req.rs_id+"");
+    const Orderproductsdetails = await query("select * from Orderproducts where  orderid ="+onlinerefunddetails[0].orderid+"");
     const servicecharge = constant.servicecharge;
-    
-    if (onlinerefunddetails[0].active_status === 1 ) {
+    if (req.active_status == 1) {
+      if (onlinerefunddetails[0].active_status == 0 ) {
       
-    //  if (req.amount > servicecharge) {
-         
-      ///cancel by ===1 is eat user cancel amount detect
-    // if (req.cancel_by && req.cancel_by === 1) {
-    //     amount= req.amount - servicecharge;
-    // }else{
-    //     amount= req.amount;
-    // }
-    // instance.payments. refund(req.paymentid, {
-    // amount: 10,
-    var amount= req.amount;
-    var refund_amt = req.amount
-    instance.payments.refund(req.paymentid, {
-      //amount values convert to paisa
-    amount: amount * 100,
-    notes: {
-      note1: 'Refund amount'
+        //  if (req.amount > servicecharge) {
+             
+        //   /cancel by ===1 is eat user cancel amount detect
+        // if (req.cancel_by && req.cancel_by === 1) {
+        //     amount= req.amount - servicecharge;
+        // }else{
+        //     amount= req.amount;
+        // }
+        // instance.payments. refund(req.paymentid, {
+        // amount: 10,
+        //  amount values convert to paisa
+        var time = moment().format("YYYY-MM-DD HH:mm:ss");
+        var amount= req.amount;
+        var refund_amt = req.amount
+        instance.payments.refund(req.paymentid,{amount: amount * 100,notes: {note1: 'Refund amount'}}).then((data) => {
+       
+        // success
+        var refunded_by=req.done_by ||0;
+        updatequery = "update Refund_Online set active_status= 1,refunded_time='"+time+"',refund_amt = '"+refund_amt+"',payment_id='"+data.id+"',refunded_by = '"+refunded_by+"',cancellation_charges='"+servicecharge+"' where rs_id ='" + req.rs_id + "'"
+        
+        sql.query(updatequery, async function (err, res) {
+            if(err) {
+                console.log("error: ", err);
+                result(err, null);
+               }
+             else{  
+                
+              
+          var refund_comments = 'Refunded has been done'
+          var New_comments  ={};
+          New_comments.doid=Orderproductsdetails[0].doid;
+          New_comments.comments=refund_comments
+          New_comments.done_by=req.done_by
+          New_comments.type=2
+          New_comments.done_type=1
+          OrderComments.create_OrderComments_crm(New_comments)
+    
+    
+                  var  message = "Amount refunded successfully"
+                  let sucobj=true;
+                  let resobj = {  
+                    success: sucobj,
+                    status:true,
+                    message:message,
+                    result:data,
+                    }; 
+                 result(null, resobj);
+                  }
+        }); 
+    
+      }).catch((error) => {
+        console.log("error: ", error);
+        let resobj = {
+            success: true,
+            status: false,
+            message:error.error.description//"Sorry! Payment not captured."
+        };
+        result(null,resobj);
+        // error
+      })
+        }else if (onlinerefunddetails[0].active_status==1) {
+        
+        var  message = "Sorry your refund amount has been already refunded!"
+              
+    
+                  let resobj = {  
+                    success: true,
+                    status:false,
+                    message:message,
+                    result:onlinerefunddetails,
+                    }; 
+      
+                 result(null, resobj);
+        }else if (onlinerefunddetails[0].active_status==2) {
+        
+        var  message = "Sorry your refund Rejected!"
+              
+                  let resobj = {  
+                    success: true,
+                    status:false,
+                    message:message,
+                    result:onlinerefunddetails,
+                    }; 
+      
+                 result(null, resobj);
+      }
+    } else {
+      
+
+      var time = moment().format("YYYY-MM-DD HH:mm:ss");
+        var amount= req.amount;
+        var refund_amt = req.amount
+        // instance.payments.refund(req.paymentid,{amount: amount * 100,notes: {note1: 'Refund amount'}}).then((data) => {
+       
+        // success
+        var refunded_by=req.done_by ||0;
+        updatequery = "update Refund_Online set active_status= 2,rejected_time='"+time+"',refunded_by = '"+refunded_by+"'  where rs_id ='" + req.rs_id + "'"
+        
+        sql.query(updatequery, async function (err, res) {
+            if(err) {
+                console.log("error: ", err);
+                result(err, null);
+               }
+             else{  
+                
+              
+          var refund_comments = 'refund rejected'
+          var New_comments  ={};
+          New_comments.doid=Orderproductsdetails[0].doid;
+          New_comments.comments=refund_comments
+          New_comments.done_by=req.done_by
+          New_comments.type=2
+          New_comments.done_type=1
+          OrderComments.create_OrderComments_crm(New_comments)
+    
+    
+                  var  message = "refund rejected successfully"
+            
+                  let resobj = {  
+                    success: true,
+                    status:true,
+                    message:message
+                    }; 
+                 result(null, resobj);
+             }
+        }); 
+
+     
     }
-  }).then((data) => {
-    console.log(data);
-    // success
-    var refunded_by=req.refunded_by ||0;
-    updatequery = "update Refund_Online set active_status= 0,refund_amt = '"+refund_amt+"',payment_id='"+data.id+"',refunded_by = '"+refunded_by+"',cancellation_charges='"+servicecharge+"' where rs_id ='" + req.rs_id + "'"
-    
-    sql.query(updatequery, async function (err, res) {
-        if(err) {
-            console.log("error: ", err);
-            result(err, null);
-           }
-         else{  
-              var orderactionlog={};
-              orderactionlog.orderid=res.orderid || 0;
-              orderactionlog.app_type=req.app_type || 0;
-              orderactionlog.userid=req.admin_id || 0;
-              orderactionlog.action=12;
-              await Order.createOrderActionLog(orderactionlog);
-
-              var  message = "Amount refunded successfully"
-              let sucobj=true;
-              let resobj = {  
-                success: sucobj,
-                status:true,
-                message:message,
-                result:data,
-                }; 
-             result(null, resobj);
-              }
-    }); 
-
-  }).catch((error) => {
-    console.log("error: ", error);
-    let resobj = {
-        success: true,
-        status: false,
-        message:error.error.description//"Sorry! Payment not captured."
-    };
-    result(null,resobj);
-    // error
-  })
-
-// }else{
-
- 
-//   let resobj = {  
-//     success: true,
-//     status:false,
-//     message:"Sorry insufficient amount!",
-//     result:onlinerefunddetails,
-//     }; 
-
-//  result(null, resobj);
-// }
-    }else if (onlinerefunddetails[0].active_status===0) {
-    
-    var  message = "Sorry your refund amount has been already refunded!"
-          
-              let sucobj=true;
-              let resobj = {  
-                success: sucobj,
-                status:false,
-                message:message,
-                result:onlinerefunddetails,
-                }; 
-  
-             result(null, resobj);
-  }
+   
 };
 
 

@@ -14,8 +14,8 @@ module.exports = function(app) {
   var Zendeskissues = require("../controllers/common/ZendeskissuesController");
   var orders = require("../controllers/common/OrderController");
   var useraddress = require("../controllers/dluser/UserAddressController");
-
-  
+  var refundOnline = require("../controllers/common/refundController");
+  var Razorpay = require("../controllers/common/RazorpayController");
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
@@ -138,12 +138,15 @@ app.route("/admin/ordercomments").post(routesVersioning({"1.0.0":darordercomment
 app.route("/admin/crm/bookreturn").post(middleware.checkToken,routesVersioning({"1.0.0":darorder.admin_day_order_book_return}));
 //re order
 app.route("/admin/crm/reorder").post(routesVersioning({"1.0.0":dayorder.reorder_order_create}));
-app.route("/admin/crm/refund").post(routesVersioning({"1.0.0":dayorder.refund_create}));
+app.route("/admin/crm/refundrequest").post(routesVersioning({"1.0.0":dayorder.refund_create}));
 app.route("/admin/crm/reorder/reasonlist").get(routesVersioning({"1.0.0":dayorder.reorder_reasonlist}));
 app.route("/admin/crm/cancel/reasonlist").get(routesVersioning({"1.0.0":dayorder.cancel_reasonlist}));
 app.route("/admin/crm/bookreturn/reasonlist").get(routesVersioning({"1.0.0":dayorder.bookreturn_reasonlist}));
 app.route("/admin/crm/refund/reasonlist").get(routesVersioning({"1.0.0":dayorder.refund_reasonlist}));
 app.route("/admin/crm/userdayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.user_crm_day_order_list}));
+app.route("/admin/refundlist").post(routesVersioning({"1.0.0":refundOnline.get_all_refund_list}));
+app.route("/admin/repayment").post(routesVersioning({"1.0.0":Razorpay.razorpay_refund_payment}));
+
 
 //////zen desk//////
 app.route("/admin/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
@@ -159,3 +162,6 @@ app.route("/admin/transaction/view").post(middleware.checkToken,routesVersioning
 
 
 app.route("/admin/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address}));}
+
+
+
