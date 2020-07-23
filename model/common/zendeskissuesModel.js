@@ -78,7 +78,7 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
   };
 
 Zendeskissues.getZendeskissues = function getZendeskissues(req,result) {
-  sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name, 'daily Locally' as department_name,if(zi.type=1,'Feature order',if(zi.type=3,'query',if(zi.type=4,'completed order','')))as note from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.type='"+req.type+"'", function(err, res) {
+  sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name, 'daily Locally' as department_name,if(zi.type=1,'future  order',if(zi.type=3,'query',if(zi.type=4,'completed order','')))as note from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.type='"+req.type+"'", function(err, res) {
     if (err) {
       result(err, null);
     } else {

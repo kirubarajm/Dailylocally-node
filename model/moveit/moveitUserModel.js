@@ -2283,7 +2283,7 @@ Moveituser.check_latlng_boundaries = function check_latlng_boundaries(req,result
 Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list(req,result) {
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
 
-  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'waiting for trip start' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip where trip_status <=1 and moveit_id="+req.moveit_userid;
+  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'Trip not started' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip cancelled' END as trip_status_msg from Moveit_trip where trip_status <=1 and moveit_id="+req.moveit_userid;
   var tripstatuscheck = await query(tripstatuscheckquery);
 
   if (tripstatuscheck.length !=0) {
@@ -2347,7 +2347,7 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
 Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_history__day_order_list(req,result) {
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
 
-  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'waiting for trip start' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid;
+  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'Trip not started' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip cancelled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid;
   var tripstatuscheck = await query(tripstatuscheckquery);
 
   if (tripstatuscheck.length !=0) {
