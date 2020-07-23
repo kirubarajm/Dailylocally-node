@@ -1457,7 +1457,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
         const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + productdetails[0].orderid + "' and active_status=0");
 
-        if (orderrefunddetails.length !=0) {
+        if (orderrefunddetails.length ==0) {
           product_price= productdetails[0].product_price + dayorderdetails[0].delivery_charge;
         }else{
           product_price= productdetails[0].product_price 
