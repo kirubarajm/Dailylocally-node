@@ -417,7 +417,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       } else {
        
         if (res2[0].length==0) {
-          isAvaliablekitchen = false;
+ 
           isAvaliablezone=false;
       
           let resobj = {
@@ -448,7 +448,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               }
        
             
-          res2[0].isAvaliablekitchen = isAvaliablekitchen;
+       
           res2[0].isAvaliablezone = isAvaliablezone;
          
           product_orginal_price = totalamount;
@@ -631,7 +631,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
           
           if (!isAvaliableItem){
-            resobj.message = tempmessage.slice(0, -1) + " not  available !";
+            // resobj.message = tempmessage.slice(0, -1) + " Some items in your cart have gone out of stock. kindly remove them or look for an alternative !";
+            resobj.message = tempmessage.slice(0, -1) + " Some items in your cart have gone out of stock. kindly remove them or look for an alternative !";
             resobj.status = isAvaliableItem
           }
           if (!isAvaliableSubscriptionItem){
@@ -641,7 +642,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
           if (!isAvaliablezone){
-            resobj.message = " Service is not available! for your following address";
+            resobj.message = " Your order cannot be placed as your current address is not serviceable. change address to continue";
             resobj.status = isAvaliablezone
           }
           if (!product_cost_limit_status){

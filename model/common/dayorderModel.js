@@ -23,6 +23,7 @@ var Dayorder = function(Dayorder) {
   this.delivery_charge=Dayorder.delivery_charge || 0;
   this.moveit_type=Dayorder.moveit_type || 0;
   this.return_status=Dayorder.return_status || 0;
+  this.address_type=Dayorder.address_type;
   
 };
 
@@ -31,7 +32,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   var day = moment().format("YYYY-MM-DD, HH:mm:ss");
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
   var Orderproductssdetails = await query("select * from Orderproducts where orderid='"+Dayorder.orderid+"' and subscription = 0");
-
+  var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
   for (let i = 0; i < getproduct.length; i++) {
 
     if (getproduct[i].subscription==0) {
@@ -39,7 +40,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
       if (dayorders.length !=0) {
 
-       var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
+      
         if (dayorders[0].delivery_charge==0) {
           var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"' where id="+dayorders[0].id;
 
@@ -100,6 +101,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.block_name=ordersdetails[0].block_name;
         new_day_order.city=ordersdetails[0].city;
         new_day_order.delivery_charge=noof_delivery;
+        new_day_order.address_type=ordersdetails[0].address_type;
     
         
 
@@ -290,7 +292,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.floor=ordersdetails[0].floor;
             new_day_order.block_name=ordersdetails[0].block_name;
             new_day_order.city=ordersdetails[0].city;
-            new_day_order.delivery_charge=ordersdetails[0].delivery_charge || 0;
+            new_day_order.delivery_charge=noof_delivery || 0;
+            new_day_order.address_type=ordersdetails[0].address_type;
             
         
             console.log("new_day_order===>2",new_day_order);    
@@ -388,7 +391,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                 new_day_order.floor=ordersdetails[0].floor;
                 new_day_order.block_name=ordersdetails[0].block_name;
                 new_day_order.city=ordersdetails[0].city;
-                new_day_order.delivery_charge=ordersdetails[0].delivery_charge || 0;
+                new_day_order.delivery_charge=noof_delivery || 0;
+                new_day_order.address_type = ordersdetails[0].address_type;
     
               sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
@@ -860,7 +864,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 
       where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
   
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Deliverd' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
+    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Deliverd' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
 
     // console.log(getdayorderquery);
 
@@ -1449,68 +1453,75 @@ Dayorder.refund_create = async function refund_create(req,result) {
     if (dayorderdetails[0].dayorderstatus === 10) {
 
 
-      for (let i = 0; i < items.length; i++) {
+      const dayproductdetails = await query("select orderid from Dayorder_products where id IN ('" + items + "') group by orderid ");
 
-        const productdetails = await query("select orderid,price * quantity as product_price from Dayorder_products where id ='" + items[i] + "' ");
+   if (dayproductdetails.length !=0) {
+    var order_ids = [];
 
-        const orderdetails = await query("select *  from Orders where orderid ='" + productdetails[0].orderid+ "' ");
-
-        const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + productdetails[0].orderid + "' and active_status=0");
-
-        if (orderrefunddetails.length ==0) {
-          product_price= productdetails[0].product_price + dayorderdetails[0].delivery_charge;
-        }else{
-          product_price= productdetails[0].product_price 
-
-        }
-        
-        var refundDetail = {
-          orderid :  productdetails[0].orderid,
-          active_status : 0,
-          userid :  orderdetails[0].userid,
-          payment_id : orderdetails[0].tsid,
-          original_amt:  product_price
-        };
-
-        await Dayorder.create_refund(refundDetail);
-
-        //  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + productdetails[0].orderid + "' and active_status=0");
-
-        //  if (orderrefunddetails.length==0) {
-           
-          
-        //  }else{
-
-        //   var refundDetail = {
-        //     orderid : productdetails[0].orderid,
-        //     active_status : 0,
-        //     userid : orderdetails[0].userid,
-        //     payment_id : orderdetails[0].tsid,
-        //     original_amt:productdetails[0].product_price
-        //   };
-
-        //   await Dayorder.create_refund(refundDetail);
-        //  }
-        
+      for (let i = 0; i < dayproductdetails.length; i++) {        
+        order_ids.push(dayproductdetails[i].orderid);
       }
 
+  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + order_ids + "' and active_status !=0");
 
-      var refund_comments = 'refunds requested. dayorderid : ' + req.doid
-      var New_comments  ={};
-      New_comments.doid=req.doid;
-      New_comments.comments=refund_comments
-      New_comments.done_by=req.done_by
-      New_comments.type=2
-      New_comments.done_type=1
-      OrderComments.create_OrderComments_crm(New_comments)
-    
-      
-      let response = {
-        success: true,
-        status: true,
-        message: "Refunded created successfully."
-      };
-      result(null, response);
+      if (orderrefunddetails.length ==0) {
+        
+
+              for (let i = 0; i < items.length; i++) {
+
+                const productdetails = await query("select orderid,price * quantity as product_price from Dayorder_products where id ='" + items[i] + "' ");
+
+                const orderdetails = await query("select *  from Orders where orderid ='" + productdetails[0].orderid+ "' ");
+
+
+                var update_query = "Update Dayorder_products set refund_status=1 where id ='" + items[i] + "' ";
+  
+                var update = await query(update_query);
+
+                product_price = productdetails[0].product_price + dayorderdetails[0].delivery_charge;
+          
+                var refundDetail = {
+                  orderid :  productdetails[0].orderid,
+                  active_status : 0,
+                  userid :  orderdetails[0].userid,
+                  payment_id : orderdetails[0].tsid,
+                  original_amt:  product_price,
+                  refund_image : req.refund_image
+                };
+
+                await Dayorder.create_refund(refundDetail);
+
+             
+              }
+
+
+              var refund_comments = 'refunds requested. dayorderid : ' + req.doid
+              var New_comments  ={};
+              New_comments.doid=req.doid;
+              New_comments.comments=refund_comments
+              New_comments.done_by=req.done_by
+              New_comments.type=2
+              New_comments.done_type=1
+              OrderComments.create_OrderComments_crm(New_comments)
+
+        
+              let response = {
+                success: true,
+                status: true,
+                message: "Refunded created successfully."
+              };
+              result(null, response);
+
+      } else {
+        let response = {
+          success: true,
+          status: false,
+          message: "Refund Already created."
+        };
+        result(null, response);
+
+      }
+          
   
     } else if(dayorderdetails[0].dayorderstatus === 11){
       let response = {
@@ -1537,6 +1548,14 @@ Dayorder.refund_create = async function refund_create(req,result) {
     };
     result(null, response);
   }
+} else {
+  let response = {
+    success: true,
+    status: false,
+    message: "Order is not available"
+  };
+  result(null, response);
+}
 };
 
 
