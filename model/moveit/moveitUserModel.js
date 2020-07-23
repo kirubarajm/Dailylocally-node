@@ -1959,7 +1959,9 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
         var wherecon = wherecon+" and trip_status="+req.trip_status+" ";
       }
 
+      // var gettriphistoryquery = "select tripid,trip_status,case when trip_status=0 then 'waiting for trip start' when trip_status=1 then 'trip started' when trip_status=2 then 'trip completed' when trip_status=3 then 'trip canceled' end as trip_status_msg,start_time,end_time,cancel_time,0 order_list,0 order_count from Moveit_trip where moveit_id="+req.moveit_userid+" "+wherecon+" ";
       var gettriphistoryquery = "select tripid,trip_status,case when trip_status=0 then 'waiting for trip start' when trip_status=1 then 'trip started' when trip_status=2 then 'trip completed' when trip_status=3 then 'trip canceled' end as trip_status_msg,start_time,end_time,cancel_time,0 order_list,0 order_count from Moveit_trip where moveit_id="+req.moveit_userid+" "+wherecon+" ";   
+   
       var gettriphistory = await query(gettriphistoryquery);
       
       if(gettriphistory.length>0){
@@ -2281,8 +2283,12 @@ Moveituser.check_latlng_boundaries = function check_latlng_boundaries(req,result
 Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list(req,result) {
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
 
-  var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+req.tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
-  var orders = await query(ordersquery);
+  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'waiting for trip start' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip where trip_status <=1 and moveit_id="+req.moveit_userid;
+  var tripstatuscheck = await query(tripstatuscheckquery);
+
+  if (tripstatuscheck.length !=0) {
+    var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+tripstatuscheck[0].tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
+    var orders = await query(ordersquery);
     
   
   if(orders.length>0 ){
@@ -2305,9 +2311,11 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
       success: true,
       status : true,
       trip_id: orders[0].trip_id,
+      trip_details:tripstatuscheck,
       result : orders
     };
     result(null, resobj);
+
   }else{
     let resobj = {
       success: true,
@@ -2316,6 +2324,83 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
     };
     result(null, resobj);
   }
+  }else{
+    let resobj = {
+      success: true,
+      status : false,
+      message : 'Trip Not Found'
+    };
+    result(null, resobj);
+  }
+
+  
+
+    // let resobj = {
+    //   success: true,
+    //   status : true,
+    //   result : orders
+    // };
+    // result(null, resobj);
+};
+
+
+Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_history__day_order_list(req,result) {
+  // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
+
+  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'waiting for trip start' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid;
+  var tripstatuscheck = await query(tripstatuscheckquery);
+
+  if (tripstatuscheck.length !=0) {
+
+
+    for(let i=0; i<tripstatuscheck.length; i++){
+      var ordersquery = " select * from Dayorder where  trip_id= "+tripstatuscheck[i].tripid+" " ;
+      var orders = await query(ordersquery);
+
+      var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+tripstatuscheck[i].tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
+      var orders = await query(ordersquery);
+
+     
+
+      tripstatuscheck[i].order_count = orders.length;
+      tripstatuscheck[i].order_list = orders;  
+
+      for(let j=0; j<orders.length; j++){
+        
+        var moveitstatusquery ="select * from Moveit_status  where doid = " +orders[j].id +" order by id desc limit 1";
+        var statuslist = await query(moveitstatusquery);
+        orders[j].moveit_status = 0;
+        if (statuslist.length !==0 ) {
+          orders[j].moveit_status = statuslist[0].status || 0;
+        }
+  
+        var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
+        var items = await query(itemsquery);
+        orders[j].itemlistcount = items.length;
+        orders[j].itemlist = items;
+  
+      }
+    }
+
+  
+    
+    let resobj = {
+      success: true,
+      status : true,
+      result : tripstatuscheck
+    };
+    result(null, resobj);
+
+  }else{
+    let resobj = {
+      success: true,
+      status : false,
+      message : 'Trip Not Found'
+    };
+    result(null, resobj);
+  }
+
+  
 
     // let resobj = {
     //   success: true,
