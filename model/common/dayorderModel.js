@@ -23,6 +23,7 @@ var Dayorder = function(Dayorder) {
   this.delivery_charge=Dayorder.delivery_charge || 0;
   this.moveit_type=Dayorder.moveit_type || 0;
   this.return_status=Dayorder.return_status || 0;
+  this.address_type=Dayorder.address_type;
   
 };
 
@@ -31,7 +32,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   var day = moment().format("YYYY-MM-DD, HH:mm:ss");
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
   var Orderproductssdetails = await query("select * from Orderproducts where orderid='"+Dayorder.orderid+"' and subscription = 0");
-
+  var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
   for (let i = 0; i < getproduct.length; i++) {
 
     if (getproduct[i].subscription==0) {
@@ -39,7 +40,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
       if (dayorders.length !=0) {
 
-       var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
+      
         if (dayorders[0].delivery_charge==0) {
           var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"' where id="+dayorders[0].id;
 
@@ -100,6 +101,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.block_name=ordersdetails[0].block_name;
         new_day_order.city=ordersdetails[0].city;
         new_day_order.delivery_charge=noof_delivery;
+        new_day_order.address_type=ordersdetails[0].address_type;
     
         
 
@@ -290,7 +292,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.floor=ordersdetails[0].floor;
             new_day_order.block_name=ordersdetails[0].block_name;
             new_day_order.city=ordersdetails[0].city;
-            new_day_order.delivery_charge=ordersdetails[0].delivery_charge || 0;
+            new_day_order.delivery_charge=noof_delivery || 0;
+            new_day_order.address_type=ordersdetails[0].address_type;
             
         
             console.log("new_day_order===>2",new_day_order);    
@@ -388,7 +391,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                 new_day_order.floor=ordersdetails[0].floor;
                 new_day_order.block_name=ordersdetails[0].block_name;
                 new_day_order.city=ordersdetails[0].city;
-                new_day_order.delivery_charge=ordersdetails[0].delivery_charge || 0;
+                new_day_order.delivery_charge=noof_delivery || 0;
+                new_day_order.address_type = ordersdetails[0].address_type;
     
               sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
