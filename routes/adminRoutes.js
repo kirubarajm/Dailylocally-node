@@ -122,8 +122,9 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/moveit/view").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_view}));
   app.route("/admin/logistics/moveit/edit").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_edit}));
   app.route("/admin/logistics/moveit/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list}));
-  app.route("/admin/logistics/moveit/otpverify").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_otp_verify}));
-  app.route("/admin/logistics/moveit/forcelogout").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_force_logout}));
+  app.route("/admin/logistics/moveit/sendotp").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.Moveituser_send_otp_byphone}));
+  app.route("/admin/logistics/moveit/otpverify").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.Moveituser_otp_verification}));
+  app.route("/admin/logistics/moveit/forcelogout").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.admin_force_Moveituser_logout}));
   app.route("/admin/logistics/trip/templist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_temp_list}));
   app.route("/admin/logistics/moveit/listwithtrip").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list_trip}));
   app.route("/admin/logistics/trip/create").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_create}));

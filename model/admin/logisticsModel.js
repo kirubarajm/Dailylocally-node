@@ -17,6 +17,7 @@ var DunzoTripHistory = require('../tableModels/dunzotriphistoryTableModel.js');
 var Notification = require('../common/notificationModel.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var PushConstant = require('../../push/PushConstant.js');
+var ClusterCategoryMapping = require("../tableModels/clustercategorymappingTableModel.js");
 
 var Logistics = function(stockkeeping) {};
 
@@ -382,12 +383,19 @@ Logistics.moveit_edit =async function moveit_edit(req,result) {
 
 /////////Moveit List//////////
 Logistics.moveit_list =async function moveit_list(req,result) {
-    if(req.zoneid){
+    if(req){
         var wherecon = "";
-        if(req.livestatus){
-            wherecon = wherecon+" and mu.online_status="+req.livestatus;
+        if(req.zoneid && req.zoneid!=''){
+            wherecon = wherecon+" and mu.zone='"+req.zoneid+"' ";
         }
-        var moveitlistquery = "select * from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where zone="+req.zoneid+" "+wherecon+" ";
+        if(req.livestatus && req.livestatus!=''){
+            wherecon = wherecon+" and mu.online_status='"+req.livestatus+"' ";
+        }        
+        if(req.moveit_search){
+            wherecon = wherecon+" and (mu.userid like '%"+req.userid+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
+        }
+        var moveitlistquery = "select * from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
+        console.log("moveitlistquery ===>",moveitlistquery);
         var moveitlist = await query(moveitlistquery);
         if(moveitlist.length>0){
             let resobj = {
@@ -453,103 +461,167 @@ Logistics.trip_temp_list =async function trip_temp_list(req,result) {
     }
 };
 
-/////////Moveit OTP Verify//////////
-Logistics.moveit_otp_verify =async function moveit_otp_verify(req,result) {
-    if(req.phone_number && req.otp && req.oid && req.userid){
-        var checkuserquery = "select * from MoveitUser where userid="+req.userid+" and phone_number="+req.phone_number+"";
-        var checkuser = await query(checkuserquery);
-        if (checkuser.length>0) {
-            var checkotpquery = "select * from Otp where oid="+req.oid;
-            var checkotp = await query(checkotpquery);
-            if(checkotp.length>0){
-                if(checkotp[0].phone_number == req.phone_number){
-                    if(checkotp[0].otp == req.otp){
-                        var updatemoveituserquery = "update MoveitUser set verified_status=1 where userid="+req.userid;
-                        var updatemoveituser = await query(updatemoveituserquery);
-                        if (updatemoveituser.affectedRows>0) {
+///////// Moveit Send OTP by admin /////////////
+Logistics.Moveituser_send_otp_byphone = function Moveituser_send_otp_byphone(newUser,result) {
+    sql.query("Select * from MoveitUser where phoneno = '" + newUser.phoneno + "'", function(err, res) {
+        if (err) {
+            console.log("error: ", err);
+            result(err, null);
+        } else {
+            if (res.length == 0) {
+                var OTP = Math.floor(Math.random() * 90000) + 10000;  
+                var otpurl =
+                "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
+                newUser.phoneno +
+                "&msg=<%23>Your DailyLocally App OTP is " +
+                OTP +
+                ". Note: Please DO NOT SHARE this OTP with anyone. " +
+                newUser.otpcode +
+                " "; 
+                
+                console.log(otpurl);
+                request({
+                method: "GET",
+                rejectUnauthorized: false,
+                url: otpurl
+                },
+                function(error, response, body) {
+                    if (error) {
+                        console.log("error: ", err);
+                        result(null, err);
+                    } else {
+                        console.log("response.statusCode, body==>",response.statusCode, body);
+                        var responcecode = body.split("#");
+                    
+                        if (body) {
+                            sql.query("insert into Otp(phone_number,apptype,otp)values('"+newUser.phoneno+"',5,'" +OTP+"')",function(err, res1) {
+                                if (err) {
+                                  console.log("error: ", err);
+                                  result(null, err);
+                                } else {
+                                  let resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "message sent successfully",
+                                    oid: res1.insertId
+                                  };
+          
+                                  result(null, resobj);
+                                }
+                              }
+                            );
+                          } else {
                             let resobj = {
-                                success: true,
-                                status: true,
-                                message: "otp verified successfully"
-                            };
+                              success: true,
+                              status: false,
+                              message: "message not sent successfully"
+                            };          
                             result(null, resobj);
-                        } else {
-                            let resobj = {
-                                success: true,
-                                status: false,
-                                message: "something went wrong plz try again"
-                            };
-                            result(null, resobj);
-                        }
-                    }else{
-                        let resobj = {
-                            success: true,
-                            status: false,
-                            message: "in valid otp"
-                        };
-                        result(null, resobj);
+                          }
                     }
-                }else{
-                    let resobj = {
-                        success: true,
-                        status: false,
-                        message: "in valid phone number"
-                    };
-                    result(null, resobj);
-                }
-            }else{
+                });
+            } else {
+                let sucobj = true;
+                let message =
+                "Following user already Exist! Please check it mobile number";
+                let resobj = {
+                    success: sucobj,
+                    status: false,
+                    message: message,
+                    result:res
+                };    
+                result(null, resobj);
+            }
+        }
+      }
+    );
+};  
+  
+/////////Moveit OTP Verify////////// 
+Logistics.Moveituser_otp_verification = function Moveituser_otp_verification( req,result) {  
+    sql.query("Select * from Otp where oid = '" + req.oid + "'", function( err,res) {
+        if (err) {
+            console.log("error: ", err);
+            result(err, null);
+        } else {
+            //   console.log(res[0].otp);
+            if (res[0].otp == req.otp) {       
+                let resobj = {
+                    success: true,
+                    status: true,
+                     message: "OTP verified successfully"
+                };
+                result(null, resobj);
+            } else {       
                 let resobj = {
                     success: true,
                     status: false,
-                    message: "in-valid oid"
+                    message: "OTP is not valid!, Try once again"
                 };
                 result(null, resobj);
             }
-        } else {
-            let resobj = {
-                success: true,
-                status: false,
-                message: "invalid userid and phone number"
-            };
-            result(null, resobj);
-        }        
-    }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "check your post values"
-        };
-        result(null, resobj);
-    }
+        }
+    });
 };
 
-/////////Moveit Force Logout//////////
-Logistics.moveit_force_logout =async function moveit_force_logout(req,result) {
-    if(req.userid){
-        var updatemoveituserquery = "update MoveitUser set online_status=2 where userid="+req.userid;
-        var updatemoveituser = await query(updatemoveituserquery);
-        if (updatemoveituser.affectedRows>0) {
-            let resobj = {
+////Admin force Logout////////////////
+Logistics.admin_force_Moveituser_logout = async function admin_force_Moveituser_logout(req, result) { 
+    orderdetails = await query("select * from Moveit_trip where trip_status=1 and moveit_id = "+req.userid+"");
+    if (orderdetails.length == 0) {     
+        sql.query("select * from MoveitUser where userid = "+req.userid+" ",async function(err,userdetails) {
+        if (err) {
+          console.log("error: ", err);
+          result(null, err);
+        } else {            
+          if (userdetails.length !==0) {
+            if(userdetails[0].login_status!=2){
+              var logouttime =  moment().format("YYYY-MM-DD HH:mm:ss");
+              updatequery = await query("Update MoveitUser set online_status = 0,pushid_android = 'null',login_status = "+req.login_status+",logout_time='"+logouttime+"'  where userid = '"+req.userid+"'");
+              var logoutstatusMessage='Force logout and disable Successfully!'
+              if(req.login_status===3) logoutstatusMessage= 'Enable Successfully.Please login after use.'
+              
+              ///////Moveit Log History/////////
+            //   moveit_last_log = await query("select distinct moveit_userid,type  from Moveit_Timelog where moveit_userid="+req.userid+" order by mt_id desc limit 1");
+            //   if(moveit_last_log[0].type==1){
+            //     req.type    = 0;
+            //     req.moveit_userid = req.userid;
+            //     req.action  = 5;              
+            //     // await Moveituser.create_createMoveitTimelog(req);  
+            //   }
+              /////////////////////////////////
+
+              let resobj = {
                 success: true,
                 status: true,
-                message: "otp verified successfully"
-            };
-            result(null, resobj);
-        } else {
+                message: logoutstatusMessage  
+              };      
+              result(null, resobj);
+            }else{
+              let resobj = {
+                success : true,
+                status  : true,
+                message : 'user are already in Logout!'  
+              };      
+              result(null, resobj); 
+            }
+          }else{    
             let resobj = {
-                success: true,
-                status: false,
-                message: "something went wrong plz try again"
-            };
+              success: true,
+              status: false,
+              message: 'Please check userid'  
+            };      
             result(null, resobj);
-        }                    
+          }     
+        }
+      });   
     }else{
-        let resobj = {
-            success: true,
-            status: false,
-            message: "check your post values"
-        };
-        result(null, resobj);
+      let resobj = {
+        success: true,
+        status: false,
+        // message:mesobj,
+        message: "Sorry can't logout, Order is assigned following user!"  
+      };
+      result(null, resobj);
     }
 };
 

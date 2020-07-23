@@ -82,10 +82,20 @@ exports.trip_temp_list = function(req, res) {
     });    
 };
 
+/////////Moveit Send OTP Verify//////////
+exports.Moveituser_send_otp_byphone = function(req, res) {    
+    Logistics.Moveituser_send_otp_byphone(req.body, function(err, ress) {
+        //console.log("Moveituser_send_otp_byphone controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Moveit OTP Verify//////////
-exports.moveit_otp_verify = function(req, res) {    
-    Logistics.moveit_otp_verify(req.body, function(err, ress) {
-        //console.log("moveit_otp_verify controller");
+exports.Moveituser_otp_verification = function(req, res) {    
+    Logistics.Moveituser_otp_verification(req.body, function(err, ress) {
+        //console.log("Moveituser_otp_verification controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
@@ -93,9 +103,9 @@ exports.moveit_otp_verify = function(req, res) {
 };
 
 /////////Moveit Force Logout//////////
-exports.moveit_force_logout = function(req, res) {    
-    Logistics.moveit_force_logout(req.body, function(err, ress) {
-        //console.log("moveit_force_logout controller");
+exports.admin_force_Moveituser_logout = function(req, res) {    
+    Logistics.admin_force_Moveituser_logout(req.body, function(err, ress) {
+        //console.log("admin_force_Moveituser_logout controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);
