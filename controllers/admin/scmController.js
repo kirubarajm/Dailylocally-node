@@ -102,6 +102,16 @@ exports.pop_to_dayorder = function(req, res) {
     });    
 };
 
+/////Auto stock to dayorder product assign//////
+exports.auto_stock_to_dayorder = function(req, res) {    
+    SCM.auto_stock_to_dayorder(req.body, function(err, ress) {
+        //console.log("auto_stock_to_dayorder controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////View PO///////////
 exports.view_po = function(req, res) {    
     SCM.view_po(req.body, function(err, ress) {
@@ -214,6 +224,26 @@ exports.quality_type_list = function(req, res) {
 exports.quality_check_product = function(req, res) {    
     SCM.quality_check_product(req.body, function(err, ress) {
         //console.log("quality_check_product controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Get Retutn List///////////
+exports.get_return_list = function(req, res) {    
+    SCM.get_return_list(req.body, function(err, ress) {
+        //console.log("get_return_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Update Retutn Orders///////////
+exports.update_return_orders = function(req, res) {    
+    SCM.update_return_orders(req.body, function(err, ress) {
+        //console.log("update_return_orders controller");
         if (err) res.send(err);
         //console.log("res", ress);
         res.send(ress);

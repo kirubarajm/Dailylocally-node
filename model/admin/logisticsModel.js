@@ -15,6 +15,7 @@ var MoveitTripHistory = require('../tableModels/moveitriphistoryTableModel.js');
 var DunzoTrip = require('../tableModels/dunzotripTableModel.js');
 var DunzoTripHistory = require('../tableModels/dunzotriphistoryTableModel.js');
 var Notification = require('../common/notificationModel.js');
+var DayOrderComment = require('../admin/orderCommentsModel.js');
 var PushConstant = require('../../push/PushConstant.js');
 
 var Logistics = function(stockkeeping) {};
@@ -209,6 +210,10 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
             var updatedayorderquery = "update Dayorder set dayorderstatus=6 where id="+req.doid;
             var updatedayorder = await query(updatedayorderquery);
             if(updatedayorder.affectedRows>0){
+                ////////Create Day order Log ////////////
+                var insertlogdata = [];
+                insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
                 let resobj = {
                     success: true,
                     status: true,
@@ -377,23 +382,36 @@ Logistics.moveit_edit =async function moveit_edit(req,result) {
 
 /////////Moveit List//////////
 Logistics.moveit_list =async function moveit_list(req,result) {
-    var moveitlistquery = "select * from MoveitUser";
-    var moveitlist = await query(moveitlistquery);
-    if(moveitlist.length>0){
-        let resobj = {
-            success: true,
-            status: true,
-            result: moveitlist
-        };
-        result(null, resobj);
+    if(req.zoneid){
+        var wherecon = "";
+        if(req.livestatus){
+            wherecon = wherecon+" and mu.online_status="+req.livestatus;
+        }
+        var moveitlistquery = "select * from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where zone="+req.zoneid+" "+wherecon+" ";
+        var moveitlist = await query(moveitlistquery);
+        if(moveitlist.length>0){
+            let resobj = {
+                success: true,
+                status: true,
+                result: moveitlist
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "no data found"
+            };
+            result(null, resobj);
+        }
     }else{
         let resobj = {
             success: true,
             status: false,
-            message: "no data found"
+            message: "check your post values"
         };
         result(null, resobj);
-    }
+    }   
 };
 
 /////////Trip Temp List//////////
@@ -435,17 +453,117 @@ Logistics.trip_temp_list =async function trip_temp_list(req,result) {
     }
 };
 
+/////////Moveit OTP Verify//////////
+Logistics.moveit_otp_verify =async function moveit_otp_verify(req,result) {
+    if(req.phone_number && req.otp && req.oid && req.userid){
+        var checkuserquery = "select * from MoveitUser where userid="+req.userid+" and phone_number="+req.phone_number+"";
+        var checkuser = await query(checkuserquery);
+        if (checkuser.length>0) {
+            var checkotpquery = "select * from Otp where oid="+req.oid;
+            var checkotp = await query(checkotpquery);
+            if(checkotp.length>0){
+                if(checkotp[0].phone_number == req.phone_number){
+                    if(checkotp[0].otp == req.otp){
+                        var updatemoveituserquery = "update MoveitUser set verified_status=1 where userid="+req.userid;
+                        var updatemoveituser = await query(updatemoveituserquery);
+                        if (updatemoveituser.affectedRows>0) {
+                            let resobj = {
+                                success: true,
+                                status: true,
+                                message: "otp verified successfully"
+                            };
+                            result(null, resobj);
+                        } else {
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong plz try again"
+                            };
+                            result(null, resobj);
+                        }
+                    }else{
+                        let resobj = {
+                            success: true,
+                            status: false,
+                            message: "in valid otp"
+                        };
+                        result(null, resobj);
+                    }
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "in valid phone number"
+                    };
+                    result(null, resobj);
+                }
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "in-valid oid"
+                };
+                result(null, resobj);
+            }
+        } else {
+            let resobj = {
+                success: true,
+                status: false,
+                message: "invalid userid and phone number"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
+/////////Moveit Force Logout//////////
+Logistics.moveit_force_logout =async function moveit_force_logout(req,result) {
+    if(req.userid){
+        var updatemoveituserquery = "update MoveitUser set online_status=2 where userid="+req.userid;
+        var updatemoveituser = await query(updatemoveituserquery);
+        if (updatemoveituser.affectedRows>0) {
+            let resobj = {
+                success: true,
+                status: true,
+                message: "otp verified successfully"
+            };
+            result(null, resobj);
+        } else {
+            let resobj = {
+                success: true,
+                status: false,
+                message: "something went wrong plz try again"
+            };
+            result(null, resobj);
+        }                    
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }
+};
+
 /////////Get Moveit List///////////
 Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
     if(req.zoneid){
         var resultdata = [];
-        var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.zone="+req.zoneid;
+        var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,mt.trip_status,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.online_status=1 and mu.zone="+req.zoneid+" group by mu.userid";
         var getmoveittrip = await query(getmoveittripquery);
         if(getmoveittrip.length > 0){
             for (let i = 0; i < getmoveittrip.length; i++) {
                 if(getmoveittrip[i].after_start_tripid>0){ }else{
                     var username="";
-                    if(getmoveittrip[i].tripid>0){
+                    if(getmoveittrip[i].tripid>0 && getmoveittrip[i].trip_status==0){
                         username = getmoveittrip[i].name+"(Live trip - "+getmoveittrip[i].tripid+")";
                     }else{
                         username = getmoveittrip[i].name+"(New trip)";
@@ -501,7 +619,11 @@ Logistics.trip_create =async function trip_create(req,result) {
                 for (let i = 0; i < dayorderids.length; i++) {
                     var historydata = [];
                     historydata.push({"doid":dayorderids[i],"tripid":req.trip_id,"type":1,"zoneid":req.zoneid,"created_by":req.done_by});
-                    await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ });                    
+                    await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ }); 
+                    ////////Create Day order Log ////////////
+                    var insertlogdata = [];
+                    insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});                   
                 }
 
                 var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
@@ -540,6 +662,11 @@ Logistics.trip_create =async function trip_create(req,result) {
                             var historydata = [];
                             historydata.push({"doid":dayorderids[i],"tripid":moveittripres.result.insertId,"type":1,"zoneid":req.zoneid,"created_by":req.done_by});
                             await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ });
+
+                            ////////Create Day order Log ////////////
+                            var insertlogdata = [];
+                            insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                            DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
                         }
 
                         ////// Send Notification //////////
@@ -547,7 +674,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                         var getmoveitdetails = await query(getmoveitdetailsquery);
                         if(getmoveitdetails.length>0){
                             console.log("moveit Send Notification For assign ============> 2");
-                            await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
+                            await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0].userid);
                         }                        
                         //////////////////////////////////
 
@@ -604,6 +731,11 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                 var historydata = [];
                 historydata.push({"doid":dayorders[i],"tripid":checkdayorder[0].trip_id,"type":2,"zoneid":req.zoneid,"created_by":req.done_by});
                 await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ }); 
+
+                ////////Create Day order Log ////////////
+                var insertlogdata = [];
+                insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
 
                 if(updatedayorder.affectedRows>0){
                     ////// Send Notification //////////
