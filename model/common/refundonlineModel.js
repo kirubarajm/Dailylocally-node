@@ -2,12 +2,12 @@
 var sql = require("../db.js");
 const util = require("util");
 const query = util.promisify(sql.query).bind(sql);
-
+var moment = require("moment");
 var RefundOnline = function(refund) {
   this.orderid = refund.orderid;
   this.original_amt = refund.original_amt;
   this.refund_amt = refund.refund_amt ;
-  this.active_status = refund.active_status;
+  this.active_status = refund.active_status ||0;
   this.userid =refund.userid;
   this.payment_id =refund.payment_id;
 
@@ -15,30 +15,29 @@ var RefundOnline = function(refund) {
 
 RefundOnline.createRefund = async function createRefund(req, result) {
 
-  const orderrefunddetails = await query("select * from Refund_Online where doid ='" + req.doid + "' and active_status=0");
+  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + req.orderid + "' and active_status=0 order by rs_id desc  limit 1");
 
-  if (orderrefunddetails.length===0) {
+  if (orderrefunddetails.length ==0) {
     sql.query("INSERT INTO Refund_Online set ?",req,async function(err, res1) {
       if (err) result(true, null);
       else {
 
-      let response = {
-          success: true,
-          status: true,
-          message : "refund online created successfully"
-      };
+      // let response = {
+      //     success: true,
+      //     status: true,
+      //     message : "refund online created successfully"
+      // };
       
-      result(null, response);
+      // result(null, response);
       }
   });
   
 }else{
-  let resobj = {
-    success: true,
-    status:false,
-    message: "Sorry Refund online Already exist for following order! Please check once again"
-  };
-  result(resobj,null);
+
+  var update_query = "Update Refund_Online set refund_amt='"+ req.refund_amt+"' where orderid ='" + req.orderid + "' "
+  
+  var update = await query(update_query);
+ 
 }
 };
 
@@ -47,18 +46,43 @@ RefundOnline.createRefund = async function createRefund(req, result) {
 
 
 RefundOnline.get_all_refunds = function get_all_refunds(req, result) {
-  sql.query("select rf.*,ors.userid,au.name as adminname from Refund_Online rf left join Dayorder as ors on ors.id = rf.doid  left join Admin_users au on au.admin_userid=rf.refunded_by  order by active_status DESC,created_at DESC", function(err, res) {
+
+  var pagelimit = 20;
+  var page = req.page || 1;
+  var startlimit = (page - 1) * pagelimit;
+  var where = "";
+  if(req.starting_date && req.end_date){
+    var end_date = moment(req.end_date).add(1, "days").format("YYYY-MM-DD");
+    where = where+" and (rf.created_at BETWEEN '"+req.starting_date +"' AND '"+end_date+"')";
+
+}
+
+// if(Dayorder.slot==1){
+//   where = where+" and HOUR(time(drs.order_place_time))<=19 ";
+// }else if(Dayorder.slot==2){
+// where = where+" and HOUR(time(drs.order_place_time))>=19 ";
+// } 
+
+  where= where+ "order by active_status DESC,created_at DESC limit " +startlimit +"," +pagelimit +" " 
+  var refund_list = "select rf.*,ors.userid,au.name as adminname,if(rf.active_status=0,'Waiting for refund',if(rf.active_status=1,'Refunded','Rejected')) as status_message from Refund_Online rf left join Orders as ors on ors.orderid = rf.orderid  left join Admin_users au on au.admin_userid=rf.refunded_by   "+where+"  "
+
+  sql.query(refund_list,async function(err, res) {
     if (err) result(err, null);
     else {
+
+      const listcount = await query("select rf.*,ors.userid,au.name as adminname,if(rf.active_status=0,'Waiting for refund',if(rf.active_status=1,'Refunded','Rejected')) as status_message from Refund_Online rf left join Orders as ors on ors.orderid = rf.orderid  left join Admin_users au on au.admin_userid=rf.refunded_by  order by active_status DESC,created_at DESC ")
       let response = {
         success: true,
         status: true,
+        pagelimit:pagelimit,
+        totalcount : listcount.length,
         result: res
       };
       result(null, response);
     }
   });
 };
+
 
 RefundOnline.get_unsuccess_refunds = function get_unsuccess_refunds(req,result) {
   sql.query("select * from Refund_Online Where status = 0", function(err, res) {

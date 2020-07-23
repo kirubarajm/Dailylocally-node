@@ -60,9 +60,7 @@ var Order = function(order) {
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
 
-  console.log(req);
-  console.log(orderitems);
-  console.log(subscription);
+
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
 
@@ -105,7 +103,7 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                     } else {
                       var amountdata = res3.result[0].amountdetails;
 
-                      console.log(amountdata);
+               
 
                       req.gst = amountdata.gstcharge;
                       req.price = amountdata.grandtotal;    
@@ -192,7 +190,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
 
   var new_Order = new Order(req);
 
-  console.log(new_Order);
+  // console.log(new_Order);
   //snew_Order.delivery_charge = constant.deliverycharge;
   sql.beginTransaction(function(err) {
     if (err) { 
@@ -213,12 +211,14 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
         console.log("Other_Item_list",Other_Item_list);
           for (var i = 0; i < Other_Item_list.length; i++) {
          
+            
+          // console.log( Other_Item_list[i]);
           var orderitem = {};
           orderitem.orderid = orderid;
           orderitem.vpid = Other_Item_list[i].vpid;
           orderitem.productname = Other_Item_list[i].Productname;
           orderitem.quantity = Other_Item_list[i].cartquantity;
-          orderitem.price = Other_Item_list[i].amount;
+          orderitem.price = Other_Item_list[i].mrp;
           orderitem.deliverydate = Other_Item_list[i].deliverydate;
           orderitem.starting_date = Other_Item_list[i].starting_date || '';
           orderitem.no_of_deliveries = Other_Item_list[i].no_of_deliveries || 7; 
@@ -232,6 +232,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
           orderitem.sun = Other_Item_list[i].sun || 0;
         
           var items = new orderproductModel(orderitem);
+
         
           orderproductModel.createOrderitems(items, function(err, res2) {
             if (err) { 
@@ -367,7 +368,7 @@ Order.online_order_place_conformation = async function(order_place, result) {
             order_place.zoneid=orderdetails[0].zoneid;
             sendsms.ordersuccess_send_sms(order_place.orderid,getordertype[0].phoneno);     
             
-            var getproductdetails = "select op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid  where status=0 and orderid="+order_place.orderid;
+            var getproductdetails = "select ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+order_place.orderid;
             var getproduct = await query(getproductdetails,);
             console.log("getproduct==========>",getproduct);
             dayorder.checkdayorder(order_place,getproduct);

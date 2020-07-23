@@ -164,7 +164,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var isAvaliablekitchen = true;
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
-  var startdate =  moment().format("DD-MM-YYYY");
+  var startdate =  moment().format("YYYY-MM-DD");
   var currenthour  = moment(day).format("HH::mm");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
@@ -176,6 +176,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var radiuslimit = constant.radiuslimit;
   var product_discount_price=0;
   var deliverydate_status = true;
+  var Subdeliverydate_status = true;
+  let delivery_date = [];
  
 
     if (currenthour < 24) {
@@ -199,7 +201,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         
         var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +orderitems[i].vpid +"' ");
       
-       
+        delivery_date.push(orderitems[i].dayorderdate);
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;
@@ -235,14 +237,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       
         
         res1[0].amount = amount;
-        // res1[0].product_gst = product_gst;
         res1[0].cartquantity = orderitems[i].quantity;
         res1[0].product_weight = product_weight;
         res1[0].product_discount_price = product_discount_price;
         res1[0].no_of_deliveries = 1;
         res1[0].subscription = 0;
         res1[0].starting_date = orderitems[i].dayorderdate || tomorrow;
-        //total product cost
         totalamount = totalamount + amount;
         // gst = gst + product_gst;
         product_total_weight = product_total_weight + product_weight;
@@ -251,20 +251,19 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         if (orderitems[i].dayorderdate) {
           res1[0].deliverydate=orderitems[i].dayorderdate;
 
-          if ( res1[0].deliverydate < startdate) {
+
+          if ( res1[0].deliverydate <= startdate) {
             deliverydate_status = false
          
           } else {
           
       
             // console.log( moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"));
-            res1[0].deliverydate= moment(orderitems[i].dayorderdate,'DD-MM-YYYY').format("YYYY-MM-DD"); 
-             console.log(res1[0].deliverydate);
+            res1[0].deliverydate= moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"); 
+             
           }
 
         }else{
-
-          
               if (currenthour < 24) {
     
                 res1[0].deliverydate = tomorrow;
@@ -279,9 +278,32 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
       
       }
+
+
+      const uniqueSet = new Set(delivery_date);
+
+      delivery_date = [...uniqueSet]
+ 
+ 
+      for (let i = 0; i < delivery_date.length; i++) {
+ 
+       date= moment(delivery_date[i]).format("YYYY-MM-DD"); 
+       var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"' ");
+ 
+       if (dayorderdetails.length !=0) {
+        if ( dayorderdetails[0].delivery_charge !=0) {
+         delivery_date.splice(i, 1);
+        }
+         
+       }
+ 
+      }
     }
 
    
+   
+
+
     if (subscription) {
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
@@ -335,20 +357,27 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         subscription_product_list[0].product_discount_price = product_discount_price;       
         subscription_product_list[0].subscription = 1;
         subscription_product_list[0].deliverydate = tomorrow;
-        subscription_product_list[0].starting_date = subscription[i].dayorderdate || tomorrow;
+        subscription_product_list[0].starting_date = moment(subscription[i].start_date).format("YYYY-MM-DD") ;
         subscription_product_list[0].mon =  subscription[i].mon ||0;
         subscription_product_list[0].tue =  subscription[i].tue ||0;
         subscription_product_list[0].wed =  subscription[i].wed ||0;
-        subscription_product_list[0].thur =  subscription[i].thur ||0;
+        subscription_product_list[0].thur = subscription[i].thur ||0;
         subscription_product_list[0].fri =  subscription[i].fri ||0;
         subscription_product_list[0].sat =  subscription[i].sat ||0;
         subscription_product_list[0].sun =  subscription[i].sun ||0;
+
+        if ( subscription[i].start_date <= startdate) {
+          Subdeliverydate_status = false
+       
+        }
 
         if (subscription[i].planid) {
 
           var getplan=await query("select * from Subscription_plan where spid='"+subscription[i].planid+"' ");
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
+
+
           subscription_product_list[0].pkts='pkts';
           subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
           subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity *  subscription_product_list[0].packetsize);
@@ -370,8 +399,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         
       }
     }
-
-
 
    
     var query1 ="select *, ROUND( 3959 * acos( cos( radians('" +
@@ -406,24 +433,24 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             isAvaliablezone =false;
           }
 
-          
-        
               distance=Math.ceil(res2[0].distance * 1.6);   
 
               if (distance > 5 && distance < 7.5) {
-                console.log("test",delivery_charge);
-                delivery_charge=delivery_charge + 20;
+                delivery_charge = delivery_charge + 20;
               }else if(distance >=7.5){
-                delivery_charge=delivery_charge + 40;
+                delivery_charge = delivery_charge + 40;
               }
    
+              if (delivery_date.length !=0) {
+                delivery_charge = delivery_charge * delivery_date.length;
+              }else{
+                delivery_charge=0;
+              }
        
             
           res2[0].isAvaliablekitchen = isAvaliablekitchen;
-          res2[0].isAvaliablezone=isAvaliablezone;
+          res2[0].isAvaliablezone = isAvaliablezone;
          
-          
-       
           product_orginal_price = totalamount;
 
             //offer coupon amount detection algorithm
@@ -497,13 +524,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           calculationdetails.totalamount = totalamount;
           calculationdetails.coupon_discount_amount = coupon_discount_amount;
           calculationdetails.couponstatus = false;
-          calculationdetails.coupon_name=coupon_name;
+          calculationdetails.coupon_name = coupon_name;
           calculationdetails.product_cost_limit_status = product_cost_limit_status;
           calculationdetails.product_cost_limit_message = constant.product_cost_limit_message;
           calculationdetails.product_cost_limit_short_message = constant.product_cost_limit_short_message+constant.minimum_cart_value;
-          calculationdetails.order_delivery_day_message=order_delivery_day_message;
-          calculationdetails.order_delivery_day=order_delivery_day;
-          calculationdetails.minimum_cart_value=constant.minimum_cart_value;
+          calculationdetails.order_delivery_day_message = order_delivery_day_message;
+          calculationdetails.order_delivery_day = order_delivery_day;
+          calculationdetails.minimum_cart_value = constant.minimum_cart_value;
 
           //  console.log(calculationdetails.order_delivery_day);
           if (req.cid && couponstatus) {
@@ -628,6 +655,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             resobj.status = deliverydate_status
           }
 
+          if (!Subdeliverydate_status) {
+            resobj.message = "Please select feature date on Subscription";
+            resobj.status = Subdeliverydate_status
+          }
           resobj.product_cost_limit_status=product_cost_limit_status;
 
           resobj.result = res2; 

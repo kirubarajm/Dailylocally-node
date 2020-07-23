@@ -454,7 +454,7 @@ exports.moveit_unlive = function(req, res) {
 
 ////Moveit Trip History/////////
 exports.moveit_trip_history = function(req, res) {
-  Moveituser.moveit_trip_history(req.body,function(err, user) {
+  Moveituser.moveit_trip_history__day_order_list(req.body,function(err, user) {
     if (err) res.send(err);
     res.json(user);
   });
