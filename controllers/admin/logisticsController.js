@@ -82,6 +82,26 @@ exports.trip_temp_list = function(req, res) {
     });    
 };
 
+/////////Moveit OTP Verify//////////
+exports.moveit_otp_verify = function(req, res) {    
+    Logistics.moveit_otp_verify(req.body, function(err, ress) {
+        //console.log("moveit_otp_verify controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Moveit Force Logout//////////
+exports.moveit_force_logout = function(req, res) {    
+    Logistics.moveit_force_logout(req.body, function(err, ress) {
+        //console.log("moveit_force_logout controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Get Moveit List///////////
 exports.moveit_list_trip = function(req, res) {    
     Logistics.moveit_list_trip(req.body, function(err, ress) {

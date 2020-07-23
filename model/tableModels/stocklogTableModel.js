@@ -13,6 +13,7 @@ var StockLog = function(stocklog) {
   this.from_type = stocklog.from_type;
   this.quantity = stocklog.quantity;
   this.zoneid = stocklog.zoneid;
+  this.created_by = stocklog.created_by;
 }
 
 //For Admin

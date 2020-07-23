@@ -4,20 +4,21 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var POReceiveUnReceiveLog = function(poreceiveunreceivelog) {
-  this.id = poreceiveunreceivelog.id;
-  this.poid = poreceiveunreceivelog.poid;
-  this.popid = poreceiveunreceivelog.popid;
-  this.type = poreceiveunreceivelog.type;
-  this.quantity = poreceiveunreceivelog.quantity;
-  this.delivery_note = poreceiveunreceivelog.delivery_note;
-  this.zoneid = poreceiveunreceivelog.zoneid;
+var POLog = function(polog) {
+  this.id = polog.id;
+  this.poid = polog.poid;
+  this.popid = polog.popid;
+  this.from_type = polog.from_type;
+  this.quantity = polog.quantity;
+  this.delivery_note = polog.delivery_note;
+  this.zoneid = polog.zoneid;
+  this.created_by = polog.created_by;
 }
 
 //For Admin
-POReceiveUnReceiveLog.createPOlog = async function createPOlog(req, result) {
-    var insertdata = new POReceiveUnReceiveLog(req);
-    sql.query("INSERT INTO PO_Receive_Unreceive_Log set ?", insertdata,async function(err, res) {
+POLog.createPOlog = async function createPOlog(req, result) {
+    var insertdata = new POLog(req);
+    sql.query("INSERT INTO PO_Log set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -36,9 +37,9 @@ POReceiveUnReceiveLog.createPOlog = async function createPOlog(req, result) {
     });    
 };
 
-POReceiveUnReceiveLog.updatePOlog =async function updatePOlog(req, result) {
-    var updatedata = new POReceiveUnReceiveLog(req);
-    sql.query("UPDATE PO_Receive_Unreceive_Log SET ? WHERE id = ?", [updatedata, updatedata.id],async function(err, res) {
+POLog.updatePOlog =async function updatePOlog(req, result) {
+    var updatedata = new POLog(req);
+    sql.query("UPDATE PO_Log SET ? WHERE id = ?", [updatedata, updatedata.id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -58,4 +59,4 @@ POReceiveUnReceiveLog.updatePOlog =async function updatePOlog(req, result) {
     );
 };
 
-module.exports = POReceiveUnReceiveLog;
+module.exports = POLog;

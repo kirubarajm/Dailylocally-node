@@ -15,12 +15,14 @@ var POtemp = function(potemp) {
   this.actual_quantity = potemp.actual_quantity;
   this.zoneid = potemp.zoneid;
   this.delete_status = potemp.delete_status || 0;
+  this.created_by = potemp.created_by;
+  this.vendor_assigned_by = potemp.vendor_assigned_by;
 }
 
 //For Admin
 POtemp.createPOtemp = async function createPOtemp(req, result) {
-    req.active_status=0;
     var insertdata = new POtemp(req);
+    console.log("insertdata ==>",insertdata);
     sql.query("INSERT INTO POtemp set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {

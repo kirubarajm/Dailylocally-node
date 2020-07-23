@@ -12,13 +12,14 @@ var Procurement = function(procurement) {
   this.vpid = procurement.vpid;
   this.quantity = procurement.quantity;
   this.pr_status = procurement.pr_status || 1;
-  this.zoneid=procurement.zoneid;
+  this.zoneid = procurement.zoneid;
+  this.created_by = procurement.created_by;
 };
 
 //// Procurment View //////////////
 Procurement.procurement_view=async function procurement_view(req,result) {
-  if(req.zone_id && req.prid){
-    var getprecurementquery = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as unit,uom.name as unit_name,if(st.quantity,st.quantity,0) as boh,pro.quantity,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.prid="+req.prid+" and pro.zoneid="+req.zone_id;
+  if(req.zoneid && req.prid){
+    var getprecurementquery = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as unit,uom.name as unit_name,if(st.quantity,st.quantity,0) as boh,pro.quantity,if(greatest(0,pro.quantity-st.quantity),greatest(0,pro.quantity-st.quantity),0) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.prid="+req.prid+" and pro.zoneid="+req.zoneid;
     var getprecurement = await query(getprecurementquery);
     if(getprecurement.length > 0){
       let resobj = {  
@@ -47,13 +48,14 @@ Procurement.procurement_view=async function procurement_view(req,result) {
 
 //////// Create New Precurment //////////
 Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
-  var productquery= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.id"
+  var productquery= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid,'"+new_Procurement.done_by+"' as created_by from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.id"
   var get_product = await query(productquery);  
 
   if (get_product.length !=0) {
     for (let i = 0; i < get_product.length; i++) {
       //get_product[i].zoneid= 1;
       var items = new Procurement(get_product[i]);         
+      //console.log("items==>",items);
       sql.query("INSERT INTO Procurement set ?", items,async function(err, res) {
         if (err) {
           console.log(err);
@@ -98,7 +100,7 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
 
 /////// Get Precurment List ///////////
 Procurement.procurement_list=async function procurement_list(req,result) {
-  if(req.zone_id){
+  if(req.zoneid){
     var where = "";    
     if(req.date){
         where = where+" and date(pro.created_at)='"+req.date+"' ";
@@ -106,7 +108,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
     if(req.vpid){
         where = where+" and (pro.vpid='"+req.vpid+"' or dop.Productname='"+req.vpid+"') ";
     }
-    var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zone_id+" "+where+" order by pro.prid";
+    var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zoneid+" "+where+" order by pro.prid";
     var procurement_list = await query(procurement_list_query);
 
     if(procurement_list.length > 0){
@@ -136,8 +138,8 @@ Procurement.procurement_list=async function procurement_list(req,result) {
 
 ////////// Move to PO /////////////
 Procurement.move_to_purchase=async function move_to_purchase(req,result) {
-  if(req.zone_id && req.pridlist){
-    var getprocurementquery = "select pro.*,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0) as boh_remaining,if(st.quantity_mapping,st.quantity_mapping,0) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_qty from Procurement as pro left join Stock as st on st.vpid=pro.vpid where pro.prid IN("+req.pridlist+") and pro.zoneid="+req.zone_id;
+  if(req.zoneid && req.pridlist && req.done_by){
+    var getprocurementquery = "select pro.*,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0) as boh_remaining,if(st.quantity_mapping,st.quantity_mapping,0) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_qty from Procurement as pro left join Stock as st on st.vpid=pro.vpid where pro.prid IN("+req.pridlist+") and pro.zoneid="+req.zoneid;
     // console.log("getprocurementquery ===>",getprocurementquery);
     var getprocurement = await query(getprocurementquery);
     if(getprocurement.length > 0){
@@ -146,8 +148,7 @@ Procurement.move_to_purchase=async function move_to_purchase(req,result) {
         var checkpotemp = await query(checkpotempquery);
         if(checkpotemp.length == 0){
           var insertdata = [];
-          insertdata.push({"vpid":getprocurement[i].vpid,"prid":getprocurement[i].prid,"actual_quantity":getprocurement[i].procurement_qty,"zoneid":req.zone_id,"delete_status":0});
-          // console.log("insertdata ==>",insertdata);
+          insertdata.push({"vpid":getprocurement[i].vpid,"prid":getprocurement[i].prid,"actual_quantity":getprocurement[i].procurement_qty,"zoneid":req.zoneid,"delete_status":0,"created_by":req.done_by});
           POtepm.createPOtemp(insertdata[0],async function(err,potempres){ 
             //console.log("potempres -->",potempres); 
           });

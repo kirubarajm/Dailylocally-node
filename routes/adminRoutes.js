@@ -80,6 +80,7 @@ module.exports = function(app) {
   app.route("/admin/po/updateporeceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_receive}));
   app.route("/admin/po/updatepounreceive").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_po_unreceive}));
   app.route("/admin/po/popsoring").post(middleware.checkToken,routesVersioning({"1.0.0": scm.pop_to_dayorder}));
+  app.route("/admin/stock/autoassign").post(middleware.checkToken,routesVersioning({"1.0.0": scm.auto_stock_to_dayorder}));
   app.route("/admin/po/view").post(middleware.checkToken,routesVersioning({"1.0.0": scm.view_po}));
   app.route("/admin/po/pdf").post(middleware.checkToken,routesVersioning({"1.0.0": scm.po_pdf}));
   app.route("/admin/po/delete").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po}));
@@ -97,6 +98,10 @@ module.exports = function(app) {
   app.route("/admin/quality/type").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_type_list}));
   app.route("/admin/quality/qualitycheck").post(middleware.checkToken,routesVersioning({"1.0.0": scm.quality_check_product}));
   app.route("/admin/quality/missingquantityreport").post(middleware.checkToken,routesVersioning({"1.0.0": scm.missing_quantity_report}));
+
+  app.route("/admin/return/getreturnlist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_return_list}));
+  app.route("/admin/return/updateorders").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_return_orders}));
+
   /////// Stock Keeping /////////////
   app.route("/admin/stockkeeping/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_list}));
   app.route("/admin/stockkeeping/openlist").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_openlist}));
@@ -117,6 +122,8 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/moveit/view").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_view}));
   app.route("/admin/logistics/moveit/edit").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_edit}));
   app.route("/admin/logistics/moveit/list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list}));
+  app.route("/admin/logistics/moveit/otpverify").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_otp_verify}));
+  app.route("/admin/logistics/moveit/forcelogout").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_force_logout}));
   app.route("/admin/logistics/trip/templist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_temp_list}));
   app.route("/admin/logistics/moveit/listwithtrip").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.moveit_list_trip}));
   app.route("/admin/logistics/trip/create").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.trip_create}));

@@ -4,20 +4,18 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var PO = function(po) {
-  this.poid = po.poid;
-  this.vid = po.vid;
-  this.cost = po.cost;
-  this.zoneid = po.zoneid;
-  this.po_status = po.po_status;
-  this.created_by = po.created_by;
+var Waste = function(waste) {
+  this.waskeid = waste.waskeid;
+  this.vpid = waste.vpid;
+  this.quantity = waste.quantity;
+  this.zoneid = waste.zoneid;
+  this.stock_status = waste.stock_status;
 }
 
 //For Admin
-PO.createPO = async function createPO(req, result) {
-    var insertdata = new PO(req);
-    console.log("insertdata ==>",insertdata);
-    sql.query("INSERT INTO PO set ?", insertdata,async function(err, res) {
+Waste.createWaste = async function createWaste(req, result) {
+    var insertdata = new Waste(req);
+    sql.query("INSERT INTO Stock set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -36,9 +34,9 @@ PO.createPO = async function createPO(req, result) {
     });    
 };
 
-PO.updatePO =async function updatePO(req, result) {
-    var updatedata = new PO(req);
-    sql.query("UPDATE PO SET ? WHERE poid = ?", [updatedata, updatedata.poid],async function(err, res) {
+Waste.updateWaste =async function updateWaste(req, result) {
+    var updatedata = new Waste(req);
+    sql.query("UPDATE Waste SET ? WHERE vpid = ?", [updatedata, updatedata.vpid],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -58,4 +56,4 @@ PO.updatePO =async function updatePO(req, result) {
     );
 };
 
-module.exports = PO;
+module.exports = Waste;

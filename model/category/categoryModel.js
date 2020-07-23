@@ -210,7 +210,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         }
   
         if (res1[0].uom== 1 ||res1[0].uom==7) {
-          res[0].weight = res[0].weight * 1000;
+          res1[0].weight = res1[0].weight * 1000;
         }
         
         res1[0].offer='offer';
