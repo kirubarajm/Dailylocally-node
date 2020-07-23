@@ -30,6 +30,7 @@ var Dayorder = function(Dayorder) {
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   var day = moment().format("YYYY-MM-DD, HH:mm:ss");
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
+  var Orderproductssdetails = await query("select * from Orderproducts where orderid='"+Dayorder.orderid+"' and subscription = 0");
 
   for (let i = 0; i < getproduct.length; i++) {
 
@@ -38,8 +39,9 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
       if (dayorders.length !=0) {
 
+       var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
         if (dayorders[0].delivery_charge==0) {
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+getproduct[i].delivery_charge+"' where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"' where id="+dayorders[0].id;
 
         }else{
           var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
@@ -97,7 +99,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.floor=ordersdetails[0].floor;
         new_day_order.block_name=ordersdetails[0].block_name;
         new_day_order.city=ordersdetails[0].city;
-        new_day_order.delivery_charge=ordersdetails[0].delivery_charge;
+        new_day_order.delivery_charge=noof_delivery;
     
         
 
@@ -1441,6 +1443,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
   const dayorderdetails = await query("select * from Dayorder where id ='" + req.doid + "'");
   var items = req.refunditems;
+  var product_price = 0;
   if (dayorderdetails.length !=0) {
     const userdetails = await query("select * from User where userid ='" + dayorderdetails[0].userid + "'");
     if (dayorderdetails[0].dayorderstatus === 10) {
@@ -1454,13 +1457,19 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
         const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + productdetails[0].orderid + "' and active_status=0");
 
+        if (orderrefunddetails.length !=0) {
+          product_price= productdetails[0].product_price + dayorderdetails[0].delivery_charge;
+        }else{
+          product_price= productdetails[0].product_price 
+
+        }
         
         var refundDetail = {
           orderid :  productdetails[0].orderid,
           active_status : 0,
           userid :  orderdetails[0].userid,
           payment_id : orderdetails[0].tsid,
-          original_amt: productdetails[0].product_price
+          original_amt:  product_price
         };
 
         await Dayorder.create_refund(refundDetail);
