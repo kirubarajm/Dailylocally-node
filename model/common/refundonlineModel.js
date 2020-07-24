@@ -12,6 +12,7 @@ var RefundOnline = function(refund) {
   this.userid =refund.userid;
   this.payment_id =refund.payment_id;
   this.refund_image=refund.refund_image;
+  this.refund_reason=refund.refund_reason;
 
 };
 
