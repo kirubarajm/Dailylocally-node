@@ -2293,11 +2293,12 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
   
   if(orders.length>0 ){
     for(let i=0; i<orders.length; i++){
-      var moveitstatusquery ="select * from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
+      var moveitstatusquery ="select *,if(status=1,'order accept',if(status=2,'Warehouse reached',if(status=3,'order pickup',if(status=5,'Customer location reached',if(status=7,'Delivery Order',' Returned Order'))))) as moveit_status_msg from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
       var statuslist = await query(moveitstatusquery);
       orders[i].moveit_status = 0;
       if (statuslist.length !==0 ) {
         orders[i].moveit_status = statuslist[0].status || 0;
+        orders[i].moveit_status_msg = statuslist[0].moveit_status_msg ;
       }
 
       var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
@@ -2347,7 +2348,7 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
 Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_history__day_order_list(req,result) {
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
 
-  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'Trip not started' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip cancelled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid;
+  var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'Trip not started' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip cancelled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid+" and  trip_status!=1";
   var tripstatuscheck = await query(tripstatuscheckquery);
 
   if (tripstatuscheck.length !=0) {
@@ -2374,7 +2375,7 @@ Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_histo
           orders[j].moveit_status = statuslist[0].status || 0;
         }
   
-        var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
+        var itemsquery = "select * from Dayorder_products  where doid="+orders[j].id;
         var items = await query(itemsquery);
         orders[j].itemlistcount = items.length;
         orders[j].itemlist = items;

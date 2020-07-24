@@ -1196,7 +1196,7 @@ Order.moveit_kitchen_reached_status = function(req, result) {
               let resobj = {
                 success: true,
                 status:true,
-                message: "kitchen reached successfully"
+                message: "Reached Warehouse Successfully"
               };
               ////Insert Order History////
               
