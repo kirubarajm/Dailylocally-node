@@ -26,7 +26,7 @@ var Product = function(product) {
   this.productdetails = product.productdetails;
   this.Perishable = product.Perishable;
   this.shelf_life = product.shelf_life;
-  this.delete_status = product.delete_status;
+  this.delete_status = product.delete_status ||0;
 }
 
 //For Admin
