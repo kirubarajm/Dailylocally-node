@@ -2245,28 +2245,37 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
 };
 
 /////////Reorder to Sorting///////////
-SCM.return_to_sorting =async function return_to_sorting(req,result) {
+SCM.return_reorder =async function return_reorder(req,result) {
     if(req.zoneid && req.doid){
         var checkdayorderquery = "select * from Dayorder where id="+req.doid;
         var checkdayorder = await query(checkdayorderquery);
         if(checkdayorder.length>0){
             if(checkdayorder[0].dayorderstatus == 12){
-                var updatedayorderquery = "update Dayorder set dayorderstatus=1,reorder_status=3 where id="+req.doid;
-                var updatedayorder = await query(updatedayorderquery);
-
-                var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
-                var updatedop = await query(updatedopquery);
-
-                ////////Create Day order Log ////////////
-                var insertlogdata = [];
-                insertlogdata.push({"comments":"return to Sorting ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){}); 
-                let resobj = {
-                    success: true,
-                    status: true,
-                    message: "return to sorting successfully"
-                };
-                result(null, resobj);
+                if(checkdayorder[0].reorder_status == 1){
+                    var updatedayorderquery = "update Dayorder set dayorderstatus=1,reorder_status=3,trip_id=NULL,moveit_type=NULL where id="+req.doid;
+                    var updatedayorder = await query(updatedayorderquery);
+    
+                    var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
+                    var updatedop = await query(updatedopquery);
+    
+                    ////////Create Day order Log ////////////
+                    var insertlogdata = [];
+                    insertlogdata.push({"comments":"return to Sorting ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){}); 
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "return to sorting successfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "plz check reorder status"
+                    };
+                    result(null, resobj);
+                }                
             }else{
                 let resobj = {
                     success: true,

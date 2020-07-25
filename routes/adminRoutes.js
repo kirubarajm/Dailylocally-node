@@ -101,6 +101,7 @@ module.exports = function(app) {
 
   app.route("/admin/return/getreturnlist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_return_list}));
   app.route("/admin/return/updateorders").post(middleware.checkToken,routesVersioning({"1.0.0": scm.update_return_orders}));
+  app.route("/admin/return/reorder").post(middleware.checkToken,routesVersioning({"1.0.0": scm.return_reorder}));
 
   /////// Stock Keeping /////////////
   app.route("/admin/stockkeeping/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_list}));
