@@ -150,7 +150,7 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
 
   var sub_category_query = "select sub1.* from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid  join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id  where cmp.cid='"+req.cid+"' and  zl1.active_status=1 group by pm.scl1_id";
 
-  console.log(sub_category_query);
+
 sql.query(sub_category_query,async function(err, res) {
   if (err) {
     result(err, null);
@@ -159,13 +159,15 @@ sql.query(sub_category_query,async function(err, res) {
 
     // var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
     var get_sub_cat_images = await query("select *,image as image_url from Category where catid='"+res[0].catid+"'");
-    var collection_details = await query("select img_url as image_url from Collections where cid='"+req.cid+"'");
+    var collection_details = await query("select name, img_url as image_url from Collections where cid='"+req.cid+"'");
 
     for (let i = 0; i < res.length; i++) {
    
       res[i].servicable_status=servicable_status;
       
     }
+
+    // console.log(collection_details[0].name);
 
     let resobj = {
       success: true,
@@ -178,7 +180,7 @@ sql.query(sub_category_query,async function(err, res) {
       empty_subconent :"Daily Locally",
       header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
       header_subconent :"Guaranteed one day delivery for orders before 9 PM",
-      category_title : collection_details[0].name,
+      title : collection_details[0].name,
       get_sub_cat_images: get_sub_cat_images,
       result: res
     };

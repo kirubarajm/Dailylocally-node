@@ -339,6 +339,14 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         res1[0].address_type=0;
                         res1[0].delete_status=0;
                         res1[0].address_default=0;
+                        res1[0].city=0;
+                        res1[0].google_address=0;
+                        res1[0].complete_address=0;
+                        res1[0].flat_house_no=0;
+                        res1[0].plot_house_no=0;
+                        res1[0].floor=0;
+                        res1[0].block_name=0;
+                        res1[0].apartment_name=0;
                         responce.push (res1[0]);
                       }
 
@@ -485,11 +493,33 @@ result(null, resobj);
        result(err, null);
      } else {
  
-       sql.query("Select userid,name,email,phoneno,referalcode,gender from User where userid = '"+req.userid+"' ", function(err, userdetails) {
+       sql.query("Select * from User where userid = '"+req.userid+"' ",async function(err, userdetails) {
          if (err) {
            result(err, null);
          } else {
  
+
+          var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
+
+          // if (address_details.length !=0) {
+          //   var userdetails = userdetails.pus(address_details[0]);
+          // }else{
+            userdetails[0].aid= address_details[0].aid || 0;
+            userdetails[0].lat=address_details[0].lat || .0;
+            userdetails[0].lon=address_details[0].lat || .0;
+            userdetails[0].city=address_details[0].city ||'';
+          userdetails[0].address_type=address_details[0].address_type || 0;
+          userdetails[0].delete_status=address_details[0].delete_status || 0;
+          userdetails[0].address_default=address_details[0].address_default ||0;
+          userdetails[0].flat_house_no=address_details[0].flat_house_no;
+          userdetails[0].plot_house_no=address_details[0].plot_house_no;
+          userdetails[0].floor=address_details[0].floor;
+          userdetails[0].block_name=address_details[0].block_name;
+          userdetails[0].apartment_name=address_details[0].apartment_name;
+          userdetails[0].google_address=address_details[0].google_address ||0;
+          userdetails[0].complete_address=address_details[0].complete_address ||0;
+          // }
+        
            if (userdetails.length !=0) {
              
              if (userdetails[0].email) {
@@ -499,6 +529,7 @@ result(null, resobj);
              }
            }
  
+
            let resobj = {
              success: true,
              status: true,

@@ -185,7 +185,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
   var startdate =  moment().format("YYYY-MM-DD");
-  var currenthour  = moment(day).format("HH::mm");
+  var currenthour  = moment(day).format("HH");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var dayafertomorrow = moment().add(2, "days").format("YYYY-MM-DD");
   var convenience_charge = 0;
@@ -225,7 +225,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;
-          tempmessage = tempmessage + res1[0].Productname + ",";
+          // tempmessage = tempmessage + res1[0].Productname + ",";
+          tempmessage = "";
           isAvaliableItem = false;
         } else {
           res1[0].availablity = true;
@@ -262,7 +263,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         res1[0].product_discount_price = product_discount_price;
         res1[0].no_of_deliveries = 1;
         res1[0].subscription = 0;
-        res1[0].starting_date = orderitems[i].dayorderdate || tomorrow;
+      
         totalamount = totalamount + amount;
         // gst = gst + product_gst;
         product_total_weight = product_total_weight + product_weight;
@@ -293,7 +294,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               }
 
         }
-  
+        
+    
+        // console.log(currenthour)
+        if (currenthour < 24) {
+          res1[0].starting_date = tomorrow
+        } else {
+          res1[0].starting_date = dayafertomorrow;
+        }
+
         productdetails.push(res1[0]);
 
       
@@ -406,7 +415,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         }
 
      
-
+        if (currenthour < 24) {
+          subscription_product_list[0].actuall_starting_date = tomorrow
+        } else {
+          subscription_product_list[0].actuall_starting_date = dayafertomorrow;
+        }
 
         subscription_product_list[0].amount = amount;
 
