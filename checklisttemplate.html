@@ -89,11 +89,19 @@ table.d {
                 <table>
                     <tr>
                         <td width=50%><span style="font-weight: bold;"> Vendor Address : </span> {{this.vendorname}} ,<br/> {{this.vendoraddress}}</td>
+                        {{/each}}                        
+                        {{#each footer}}
                         <td width=50%><span style="font-weight: bold;"> Ship To : </span> {{this.shipto}} </td>
+                        {{/each}}  
+                        {{#each order}}  
                     </tr>
                     <tr>
                         <td width=50%><span style="font-weight: bold;"> Phone number : </span> {{this.vendorphoneno}} </td>
-                        <td width=50%><span style="font-weight: bold;"> Email : </span> {{this.vendoremail}} </td>
+                        {{/each}}                        
+                        {{#each footer}}  
+                        <td width=50%><span style="font-weight: bold;"> Email : </span> {{this.contactemail}} </td>
+                        {{/each}}  
+                        {{#each order}}   
                     </tr>
                     <tr>
                         <td width=50%><span style="font-weight: bold;"> Email : </span> {{this.vendoremail}} </td>
@@ -134,8 +142,9 @@ table.d {
     </table>
 
     <table>
-        <tr>
-            <td>Total Invoice Amount : 3000(three thousand only/-)</td>
+        <tr>{{#each order}}
+            <td>Total Invoice Amount : {{this.sumof}}({{this.sumofvalue}} only/-)</td>
+            {{/each}}
         </tr>
     </table>
 <br/>

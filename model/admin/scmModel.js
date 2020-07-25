@@ -19,7 +19,7 @@ var WasteManagement = require('../tableModels/wastemanagementTableModel.js');
 const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
-var Waste = require('../tableModels/wasteTableModel.js');
+var converter = require('number-to-words');
 
 var pdf = require("pdf-creator-node");
 var fs = require('fs');
@@ -389,6 +389,14 @@ SCM.create_po =async function create_po(req,result) {
                                         }
                                         /////Update Dayorder product status =>removed///////
                                     }
+                                    
+                                    if(j+1 == vendor_polist.length){
+                                        var poid = [];
+                                        poid.push({"poid":pores.result.insertId});
+                                        SCM.po_pdf(poid[0],async function(err,poidres){
+                                            console.log("poidres ==>",poidres);
+                                        });
+                                    }
                                 }
         
                                 if(vendorcost > 0 ){
@@ -407,6 +415,8 @@ SCM.create_po =async function create_po(req,result) {
                     }                    
                 }else{ console.log("invalid vendor id"); }                    
             }
+            
+            
             let resobj = {
                 success: true,
                 status: true,
@@ -1050,97 +1060,103 @@ SCM.view_po =async function view_po(req,result) {
 /////// PO PDF ////////
 SCM.po_pdf= async function po_pdf(req,result) {
     if(req.poid){
-
-    }else{
+        var getchecklistquery ="select po.poid,po.created_at as podate,pop.due_date as deliveryduedate,ven.name as vendorname,ven.address as vendoraddress,ven.phoneno as vendorphoneno,ven.email as vendoremail,ven.gst as vendorgst,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'product_name',dop.productname,'rate',pop.cost,'quantity',pop.requested_quantity,'unit',uom.name,'amount',pop.requested_quantity*pop.cost)) as items from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid left join UOM as uom on uom.uomid=dop.product_uom where po.poid="+req.poid;
+        var getchecklist = await query(getchecklistquery);
         
-    }
-    // var getchecklistquery ="select ord.orderid,ord.userid,us.name,ord.cus_address,us.phoneno,ord.orderid,date(ord.created_at) as orderdate,date(ord.order_delivery_day) as deliverydate from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"' group by ord.orderid";
-    // var getchecklist = await query(getchecklistquery);
-
-    var getchecklist = [];
-    getchecklist.push({"poid":2,"podate":"2020-07-20 12:00:00","deliveryduedate":"2020-07-20 12:00:00","vendorname":"vendor1","vendoraddress":"no 60, 1st streeet, rayapuram, chennai-659698","vendorphoneno":"9966556622","shipto":"no 48, 5th street, T-nagar, chennai-697898","vendoremail":"vendor1@gmail.com","vendorgst":"GST00988765"});
-  
-    // var getchecklistitemquery ="select pro.product_name,oi.quantity from Orders as ord left join OrderItem as oi on oi.orderid=ord.orderid left join Product as pro on pro.productid=oi.productid left join User as us on us.userid=ord.userid where ord.orderid='"+req.orderid+"'";
-    // var getchecklistitem = await query(getchecklistitemquery);
-    // getchecklist['items'] = getchecklistitem;
-    var getchecklistitem = [];
-    getchecklistitem.push({"product_name":"product1","quantity":10,"rate":300,"unit":"grams","amount":3000});
-    getchecklist['items'] = getchecklistitem;
-
+        for (let i = 0; i < getchecklist.length; i++) {
+            getchecklist[i].items = JSON.parse(getchecklist[i].items); 
+        }
     
-    if(getchecklist.length != 0){
-      var options = {
-        format: "A4",
-        orientation: "landscap",
-        border: "10mm"
-      };
-      var order = [{
-        poid: getchecklist[0]['poid'],
-        podate: moment(getchecklist[0]['podate']).format("DD-MM-YYYY"),
-        deliveryduedate: moment(getchecklist[0]['deliveryduedate']).format("DD-MM-YYYY"),
-        vendorname: getchecklist[0]['vendorname'],
-        vendoraddress: getchecklist[0]['vendoraddress'],
-        vendorphoneno: getchecklist[0]['vendorphoneno'],
-        shipto: getchecklist[0]['shipto'],
-        vendoremail: getchecklist[0]['vendoremail'],
-        vendorgst: getchecklist[0]['vendorgst']
-      }]
-      var headerdata = [{
-        headername: constant.tovo_po_header_name,
-        headeraddress: constant.tovo_po_header_address,
-        headerarea: constant.tovo_po_header_area,
-        headergst: constant.tovo_po_header_gst,
-      }]
-      var footerdata = [{
-        contactname: constant.tovo_po_contact,
-        contactnumber: constant.tovo_po_contact_number,
-        contactemail: constant.tovo_po_contact_email,
-        footername: constant.tovo_po_footer_name,
-        footeraddress: constant.tovo_po_footer_address,
-        footerarea: constant.tovo_po_footer_area,
-      }]
-      var items = getchecklistitem;
-      var pathfilename = "./uploads/po_pdf/"+getchecklist[0]['poid']+".pdf";
-      var document = {
-        html: html,
-        data: {
-            items: items,
-            order: order,
-            footer: footerdata,
-            header:headerdata,
-        },
-        path: pathfilename
-      };
-      //console.log(document);
-      pdf.create(document, options)
-        .then(res => {
-            console.log(res);
-            let resobj = {
-              success: true,
-              message: "pdf Created Successfully",
-              status:true,
-              url: res
+        var sumof = 0;
+        for (let j = 0; j < getchecklist[0].items.length; j++) {
+            sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].amount);
+        }       
+        var sumofvalue = converter.toWords(sumof);
+    
+        if(getchecklist.length != 0){
+            var options = {
+                format: "A4",
+                orientation: "landscap",
+                border: "10mm"
             };
-            result(null, resobj);
-        })
-        .catch(error => {
-            console.error(error)
-            let resobj = {
-              success: false,
-              message: "something went wrong",
-              status:false
+            var order = [{
+                poid: getchecklist[0]['poid'],
+                podate: moment(getchecklist[0]['podate']).format("DD-MM-YYYY"),
+                deliveryduedate: moment(getchecklist[0]['deliveryduedate']).format("DD-MM-YYYY"),
+                vendorname: getchecklist[0]['vendorname'],
+                vendoraddress: getchecklist[0]['vendoraddress'],
+                vendorphoneno: getchecklist[0]['vendorphoneno'],
+                vendoremail: getchecklist[0]['vendoremail'],
+                vendorgst: getchecklist[0]['vendorgst'],
+                sumof: sumof,
+                sumofvalue: sumofvalue
+            }]
+            var headerdata = [{
+                headername: constant.tovo_po_header_name,
+                headeraddress: constant.tovo_po_header_address,
+                headerarea: constant.tovo_po_header_area,
+                headergst: constant.tovo_po_header_gst,
+            }]
+            var footerdata = [{
+                shipto: constant.tovo_po_ship_to,
+                contactname: constant.tovo_po_contact,
+                contactnumber: constant.tovo_po_contact_number,
+                contactemail: constant.tovo_po_contact_email,
+                footername: constant.tovo_po_footer_name,
+                footeraddress: constant.tovo_po_footer_address,
+                footerarea: constant.tovo_po_footer_area,
+            }]
+            var items = getchecklist[0]['items'];
+                // console.log("items ===>",items);
+            var pathfilename = "./uploads/po_pdf/"+getchecklist[0]['poid']+".pdf";
+            var document = {
+                html: html,
+                data: {
+                    items: items,
+                    order: order,
+                    footer: footerdata,
+                    header:headerdata,
+                },
+                path: pathfilename
             };
-            result(null, resobj);
-        });    
+            //console.log(document);
+            pdf.create(document, options)
+                .then(res => {
+                    console.log(res);
+                    let resobj = {
+                    success: true,
+                    message: "pdf Created Successfully",
+                    status:true,
+                    url: res
+                    };
+                    result(null, resobj);
+                })
+                .catch(error => {
+                    console.error(error)
+                    let resobj = {
+                    success: false,
+                    message: "something went wrong",
+                    status:false
+                    };
+                    result(null, resobj);
+                });    
+        }else{
+          let resobj = {
+            success: false,
+            message: "no record in this order",
+            status:false
+          };
+          result(null, resobj);
+        } 
     }else{
-      let resobj = {
-        success: false,
-        message: "no record in this order",
-        status:false
-      };
-      result(null, resobj);
-    }  
-  };
+        let resobj = {
+            success: false,
+            message: "check post values",
+            status:false
+          };
+          result(null, resobj);
+    }    
+};
 
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {
@@ -2110,7 +2126,7 @@ SCM.get_return_list =async function get_return_list(req,result) {
             where = where+" and date(dayo.date)='"+req.date+"' ";
         }
 
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and reorder_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
         var getpolist = await query(getpolistquery);
         //  console.log("getpolist==>",getpolist);
         if(getpolist.length > 0){
@@ -2150,43 +2166,123 @@ SCM.get_return_list =async function get_return_list(req,result) {
 SCM.update_return_orders =async function update_return_orders(req,result) {
     if(req.zoneid && req.doid && req.products.length>0){
         var products = req.products;
-        for (let i = 0; i < products.length; i++) {
-            if(products[i].type==1){
-                ////Push To stock/////
-                var checkstockquery = "select * from Stock where vpid="+products[i].vpid;
-                var checkstock = await query(checkstockquery);
-                if(checkstock.length>0){
-                    var updateqty = parseInt(checkstock[0].quantity)+parseInt(products[i].quantity);
-                    var updatestockquery = "update stock set quantity="+updateqty+" where vipd="+products[i].vpid;
-                    var updatestock = await query(updatestockquery);
-
-                    ////////Stock in Log//////////////
-                    var stocklogdataout = [];
-                    stocklogdataout.push({"stockid":checkstock[0].stockid,"vpid":checkstock[0].vpid,"dopid":products[i].dopid,"type":1,"from_type":5,"quantity":req[0].report_quantity,"zoneid":req.zoneid});
-                    StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
-
+        var checkdayorderquery = "select * from Dayorder where id="+req.doid;
+        var checkdayorder = await query(checkdayorderquery);
+        if(checkdayorder.length>0){
+            if(checkdayorder[0].dayorderstatus==12){
+                if(checkdayorder[0].reorder_status==1){
+                    for (let i = 0; i < products.length; i++) {
+                        if(products[i].type==1){
+                            ////Push To stock/////
+                            var checkstockquery = "select * from Stock where vpid="+products[i].vpid;
+                            var checkstock = await query(checkstockquery);
+                            if(checkstock.length>0){
+                                var updateqty = parseInt(checkstock[0].quantity)+parseInt(products[i].quantity);
+                                var updatestockquery = "update Stock set quantity="+updateqty+" where vpid="+products[i].vpid;
+                                var updatestock = await query(updatestockquery);
+            
+                                ////////Stock in Log//////////////
+                                var stocklogdataout = [];
+                                stocklogdataout.push({"stockid":checkstock[0].stockid,"vpid":checkstock[0].vpid,"dopid":products[i].dopid,"type":1,"from_type":5,"quantity":products[i].quantity,"zoneid":req.zoneid});
+                                StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){
+                                    if(stocklogdatares.status==true){ }else{ }
+                                 });                    
+                            }
+                        }else if(products[i].type==2){
+                            var wastmanagement_data = [];
+                            wastmanagement_data.push({"dopid":products[i].dopid,"vpid":products[i].vpid,"quantity":products[i].quantity,"from_type":5,"zoneid":req.zoneid});
+                            WasteManagement.createWasteManagement(wastmanagement_data[0],async function(err,wastmanagement_datares){
+                                if(wastmanagement_datares.status==true){ }else{ }
+                            });
+                        }
+                    }
+            
+                    var updatedayorderquery = "update Dayorder set reorder_status=2 where id="+req.doid;
+                    var updatedayorder = await query(updatedayorderquery);
+                    ////////Create Day order Log ////////////
+                    var insertlogdata = [];
+                    insertlogdata.push({"comments":"Order Retrun accepted in SCM ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});  
                     
+                    let resobj = {
+                        success: true,
+                        status: true,
+                        message: "sorting Reported successfully"
+                    };
+                    result(null, resobj);
+                }else{
+                    let resobj = {
+                        success: true,
+                        status: false,
+                        message: "In valid reorder_status"
+                    };
+                    result(null, resobj);
                 }
-            }else if(products[i].type==2){
-                var checkwastequery = "select * from Waste where vpid="+products[i].vpid;
-                var checkwaste = await query(checkwastequery);
-                if(checkwaste.length==0){
-                    var updateqty = parseInt(checkwaste[0].quantity)+parseInt(products[i].quantity);
-                    var updatewastequery = "update Waste set quantity="+updateqty+" where vipd="+products[i].vpid;
-                    var updatewaste = await query(updatewastequery);
-
-                    ////////Stock in Log//////////////
-                    var stocklogdataout = [];
-                    stocklogdataout.push({"stockid":checkwaste[0].stockid,"vpid":checkwaste[0].vpid,"dopid":products[i].dopid,"type":1,"from_type":5,"quantity":req[0].report_quantity,"zoneid":req.zoneid});
-                    StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
-                }
-                Waste
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "In valid dayorder status"
+                };
+                result(null, resobj);
             }
-        } 
-        ////////Create Day order Log ////////////
-        var insertlogdata = [];
-        insertlogdata.push({"comments":"Order Retrun accepted in SCM ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});       
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "In valid Order id"
+            };
+            result(null, resobj);
+        }        
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }  
+};
+
+/////////Reorder to Sorting///////////
+SCM.return_to_sorting =async function return_to_sorting(req,result) {
+    if(req.zoneid && req.doid){
+        var checkdayorderquery = "select * from Dayorder where id="+req.doid;
+        var checkdayorder = await query(checkdayorderquery);
+        if(checkdayorder.length>0){
+            if(checkdayorder[0].dayorderstatus == 12){
+                var updatedayorderquery = "update Dayorder set dayorderstatus=1,reorder_status=3 where id="+req.doid;
+                var updatedayorder = await query(updatedayorderquery);
+
+                var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
+                var updatedop = await query(updatedopquery);
+
+                ////////Create Day order Log ////////////
+                var insertlogdata = [];
+                insertlogdata.push({"comments":"return to Sorting ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){}); 
+                let resobj = {
+                    success: true,
+                    status: true,
+                    message: "return to sorting successfully"
+                };
+                result(null, resobj);
+            }else{
+                let resobj = {
+                    success: true,
+                    status: false,
+                    message: "plz check order status"
+                };
+                result(null, resobj); 
+            }
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                message: "invalid doid"
+            };
+            result(null, resobj); 
+        }
     }else{
         let resobj = {
             success: true,
