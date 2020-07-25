@@ -2126,7 +2126,7 @@ SCM.get_return_list =async function get_return_list(req,result) {
             where = where+" and date(dayo.date)='"+req.date+"' ";
         }
 
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and reorder_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
         var getpolist = await query(getpolistquery);
         //  console.log("getpolist==>",getpolist);
         if(getpolist.length > 0){
@@ -2170,7 +2170,7 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
         var checkdayorder = await query(checkdayorderquery);
         if(checkdayorder.length>0){
             if(checkdayorder[0].dayorderstatus==12){
-                if(checkdayorder[0].reorder_status==1){
+                if(checkdayorder[0].return_status==1){
                     for (let i = 0; i < products.length; i++) {
                         if(products[i].type==1){
                             ////Push To stock/////
@@ -2197,7 +2197,7 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
                         }
                     }
             
-                    var updatedayorderquery = "update Dayorder set reorder_status=2 where id="+req.doid;
+                    var updatedayorderquery = "update Dayorder set return_status=2 where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
@@ -2214,7 +2214,7 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
                     let resobj = {
                         success: true,
                         status: false,
-                        message: "In valid reorder_status"
+                        message: "In valid return_status"
                     };
                     result(null, resobj);
                 }
@@ -2251,8 +2251,8 @@ SCM.return_reorder =async function return_reorder(req,result) {
         var checkdayorder = await query(checkdayorderquery);
         if(checkdayorder.length>0){
             if(checkdayorder[0].dayorderstatus == 12){
-                if(checkdayorder[0].reorder_status == 1){
-                    var updatedayorderquery = "update Dayorder set dayorderstatus=1,reorder_status=3,trip_id=NULL,moveit_type=NULL where id="+req.doid;
+                if(checkdayorder[0].return_status == 1){
+                    var updatedayorderquery = "update Dayorder set dayorderstatus=1,return_status=3,trip_id=NULL,moveit_type=NULL where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
     
                     var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
