@@ -1557,7 +1557,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////Moveit Trip List/////////
   Moveituser.moveit_trip_list =async function moveit_trip_list(req, result) {
     if(req.moveit_userid){
-      var gettriplistquery = "select mt.tripid as trip_id,mt.moveit_id,mu.name as moveit_user_name, COUNT(ord.id) as order_count, mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip as mt left join MoveitUser as mu on mu.userid=mt.moveit_id left join Dayorder as ord on ord.trip_id=mt.tripid where date(mt.created_at)=CURDATE() and mt.moveit_id="+req.moveit_userid+" group by mt.tripid order by mt.trip_status";
+      var gettriplistquery = "select mt.tripid as trip_id,mt.moveit_id,mu.name as moveit_user_name, COUNT(ord.id) as order_count, mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'Trip not started' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg from Moveit_trip as mt left join MoveitUser as mu on mu.userid=mt.moveit_id left join Dayorder as ord on ord.trip_id=mt.tripid where date(mt.created_at)=CURDATE() and mt.moveit_id="+req.moveit_userid+" group by mt.tripid order by mt.trip_status";
       var gettriplist = await query(gettriplistquery);
       if(gettriplist.length>0){
         let resobj = {
@@ -2296,9 +2296,11 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
       var moveitstatusquery ="select *,if(status=1,'order accept',if(status=2,'Warehouse reached',if(status=3,'order pickup',if(status=5,'Customer location reached',if(status=7,'Delivery Order',' Returned Order'))))) as moveit_status_msg from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
       var statuslist = await query(moveitstatusquery);
       orders[i].moveit_status = 0;
+      orders[i].moveit_status_msg = '';
       if (statuslist.length !==0 ) {
         orders[i].moveit_status = statuslist[0].status || 0;
-        orders[i].moveit_status_msg = statuslist[0].moveit_status_msg ;
+        orders[i].moveit_status_msg = statuslist[0].moveit_status_msg  ;
+        console.log(orders[i].moveit_status_msg);
       }
 
       var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
@@ -2359,7 +2361,7 @@ Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_histo
       var orders = await query(ordersquery);
 
 
-      var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.zone_phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'waiting for trip start' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+tripstatuscheck[i].tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
+      var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.zone_phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'Trip not started' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+tripstatuscheck[i].tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
       var orders = await query(ordersquery);
 
      

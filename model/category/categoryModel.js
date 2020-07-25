@@ -88,18 +88,37 @@ Category.get_category_list =async function get_category_list(req,result) {
         } else {
         
        
-            var collectionlist        = {};
-            collectionlist.collection = res3.collection;
-            var collection       = collectionlist.collection[0];
-            collection.category=true,
-            collection.clickable= false
-            collection.collection_status= true
-
-            collection.catid = collection.cid;
-            collection.servicable_status=servicable_status;
-            collection.query=0;
-                   
-            res.splice(2, 0, collection);
+            // console.log(res3.status);
+            if (res3.status==true) {
+              var collectionlist        = {};
+              collectionlist.collection = res3.collection;
+              var collection       = collectionlist.collection[0];
+              collection.category=true,
+              collection.clickable= false
+              collection.collection_status= true
+  
+              collection.catid = collection.cid;
+              collection.servicable_status=servicable_status;
+              collection.query=0;
+                     
+              res.splice(2, 0, collection);
+  
+              let resobj = {
+                success: true,
+                status:true,
+                serviceablestatus: servicable_status,
+                unserviceable_title:"Sorry! Your area is not serviceable.",
+                unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+                empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+                empty_content:"Daily Locally",
+                empty_subconent :"Daily Locally",
+                header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+                header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+                category_title :"Categories",
+                result: res
+              };
+              result(null, resobj);
+            } 
 
             let resobj = {
               success: true,
@@ -116,6 +135,7 @@ Category.get_category_list =async function get_category_list(req,result) {
               result: res
             };
             result(null, resobj);
+           
                                 
 
          
@@ -220,7 +240,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         res1[0].mrp_discount_amout=0;
         if ( res1[0].discount_cost) {
           res1[0].discount_cost_status=true;
-          res1[0].mrp_discount_amout = res[0].mrp - res[0].discount_cost ;
+          res1[0].mrp_discount_amout = res1[0].mrp - res1[0].discount_cost ;
         }
 
 

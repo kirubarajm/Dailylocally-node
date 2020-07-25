@@ -277,9 +277,11 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                      );
 
                      var user = {};
-                         user.userid= res2.insertId
-                    var new_cluster = new clusteruser(user);
-                     clusteruser.create_a_cluster_user(new_cluster);
+                     user.userid= res2.insertId
+
+                      var new_cluster = new clusteruser(user);
+                      new_cluster.userid= res2.insertId;
+                      clusteruser.create_a_cluster_user(new_cluster);
                     let resobj = {
                       success: true,
                       status: true,

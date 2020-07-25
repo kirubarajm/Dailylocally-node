@@ -26,25 +26,34 @@ Collection.list_all_active_collection =async function list_all_active_collection
         result(err, null);
       } else {
       
-       var kitchen= await Collection.getcollectionlist(res,req);
-   
+        if (res.length !=0) {
+          if (res.length !== 0 ) {
         
-        if (res.length !== 0 ) {
-        
-          let resobj = {
-            success: true,
-            status:true,
-            collection: res
-          };
-          result(null, resobj);
+            let resobj = {
+              success: true,
+              status:true,
+              collection: res
+            };
+            result(null, resobj);
+          } else {
+            let resobj = {
+              success: true,
+              status:false,
+              message: "Sorry there no active collections"
+            };
+            result(null, resobj);
+           } 
         } else {
+          
           let resobj = {
             success: true,
-            status:false,
-            message: "Sorry there no active collections"
+            status: false,
+            message: "Collection not Found"
           };
           result(null, resobj);
-         }     
+        }
+        
+           
       }
     });
   } else {
