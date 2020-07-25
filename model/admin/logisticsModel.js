@@ -394,8 +394,7 @@ Logistics.moveit_list =async function moveit_list(req,result) {
         if(req.moveit_search){
             wherecon = wherecon+" and (mu.userid like '%"+req.userid+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
         }
-        var moveitlistquery = "select * from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
-        console.log("moveitlistquery ===>",moveitlistquery);
+        var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
         var moveitlist = await query(moveitlistquery);
         if(moveitlist.length>0){
             let resobj = {
@@ -639,6 +638,7 @@ Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
                         username = getmoveittrip[i].name+"(Live trip - "+getmoveittrip[i].tripid+")";
                     }else{
                         username = getmoveittrip[i].name+"(New trip)";
+                        getmoveittrip[i].tripid='';
                     }
                     resultdata.push({"userid":getmoveittrip[i].userid,"name":username,"tripid":getmoveittrip[i].tripid});
                 } 
@@ -806,7 +806,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
 
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorders[i],"type":1,"done_type":1});
                 DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
 
                 if(updatedayorder.affectedRows>0){

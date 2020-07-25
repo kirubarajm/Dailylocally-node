@@ -175,6 +175,8 @@ const calculate = {
     tovo_po_footer_name:"Tovo Technologies PVT.LTD.,",
     tovo_po_footer_address:"AMG Towers, Lawyer Jaganathan Street,",
     tovo_po_footer_area:"Alandur, chennai - 600032",
+    tovo_po_ship_to:" no 48, 5th street, T-nagar, chennai-697898",
+
 }
 
 
