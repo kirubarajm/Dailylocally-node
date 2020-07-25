@@ -78,7 +78,8 @@ Category.get_category_list =async function get_category_list(req,result) {
         res[i].category=true,
         res[i].clickable= true
         res[i].collection_status= false
-
+        res[i].tile_type= 1
+        //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
       }
 
 
@@ -100,6 +101,7 @@ Category.get_category_list =async function get_category_list(req,result) {
               collection.catid = collection.cid;
               collection.servicable_status=servicable_status;
               collection.query=0;
+              collection.tile_type= 2
                      
               res.splice(2, 0, collection);
   
@@ -112,8 +114,8 @@ Category.get_category_list =async function get_category_list(req,result) {
                 empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
                 empty_content:"Daily Locally",
                 empty_subconent :"Daily Locally",
-                header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
-                header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+                header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> What can we get you for tomorrow ?",
+                header_subconent :"Order or Subscribe before 12 midnight and get it before12 noon! ",
                 category_title :"Categories",
                 result: res
               };

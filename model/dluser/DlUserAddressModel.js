@@ -261,7 +261,7 @@ UserAddress.updateById =async function updateById(req, result){
 
 UserAddress.check_address =async function check_address(req, result){
 
-    var servicable_status = false;
+    var servicable_status = true;
    
     var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
     req.lat +
@@ -282,7 +282,7 @@ UserAddress.check_address =async function check_address(req, result){
    var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
    
    if (user_day_order_details.length !=0) {
-       
+       console.log(servicable_status);
      if (!servicable_status) {
        let resobj = {
            success: true,
