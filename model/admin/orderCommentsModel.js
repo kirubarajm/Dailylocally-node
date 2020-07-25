@@ -34,6 +34,8 @@ OrderComments.create_OrderComments = function create_OrderComments(OrderComments
 };
 
 OrderComments.create_OrderComments_crm = function create_OrderComments_crm(OrderComments, res) {
+
+  console.log(OrderComments);
   sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, result) {
     if (err) {
       console.log(err);
