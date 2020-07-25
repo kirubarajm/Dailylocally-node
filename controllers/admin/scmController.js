@@ -249,3 +249,13 @@ exports.update_return_orders = function(req, res) {
         res.send(ress);
     });    
 };
+
+/////////Admin Return Reorder///////////
+exports.return_reorder = function(req, res) {    
+    SCM.return_reorder(req.body, function(err, ress) {
+        //console.log("return_reorder controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
