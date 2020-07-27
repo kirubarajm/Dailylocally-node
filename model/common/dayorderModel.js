@@ -1054,6 +1054,14 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     };
     result(null, resobj);
   
+  }else if (day_order[0].dayorderstatus <=8) {
+    let resobj = {
+      success: true,
+      message: "order not pickedup.",
+      status: false
+    };
+    result(null, resobj);
+  
   }else{
 
       
