@@ -469,7 +469,7 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
 
       }
     }else{
-      where = where+" and  DATE(drs.created_at) = CURDATE()";
+      where = where+" and  DATE(drs.date) = CURDATE()";
     }
 
 
@@ -1095,12 +1095,14 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     // await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
     // result(null, resobj);
  
-    // var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
-    // var getmoveitdetails = await query(getmoveitdetailsquery);
-    // if(getmoveitdetails.length>0){
-    //     console.log("moveit Send Notification ============> For assign 1");
-    //     await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
-    // }
+    var getmoveitdetailsquery = "select mu.* from Dayorder dors left join Moveit_trip mt on mt.tripid=dors.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id where dors.id="+req.moveit_id;
+    var getmoveitdetails = await query(getmoveitdetailsquery);
+    if(getmoveitdetails.length>0){
+      console.log("moveit Send Notification return book ================> 2");
+      await Notification.orderMoveItPushNotification(day_order[0].trip_id,PushConstant.pageidMoveit_return_book,getmoveitdetails[0],day_order[0].id);
+    }
+
+    
    
     let resobj = {
       success: true,

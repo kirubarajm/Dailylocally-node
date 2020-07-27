@@ -427,7 +427,7 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
         message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer",
         pageid: "" + pageid,
         tripid: "" + trip.trip_id,
-        orderid: "" + orderid,
+        orderid: "" + otherfields,
         ordercount: "1",
         app: "Move-it",
         notification_type: "1"

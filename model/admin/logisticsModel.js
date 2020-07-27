@@ -18,6 +18,7 @@ var Notification = require('../common/notificationModel.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var PushConstant = require('../../push/PushConstant.js');
 var ClusterCategoryMapping = require("../tableModels/clustercategorymappingTableModel.js");
+var MoveitUserModel = require("../moveit/moveitUserModel.js");
 
 var Logistics = function(stockkeeping) {};
 
@@ -823,7 +824,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                 var updatedayorder = await query(updatedayorderquery);
 
                 ///////check trip status for close //////////
-                await Logistics.trip_status_update(checkdayorder[0].trip_id,async function(err,tripstatusupdateeres){});
+                await MoveitUserModel.updatetripstatus(checkdayorder[0].trip_id);
                 
                 var historydata = [];
                 historydata.push({"doid":dayorders[i],"tripid":checkdayorder[0].trip_id,"type":2,"zoneid":req.zoneid,"created_by":req.done_by});
