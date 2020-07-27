@@ -347,7 +347,7 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
     case PushConstant.pageidMoveit_Trip_Assigned:
       // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
       data = {
-        title: "New Trip #"+  trip.trip_id +" assigned",
+        title: "New Trip "+  trip.trip_id +" assigned",
         message: "Your trip contains " + trip.order_count + " orders.",
         pageid: "" + pageid,
         tripid: "" + trip.trip_id,
@@ -423,15 +423,14 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
       break;
     case PushConstant.pageidMoveit_return_book:
       data = {
-        title: "Return booked for Order"+ orderid,
-        message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer.",
+        title: "Return booked for Order "+ orderid,
+        message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer",
         pageid: "" + pageid,
+        tripid: "" + trip.trip_id,
+        orderid: "" + orderid,
+        ordercount: "1",
         app: "Move-it",
         notification_type: "1"
-        // name: "" + Eatuserdetail.name,
-        // price: "" + orders.price,
-        // orderid: "" + orders.orderid,
-        // place: "" + orders.cus_address,       
       };  
       break;
   }
