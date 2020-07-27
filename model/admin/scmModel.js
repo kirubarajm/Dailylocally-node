@@ -20,6 +20,7 @@ const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
 var converter = require('number-to-words');
+var Document = require("../../model/common/documentsModel.js");
 
 var pdf = require("pdf-creator-node");
 var fs = require('fs');
@@ -1122,7 +1123,12 @@ SCM.po_pdf= async function po_pdf(req,result) {
             //console.log(document);
             pdf.create(document, options)
                 .then(res => {
-                    console.log(res);
+                    console.log(res.filename);
+                    ///////
+
+                    // Document.newmoveitdocumentupload(res.filename);
+
+
                     let resobj = {
                     success: true,
                     message: "pdf Created Successfully",
