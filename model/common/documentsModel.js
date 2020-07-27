@@ -53,7 +53,7 @@ Documents.createDocument = function createDocument(newDocument, result) {
         return;
       }
       const params = {
-        Bucket: "eattovo", // pass your bucket name
+        Bucket: "dailylocally", // pass your bucket name
         Key: fileName, // file will be saved as testBucket/contacts.csv
         Body: newDocument.files.lic
       };
@@ -290,10 +290,7 @@ Documents.remove_document = function(req, result) {
   });
 };
 
-Documents.newmoveitdocumentupload = function newmoveitdocumentupload(
-  newDocument,
-  result
-) {
+Documents.newmoveitdocumentupload = function newmoveitdocumentupload( newDocument, result) {
   if (Object.keys(newDocument.files).length == 0) {
     return result.status(400).send("No files were uploaded.");
   }
@@ -302,7 +299,7 @@ Documents.newmoveitdocumentupload = function newmoveitdocumentupload(
   var name = fileName.name;
   var name = Date.now() + "-" + name;
   const params = {
-    Bucket: "eattovo/upload/admin/moveit", // pass your bucket name
+    Bucket: "dailylocally/upload/moveit", // pass your bucket name
     Key: name, // file will be saved as testBucket/contacts.csv
     Body: fileName.data,
     ContentType: "image/jpg",
@@ -336,7 +333,7 @@ Documents.newsalesdocumentupload = function newsalesdocumentupload(
   var name = fileName.name;
   var name = Date.now() + "-" + name;
   const params = {
-    Bucket: "eattovo/upload/admin/sales", // pass your bucket name
+    Bucket: "dailylocally/upload/admin/sales", // pass your bucket name
     Key: name, // file will be saved as testBucket/contacts.csv
     Body: fileName.data,
     ContentType: "image/jpg",
@@ -369,7 +366,7 @@ Documents.newmakeitdocumentupload = function newmakeitdocumentupload(newDocument
   var name = fileName.name;
   var name = Date.now() + "-" + name;
   const params = {
-    Bucket: "eattovo/upload/admin/makeit", // pass your bucket name
+    Bucket: "dailylocally/upload/admin/makeit", // pass your bucket name
     Key: name, // file will be saved as testBucket/contacts.csv
     Body: fileName.data,
     ContentType: "image/jpg",
@@ -400,7 +397,7 @@ Documents.makeit_product_upload_a_document = function makeit_product_upload_a_do
   var name = fileName.name;
   var name = Date.now() + "-" + name;
   const params = {
-    Bucket: "eattovo/upload/admin/makeit/product", // pass your bucket name
+    Bucket: "dailylocally/upload/admin/makeit/product", // pass your bucket name
     Key: name, // file will be saved as testBucket/contacts.csv
     Body: fileName.data,
     ContentType: "image/jpg",
