@@ -1217,22 +1217,15 @@ Catalog.get_tag_list =async function get_tag_list(req,result) {
 
 /////////File Upload step:1 ->///////////
 Catalog.fileUpload = function fileUpload(newDocument,result) {
-    console.log("newDocument.type",newDocument.type);
     if (Object.keys(newDocument.files).length == 0) {
       return result.status(400).send("No files were uploaded.");
     }
     var fileName = newDocument.files.file;
     var name = fileName.name;
     var name = Date.now() + "-" + name;
-    var bucketurl = "";
-    if(newDocument.type == 1){
-        bucketurl = "dailylocally/admin/catalog";
-    }
-// console.log("newDocument.type",newDocument);
-console.log("bucketurl",bucketurl); 
-
+    
     const params = {
-      Bucket: bucketurl, // pass your bucket name
+      Bucket: "dailylocally/admin", // pass your bucket name
       Key: name, // file will be saved as testBucket/contacts.csv
       Body: fileName.data,
       ContentType: "image/jpg",

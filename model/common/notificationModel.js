@@ -423,7 +423,7 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
       break;
     case PushConstant.pageidMoveit_return_book:
       data = {
-        title: "Return booked for Order "+ orderid,
+        title: "Return booked for Order "+ otherfields,
         message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer",
         pageid: "" + pageid,
         tripid: "" + trip.trip_id,
