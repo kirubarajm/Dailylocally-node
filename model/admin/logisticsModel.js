@@ -214,7 +214,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
                 insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+                DayOrderComment.create_OrderComments_crm(insertlogdata);  
                 let resobj = {
                     success: true,
                     status: true,
@@ -719,7 +719,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
                     insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
-                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});                   
+                    DayOrderComment.create_OrderComments_crm(insertlogdata);                
                 }
 
                 var difforderid = dayorderids.filter(x => oldorders.indexOf(x) === -1);
@@ -764,7 +764,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                             ////////Create Day order Log ////////////
                             var insertlogdata = [];
                             insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
-                            DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+                            DayOrderComment.create_OrderComments_crm(insertlogdata);  
                         }
 
                         ////// Send Notification //////////
@@ -832,7 +832,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
                 insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorders[i],"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+                DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
                 if(updatedayorder.affectedRows>0){
                     ////// Send Notification //////////

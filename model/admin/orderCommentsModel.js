@@ -19,7 +19,7 @@ OrderComments.create_OrderComments = function create_OrderComments(OrderComments
   sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, result) {
     if (err) {
       console.log(err);
-      res(err, null);
+      result(err, null);
     } else {
       
       if (email_list.length !=0) {
@@ -32,14 +32,12 @@ OrderComments.create_OrderComments = function create_OrderComments(OrderComments
         status : true,
         message: "Day Order Comments Created successfully"
       };
-      res(null, resobj);
+      result(null, resobj);
     }
   });
 };
 
 OrderComments.create_OrderComments_crm = function create_OrderComments_crm(OrderComments, res) {
-
-  console.log(OrderComments);
   sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, result) {
     if (err) {
       console.log(err);
