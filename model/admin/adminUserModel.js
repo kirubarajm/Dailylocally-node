@@ -129,9 +129,9 @@ AdminUser.remove = function(id, result) {
 };
 
 AdminUser.login = function login(req, result) {
-  var reqs = [req.email, req.password];
-  sql.query("Select * from Admin_users where email = ? and password = ?", reqs,
-    function(err, res) {
+var admin = "Select au.*,aur.*,afr.* from Admin_users  au left join Admin_user_roles aur on au.user_roleid=aur.userroleid left join Admin_features_roles_mapping afr on afr.userroleid=aur.userroleid  where au.email = '"+req.email+"' and au.password = '"+req.password+"'";
+console.log(admin); 
+sql.query(admin, async function(err, res) {
       if (err) {
         let resobj = {
           success: true,
@@ -141,10 +141,13 @@ AdminUser.login = function login(req, result) {
         };
         result(resobj, null);
       } else {
+
         if (res.length !== 0) {
+
           var req_push={admin_userid:res[0].admin_userid,push_token:req.push_token}
+
           if(req.push_token){
-          AdminUser.updatePushidByToken(req_push, function(err, res2) {
+          AdminUser.updatePushidByToken(req_push,async function(err, res2) {
             if (err) {
               let resobj = {
                 success: true,
@@ -155,7 +158,7 @@ AdminUser.login = function login(req, result) {
               result(resobj, null);
             }else{
               res[0].push_token=req_push.push_token
-              let resobj = {
+                    let resobj = {
                 success: true,
                 status: true,
                 message: res[0].name+" Login Successfully",
@@ -165,6 +168,7 @@ AdminUser.login = function login(req, result) {
             }
           })
          }else{
+
           let resobj = {
             success: true,
             status: true,
@@ -173,6 +177,7 @@ AdminUser.login = function login(req, result) {
           };
           result(null, resobj);
          }
+
         } else {
           let resobj = {
             success: true,
