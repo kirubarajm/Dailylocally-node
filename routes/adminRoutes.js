@@ -16,6 +16,8 @@ module.exports = function(app) {
   var useraddress = require("../controllers/dluser/UserAddressController");
   var refundOnline = require("../controllers/common/refundController");
   var Razorpay = require("../controllers/common/RazorpayController");
+  var adminuser = require("../controllers/admin/adminUserController");
+
   //////// ==============> Admin Routes <================= /////////  
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
@@ -170,7 +172,9 @@ app.route("/admin/transaction").post(middleware.checkToken,routesVersioning({"1.
 app.route("/admin/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
 
 
-app.route("/admin/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address}));}
+app.route("/admin/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address}));
 
+app.route("/admin/adminuserlist").post(middleware.checkToken,routesVersioning({"1.0.0":adminuser.getAllUser}));
 
+}
 

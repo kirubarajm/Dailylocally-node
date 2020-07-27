@@ -1110,7 +1110,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
   var day = moment().format("YYYY-MM-DD , h:mm:ss");
   var date  = moment(Dayorder.date).format("YYYY-MM-DD");
   var startdate =  moment().format("YYYY-MM-DD");
-  var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+  var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10 ");
 
   if (date < startdate) {
     let resobj = {
@@ -1142,8 +1142,9 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
       var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
       var getproduct = await query(getproductdetails);
 
-      var update_query =await query("update Dayorder set reorder_status=1,reorder_reason='"+Dayorder.reorder_reason+"',reorder_by='"+Dayorder.done_by+"',reorder_id='"+Dayorder.doid+"',order_place_time='"+day+"' where id='"+dayorders[0].id+"' ");
-      
+      var day_order_update = "update Dayorder set  reorder_status=1,reorder_reason='"+Dayorder.reorder_reason+"',reorder_by='"+Dayorder.done_by+"',reorder_id='"+Dayorder.doid+"',order_place_time='"+day+"' where id='"+dayorders[0].id+"' ";
+
+      var update_query =await query(day_order_update);
  
       var new_createDayorderproducts={};
       new_createDayorderproducts.orderid = getproduct[0].orderid;
@@ -1231,6 +1232,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
         res(err, null);
       } else {
         var doid = res1.insertId;   
+
+        var day_order_update = "update Dayorder set  reorder_mapping_orderid='"+res1.insertId+"'  where id='"+Dayorder.doid+"' ";
+        console.log("day_order_update",day_order_update);
+        var update_query =await query(day_order_update);
+
+
        for (let i = 0; i < order_item.length; i++) {
      
           var getproductdetails = "select  * from Dayorder_products where doid="+Dayorder.doid+" and id='"+order_item[i]+"'";
@@ -1273,12 +1280,12 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
 
         PushConstant.Pageid_dl_reorder_notification = 14;
         await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
-        result(null, resobj);
+        // result(null, resobj);
     
         let resobj = {
           success: true,
           status: true,
-          message : 're-order created Sucessfully'
+          message : 're-order created Sucessfully, reorder '+res1.insertId
         };
     
         result(null, resobj); 
