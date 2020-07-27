@@ -175,6 +175,8 @@ app.route("/admin/transaction/view").post(middleware.checkToken,routesVersioning
 app.route("/admin/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address}));
 
 app.route("/admin/adminuserlist").post(middleware.checkToken,routesVersioning({"1.0.0":adminuser.getAllUser}));
+app.route("/admin/login").post(routesVersioning({"1.0.0":adminuser.login}));
+app.route("/admin/logout").post(routesVersioning({"1.0.0":adminuser.logout}));
 
 }
 
