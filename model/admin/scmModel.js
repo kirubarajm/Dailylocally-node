@@ -1946,7 +1946,7 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
                 insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+                DayOrderComment.create_OrderComments_crm(insertlogdata);  
                 //////// change po status from 0 to 1 ///////////
             }else{
                 error_poid.push(req.dopid_list[i]);
@@ -2089,7 +2089,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         ////////Create Day order Log ////////////
         var insertlogdata = [];
         insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+        DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         let resobj = {
             success: true,
@@ -2104,7 +2104,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         ////////Create Day order Log ////////////
         var insertlogdata = [];
         insertlogdata.push({"comments":"revoke moved from qc to sorting","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-        DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});
+        DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         let resobj = {
             success: true,
@@ -2202,7 +2202,7 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
                     insertlogdata.push({"comments":"Order Retrun accepted in SCM ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});  
+                    DayOrderComment.create_OrderComments_crm(insertlogdata);   
                     
                     let resobj = {
                         success: true,
@@ -2257,11 +2257,15 @@ SCM.return_reorder =async function return_reorder(req,result) {
     
                     var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
                     var updatedop = await query(updatedopquery);
+
+                    ////////Delete QA CheckList //////////////
+                    var updateqaquery = "delete from QA_check_list where doid="+req.doid;
+                    var updateqa = await query(updateqaquery);
     
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
                     insertlogdata.push({"comments":"return to Sorting ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                    DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){}); 
+                    DayOrderComment.create_OrderComments_crm(insertlogdata);  
                     let resobj = {
                         success: true,
                         status: true,

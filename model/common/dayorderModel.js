@@ -1071,7 +1071,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
 
     var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   
-    var update_query = "Update Dayorder set dayorderstatus=12 ,return_order_time='"+day+"',return_reason='"+req.return_reason+"',return_booked_by='"+req.done_by+"' where id = "+req.doid+" "
+    var update_query = "Update Dayorder set dayorderstatus=12 ,return_status=1, return_order_time='"+day+"',return_reason='"+req.return_reason+"',return_booked_by='"+req.done_by+"' where id = "+req.doid+" "
   
     var update = await query(update_query);
 
