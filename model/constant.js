@@ -158,7 +158,7 @@ const calculate = {
     makeit_package_alert_count:25,
     makeit_live_quantity_restrict_count:10,
 
-    email_user:'aravind@tovogroup.com',
+    email_user:'dailylocally@gmail.com',
     email_pass:'Dailylocally12!',
 
     virtual_order_sms_contact_number:'9150265900',

@@ -1,6 +1,6 @@
 "user strict";
 var sql = require("../db.js");
-
+var emailService = require("../../model/common/emailServiceModel");
 
 //Task object constructor
 var OrderComments = function(ordercomments) {
@@ -14,7 +14,7 @@ var OrderComments = function(ordercomments) {
 };
 
 
-OrderComments.create_OrderComments = function create_OrderComments(OrderComments, res) {
+OrderComments.create_OrderComments = function create_OrderComments(OrderComments,email_list, res) {
   // console.log(OrderComments);
   sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, result) {
     if (err) {
@@ -22,6 +22,10 @@ OrderComments.create_OrderComments = function create_OrderComments(OrderComments
       res(err, null);
     } else {
       
+      if (email_list.length !=0) {
+        emailService.send_commands_Mail(email_list,OrderComments);
+      }
+
      
       let resobj = {
         success: true,
