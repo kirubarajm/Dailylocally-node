@@ -130,7 +130,6 @@ AdminUser.remove = function(id, result) {
 
 AdminUser.login = function login(req, result) {
 var admin = "Select au.*,aur.*,afr.* from Admin_users  au left join Admin_user_roles aur on au.user_roleid=aur.userroleid left join Admin_features_roles_mapping afr on afr.userroleid=aur.userroleid  where au.email = '"+req.email+"' and au.password = '"+req.password+"'";
-console.log(admin); 
 sql.query(admin, async function(err, res) {
       if (err) {
         let resobj = {
@@ -191,6 +190,46 @@ sql.query(admin, async function(err, res) {
     }
   );
 };
+
+AdminUser.user_details = function user_details(req, result) {
+  var admin = "Select au.*,aur.*,afr.* from Admin_users  au left join Admin_user_roles aur on au.user_roleid=aur.userroleid left join Admin_features_roles_mapping afr on afr.userroleid=aur.userroleid  where au.admin_userid = '"+req.admin_userid+"' ";
+  sql.query(admin, async function(err, res) {
+        if (err) {
+          let resobj = {
+            success: true,
+            status: false,
+            message: "Sorry! please enter correct login detail",
+            result: err
+          };
+          result(resobj, null);
+        } else {
+  
+          if (res.length !== 0) {
+  
+            var req_push={admin_userid:res[0].admin_userid,push_token:req.push_token}
+  
+            res[0].push_token=req_push.push_token
+
+          let resobj = {
+                  success: true,
+                  status: true,
+                  result: res
+                };
+                result(null, resobj);
+  
+          } else {
+            let resobj = {
+              success: true,
+              status: false,
+              message: "Please check your email and password",
+              result: res
+            };
+            result(null, resobj);
+          }
+        }
+      }
+    );
+  };
 
 AdminUser.logout = function logout(req, result) {
   sql.query(

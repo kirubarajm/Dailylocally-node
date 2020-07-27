@@ -33,6 +33,12 @@ exports.login = function(req, res) {
   });
 };
 
+exports.user_details = function(req, res) {
+  adminUser.user_details(req.body, function(err, user) {
+  if (err) res.send(err);
+  res.json(user);
+});
+};
 exports.logout = function(req, res) {
     adminUser.logout(req.body, function(err, user) {
     if (err) res.send(err);
