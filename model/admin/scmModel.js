@@ -2257,6 +2257,10 @@ SCM.return_reorder =async function return_reorder(req,result) {
     
                     var updatedopquery = "update Dayorder_products set scm_status=3 where doid="+req.doid;
                     var updatedop = await query(updatedopquery);
+
+                    ////////Delete QA CheckList //////////////
+                    var updateqaquery = "delete from QA_check_list where doid="+req.doid;
+                    var updateqa = await query(updateqaquery);
     
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];

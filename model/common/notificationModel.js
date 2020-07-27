@@ -24,9 +24,16 @@ Notification.getPushOrderDetail_old = async function(orderid) {
 
 Notification.getPushOrderDetail = async function(orderid) {
   
-  var orders = await query("select mt.tripid as orderid,dayo.id as price,dayo.complete_address as cus_address,mt.moveit_id as moveit_user_id,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Moveit_trip as mt left join Dayorder as dayo on dayo.trip_id=mt.tripid left join User as us on us.userid=dayo.userid where mt.tripid="+orderid+" group by mt.tripid");
-  
+  var orders = await query("select mt.tripid as orderid,dayo.id as price,dayo.complete_address as cus_address,mt.moveit_id as moveit_user_id,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Moveit_trip as mt left join Dayorder as dayo on dayo.trip_id=mt.tripid left join User as us on us.userid=dayo.userid where mt.tripid="+orderid+" group by mt.tripid");
+  // console.log("orders[0]==>",orders[0]);
   return orders[0];
+};
+
+Notification.getPushtripDetail = async function(tripid) {
+  var tripdetailsquery = "select Count(id) as order_count,trip_id from Dayorder where trip_id="+tripid;
+  var trip = await query(tripdetailsquery);
+  //  console.log("trip[0]==>",trip[0]);
+  return trip[0];
 };
 
 Notification.getVirtualMakeitPushId = async function(makeit_id) {
@@ -327,31 +334,46 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 
 
 
-Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it_user_detail) {
+Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it_user_detail,otherfields) {
   console.log("moveit send notification file ----2");
   const orders = await Notification.getPushOrderDetail(orderid);
- // const moveitdetails = await Notification.getMovieitDetail()
+  const trip = await Notification.getPushtripDetail(orderid);
+  // console.log("trip ============>",trip);
+  // const moveitdetails = await Notification.getMovieitDetail()
   var Eatuserdetail = JSON.parse(orders.userdetail);
-  var data = null;
+  var data = ""; 
 
   switch (pageid) {
-    case PushConstant.pageidMoveit_Order_Assigned:
-     // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
+    case PushConstant.pageidMoveit_Trip_Assigned:
+      // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
       data = {
-        title: "Order assign",
-        message: "Order Assigned to you. OrderID is#" + orderid,
+        title: "New Trip #"+  trip.trip_id +" assigned",
+        message: "Your trip contains " + trip.order_count + " orders.",
         pageid: "" + pageid,
-        name: "" + Eatuserdetail.name,
-        price: "" + orders.price,
-        orderid: "" + orders.orderid,
-        place: "" + orders.cus_address,
+        tripid: "" + trip.trip_id,
+        orderid: "0",
+        ordercount: "" + trip.order_count,
         app: "Move-it",
         notification_type: "1"
       };
       break;
-
+    case PushConstant.pageidMoveit_Order_Assigned:
+      // console.log("pageidMoveit_Order_Assigned ========>");
+      // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
+      data = {
+        title: "Order " +otherfields+ " has been added to trip "+trip.trip_id,
+        message: "Order " +otherfields+ " has been added to trip "+trip.trip_id,
+        pageid: "" + pageid,
+        tripid: "" + trip.trip_id,
+        orderid: "" + otherfields,
+        ordercount: "" + trip.order_count,
+        app: "Move-it",
+        notification_type: "1"
+      };
+      // console.log("pageidMoveit_Order_Assigned data========>",data);
+      break;
     case PushConstant.pageidMoveit_Order_Cancel:
-     // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
+      // Eatuserdetail = await Notification.getEatUserDetail(Eatuserid);
       data = {
         title: "Order Cancel",
         message:
@@ -365,7 +387,6 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
         notification_type: "1"
       };
       break;
-
     case PushConstant.pageidMoveit_Order_Prepared:
       data = {
         title: "Order is Prepared",
@@ -374,9 +395,8 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
         app: "Move-it",
         notification_type: "1"
       };
-
       break;
-      case PushConstant.pageidMoveit_Order_Reassign:
+    case PushConstant.pageidMoveit_Order_Reassign:
       data = {
         title: "Order Re-assigned",
         message: "Your order has been assigned to another moveit.",
@@ -386,58 +406,45 @@ Notification.orderMoveItPushNotification = async function(orderid,pageid,move_it
         name: "" + Eatuserdetail.name,
         price: "" + orders.price,
         orderid: "" + orders.orderid,
-        place: "" + orders.cus_address,
-     
+        place: "" + orders.cus_address,     
       };
-
       break;
-      case PushConstant.pageidMoveit_Order_unassign:
+    case PushConstant.pageidMoveit_Order_unassign:
       data = {
         title: "Order un-assigned",
         message: "Your order has been un-assigned.",
         pageid: "" + pageid,
+        tripid: "" + trip.trip_id,
+        orderid: "" + otherfields,
+        ordercount: "" +1,
         app: "Move-it",
-        notification_type: "1",
-        name: "" + Eatuserdetail.name,
-        price: "" + orders.price,
-        orderid: "" + orders.orderid,
-        place: "" + orders.cus_address,
-     
+        notification_type: "1"
       };
-
       break;
-
-      case PushConstant.pageidMoveit_return_book:
-        data = {
-          title: "Return booked for Order"+ orderid,
-          message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer.",
-          pageid: "" + pageid,
-          app: "Move-it",
-          notification_type: "1"
-          // name: "" + Eatuserdetail.name,
-          // price: "" + orders.price,
-          // orderid: "" + orders.orderid,
-          // place: "" + orders.cus_address,
-       
-        };
-  
-        break;
+    case PushConstant.pageidMoveit_return_book:
+      data = {
+        title: "Return booked for Order"+ orderid,
+        message: "Kindly return this order back to the hub. Do NOT Deliver it to the customer.",
+        pageid: "" + pageid,
+        app: "Move-it",
+        notification_type: "1"
+        // name: "" + Eatuserdetail.name,
+        // price: "" + orders.price,
+        // orderid: "" + orders.orderid,
+        // place: "" + orders.cus_address,       
+      };  
+      break;
   }
-
+// console.log("data ====>",data);
   if (data == null) return;
 
   if (!move_it_user_detail) {
-    move_it_user_detail = await query(
-      "SELECT * FROM MoveitUser where userid = " + orders.moveit_user_id
-    );
+    move_it_user_detail = await query("SELECT * FROM MoveitUser where userid = " + orders.moveit_user_id);
     move_it_user_detail = move_it_user_detail[0];
   }
 
   if (move_it_user_detail && move_it_user_detail.pushid_android) {
-    FCM_Moveit.sendNotificationAndroid(
-      move_it_user_detail.pushid_android,
-      data
-    );
+    FCM_Moveit.sendNotificationAndroid(move_it_user_detail.pushid_android,data);
   }
 };
 

@@ -170,8 +170,13 @@ exports.sendNotificationAndroid = function(
     data: dat
   };
   console.log("payload title:"+payload.data.title);
+  console.log("payload message:"+payload.data.message);
+  console.log("payload pageid:"+payload.data.pageid);
+  console.log("payload tripid:"+payload.data.tripid);
   console.log("payload orderid:"+payload.data.orderid);
-  console.log("payload name:"+payload.data.name);
+  console.log("payload ordercount:"+payload.data.ordercount);
+  console.log("payload app:"+payload.data.app);
+  console.log("payload notification_type:"+payload.data.notification_type);
   console.log("moveit notification payload:"+payload);
   Move_it.messaging().sendToDevice(token, payload, options);
 };

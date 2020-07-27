@@ -302,7 +302,7 @@ Logistics.moveit_add =async function moveit_add(req,result) {
 /////////View Moveit//////////
 Logistics.moveit_view =async function moveit_view(req,result) {
     if(req.userid){
-        var moveituserquery = "select * from MoveitUser where userid="+req.userid;
+        var moveituserquery = "select mu.*,zo.Zonename from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where userid="+req.userid;
         var moveituser = await query(moveituserquery);
         if(moveituser.length > 0){
             let resobj = {
@@ -628,20 +628,37 @@ Logistics.admin_force_Moveituser_logout = async function admin_force_Moveituser_
 Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
     if(req.zoneid){
         var resultdata = [];
-        var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,mt.trip_status,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.online_status=1 and mu.zone="+req.zoneid+" group by mu.userid";
-        var getmoveittrip = await query(getmoveittripquery);
-        if(getmoveittrip.length > 0){
-            for (let i = 0; i < getmoveittrip.length; i++) {
-                if(getmoveittrip[i].after_start_tripid>0){ }else{
+        // var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,mt.trip_status,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.online_status=1 and mu.zone="+req.zoneid+" group by mu.userid";
+        // var getmoveittrip = await query(getmoveittripquery);
+
+        var getmoveitquery = "select mu.userid,mu.name from MoveitUser as mu where mu.zone="+req.zoneid+" and mu.online_status=1 group by mu.userid";
+        var getmoveit = await query(getmoveitquery);
+        if(getmoveit.length > 0){
+            for (let i = 0; i < getmoveit.length; i++) {
+                // if(getmoveittrip[i].after_start_tripid>0){ }else{
+                //     var username="";
+                //     if(getmoveittrip[i].tripid>0 && getmoveittrip[i].trip_status==0){
+                //         username = getmoveittrip[i].name+"(Live trip - "+getmoveittrip[i].tripid+")";
+                //     }else{
+                //         username = getmoveittrip[i].name+"(New trip)";
+                //         getmoveittrip[i].tripid='';
+                //     }
+                //     resultdata.push({"userid":getmoveittrip[i].userid,"name":username,"tripid":getmoveittrip[i].tripid});
+                // } 
+                var getmoveittripquery = "select * from Moveit_trip where moveit_id="+getmoveit[i].userid+" order by tripid desc limit 1";
+                var getmoveittrip = await query(getmoveittripquery);
+                if(getmoveittrip.length>0){
                     var username="";
-                    if(getmoveittrip[i].tripid>0 && getmoveittrip[i].trip_status==0){
-                        username = getmoveittrip[i].name+"(Live trip - "+getmoveittrip[i].tripid+")";
+                    if(getmoveittrip[0].trip_status==0){
+                        username = getmoveit[i].name+"(Live trip - "+getmoveittrip[0].tripid+")";
                     }else{
-                        username = getmoveittrip[i].name+"(New trip)";
-                        getmoveittrip[i].tripid='';
+                        username = getmoveit[i].name+"(New trip)";
+                        getmoveittrip[0].tripid='';
                     }
-                    resultdata.push({"userid":getmoveittrip[i].userid,"name":username,"tripid":getmoveittrip[i].tripid});
-                } 
+                }else{
+                    username = getmoveit[i].name+"(New trip)";
+                }
+                resultdata.push({"userid":getmoveit[i].userid,"name":username,"tripid":getmoveittrip[0].tripid});
             }
             if(resultdata.length>0){
                 let resobj = {
@@ -682,6 +699,13 @@ Logistics.trip_create =async function trip_create(req,result) {
         var dayorderids = req.doid;
         var moveittripdata = [];
         if(req.trip_id){
+            var getoldordersquery = "select * from Dayorder where trip_id="+req.trip_id;
+            var getoldorders = await query(getoldordersquery); 
+            var oldorders = [];
+            for (let k = 0; k < getoldorders.length; k++) {
+                oldorders.push(getoldorders[k].id);                
+            }
+
             var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7,zoneid="+req.zoneid+" where id IN("+dayorderids+")";
             var updatedayorder = await query(updatedayorderquery);  
             if(updatedayorder.affectedRows>0){
@@ -698,11 +722,13 @@ Logistics.trip_create =async function trip_create(req,result) {
                     DayOrderComment.create_OrderComments(insertlogdata,async function(err,insertlogdatares){});                   
                 }
 
+                var difforderid = dayorderids.filter(x => oldorders.indexOf(x) === -1);
+        
                 var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
                 var getmoveitdetails = await query(getmoveitdetailsquery);
                 if(getmoveitdetails.length>0){
-                    console.log("moveit Send Notification ============> For assign 1");
-                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0].userid);
+                    console.log("moveit Send Notification add orders to trip ================> 2");
+                    await Notification.orderMoveItPushNotification(req.trip_id,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0],difforderid);
                 }
 
                 
@@ -745,10 +771,9 @@ Logistics.trip_create =async function trip_create(req,result) {
                         var getmoveitdetailsquery = "select * from MoveitUser where userid="+req.moveit_id;
                         var getmoveitdetails = await query(getmoveitdetailsquery);
                         if(getmoveitdetails.length>0){
-                            console.log("moveit Send Notification For assign ============> 2");
-                            await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0].userid);
-                        }                        
-                        //////////////////////////////////
+                            console.log("moveit Send Notification For New Trip Created ================> 1");
+                            await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Trip_Assigned,getmoveitdetails[0],0);
+                        }
 
                         let resobj = {
                             success: true,
@@ -815,7 +840,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
                     var getmoveitdetails = await query(getmoveitdetailsquery);
                     if(getmoveitdetails.length>0){
                         console.log("moveit Send Notification For unassign============> 1");
-                        await Notification.orderMoveItPushNotification(checkdayorder[0].trip_id,PushConstant.pageidMoveit_Order_unassign,getmoveitdetails[0]);
+                        await Notification.orderMoveItPushNotification(checkdayorder[0].trip_id,PushConstant.pageidMoveit_Order_unassign,getmoveitdetails[0],dayorders[i]);
                     }
                     ///////////////////////////////////
                     updatedids.push(dayorders[i]);
@@ -829,7 +854,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
 
         var sucdata = "";
         if(updatedids.length>0){
-            sucdata = "Order id "+updatedids+" status updated successfully";
+            sucdata = "Order id "+updatedids+" unassign successfully";
         }
 
         var errdata = "";
