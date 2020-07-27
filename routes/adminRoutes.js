@@ -178,5 +178,7 @@ app.route("/admin/adminuserlist").post(middleware.checkToken,routesVersioning({"
 app.route("/admin/login").post(routesVersioning({"1.0.0":adminuser.login}));
 app.route("/admin/logout").post(routesVersioning({"1.0.0":adminuser.logout}));
 
+app.route("/admin/userdetails").post(routesVersioning({"1.0.0":adminuser.user_details}));
+
 }
 
