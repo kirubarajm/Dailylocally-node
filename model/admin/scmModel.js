@@ -393,12 +393,17 @@ SCM.create_po =async function create_po(req,result) {
                                         }
                                         /////Update Dayorder product status =>removed///////
                                     }
-                                    
+                                    //////PO PDf Creation /////
+                                    console.log("po pdfffffff =-============>");
                                     if(j+1 == vendor_polist.length){
                                         var poid = [];
                                         poid.push({"poid":pores.result.insertId});
                                         SCM.po_pdf(poid[0],async function(err,poidres){
                                             console.log("poidres ==>",poidres);
+                                            if(poidres.status==true){
+                                                var updatepdfurlquery = "update PO set po_pdf_url='"+poidres.url.filename+"' where poid="+pores.result.insertId;
+                                                var updatepdfurl = await query(updatepdfurlquery);
+                                            }
                                         });
                                     }
                                 }
@@ -2103,7 +2108,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         //////// Customer App Notification //////////
-        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id where ors.id = '"+req.doid+"'" );
+        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch,DATE_FORMAT(qc.created_at, '%d-%m-%Y') as timeofqc from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id left join QC_check_list as qc on qc.doid=ors.id where ors.id = '"+req.doid+"' group by ors.id" );
         PushConstant.Pageid_dl_ready_at_wherehouse_notification = 29;
         await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_ready_at_wherehouse_notification);
 
@@ -2184,9 +2189,13 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
         var products = req.products;
         var checkdayorderquery = "select * from Dayorder where id="+req.doid;
         var checkdayorder = await query(checkdayorderquery);
+        
         if(checkdayorder.length>0){
             if(checkdayorder[0].dayorderstatus==12){
                 if(checkdayorder[0].return_status==1){
+                    var grttripquery = "select * from Moveit_trip where tripid="+checkdayorder[0].trip_id;
+                    var grttrip = await query(grttripquery);
+
                     for (let i = 0; i < products.length; i++) {
                         var updatedopquery = "update Dayorder_products set driver_return_quantity="+products[i].quantity+" where id="+products[i].dopid;
                         var updatedop = await query(updatedopquery);
@@ -2217,13 +2226,18 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
 
                     ////// Update Trip Status /////////////
                     await MoveitUserModel.updatetripstatus(checkdayorder[0].trip_id);
+
+                    ////// Update Moveit Status ///////////
+                    var insertmoveitstatus = "insert into Moveit_status (doid,moveitid,status) values("+req.doid+","+grttrip[0].moveit_id+",9)";
+                    var insertmoveit = await query(insertmoveitstatus);
             
                     var updatedayorderquery = "update Dayorder set return_status=2 where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
                     insertlogdata.push({"comments":"Order Retrun accepted in SCM ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                    DayOrderComment.create_OrderComments_crm(insertlogdata);   
+                    DayOrderComment.create_OrderComments_crm(insertlogdata);  
+
                     
                     let resobj = {
                         success: true,
@@ -2273,6 +2287,9 @@ SCM.return_reorder =async function return_reorder(req,result) {
         if(checkdayorder.length>0){
             if(checkdayorder[0].dayorderstatus == 12){
                 if(checkdayorder[0].return_status == 1){
+                    var grttripquery = "select * from Moveit_trip where tripid="+checkdayorder[0].trip_id;
+                    var grttrip = await query(grttripquery);
+
                     var updatedayorderquery = "update Dayorder set dayorderstatus=1,return_status=3,trip_id=NULL,moveit_type=NULL where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
     
@@ -2289,6 +2306,10 @@ SCM.return_reorder =async function return_reorder(req,result) {
                     DayOrderComment.create_OrderComments_crm(insertlogdata);  
                     ///////// Trip Status Update////////////////////////////
                     await MoveitUserModel.updatetripstatus(checkdayorder[0].trip_id);
+
+                    ////// Update Moveit Status ///////////
+                    var insertmoveitstatus = "insert into Moveit_status (doid,moveitid,status) values("+req.doid+","+grttrip[0].moveit_id+",9)";
+                    var insertmoveit = await query(insertmoveitstatus);
 
                     let resobj = {
                         success: true,
