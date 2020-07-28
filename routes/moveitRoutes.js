@@ -63,6 +63,7 @@ app.route("/moveit/updateorderpickupimage").post(routesVersioning({"1.0.0":movei
 app.route("/moveit/moveittriphistory").post(routesVersioning({"1.0.0":moveituser.moveit_trip_history}));
 
 app.route("/moveit/dayorderlist").post(routesVersioning({"1.0.0":moveituser.moveit_trip_day_order_list}));
+app.route("/moveit/trip/orderdetails").post(routesVersioning({"1.0.0":moveituser.trip_order_details}));
 
 ////Moveit test push notification/////////
 app.route("/moveit/push_notification").post(routesVersioning({"1.0.0":moveituser.push_notification}));
