@@ -1486,7 +1486,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
    if (dayproductdetails.length !=0) {
 
-    if (dayorderdetails[0].dayorderstatus === 10) {
+    if (dayorderdetails[0].dayorderstatus === 10 ||dayorderdetails[0].dayorderstatus === 11) {
         
       var order_ids = [];
 
@@ -1501,16 +1501,16 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
                       for (let i = 0; i < items.length; i++) {
 
-                        const productdetails = await query("select orderid,price * quantity as product_price from Dayorder_products where id ='" + items[i] + "' ");
+                        const productdetails = await query("select doid,orderid,price * quantity as product_price from Dayorder_products where id ='" + items[i] + "' ");
 
                         const orderdetails = await query("select *  from Orders where orderid ='" + productdetails[0].orderid+ "' ");
-
 
                         var update_query = "Update Dayorder_products set refund_status=1 where id ='" + items[i] + "' ";
           
                         var update = await query(update_query);
-
-                        product_price = productdetails[0].product_price + dayorderdetails[0].delivery_charge;
+                        var delivery_charge = 0;
+                        delivery_charge=  req.delivery_charge || 0
+                        product_price = productdetails[0].product_price + delivery_charge;
                   
                         var refundDetail = {
                           orderid :  productdetails[0].orderid,
@@ -1519,9 +1519,14 @@ Dayorder.refund_create = async function refund_create(req,result) {
                           payment_id : orderdetails[0].tsid,
                           original_amt:  product_price,
                           refund_image : req.refund_image,
-                          refund_reason : req.refund_reason
+                          refund_reason : req.refund_reason,
+                          refunded_by : req.done_by,
+                          doid : productdetails[0].doid,
+                          refund_delivery_charge:delivery_charge
+
                         };
 
+                        console.log(refundDetail);
                         await Dayorder.create_refund(refundDetail);
 
                     
@@ -1556,15 +1561,6 @@ Dayorder.refund_create = async function refund_create(req,result) {
               }
                   
   
-    }else if(dayorderdetails[0].dayorderstatus === 11){
-      let response = {
-        success: true,
-        status: false,
-        message: " Day Order already canceled."
-      };
-      result(null, response);
-    
-    
     }else {
       let response = {
         success: true,
