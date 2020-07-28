@@ -1223,8 +1223,9 @@ Catalog.fileUpload = function fileUpload(newDocument,result) {
     var fileName = newDocument.files.file;
     var name = fileName.name;
     var name = Date.now() + "-" + name;
+    
     const params = {
-      Bucket: "eattovo/upload/admin/makeit/product", // pass your bucket name
+      Bucket: "dailylocally/admin", // pass your bucket name
       Key: name, // file will be saved as testBucket/contacts.csv
       Body: fileName.data,
       ContentType: "image/jpg",

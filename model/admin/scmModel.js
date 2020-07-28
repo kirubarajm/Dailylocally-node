@@ -20,6 +20,8 @@ const { tunnel_refund_amout } = require('../constant.js');
 var DayOrderComment = require('../admin/orderCommentsModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
 var converter = require('number-to-words');
+var Document = require("../../model/common/documentsModel.js");
+var MoveitUserModel = require("../moveit/moveitUserModel.js");
 
 var pdf = require("pdf-creator-node");
 var fs = require('fs');
@@ -415,6 +417,8 @@ SCM.create_po =async function create_po(req,result) {
                     }                    
                 }else{ console.log("invalid vendor id"); }                    
             }
+
+            
             
             
             let resobj = {
@@ -1122,7 +1126,12 @@ SCM.po_pdf= async function po_pdf(req,result) {
             //console.log(document);
             pdf.create(document, options)
                 .then(res => {
-                    console.log(res);
+                    console.log(res.filename);
+                    ///////
+
+                    // Document.newmoveitdocumentupload(res.filename);
+
+
                     let resobj = {
                     success: true,
                     message: "pdf Created Successfully",
@@ -2126,7 +2135,7 @@ SCM.get_return_list =async function get_return_list(req,result) {
             where = where+" and date(dayo.date)='"+req.date+"' ";
         }
 
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'driver_return_quantity',dop.driver_return_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
         var getpolist = await query(getpolistquery);
         //  console.log("getpolist==>",getpolist);
         if(getpolist.length > 0){
@@ -2172,6 +2181,8 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
             if(checkdayorder[0].dayorderstatus==12){
                 if(checkdayorder[0].return_status==1){
                     for (let i = 0; i < products.length; i++) {
+                        var updatedopquery = "update Dayorder_products set driver_return_quantity="+products[i].quantity+" where id="+products[i].dopid;
+                        var updatedop = await query(updatedopquery);
                         if(products[i].type==1){
                             ////Push To stock/////
                             var checkstockquery = "select * from Stock where vpid="+products[i].vpid;
@@ -2196,6 +2207,9 @@ SCM.update_return_orders =async function update_return_orders(req,result) {
                             });
                         }
                     }
+
+                    ////// Update Trip Status /////////////
+                    await MoveitUserModel.updatetripstatus(checkdayorder[0].trip_id);
             
                     var updatedayorderquery = "update Dayorder set return_status=2 where id="+req.doid;
                     var updatedayorder = await query(updatedayorderquery);
@@ -2266,6 +2280,9 @@ SCM.return_reorder =async function return_reorder(req,result) {
                     var insertlogdata = [];
                     insertlogdata.push({"comments":"return to Sorting ","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
                     DayOrderComment.create_OrderComments_crm(insertlogdata);  
+                    ///////// Trip Status Update////////////////////////////
+                    await MoveitUserModel.updatetripstatus(checkdayorder[0].trip_id);
+
                     let resobj = {
                         success: true,
                         status: true,
