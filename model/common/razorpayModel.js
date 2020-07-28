@@ -5,6 +5,8 @@ const Rpay = require("razorpay");
 var constant = require("../constant.js");
 var moment = require("moment");
 var OrderComments = require("../../model/admin/orderCommentsModel");
+var PushConstant = require("../../push/PushConstant.js");
+var Notification = require("../../model/common/notificationModel.js");
 // var instance = new Rpay({
 //     key_id: "rzp_test_3cduMl5T89iR9G",
 //     key_secret: "BSdpKV1M07sH9cucL5uzVnol"
@@ -114,7 +116,12 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
           New_comments.done_type=1
           OrderComments.create_OrderComments_crm(New_comments)
     
-    
+              
+          var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid where  rf.rs_id ="+req.rs_id+" " );
+
+          PushConstant.Pageid_dl_refund_create = 10;
+          await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_refund_create);
+
                   var  message = "Amount refunded successfully"
                   let sucobj=true;
                   let resobj = {  
@@ -183,15 +190,19 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
              else{  
                 
               
-          var refund_comments = 'refund rejected'
-          var New_comments  ={};
-          New_comments.doid=Orderproductsdetails[0].doid;
-          New_comments.comments=refund_comments
-          New_comments.done_by=req.done_by
-          New_comments.type=2
-          New_comments.done_type=1
-          OrderComments.create_OrderComments_crm(New_comments)
+                    var refund_comments = 'refund rejected'
+                    var New_comments  ={};
+                    New_comments.doid=Orderproductsdetails[0].doid;
+                    New_comments.comments=refund_comments
+                    New_comments.done_by=req.done_by
+                    New_comments.type=2
+                    New_comments.done_type=1
+                    OrderComments.create_OrderComments_crm(New_comments)
     
+                    var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid where  rf.rs_id ="+req.rs_id+" " );
+            
+                    PushConstant.Pageid_dl_Refund_unapproved_notification = 16;
+                    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_Refund_unapproved_notification);
     
                   var  message = "refund rejected successfully"
             

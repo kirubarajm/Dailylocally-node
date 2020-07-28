@@ -910,7 +910,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
 };
 
 Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_cancel(Dayorder,vpid,result) {
-  console.log(Dayorder);
+
   var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
   var day_order = await query("select * from Dayorder where id = "+Dayorder.doid+" ");
@@ -1090,8 +1090,8 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
 
     var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.doid+"'" );
 
-    // PushConstant.Pageid_dl_return_notification = 14;
-    // await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_return_notification);
+    PushConstant.Pageid_dl_return_notification = 14;
+    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_return_notification);
 
     // await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
     // result(null, resobj);
@@ -1203,7 +1203,7 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
 
     var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
 
-    PushConstant.Pageid_dl_reorder_notification = 14;
+    PushConstant.Pageid_dl_reorder_notification = 17;
     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
 
 
@@ -1526,7 +1526,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
                         };
 
-                        console.log(refundDetail);
+                   
                         await Dayorder.create_refund(refundDetail);
 
                     
@@ -1542,6 +1542,10 @@ Dayorder.refund_create = async function refund_create(req,result) {
                       New_comments.done_type=1
                       OrderComments.create_OrderComments_crm(New_comments)
 
+                      var orders = await query("SELECT rf.original_amt,ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid left join Refund_Online rf on rf.doid=ors.id where ors.id = '"+req.doid+"'" );
+
+                      PushConstant.Pageid_dl_refund_create = 10;
+                      await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_refund_create);
                 
                       let response = {
                         success: true,
