@@ -629,10 +629,11 @@ Logistics.admin_force_Moveituser_logout = async function admin_force_Moveituser_
 Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
     if(req.zoneid){
         var resultdata = [];
+        var getdetails = [];
         // var getmoveittripquery = "select mu.userid,mu.name,mt.tripid,mt.trip_status,case when mt.trip_status=0 then mt.tripid end as before_start_tripid,case when mt.trip_status=1 then mt.tripid end as after_start_tripid from MoveitUser as mu left join Moveit_trip as mt on mt.moveit_id=mu.userid where mu.online_status=1 and mu.zone="+req.zoneid+" group by mu.userid";
         // var getmoveittrip = await query(getmoveittripquery);
 
-        var getmoveitquery = "select mu.userid,mu.name from MoveitUser as mu where mu.zone="+req.zoneid+" and mu.online_status=1 group by mu.userid";
+        var getmoveitquery = "select mu.userid,mu.name,'' as moveittripid,'0' as action from MoveitUser as mu where mu.zone="+req.zoneid+" and mu.online_status=1 group by mu.userid";
         var getmoveit = await query(getmoveitquery);
         if(getmoveit.length > 0){
             for (let i = 0; i < getmoveit.length; i++) {
@@ -646,21 +647,30 @@ Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
                 //     }
                 //     resultdata.push({"userid":getmoveittrip[i].userid,"name":username,"tripid":getmoveittrip[i].tripid});
                 // } 
+                
                 var getmoveittripquery = "select * from Moveit_trip where moveit_id="+getmoveit[i].userid+" order by tripid desc limit 1";
                 var getmoveittrip = await query(getmoveittripquery);
                 if(getmoveittrip.length>0){
-                    var username="";
+                    var username = "";
+                    var moveittrip = "";
                     if(getmoveittrip[0].trip_status==0){
-                        username = getmoveit[i].name+"(Live trip - "+getmoveittrip[0].tripid+")";
-                    }else{
-                        username = getmoveit[i].name+"(New trip)";
-                        getmoveittrip[0].tripid='';
+                        getmoveit[i].name = getmoveit[i].name+"(Live trip - "+getmoveittrip[0].tripid+")";
+                    }else if(getmoveittrip[0].trip_status==1){                        
+                        getmoveit[i].name = getmoveit[i].name+"(New trip)";
+                        getmoveit[i].moveittripid ='';
+                        getmoveit[i].action ='1';
+                    }else {                        
+                        getmoveit[i].name = getmoveit[i].name+"(New trip)";
+                        getmoveit[i].moveittripid ='';
                     }
                 }else{
-                    username = getmoveit[i].name+"(New trip)";
+                    getmoveit[i].name = getmoveit[i].name+"(New trip)";
+                    getmoveit[i].moveittripid ='';
                 }
-                resultdata.push({"userid":getmoveit[i].userid,"name":username,"tripid":getmoveittrip[0].tripid});
+
+                resultdata.push({"userid":getmoveit[i].userid,"name":getmoveit[i].name,"tripid":getmoveit[i].moveittripid,"action":getmoveit[i].action});
             }
+            var  resultdata = resultdata.filter(item => item.action == 0);
             if(resultdata.length>0){
                 let resobj = {
                     success: true,
