@@ -215,7 +215,12 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
                 insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments_crm(insertlogdata);  
+                DayOrderComment.create_OrderComments_crm(insertlogdata); 
+                
+                //////// Customer App Notification //////////
+                var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id where ors.id = '"+req.doid+"'" );
+                PushConstant.Pageid_dl_dispatched_after_qa_notification = 9;
+                await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_dispatched_after_qa_notification);
                 let resobj = {
                     success: true,
                     status: true,
@@ -766,7 +771,12 @@ Logistics.trip_create =async function trip_create(req,result) {
                             ////////Create Day order Log ////////////
                             var insertlogdata = [];
                             insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
-                            DayOrderComment.create_OrderComments_crm(insertlogdata);  
+                            DayOrderComment.create_OrderComments_crm(insertlogdata); 
+                            
+                            //////// Customer App Notification //////////
+                            var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id where ors.id = '"+dayorderids[i]+"'" );
+                            PushConstant.Pageid_dl_trip_assigned_notification = 9;
+                            await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_trip_assigned_notification);
                         }
 
                         ////// Send Notification //////////

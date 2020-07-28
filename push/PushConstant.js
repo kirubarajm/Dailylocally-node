@@ -19,6 +19,10 @@ const PushConstant={
     Pageid_dl_zendesk_notification:13,//zendesk
     Pageid_dl_return_notification:14,
     Pageid_dl_reorder_notification:15,
+    
+    Pageid_dl_trip_assigned_notification:9,
+    Pageid_dl_ready_at_wherehouse_notification:29,
+    Pageid_dl_dispatched_after_qa_notification:9,
 
 
     pageidMoveit_Order_Assigned:1,

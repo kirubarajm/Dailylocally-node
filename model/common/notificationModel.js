@@ -189,6 +189,45 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
           data.image=userid.image;
          }
         break;
+    case PushConstant.Pageid_dl_trip_assigned_notification:
+      data = {
+        title: "Your order has been dispatched from our warehouse!",
+        message: "Your fresh products are on way. Our delivery partner will reach out to you in case needed. We would like you to collect the order yourself to ensure freshness!",
+        pageid: PushConstant.Pageid_dl_trip_assigned_notification,
+        date:orders[0].date,
+        userid: orders[0].userid,
+        orderid: orders[0].id,
+        timeofdelivery: orders[0].timeofdispatch,
+        app: "Eat",
+        notification_type: "2"
+      };
+      break;
+    case PushConstant.Pageid_dl_ready_at_wherehouse_notification:
+      data = {
+        title: "Your order is ready at our warehouse!",
+        message: "Each product is locally sourced and packed with care in our Daily Locally's footprinted boxes.",
+        pageid: PushConstant.Pageid_dl_ready_at_wherehouse_notification,
+        date:orders[0].date,
+        userid: orders[0].userid,
+        orderid: orders[0].id,
+        qcchecklistfilledup: orders[0].timeofdispatch,
+        app: "Eat",
+        notification_type: "2"
+      };
+      break;
+    case PushConstant.Pageid_dl_dispatched_after_qa_notification:
+      data = {
+        title: "Your order is dispatched after our QA Proceess",
+        message: "We ensure a 3 step Quality Assurance process to ensure footprint packaging and seamless transportation. Our packaging is designed to make sure that there is no spoilage during transit. Looking forward to the smile on your face :)",
+        pageid: PushConstant.Pageid_dl_dispatched_after_qa_notification,
+        date:orders[0].date,
+        userid: orders[0].userid,
+        orderid: orders[0].id,
+        qachecklistfilledup: orders[0].timeofdispatch,
+        app: "Eat",
+        notification_type: "2"
+      };
+      break;
   }
   if (data == null) return;
 
