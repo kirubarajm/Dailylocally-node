@@ -251,9 +251,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
 /////////Add Moveit//////////
 Logistics.moveit_add =async function moveit_add(req,result) {
     if(req){
-        var checkemailquery = "select * from MoveitUser where email='"+req.email+"'";
-        var checkemail = await query(checkemailquery);
-        if(checkemail.length==0){
+        req.email="";
             var checkmobilequery = "select * from MoveitUser where phoneno='"+req.phoneno+"'";
             var checkmobile = await query(checkmobilequery);
             if(checkmobile.length==0){
@@ -282,14 +280,7 @@ Logistics.moveit_add =async function moveit_add(req,result) {
                 };
                 result(null, resobj);
             }
-        }else{
-            let resobj = {
-                success: true,
-                status: false,
-                message: "emailid already exist"
-            };
-            result(null, resobj);
-        }        
+               
     }else{
         let resobj = {
             success: true,
