@@ -1347,7 +1347,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
 
                 var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+req.id+"'" );
 
-                PushConstant.Pageid_dl_order_reached = 7;
+                PushConstant.Pageid_dl_order_delivered = 7;
                 await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_delivered);
                 result(null, resobj);
              

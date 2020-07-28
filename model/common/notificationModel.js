@@ -228,6 +228,45 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         notification_type: "2"
       };
       break;
+
+      case PushConstant.Pageid_dl_refund_create:
+        data = {
+          title: "Refund of Rs"+orders[0].original_amt+" Initiated for Order " +orders[0].id,
+          message: "Your refund request has been raised and will be completed within 7 bank working days",
+          pageid: "" +29,
+          userid: "" +orders[0].userid,
+          orderid: "" +orders[0].doid,
+          refund_amount:""+orders[0].original_amt,
+          app: "Dl",
+          notification_type: "2"
+        };
+        break;
+      
+        case PushConstant.Pageid_dl_refund_repayment:
+          data = {
+            title: "Yay! Your refund request of Rs."+orders[0].original_amt+" for Order " +orders[0].doid+ " has been approved",
+            message: " Your refund request has been raised and will be completed within 5-7 bank working days ",
+            pageid: "" +29,
+            userid: "" +orders[0].userid,
+            orderid: "" +orders[0].doid,
+            refund_amount:""+orders[0].original_amt,
+            app: "Dl",
+            notification_type: "2"
+          };
+          break;
+        
+          case PushConstant.Pageid_dl_Refund_unapproved_notification:
+            data = {
+              title: "Your refund request of Rs."+orders[0].original_amt+" for Order " +orders[0].doid+ " has been rejected",
+              message: " Our customer support will get in touch with you with the details. In case of urgency, we request you to get in touch with us through our in app chat support ",
+              pageid: "" +29,
+              userid: "" +orders[0].userid,
+              orderid: "" +orders[0].doid,
+              refund_amount:""+orders[0].original_amt,
+              app: "Dl",
+              notification_type: "2"
+            };
+            break;
   }
   if (data == null) return;
 
