@@ -70,8 +70,8 @@ RefundOnline.get_all_refunds = function get_all_refunds(req, result) {
 // } 
 
 
-    if(req.orderid){
-      where = where+" and rf.orderid="+req.orderid;
+    if(req.doid){
+      where = where+" and rf.doid="+req.doid;
     }
 
     if(req.userid){

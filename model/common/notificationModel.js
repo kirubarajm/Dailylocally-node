@@ -158,7 +158,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         message: "Apologies! Your order has been cancelled due to the following reason",
         pageid: 29,
         date:orders[0].date,
-        app: "Eat",
+        app: "Dl",
         notification_type: "2"
       };
 
@@ -170,7 +170,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         message: "Your new order number is <#"+orders[0].id+">. Your redelivery will be completed by <Date>. Kindly get in touch with us through our chat support to know more",
         pageid: 9,
         date:orders[0].date,
-        app: "Eat",
+        app: "Dl",
         notification_type: "2"
       };
 
@@ -182,7 +182,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
           pageid: "" + pageid,
          
       //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
-          app: "Eat",
+          app: "Dl",
           notification_type: "1"
         };
         if (userid.image) {
