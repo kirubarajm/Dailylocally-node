@@ -10,6 +10,7 @@ var RefundOnline = require("../../model/common/refundonlineModel");
 var Notification = require("../../model/common/notificationModel.js");
 var MoveitStatus = require("../../model/moveit/moveitStatusModel");
 var PushConstant = require("../../push/PushConstant.js");
+var Order = require("../common/orderModel.js");
 
 var Dayorder = function(Dayorder) {
   this.date = Dayorder.date;
@@ -1054,7 +1055,7 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
     };
     result(null, resobj);
   
-  }else if (day_order[0].dayorderstatus <=8) {
+  }else if (day_order[0].dayorderstatus <8) {
     let resobj = {
       success: true,
       message: "order not pickedup.",
@@ -1094,12 +1095,24 @@ Dayorder.admin_day_order_book_return=async function admin_day_order_book_return(
 
     // await Notification.orderMoveItPushNotification(moveittripres.result.insertId,PushConstant.pageidMoveit_Order_Assigned,getmoveitdetails[0]);
     // result(null, resobj);
+
+    
  
-    var getmoveitdetailsquery = "select mu.* from Dayorder dors left join Moveit_trip mt on mt.tripid=dors.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id where dors.id="+req.moveit_id;
+    var getmoveitdetailsquery = "select mu.* from Dayorder dors left join Moveit_trip mt on mt.tripid=dors.trip_id left join MoveitUser as mu on mu.userid=mt.moveit_id where dors.id="+req.doid;
     var getmoveitdetails = await query(getmoveitdetailsquery);
     if(getmoveitdetails.length>0){
       console.log("moveit Send Notification return book ================> 2");
       await Notification.orderMoveItPushNotification(day_order[0].trip_id,PushConstant.pageidMoveit_return_book,getmoveitdetails[0],day_order[0].id);
+      
+      // console.log("getmoveitdetails[0].userid==>",getmoveitdetails[0].userid);
+      // req.doid = req.doid;
+      // req.moveitid = getmoveitdetails[0].userid;
+      // req.status = 8 // order return by moveit
+      // console.log("req===>",req);
+      // await Order.insert_order_status(req);
+      
+      var insertmoveitstatus = "insert into Moveit_status (doid,moveitid,status) values("+req.doid+","+getmoveitdetails[0].userid+",8)";
+      var insertmoveit = await query(insertmoveitstatus);
     }
 
     
