@@ -25,7 +25,7 @@ app.route("/moveit/makeitrating").put(middleware.checkToken,routesVersioning({"1
 app.route("/moveit/qualitycheck").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_kitchen_qualitycheck}));
 app.route("/moveit/paymentstatus").put(middleware.checkToken,routesVersioning({"1.0.0":orders.order_payment_status}));
 app.route("/moveit/ordershistory/:moveit_user_id").get(middleware.checkToken,routesVersioning({"1.0.0":orders.orderhistory_by_moveit_userid}));
- app.route("/moveit/documentUpload").post(middleware.checkToken,routesVersioning({"1.0.0":documents.moveit_upload_a_documents}));
+app.route("/moveit/documentUpload").post(middleware.checkToken,routesVersioning({"1.0.0":documents.moveit_upload_a_documents}));
 // app.route("/moveit/documentstore").post(middleware.checkToken,routesVersioning({"1.0.0":moveitdocument.create_a_documents}));
 //app.route("/moveit/makeitrating").put(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_kitchen_rating}));
 app.route("/moveit/qualitychecklist").post(middleware.checkToken,routesVersioning({"1.0.0":moveituser.moveit_quality_checklist}));
@@ -40,15 +40,13 @@ app.route("/moveit/logout").post(middleware.checkToken,routesVersioning({"1.0.0"
 app.route("/moveit/todayincome").post(routesVersioning({"1.0.0":orders.moveit_delivery_cash_received_by_today}));
 app.route("/moveit/order/accept").put(middleware.checkToken,routesVersioning({"1.0.0":orders.moveit_order_accept}));
 app.route("/moveit/versioncheck").post(routesVersioning({"1.0.0": moveituser.moveit_app_version_check_vid}));
-app.route("/moveit/ordernotificationtime").post(routesVersioning({"1.0.0": orders.moveit_notification_time}));
+app.route("/moveit/ordernotificationtime").put(routesVersioning({"1.0.0": orders.moveit_notification_time}));
 // app.route("/moveit/logtime").post(routesVersioning({"1.0.0": moveitlogtime.createMoveitTimelog_by_id}));
 app.route("/moveit/customerlocationreach").put(middleware.checkToken,routesVersioning({"1.0.0":orders.moveit_customer_location_reached}));
 app.route("/moveit/unacceptorders").post(middleware.checkToken,routesVersioning({"1.0.0":orders.moveit_unaccept_orders}));
-
 app.route("/moveit/customersupport").post(routesVersioning({"1.0.0": moveituser.moveit_customer_support}));
 app.route("/moveit/zone").post(routesVersioning({"1.0.0": moveituser.moveit_zone_data}));
 
-//////Eat clone Moveit API's////////////
 ////Moveit Trip List/////////
 app.route("/moveit/moveittriplist").post(routesVersioning({"1.0.0":moveituser.moveit_trip_list}));
 ////Moveit Trip Details/////////

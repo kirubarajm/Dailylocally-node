@@ -2029,6 +2029,7 @@ Moveituser.moveit_zone_data =async function moveit_zone_data(req, result) {
   ////check and update Trip Status////////
   Moveituser.updatetripstatus =async function updatetripstatus(trip_id) {
     if(trip_id){
+      console.log("trip ")
       var checktripquery = "select if(count(id),count(id),0) as order_count,if(count(CASE WHEN dayorderstatus<10 THEN id END),count(CASE WHEN dayorderstatus<10 THEN id END),0) as last_order from Dayorder where trip_id="+trip_id;
       var checktrip = await query(checktripquery);
       var curtime =  moment().format("YYYY-MM-DD HH:mm:ss");
@@ -2293,7 +2294,7 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
   
   if(orders.length>0 ){
     for(let i=0; i<orders.length; i++){
-      var moveitstatusquery ="select *,if(status=1,'order accept',if(status=2,'Warehouse reached',if(status=3,'order pickup',if(status=5,'Customer location reached',if(status=7,'Delivery Order',' Returned Order'))))) as moveit_status_msg from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
+      var moveitstatusquery ="select *,if(status=1,'order accept',if(status=2,'Warehouse reached',if(status=3,'order pickup',if(status=5,'Customer location reached',if(status=7,'Delivery Order',if(status=8,'Return Order','Returned to Hub')))))) as moveit_status_msg from Moveit_status  where doid = " +orders[i].id +" order by id desc limit 1";
       var statuslist = await query(moveitstatusquery);
       orders[i].moveit_status = 0;
       orders[i].moveit_status_msg = '';
