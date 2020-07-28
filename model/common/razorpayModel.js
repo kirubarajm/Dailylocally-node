@@ -89,8 +89,8 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
         // amount: 10,
         //  amount values convert to paisa
         var time = moment().format("YYYY-MM-DD HH:mm:ss");
-        var amount= req.amount;
-        var refund_amt = req.amount
+        var amount= onlinerefunddetails[0].original_amt;
+        var refund_amt = onlinerefunddetails[0].original_amt
         instance.payments.refund(req.paymentid,{amount: amount * 100,notes: {note1: 'Refund amount'}}).then((data) => {
        
         // success

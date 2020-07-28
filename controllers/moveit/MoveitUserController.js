@@ -521,3 +521,11 @@ exports.moveit_trip_day_order_list = function(req, res) {
     res.json(user);
   });
 };
+
+////Moveit Trip History/////////
+exports.trip_order_details = function(req, res) {
+  Moveituser.trip_order_details(req.body,function(err, user) {
+    if (err) res.send(err);
+    res.json(user);
+  });
+};
