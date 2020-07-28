@@ -1017,6 +1017,7 @@ Order.moveit_order_accept = async function moveit_order_accept(req, result) {
 Order.order_pickup_status_by_moveituser = function order_pickup_status_by_moveituser( req,result) {
   var order_pickup_time = moment().format("YYYY-MM-DD HH:mm:ss");
   var twentyMinutesLater = moment().add(0, "seconds").add(constant.foodpreparationtime, "minutes").format("YYYY-MM-DD HH:mm:ss");
+
   req.lat = req.lat || 0;
   req.lon = req.lon || 0;
   req.imgurl = req.imgurl || '';
@@ -1273,6 +1274,8 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
 
 
 Order.order_delivery_status_by_moveituser =async function(req, result) {
+
+  console.log(req);
   req.lat = req.lat || 0;
   req.lon = req.lon || 0;
   var order_delivery_time = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -1320,6 +1323,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
               } else {
                 /////Check Trip Status////
                 if(req.trip_id && req.trip_id>0){
+                  console.log("trip ")
                   var trip_status = await MoveitUser.updatetripstatus(req.trip_id);
                 }
               
@@ -1367,4 +1371,38 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
     }
   );
 };
+
+
+
+Order.moveit_notification_time_orderid = async function moveit_notification_time_orderid(req,result) {
+  var tripdetails = await query("select * from Moveit_trip where tripid = '"+req.trip_id+"'");
+  if (tripdetails.length !==0) {    
+    var currenttime = moment().format("YYYY-MM-DD HH:mm:ss");
+    // var skipupdatequery = await query("update Orders set moveit_notification_time = '"+currenttime+"'  where trip_id = '"+req.trip_id+"'");
+    var skipupdatequery = await query("update Moveit_trip set moveit_notification_time = '"+currenttime+"'  where tripid = '"+req.trip_id+"'");
+    if (skipupdatequery.err) {
+      let resobj = {
+        success: true,
+        status:false,
+        result: err
+      };
+      result(null, resobj);
+    }
+    let resobj = {
+      success: true,
+      status: true,
+      message:"Order moveit notification updated"
+    };
+    result(null, resobj);
+  }else{
+    let resobj = {
+      success: true,
+      status:false,
+      message:"There is no orders found!",
+      result: tripdetails
+    };
+    result(null, resobj);
+  }
+};
+
 module.exports = Order;
