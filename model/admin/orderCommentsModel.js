@@ -14,15 +14,15 @@ var OrderComments = function(ordercomments) {
 };
 
 
-OrderComments.create_OrderComments = function create_OrderComments(OrderComments,email_list, res) {
+OrderComments.create_OrderComments = function create_OrderComments(OrderComments,email_list, result) {
   // console.log(OrderComments);
-  sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, result) {
+  sql.query("INSERT INTO DayOrderComments set ?", OrderComments, function(err, res) {
     if (err) {
       console.log(err);
       result(err, null);
     } else {
       
-      if (email_list.length !=0) {
+      if (email_list&&email_list.length !=0) {
         emailService.send_commands_Mail(email_list,OrderComments);
       }
 

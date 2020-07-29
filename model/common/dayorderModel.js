@@ -470,7 +470,7 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
 
       }
     }else{
-      where = where+" and  DATE(drs.date) = CURDATE()";
+      where = where+" and  DATE(drs.date) = ADDDATE(CURDATE(), INTERVAL 1 DAY)";
     }
 
 
