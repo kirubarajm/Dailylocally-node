@@ -26,6 +26,7 @@ Collection.list_all_active_collection =async function list_all_active_collection
         result(err, null);
       } else {
       
+        await Collection.getcollectionlist(res,req)
         if (res.length !=0) {
           if (res.length !== 0 ) {
         
@@ -75,6 +76,7 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
     
     await Collection.get_all_collection_by_cid(req, async function(err,res3) {
       if (err) {
+     
         result(err, null);
       } else {
         if (res3.status != true) {
@@ -83,7 +85,7 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
        
           var productlist = res3.result
            
-          //console.log(productlist);
+        console.log(productlist.length);
           
           if (productlist.length !==0) {
             res[i].collectionstatus = true;
@@ -92,7 +94,7 @@ Collection.getcollectionlist = async function getcollectionlist(res,req){
           } 
         
           delete res[i].query;
-          console.log("collectionstatus",res);
+          // console.log("collectionstatus",res);
         }
       }
     });
@@ -107,7 +109,7 @@ Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(
         result(err, null);
       } else {            
         if (res1.length !=0) {
-                              
+          // console.log(res1);                
             let resobj = {
               success: true,
               status: true,

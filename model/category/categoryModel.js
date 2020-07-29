@@ -93,6 +93,7 @@ Category.get_category_list =async function get_category_list(req,result) {
             if (res3.status==true) {
               var collectionlist        = {};
               collectionlist.collection = res3.collection;
+              console.log(collectionlist.collection.length);
               var collection       = collectionlist.collection[0];
               collection.category=true,
               collection.clickable= false

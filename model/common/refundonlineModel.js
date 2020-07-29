@@ -7,11 +7,11 @@ const { json } = require("body-parser");
 var RefundOnline = function(refund) {
   this.orderid = refund.orderid;
   this.original_amt = refund.original_amt;
-  this.refund_amt = refund.refund_amt ;
+  this.refund_amt = refund.refund_amt ||0;
   this.active_status = refund.active_status ||0;
   this.userid =refund.userid;
   this.payment_id =refund.payment_id;
-  this.refund_image=refund.refund_image;
+  this.refund_image=refund.refund_image ||0;
   this.refund_reason=refund.refund_reason;
   this.refunded_by= refund.refunded_by;
   this.doid=refund.doid;
@@ -21,8 +21,9 @@ var RefundOnline = function(refund) {
 
 RefundOnline.createRefund = async function createRefund(req, result) {
 
-  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + req.orderid + "' and active_status=0 order by rs_id desc  limit 1");
 
+  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + req.orderid + "' and active_status=0 order by rs_id desc  limit 1");
+  
   if (orderrefunddetails.length ==0) {
     sql.query("INSERT INTO Refund_Online set ?",req,async function(err, res1) {
       if (err) result(true, null);
@@ -40,6 +41,7 @@ RefundOnline.createRefund = async function createRefund(req, result) {
   
 }else{
 
+  console.log("---------------------");
   var update_query = "Update Refund_Online set refund_amt='"+ req.refund_amt+"',refunded_by='"+req.refunded_by+"',doid='"+req.doid+"',refund_delivery_charge='"+req.refund_delivery_charge+"' where orderid ='" + req.orderid + "' "
   
   var update = await query(update_query);

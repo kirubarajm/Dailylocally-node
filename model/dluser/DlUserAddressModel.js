@@ -96,7 +96,7 @@ UserAddress.getaddressById = function getaddressById(userId, result) {
                     
                     status = false;
                 }else{
-                    res[0].note= 'This content will be given by sushant';
+                    res[0].note= 'All your current orders will also be delivered to the new address!';
                 }
                
                 let resobj = {  
@@ -235,8 +235,8 @@ UserAddress.updateById =async function updateById(req, result){
             }
         }
 
-      var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-        sql.query(query,[new Date()],async function (err, res) {
+      var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
+        sql.query(query1,[new Date()],async function (err, res) {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -244,7 +244,7 @@ UserAddress.updateById =async function updateById(req, result){
             else {
 
                   var address=  await query("select * from Address WHERE userid='"+req.userid+"'");
-
+                console.log(address);
                 let resobj = {
                     success: true,
                     status:true,
@@ -282,14 +282,13 @@ UserAddress.check_address =async function check_address(req, result){
    var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
    
    if (user_day_order_details.length !=0) {
-       console.log(servicable_status);
      if (!servicable_status) {
        let resobj = {
            success: true,
            status: servicable_status,
            servicable_status:servicable_status,
-           title : 'Alert',
-           message: "Your current selected location is unserviceable",
+           title : 'Area unserviceable!',
+           message: "Please cancel your upcoming orders or get in touch with our customer support to process the request",
        };
    
        result(null, resobj);
