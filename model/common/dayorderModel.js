@@ -1554,6 +1554,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
                         delivery_charge=  req.delivery_charge || 0
                         product_price = productdetails[0].product_price + delivery_charge;
                   
+                        console.log(productdetails[0].orderid);
                         var refundDetail = {
                           orderid :  productdetails[0].orderid,
                           active_status : 0,

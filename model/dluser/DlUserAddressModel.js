@@ -235,8 +235,8 @@ UserAddress.updateById =async function updateById(req, result){
             }
         }
 
-      var  query = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-        sql.query(query,[new Date()],async function (err, res) {
+      var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
+        sql.query(query1,[new Date()],async function (err, res) {
             if (err) {
                 console.log("error: ", err);
                 result(err, null);
@@ -244,7 +244,7 @@ UserAddress.updateById =async function updateById(req, result){
             else {
 
                   var address=  await query("select * from Address WHERE userid='"+req.userid+"'");
-
+                console.log(address);
                 let resobj = {
                     success: true,
                     status:true,

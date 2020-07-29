@@ -11,15 +11,7 @@ exports.razorpay_refund_payment = function(req, res) {
         status: false,
         message: "Please provide payment id"
       });
-  }else if (!req.body.amount) {
-    res
-      .status(400)
-      .send({
-        error: true,
-        status: false,
-        message: "Please provide amount"
-      });
-  } else {
+  }else {
     Razorpay.razorpay_refund_payment_by_paymentid(req.body, function(err,razorpay) {
    if (err) res.send(err);
       res.send(razorpay);
