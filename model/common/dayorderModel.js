@@ -725,7 +725,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
       let resobj = {
         success: true,
         message: "Order not found .",
-        status: true
+        status: false
       };
       result(null, resobj);
     
@@ -733,7 +733,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
       let resobj = {
         success: true,
         message: "Following order not returned. Please check admin.",
-        status: true
+        status: false
       };
       result(null, resobj);
     
@@ -741,7 +741,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
       let resobj = {
         success: true,
         message: "Already order cancelled.",
-        status: true
+        status: false
       };
       result(null, resobj);
     
@@ -749,7 +749,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
       let resobj = {
         success: true,
         message: "Already order delivered.",
-        status: true
+        status: false
       };
       result(null, resobj);
     
@@ -793,7 +793,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
 
       let resobj = {
         success: true,
-        status: true,
+        status: false,
         message : 'product not available'
       };
   
