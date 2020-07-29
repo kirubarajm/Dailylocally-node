@@ -1179,6 +1179,9 @@ SCM.delete_po =async function delete_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
         var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
         var getpo = await query(getpoquery);
+
+        var getpopbeforequery = "select * from POproducts where poid=+"+req.poid;
+        var getpopbefore = await query(getpopbeforequery);
         if(getpo.length>0){
             let resobj = { };
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
@@ -1195,6 +1198,10 @@ SCM.delete_po =async function delete_po(req,result) {
                             var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
                             var updatepo = await query(updatepoquery);
                             if(updatepo.affectedRows>0){
+                                for (let i = 0; i < getpopbefore.length; i++) {
+                                    var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
+                                    var updatepro = await query(updateproquery);
+                                }
                                 polog_data = [];
                                 polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
                                 POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
