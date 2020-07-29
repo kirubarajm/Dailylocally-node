@@ -718,19 +718,67 @@ Dayorder.update_scm_status = async function update_scm_status(Dayorder){
 Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayorder,result) {
     var now = moment().format("YYYY-MM-DD,h:mm:ss a");
 
-    var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"'");
+    var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"' and scm_status <= 6");
+    var dayorder= await query("select * from Dayorder where id='"+Dayorder.doid+"'");
+
+    if (dayorder.length==0) {
+      let resobj = {
+        success: true,
+        message: "Order not found .",
+        status: true
+      };
+      result(null, resobj);
     
+    }else if (dayorder[0].dayorderstatus ==12) {
+      let resobj = {
+        success: true,
+        message: "Following order not returned. Please check admin.",
+        status: true
+      };
+      result(null, resobj);
+    
+    }else if (dayorder[0].dayorderstatus ==11) {
+      let resobj = {
+        success: true,
+        message: "Already order cancelled.",
+        status: true
+      };
+      result(null, resobj);
+    
+    }else if (dayorder[0].dayorderstatus ==10) {
+      let resobj = {
+        success: true,
+        message: "Already order delivered.",
+        status: true
+      };
+      result(null, resobj);
+    
+    }else{
+
     if (product.length !==0) {
-      var dayorder= await query("select * from Dayorder where id='"+Dayorder.doid+"'");
-      if (product[0].scm_status < 6 ) {
+
+      // if (product[0].scm_status < 6 ) {
 
         var req = {};
         req.quantity = product[0].quantity;
-        req.vpid = Dayorder.vpid;
+        req.vpid = product[0].vpid;
         req.zoneid = dayorder[0].zoneid;
         Stock.cancel_product_quantity_update_Stock(req);
 
         var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"'");
+
+
+        var day_order_product = await query("select * from  Dayorder_products where doid='"+Dayorder.doid+"' and scm_status < 11 ");
+
+        if (day_order_product.length ==0) {
+          var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"'");
+
+          var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
+
+          PushConstant.Pageid_dl_order_cancel = 8;
+          await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_cancel);
+        
+        }
 
         let resobj = {
           success: true,
@@ -739,15 +787,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
         };
     
         result(null, resobj); 
-      } else {
-        let resobj = {
-          success: true,
-          status: true,
-          message : 'product not available'
-        };
-    
-        result(null, resobj); 
-      }
+      
 
     }else{
 
@@ -761,7 +801,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
     }
   
   
-
+  }
      
   };
 
@@ -985,6 +1025,8 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
   
     
   }
+
+
   var day_order_product = await query("select * from  Dayorder_products where doid='"+Dayorder.doid+"' and scm_status < 11 ");
 
   if (day_order_product.length ==0) {

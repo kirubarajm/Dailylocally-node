@@ -569,8 +569,14 @@ sql.query(product_list1,async function(err, res) {
 
 
 ProductMaster.get_brand_list = async function get_brand_list(req,result) {
-  
-  var brand_list = "select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand where pm.scl1_id= "+req.scl1_id+" or pm.scl2_id= "+req.scl2_id+" group by  pm.brand ";
+if (req.scl2_id ==0) {
+  var brand_list = "select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand where pm.scl1_id= "+req.scl1_id+"  group by  pm.brand ";
+
+}else{
+    var brand_list = "select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand where pm.scl1_id= "+req.scl1_id+" or pm.scl2_id= "+req.scl2_id+" group by  pm.brand ";
+
+}
+  console.log(brand_list)
   sql.query(brand_list,async function(err, res) {
     if (err) {
       result(err, null);
