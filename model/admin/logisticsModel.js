@@ -651,6 +651,7 @@ Logistics.moveit_list_trip =async function moveit_list_trip(req,result) {
                     var moveittrip = "";
                     if(getmoveittrip[0].trip_status==0){
                         getmoveit[i].name = getmoveit[i].name+"(Live trip - "+getmoveittrip[0].tripid+")";
+                        getmoveit[i].moveittripid = getmoveittrip[0].tripid;
                     }else if(getmoveittrip[0].trip_status==1){                        
                         getmoveit[i].name = getmoveit[i].name+"(New trip)";
                         getmoveit[i].moveittripid ='';
