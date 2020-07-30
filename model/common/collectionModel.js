@@ -21,38 +21,51 @@ Collection.list_all_active_collection =async function list_all_active_collection
   var userdetails  = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
 
   if (userdetails.length !==0) {
-    sql.query("Select cs.cid,cs.query,cs.name,cs.active_status,cs.img_url as image from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"'   ",async function(err, res) {
+    sql.query("Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid  join Collection_mapping_product cmp on cmp.cid=cs.cid  left join ProductMaster pm on pm.pid=cmp.pid left join Product_live pl on pl.pid=pm.pid where cs.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1  group by cs.cid ",async function(err, res) {
       if (err) {
         result(err, null);
       } else {
       
-        await Collection.getcollectionlist(res,req)
-        if (res.length !=0) {
-          if (res.length !== 0 ) {
+      //  var collection=  await Collection.getcollectionlist(res,req);
+
+
+      //  Collection.getcollectionlist(res,req,async function(err,res2) {
+      //   if (err) {
+      //     result(err, null);
+      //   } else {
         
-            let resobj = {
-              success: true,
-              status:true,
-              collection: res
-            };
-            result(null, resobj);
-          } else {
-            let resobj = {
-              success: true,
-              status:false,
-              message: "Sorry there no active collections"
-            };
-            result(null, resobj);
-           } 
-        } else {
-          
-          let resobj = {
-            success: true,
-            status: false,
-            message: "Collection not Found"
-          };
-          result(null, resobj);
-        }
+       
+      //       console.log("getcollectionlist-----------------",res2);
+           
+           
+      //       let resobj = {
+      //         success: true,
+      //         status:true,
+      //         collection: res2
+      //       };
+      //       result(null, resobj);              
+
+         
+      //   }
+      // });
+
+
+      if (res.length != 0 ) {
+        
+        let resobj = {
+          success: true,
+          status:true,
+          collection: res
+        };
+        result(null, resobj);
+      } else {
+        let resobj = {
+          success: true,
+          status: false,
+          message: "Sorry there no active collections"
+        };
+        result(null, resobj);
+       } 
         
            
       }
@@ -68,48 +81,63 @@ Collection.list_all_active_collection =async function list_all_active_collection
  
 };
 
-Collection.getcollectionlist = async function getcollectionlist(res,req){
+Collection.getcollectionlist = async function getcollectionlist(res2,req,result){
   var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
-  for (let i = 0; i < res.length; i++) {
-    req.cid = res[i].cid;   
-    req.query = res[i].query;
+
+  for (let i = 0; i < res2.length; i++) {
+
+    req.cid = res2[i].cid;   
+    req.query = res2[i].query;
     
-    await Collection.get_all_collection_by_cid(req, async function(err,res3) {
+    await Collection.get_all_collection_by_cid(req, async function(err,res4) {
       if (err) {
-     
+        console.log(err);
         result(err, null);
       } else {
-        if (res3.status != true) {
-          result(null, res3);
+        if (res4.status != true) {
+          result(null, res4);
         } else {          
        
-          var productlist = res3.result
+          // console.log(res3.result);
+          var productlist = res4.result
            
-        console.log(productlist.length);
+        // console.log("productlist",productlist);
           
-          if (productlist.length !==0) {
-            res[i].collectionstatus = true;
+          if (productlist.length !=0) {
+            res2[i].collectionstatus = true;
+            console.log("true",productlist.length);
           }else{
-            res[i].collectionstatus = false;
+            res2[i].collectionstatus = false;
+            console.log("false",productlist.length);
           } 
         
-          delete res[i].query;
+          delete res2[i].query;
           // console.log("collectionstatus",res);
         }
       }
     });
   }
-return res
+  // result res2
+
+  let resobj = {
+    success: true,
+    status: true,
+    result: res2
+  };
+  result(null, resobj);
 }
 
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
 
+  console.log("------------------------req.query",req.query);
+  console.log("------------------------------------",req.cid);
     await sql.query(req.query,[req.cid],async function(err, res1) {
       if (err) {
         result(err, null);
       } else {            
         if (res1.length !=0) {
-          // console.log(res1);                
+          // console.log(res1); 
+          // console.log("------------------------res1",res1.length);              
             let resobj = {
               success: true,
               status: true,
@@ -118,10 +146,11 @@ Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(
             };
             result(null, resobj);
           }else{
+            // console.log("------------------------res2",res1.length);   
             let resobj = {
               success: true,
               status: false,
-              collection_name:res[0].name,
+              collection_name:'',
               result: res1
             };
             result(null, resobj);

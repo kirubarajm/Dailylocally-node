@@ -93,18 +93,54 @@ Category.get_category_list =async function get_category_list(req,result) {
             if (res3.status==true) {
               var collectionlist        = {};
               collectionlist.collection = res3.collection;
-              console.log(collectionlist.collection.length);
-              var collection       = collectionlist.collection[0];
-              collection.category=true,
-              collection.clickable= false
-              collection.collection_status= true
+
+             
+              var collection       = collectionlist.collection;
+
+              const potrate_collectionlist    = collection.filter(collection => collection.tile_type < 2);
+              const landscape_collectionlist  = collection.filter(collection => collection.tile_type > 1);
+
+
+              console.log(collection.length);
+              console.log(potrate_collectionlist.length);
+              console.log(landscape_collectionlist.length);
+              // kitchenlist = serviceablekitchenlist.concat(unserviceablekitchenlist); 
+              var temp = 0
+              potrate_collectionlist.forEach(i => {
+                
+                // console.log(res.length);
+                temp = temp +2
+                i.category=true,
+                i.clickable= false
+                i.collection_status= true    
+                i.catid = i.cid;
+                i.servicable_status=servicable_status;
   
-              collection.catid = collection.cid;
-              collection.servicable_status=servicable_status;
-              collection.query=0;
-              collection.tile_type= 2
-                     
-              res.splice(2, 0, collection);
+                      
+                res.splice(temp, 0, i);
+
+
+              });
+
+              var temp1 = 0
+              landscape_collectionlist.forEach(i => {
+                
+                // console.log(i.cid);
+                temp1 = temp1 +2
+
+                i.category=true,
+                i.clickable= false
+                i.collection_status= true
+    
+                i.catid = i.cid;
+                i.servicable_status=servicable_status;
+                i.tile_type= 2
+                      
+                res.splice(i.category_Position, 0, i);
+
+
+              });
+
   
               let resobj = {
                 success: true,
