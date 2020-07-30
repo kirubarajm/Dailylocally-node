@@ -144,7 +144,7 @@ Procurement.move_to_purchase=async function move_to_purchase(req,result) {
     var getprocurement = await query(getprocurementquery);
     if(getprocurement.length > 0){
       for (let i = 0; i < getprocurement.length; i++) {
-        var checkpotempquery = "select * from POtemp where vpid="+getprocurement[i].vpid+" and prid="+getprocurement[i].prid+" and delete_satus=0";
+        var checkpotempquery = "select * from POtemp where vpid="+getprocurement[i].vpid+" and prid="+getprocurement[i].prid+" and delete_status=0";
         var checkpotemp = await query(checkpotempquery);
         if(checkpotemp.length == 0){
           var insertdata = [];

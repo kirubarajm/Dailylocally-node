@@ -694,7 +694,7 @@ SCM.update_po_unreceive =async function update_po_unreceive(req,result) {
             if(getpop[0].stand_by>0){
                 if(req.quantity <= getpop[0].stand_by){
                     var standby_qty = parseInt(getpop[0].stand_by)-parseInt(req.quantity);
-                    if(standby_qty>0){
+                    if(standby_qty>=0){
                         var updatepopquery = "update POproducts set stand_by="+standby_qty+" where popid="+req.popid;
                         var updatepopquery = await query(updatepopquery);                    
                         if(updatepopquery.affectedRows>0){
@@ -1638,24 +1638,56 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                 var getstock = await query(getstockquery);
                                 if(getstock.length>0){
                                     //// what ever you change this query need to chage ==>auto_stock_to_dayorder<== this function /////////////
-                                    var getdayorderproductquery = "select * from Dayorder_products where scm_status=2 and vpid="+getpop[0].vpid+" and doid not in(select id from Dayorder where zoneid=1 and id=(select DISTINCT(doid) from Dayorder_products where scm_status=4) and dayorderstatus=1 group by id,userid) order by created_at";
+                                    var getdayorderproductquery = "select * from Dayorder_products where scm_status in(2,3) and vpid="+getpop[0].vpid+" and doid not in(select id from Dayorder where zoneid=1 and id in(select DISTINCT(doid) from Dayorder_products where scm_status=4) and dayorderstatus=1 group by id,userid) order by created_at";
                                     var getdayorderproduct = await query(getdayorderproductquery);
                                     if(getdayorderproduct.length>0){
                                         for (let i = 0; i < getdayorderproduct.length && getstock[0].quantity>0; i++) {
                                             if(getdayorderproduct[i].quantity >= getdayorderproduct[i].received_quantity){
                                                 var qty = parseInt(getdayorderproduct[i].quantity) - parseInt(getdayorderproduct[i].received_quantity);
-                                                if(getstock[0].quantity >= qty){
-                                                    var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
+                                                console.log("getdayorderproduct[i].quantity==>",qty);
+                                                console.log("getdayorderproduct[i].received_quantity==>",getdayorderproduct[i].received_quantity);
+                                                console.log("qty==>",qty);
+                                                //////////////Product ful fill and sorting/////////
+                                                // if(getstock[0].quantity >= qty){
+                                                //     console.log("=====>3");
+                                                //     var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
+                                                //     var updateDOP = await query(updateDOPquery);
+                                                //     //////Stock Log//////////
+                                                //     if(updateDOP.affectedRows>0){
+                                                //         console.log("=====>4");
+                                                //         var stocklogdataout = [];
+                                                //         stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zoneid,"created_by":req.done_by});
+                                                //         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
+                                                //     }
+
+                                                //     getstock[0].quantity = parseInt(getstock[0].quantity) - parseInt(qty);
+                                                // }
+
+                                                //////////////Product without ful fill and sorting/////////
+                                                if(getstock[0].quantity>0){
+                                                    var upqty = 0;
+                                                    if(getstock[0].quantity >= qty){                                                        
+                                                        var upqty = qty + parseInt(getdayorderproduct[i].received_quantity);
+                                                        getstock[0].quantity = parseInt(getstock[0].quantity) - parseInt(qty);
+                                                    }else{
+                                                        var upqty = parseInt(getstock[0].quantity)+parseInt(getdayorderproduct[i].received_quantity);
+                                                        getstock[0].quantity = 0;
+                                                    }                                                    
+                                                    var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+upqty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
                                                     var updateDOP = await query(updateDOPquery);
                                                     //////Stock Log//////////
                                                     if(updateDOP.affectedRows>0){
+                                                        console.log("=====>4");
                                                         var stocklogdataout = [];
                                                         stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zoneid,"created_by":req.done_by});
                                                         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
                                                     }
-
-                                                    getstock[0].quantity = parseInt(getstock[0].quantity) - parseInt(qty);
+                                                    
+                                                }else{
+                                                    console.log("=====>5");
                                                 }
+                                            }else{
+                                                console.log("=====>6");
                                             }                      
                                         }
                                         
@@ -1677,7 +1709,8 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                         }
                                         
                                         //// update pop status //////// 
-                                        var updatepopquery = "update POproducts set pop_status=1,sorting_status=1,stand_by=0,received_quantity="+getpop[0].stand_by+" where popid="+req.popid;
+                                        var uppopqty = (parseInt(getpop[0].received_quantity)+parseInt(getpop[0].aditional_quantity))+parseInt(getpop[0].stand_by);
+                                        var updatepopquery = "update POproducts set pop_status=1,sorting_status=1,stand_by=0,received_quantity="+uppopqty+" where popid="+req.popid;
                                         var updatepop = await query(updatepopquery);
 
                                         //// Check and update po status /////
@@ -1707,6 +1740,7 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                             result(null, resobj);
                                         }                                        
                                     }else{
+                                        console.log("=====>7");
                                         let resobj = {
                                             success: true,
                                             status: false,
