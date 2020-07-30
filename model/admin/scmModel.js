@@ -478,7 +478,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
             where = where+" and po.po_status="+req.po_status;
         }        
 
-        var getpolistquery = "select po.poid,po.po_pdf_url,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:8000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {
