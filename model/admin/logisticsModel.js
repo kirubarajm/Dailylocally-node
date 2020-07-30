@@ -214,7 +214,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
             if(updatedayorder.affectedRows>0){
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+                insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":2,"done_type":1});
                 DayOrderComment.create_OrderComments_crm(insertlogdata); 
                 
                 //////// Customer App Notification //////////
@@ -726,7 +726,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                     await MoveitTripHistory.createMoveitTripHistory(historydata[0],async function(err,historyres){ }); 
                     ////////Create Day order Log ////////////
                     var insertlogdata = [];
-                    insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                    insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":2,"done_type":1});
                     DayOrderComment.create_OrderComments_crm(insertlogdata);                
                 }
 
@@ -771,7 +771,7 @@ Logistics.trip_create =async function trip_create(req,result) {
 
                             ////////Create Day order Log ////////////
                             var insertlogdata = [];
-                            insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":1,"done_type":1});
+                            insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":dayorderids[i],"type":2,"done_type":1});
                             DayOrderComment.create_OrderComments_crm(insertlogdata); 
                             
                             //////// Customer App Notification //////////
@@ -844,7 +844,7 @@ Logistics.trip_unassign =async function trip_unassign(req,result) {
 
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorders[i],"type":1,"done_type":1});
+                insertlogdata.push({"comments":"Moveit Un-Assigned","done_by":req.done_by,"doid":dayorders[i],"type":2,"done_type":1});
                 DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
                 if(updatedayorder.affectedRows>0){

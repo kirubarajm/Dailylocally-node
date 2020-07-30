@@ -478,7 +478,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
             where = where+" and po.po_status="+req.po_status;
         }        
 
-        var getpolistquery = "select po.poid,po.po_pdf_url,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:8000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
             let resobj = {
@@ -521,8 +521,8 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status=0 "+where+" group by pop.popid";
-        // console.log("getpolistquery ==>",getpolistquery);
+        var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status IN(0,1) "+where+" group by pop.popid";
+        //  console.log("getpolistquery ==>",getpolistquery);
 
         var getpolist = await query(getpolistquery);
         if(getpolist.length > 0){
@@ -1179,6 +1179,9 @@ SCM.delete_po =async function delete_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
         var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
         var getpo = await query(getpoquery);
+
+        var getpopbeforequery = "select * from POproducts where poid=+"+req.poid;
+        var getpopbefore = await query(getpopbeforequery);
         if(getpo.length>0){
             let resobj = { };
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
@@ -1195,6 +1198,10 @@ SCM.delete_po =async function delete_po(req,result) {
                             var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
                             var updatepo = await query(updatepoquery);
                             if(updatepo.affectedRows>0){
+                                for (let i = 0; i < getpopbefore.length; i++) {
+                                    var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
+                                    var updatepro = await query(updateproquery);
+                                }
                                 polog_data = [];
                                 polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
                                 POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
