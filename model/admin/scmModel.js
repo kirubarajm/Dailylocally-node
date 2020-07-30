@@ -1570,20 +1570,41 @@ SCM.auto_stock_to_dayorder =async function auto_stock_to_dayorder(req, result) {
                         if(getdayorderproducts[j].vpid == getstocks[i].vpid && getdayorderproducts[j].sorting_status != 2){
                             if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
                                 var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
-                                if(getstocks[i].quantity >= qty){
-                                    var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+" where id="+getdayorderproducts[j].id;
+                                //////////////Product ful fill and sorting/////////
+                                // if(getstocks[i].quantity >= qty){
+                                //     var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+qty+" where id="+getdayorderproducts[j].id;
+                                //     var updateDOP = await query(updateDOPquery);
+                                //     if(updateDOP.affectedRows>0){
+                                //         var stocklogdataout = [];
+                                //         stocklogdataout.push({"stockid":getstocks[i].stockid,"vpid":getstocks[i].vpid,"dopid":getdayorderproducts[j].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zoneid,"created_by":req.done_by});
+                                //         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
+                                //     }
+                                //     getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
+                                // }        
+                                
+                                //////////////Product without ful fill and sorting/////////
+                                if(getstocks[i].quantity>0){
+                                    var upqty = 0;
+                                    if(getstocks[i].quantity >= qty){                                                        
+                                        var upqty = qty + parseInt(getdayorderproducts[j].received_quantity);
+                                        getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
+                                    }else{
+                                        var upqty = parseInt(getstocks[i].quantity)+parseInt(getdayorderproducts[j].received_quantity);
+                                        getstocks[i].quantity = 0;
+                                    }                                                    
+                                    var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+upqty+" where id="+getdayorderproducts[j].id;
                                     var updateDOP = await query(updateDOPquery);
+                                    //////Stock Log OUT//////////
                                     if(updateDOP.affectedRows>0){
                                         var stocklogdataout = [];
-                                        stocklogdataout.push({"stockid":getstocks[i].stockid,"vpid":getstocks[i].vpid,"dopid":getdayorderproducts[j].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zoneid,"created_by":req.done_by});
+                                        stocklogdataout.push({"stockid":getstocks[i].stockid,"vpid":getstocks[i].vpid,"dopid":getdayorderproducts[j].id,"type":2,"from_type":6,"quantity":upqty,"zoneid":req.zoneid,"created_by":req.done_by});
                                         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
-                                    }
-                                    getstocks[i].quantity = parseInt(getstocks[i].quantity) - parseInt(qty);
-                                }                          
+                                    }                                    
+                                }
                             }
                         }
                     }
-                    var updatestockquery = "update Stock set quantity="+getstocks[i].quantity+" where vpid="+getstocks[i].vpid+" and zoneid="+req.zoneid;
+                    var updatestockquery = "update Stock set quantity="+getstocks[i].vpid+" and zoneid="+req.zoneid;
                     var updatestock = await query(updatestockquery);
                 }         
             }
@@ -1627,7 +1648,7 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
             //if(getpop[0].total_received_quantity >0){
                 if(getpop[0].stand_by>0){
                     var stockdata = [];
-                    stockdata.push({"vpid":getpop[0].vpid,"stand_by":getpop[0].stand_by,"zoneid":req.zoneid});
+                    stockdata.push({"vpid":getpop[0].vpid,"stand_by":getpop[0].stand_by,"zoneid":req.zoneid,"popid":req.popid,"done_by":req.done_by});
                     SCM.stock_check_update(stockdata,async function(err,stockres){
                         if(stockres.status==true){                                                        
                             // var totalqty = parseInt(stockres.result[0].quantity)+parseInt(getpop[0].stand_by);
@@ -1644,9 +1665,6 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                         for (let i = 0; i < getdayorderproduct.length && getstock[0].quantity>0; i++) {
                                             if(getdayorderproduct[i].quantity >= getdayorderproduct[i].received_quantity){
                                                 var qty = parseInt(getdayorderproduct[i].quantity) - parseInt(getdayorderproduct[i].received_quantity);
-                                                console.log("getdayorderproduct[i].quantity==>",qty);
-                                                console.log("getdayorderproduct[i].received_quantity==>",getdayorderproduct[i].received_quantity);
-                                                console.log("qty==>",qty);
                                                 //////////////Product ful fill and sorting/////////
                                                 // if(getstock[0].quantity >= qty){
                                                 //     console.log("=====>3");
@@ -1675,11 +1693,11 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                                     }                                                    
                                                     var updateDOPquery = "update Dayorder_products set scm_status=3,received_quantity="+upqty+",popid="+req.popid+" where id="+getdayorderproduct[i].id;
                                                     var updateDOP = await query(updateDOPquery);
-                                                    //////Stock Log//////////
+                                                    //////Stock Log OUT//////////
                                                     if(updateDOP.affectedRows>0){
                                                         console.log("=====>4");
                                                         var stocklogdataout = [];
-                                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":qty,"zoneid":req.zoneid,"created_by":req.done_by});
+                                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":getpop[0].stand_by,"zoneid":req.zoneid,"created_by":req.done_by});
                                                         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
                                                     }
                                                     
@@ -1701,12 +1719,12 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                         console.log("updatestockquery2 ==>",updatestockquery2);
                                         var updatestock2 = await query(updatestockquery2);
                                         // console.log("updatestock2 ===>",updatestock2);
-                                        //////Stock Log//////////
-                                        if(updatestock2.affectedRows>0){
-                                            var stocklogdatain = [];
-                                            stocklogdatain.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"type":1,"from_type":1,"quantity":getstock[0].quantity,"zoneid":req.zoneid,"created_by":req.done_by});
-                                            StockLog.createStockLog(stocklogdatain[0], async function(err,stocklogdatares){ });
-                                        }
+                                        //////Stock Log IN//////////
+                                        // if(updatestock2.affectedRows>0){
+                                        //     var stocklogdatain = [];
+                                        //     stocklogdatain.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"type":1,"from_type":1,"quantity":getstock[0].quantity,"zoneid":req.zoneid,"created_by":req.done_by});
+                                        //     StockLog.createStockLog(stocklogdatain[0], async function(err,stocklogdatares){ });
+                                        // }
                                         
                                         //// update pop status //////// 
                                         var uppopqty = (parseInt(getpop[0].received_quantity)+parseInt(getpop[0].aditional_quantity))+parseInt(getpop[0].stand_by);
@@ -1817,6 +1835,12 @@ SCM.stock_check_update =async function stock_check_update(req, result) {
             var updatestockquery  = "update Stock set quantity="+totalqty+" where vpid="+req[0].vpid+" and zoneid="+req[0].zoneid;
             var updatestock = await query(updatestockquery); 
             if(updatestock.affectedRows>0){
+                //////Stock Log IN//////////
+                var stocklogdatain = [];
+                stocklogdatain.push({"stockid":getstockprice1[0].stockid,"vpid":getstockprice1[0].vpid,"popid":req[0].popid,"type":1,"from_type":1,"quantity":req[0].stand_by,"zoneid":req[0].zoneid,"created_by":req[0].done_by});
+                console.log("stocklogdatain ==>1111",stocklogdatain);
+                StockLog.createStockLog(stocklogdatain[0], async function(err,stocklogdatares){ });
+                
                 var getstockpricequery = "select * from Stock where vpid="+req[0].vpid+" and zoneid="+req[0].zoneid;
                 var getstockprice = await query(getstockpricequery);
 
@@ -1839,6 +1863,12 @@ SCM.stock_check_update =async function stock_check_update(req, result) {
             stockdata.push({"vpid":req[0].vpid,"quantity":req[0].stand_by,"zoneid":req[0].zoneid});
             Stock.createStock(stockdata[0],async function(err,stockres){
                 if(stockres.status==true){
+                    //////Stock Log IN//////////
+                    var stocklogdatain = [];
+                    stocklogdatain.push({"stockid":stockres.result.insertId,"vpid":req[0].vpid,"popid":req[0].popid,"type":1,"from_type":1,"quantity":req[0].stand_by,"zoneid":req[0].zoneid,"created_by":req[0].done_by});
+                    console.log("stocklogdatain ==>2222",stocklogdatain);
+                    StockLog.createStockLog(stocklogdatain[0], async function(err,stocklogdatares){ });
+                    
                     var getstockpricequery = "select * from Stock where vpid="+req[0].vpid+" and zoneid="+req[0].zoneid;
                     var getstockprice = await query(getstockpricequery);
                     if(getstockprice.length>0){                        
