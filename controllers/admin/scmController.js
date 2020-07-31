@@ -128,7 +128,15 @@ exports.po_pdf = function(req, res) {
       if (err) res.send(err);
       res.json(result);
     });
-  };
+};
+
+/////// Invoice PDF ////////
+exports.invoice_pdf = function(req, res) {
+    SCM.invoice_pdf(req.body, function(err, result) {
+      if (err) res.send(err);
+      res.json(result);
+    });
+};
 
 /////////Delete PO///////////
 exports.delete_po = function(req, res) {    

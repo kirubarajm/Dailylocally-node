@@ -85,6 +85,7 @@ module.exports = function(app) {
   app.route("/admin/stock/autoassign").post(middleware.checkToken,routesVersioning({"1.0.0": scm.auto_stock_to_dayorder}));
   app.route("/admin/po/view").post(middleware.checkToken,routesVersioning({"1.0.0": scm.view_po}));
   app.route("/admin/po/pdf").post(middleware.checkToken,routesVersioning({"1.0.0": scm.po_pdf}));
+  app.route("/admin/invoice/pdf").post(middleware.checkToken,routesVersioning({"1.0.0": scm.invoice_pdf}));
   app.route("/admin/po/delete").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po}));
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
