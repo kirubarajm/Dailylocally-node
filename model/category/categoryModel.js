@@ -104,30 +104,38 @@ Category.get_category_list =async function get_category_list(req,result) {
               console.log(collection.length);
               console.log(potrate_collectionlist.length);
               console.log(landscape_collectionlist.length);
-              // kitchenlist = serviceablekitchenlist.concat(unserviceablekitchenlist); 
-              var temp = 0
-              potrate_collectionlist.forEach(i => {
+           
+              for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
-                // console.log(res.length);
-                temp = temp +2
-                i.category=true,
-                i.clickable= false
-                i.collection_status= true    
-                i.catid = i.cid;
-                i.servicable_status=servicable_status;
-  
-                      
-                res.splice(temp, 0, i);
+                potrate_collectionlist[i].category=true,
+                potrate_collectionlist[i].clickable= false
+                potrate_collectionlist[i].collection_status= true    
+                potrate_collectionlist[i].catid = i.cid;
+                potrate_collectionlist[i].servicable_status=servicable_status;    
+                
+              }
+              // var temp = 0
+              // potrate_collectionlist.forEach(i => {
+                
+              //   // console.log(res.length);
+              //   // temp = temp +2
+              //   i.category=true,
+              //   i.clickable= false
+              //   i.collection_status= true    
+              //   i.catid = i.cid;
+              //   i.servicable_status=servicable_status;                     
+              //   // res.splice(temp, 0, i);
 
+              // });
 
-              });
-
+              res = res.concat(potrate_collectionlist); 
               var temp1 = 0
+
               landscape_collectionlist.forEach(i => {
                 
                 // console.log(i.cid);
-                temp1 = temp1 +2
-
+                temp1 = temp1 + 4
+                console.log("temp1",temp1);
                 i.category=true,
                 i.clickable= false
                 i.collection_status= true
@@ -136,8 +144,8 @@ Category.get_category_list =async function get_category_list(req,result) {
                 i.servicable_status=servicable_status;
                 i.tile_type= 2
                       
-                res.splice(i.category_Position, 0, i);
-
+                res.splice(temp1, 0, i);
+                temp1 = temp1+1
 
               });
 
@@ -324,7 +332,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           }
 
         }else{
-              if (currenthour < 24) {
+              if (currenthour <=24) {
     
                 res1[0].deliverydate = tomorrow;
               } else {

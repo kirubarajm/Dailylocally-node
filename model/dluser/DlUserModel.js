@@ -205,6 +205,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
                   token: token,
                   otpstatus: otpstatus,
                   genderstatus: genderstatus,
+                  registrationstatus:registrationstatus,
                   userid: res2.insertId,
                   result: responce
                 };
@@ -266,6 +267,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
         console.log("newUser.phoneno:",newUser.phoneno);
           if (res[0].gender !== "" &&res[0].gender !== null && res[0].name !== "" && res[0].name !== null) {
             genderstatus = true;
+            registrationstatus=true;
           }
 
           if (!otpstatus) {
@@ -329,6 +331,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
                   status: true,
                   otpstatus: otpstatus,
                   genderstatus: genderstatus,
+                  registrationstatus:registrationstatus,
                   message: 'Authentication successful!',
                   token: token,
                   userid: res[0].userid,
@@ -365,6 +368,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
                           message: "message sent successfully",
                           otpstatus: otpstatus,
                           genderstatus: genderstatus,
+                          registrationstatus:registrationstatus,
                           oid: res1.insertId
                         };
 
@@ -379,6 +383,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
                     message: "message sent successfully",
                     otpstatus: otpstatus,
                     genderstatus: genderstatus,
+                    registrationstatus:registrationstatus,
                     message : responcecode
                   };
 
