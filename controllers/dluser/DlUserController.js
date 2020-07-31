@@ -117,6 +117,13 @@ exports.customer_support = function(req, res) {
   });
 };
 
+exports.check_device = function(req, res) {
+  Dluser.check_device(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.json(user);
+  });
+};
+
 exports.zendesk_requestcreate = function(req, res) {
   if (req.headers) {
     req.body.app_type = parseInt(req.headers.apptype);
