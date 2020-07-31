@@ -54,12 +54,14 @@ var Order = function(order) {
   this.coupon = order.coupon;
   this.delivery_charge=order.delivery_charge;
   this.discount_amount=order.discount_amount;
+  this.virtualkey=order.virtualkey;
   
 };
 
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
 
+ var virtualkey = req.virtualkey || 0
 
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
@@ -103,13 +105,14 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
                     } else {
                       var amountdata = res3.result[0].amountdetails;
 
-               
-
+                      if (virtualkey==1) {
+                        req.payment_status = 1;
+                      } 
+                      
                       req.gst = amountdata.gstcharge;
                       req.price = amountdata.grandtotal;    
                       req.delivery_charge = amountdata.delivery_charge;
                       req.zoneid =  res3.result[0].id;
-
                       req.google_address = address_data[0].google_address;
                       req.complete_address = address_data[0].complete_address;
                       req.flat_house_no = address_data[0].flat_house_no;
@@ -208,7 +211,7 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
       }else{
         var orderid = res1.insertId;
 
-        console.log("Other_Item_list",Other_Item_list);
+
           for (var i = 0; i < Other_Item_list.length; i++) {
          
             
@@ -244,9 +247,17 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
           });
 
          
-        }
+          }
 
-       
+       if (new_Order.payment_status == 1) {
+        var order_place = {};
+        order_place.orderid=orderid;
+        var getproductdetails = "select ors.address_type,ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+orderid;
+        var getproduct = await query(getproductdetails,);
+        // console.log("getproduct==========>",getproduct);
+        dayorder.checkdayorder(order_place,getproduct);
+
+       }
 
 
         let resobj = {
