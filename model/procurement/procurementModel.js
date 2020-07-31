@@ -101,20 +101,34 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
 /////// Get Precurment List ///////////
 Procurement.procurement_list=async function procurement_list(req,result) {
   if(req.zoneid){
+    var pagelimit = 20;
+    var page = req.page || 1;
+    var startlimit = (page - 1) * pagelimit;
+
     var where = "";    
-    if(req.date){
-        where = where+" and date(pro.created_at)='"+req.date+"' ";
+    if(req.from_date && req.to_date){
+      wherecon = wherecon+" and (date(pro.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
     }
-    if(req.vpid){
-        where = where+" and (pro.vpid='"+req.vpid+"' or dop.Productname='"+req.vpid+"') ";
+    if(req.productsearch){
+        where = where+" and (pro.vpid='"+req.productsearch+"' or dop.Productname='"+req.productsearch+"') ";
     }
-    var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zoneid+" "+where+" order by pro.prid";
+    if(req.report && req.report==1){
+      var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zoneid+" "+where+" order by pro.prid";
+    }else{
+      var procurement_list_query = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zoneid+" "+where+" order by pro.prid limit " +startlimit +"," +pagelimit +" ";
+    }
     var procurement_list = await query(procurement_list_query);
 
+    var totalcountquery = "select pro.prid,pro.created_at,pro.vpid,dop.productname,dop.product_uom as uom,uom.name as uom_name,greatest(0,if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0)) as boh_remaining,greatest(0,if(st.quantity_mapping,st.quantity_mapping,0)) as boh_mapped,if(pro.quantity,pro.quantity,0) as required_quantity,greatest(0,(if(pro.quantity,pro.quantity,0))-(if((st.quantity-st.quantity_mapping),(st.quantity-st.quantity_mapping),0))) as procurement_quantity,pro.pr_status,case when pro.pr_status=0 then 'open' when pro.pr_status=1 then 'ready to po' end as pr_status_msg,pro.zoneid from Procurement as pro left join Dayorder_products as dop on dop.prid=pro.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=dop.vpid where pro.pr_status=1 and pro.zoneid="+req.zoneid+" "+where+" order by pro.prid";
+    var total_count = await query(totalcountquery);
+
     if(procurement_list.length > 0){
+      var totalcount = total_count.length;     
       let resobj = {  
         success: true,
         status: true,
+        totalcount: totalcount,
+        pagelimit: pagelimit,
         result:procurement_list 
       };
       result(null, resobj);
@@ -122,6 +136,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
       let resobj = {  
         success: true,
         status: false,
+        totalcount: 0,
         message:"no data"
       };
       result(null, resobj);
@@ -130,6 +145,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
     let resobj = {  
       success: true,
       status: false,
+      totalcount: 0,
       message:"check your post values"
     };
     result(null, resobj);

@@ -455,18 +455,22 @@ SCM.create_po =async function create_po(req,result) {
 /////////Get PO List///////////
 SCM.get_po_list =async function get_po_list(req,result) {
     if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
         var where = "";
         if(req.poid){
-            where = where+" and po.poid="+req.poid;
+            where = where+" and po.poid='"+req.poid+"' ";
         }
-        if(req.date){
-            where = where+" and date(po.created_at)='"+req.date+"' ";
+        if(req.from_date && req.to_date){
+            where = where+" and (date(po.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
         if(req.pop_status){
             where = where+" and pop.pop_status="+req.pop_status;
         }
-        if(req.vid){
-            where = where+" and po.vid='"+req.vid+"' or ven.name='"+req.vid+"' ";
+        if(req.vendorsearch){
+            where = where+" and po.vid='"+req.vendorsearch+"' or ven.name='"+req.vendorsearch+"' ";
         }
         if(req.due_date){
             where = where+" and date(pop.due_date)='"+req.due_date+"' ";
@@ -477,13 +481,28 @@ SCM.get_po_list =async function get_po_list(req,result) {
         if(req.po_status){
             where = where+" and po.po_status="+req.po_status;
         }        
-
-        var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:8000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        if(req.report && req.report==1){
+            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        }else{
+            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc limit " +startlimit +"," +pagelimit +"";
+        }
         var getpolist = await query(getpolistquery);
+
+        var totalcountquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        var total_count = await query(totalcountquery);
+
         if(getpolist.length > 0){
+            for (let i = 0; i < getpolist.length; i++) {
+                if(getpolist[i].open_quqntity < 0){
+                    getpolist[i].open_quqntity=0;
+                }                
+            }
+            var totalcount = total_count.length;
             let resobj = {
                 success: true,
                 status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
                 result: getpolist
             };
             result(null, resobj);
@@ -491,6 +510,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                totalcount: 0,
                 message: "no records found"
             };
             result(null, resobj);
@@ -499,6 +519,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            totalcount: 0,
             message: "check your post values"
         };
         result(null, resobj);
@@ -508,27 +529,42 @@ SCM.get_po_list =async function get_po_list(req,result) {
 /////////Get PO receive List///////////
 SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
     if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
         var where = "";
-        if(req.date){
-            where = where+" and date(po.created_at)='"+req.date+"' ";
+        if(req.from_date && req.to_date){
+            where = where+" and (date(po.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
-        if(req.vpid){
-            where = where+" and pop.vpid='"+req.vpid+"' or dop.productname='"+req.vpid+"' ";
+        if(req.productsearch){
+            where = where+" and pop.vpid='"+req.productsearch+"' or dop.productname='"+req.productsearch+"' ";
         }
-        if(req.vid){
-            where = where+" and po.vid='"+req.vid+"' or ven.name='"+req.vid+"' ";
+        if(req.vendorsearch){
+            where = where+" and po.vid='"+req.vendorsearch+"' or ven.name='"+req.vendorsearch+"' ";
         }
         if(req.poid){
             where = where+" and po.poid="+req.poid;
         }
-        var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status IN(0,1) "+where+" group by pop.popid";
+
+        if(req.report && req.report==1){
+            var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status IN(0,1) "+where+" group by pop.popid";
+        }else{
+            var getpolistquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status IN(0,1) "+where+" group by pop.popid order by pop.popid limit " +startlimit +"," +pagelimit +" ";
+        }
+        var getpolist = await query(getpolistquery);
         //  console.log("getpolistquery ==>",getpolistquery);
 
-        var getpolist = await query(getpolistquery);
+        var totalcountquery = "select pop.popid,po.poid,pop.vpid,dop.productname,dop.product_short_desc,uom.name as uom,po.vid,ven.name,po.created_at,if(st.quantity,st.quantity,0) as boh,if(sum(pop.requested_quantity), sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity), sum(pop.received_quantity),0) as received_quantity,po.cost,po.po_status,pop.pop_status,pop.sorting_status,pop.stand_by from POproducts as pop left join PO as po on po.poid = pop.poid left join Vendor as ven on ven.vid=po.vid left join Dayorder_products as dop on dop.prid=pop.prid left join UOM as uom on uom.uomid=dop.product_uom left join Stock as st on st.vpid=pop.vpid where po.zoneid="+req.zoneid+" and po.po_status IN(0,1) "+where+" group by pop.popid";
+        var total_count = await query(totalcountquery);
+        
         if(getpolist.length > 0){
+            var totalcount = total_count.length; 
             let resobj = {
                 success: true,
                 status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
                 result: getpolist
             };
             result(null, resobj);
@@ -536,6 +572,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                totalcount: 0,
                 message: "no records found"
             };
             result(null, resobj);
@@ -544,6 +581,7 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            totalcount: 0,
             message: "check your post values"
         };
         result(null, resobj);
@@ -1567,7 +1605,7 @@ SCM.auto_stock_to_dayorder =async function auto_stock_to_dayorder(req, result) {
 
                 if(getdayorderproducts.length > 0){
                     for (let j = 0; j < getdayorderproducts.length && getstocks[i].quantity>0; j++) {
-                        if(getdayorderproducts[j].vpid == getstocks[i].vpid && getdayorderproducts[j].sorting_status != 2){
+                        if(getdayorderproducts[j].vpid == getstocks[i].vpid){ // && getdayorderproducts[j].sorting_status != 2
                             if(getdayorderproducts[j].quantity >= getdayorderproducts[j].received_quantity){
                                 var qty = parseInt(getdayorderproducts[j].quantity) - parseInt(getdayorderproducts[j].received_quantity);
                                 //////////////Product ful fill and sorting/////////
@@ -1599,12 +1637,12 @@ SCM.auto_stock_to_dayorder =async function auto_stock_to_dayorder(req, result) {
                                         var stocklogdataout = [];
                                         stocklogdataout.push({"stockid":getstocks[i].stockid,"vpid":getstocks[i].vpid,"dopid":getdayorderproducts[j].id,"type":2,"from_type":6,"quantity":upqty,"zoneid":req.zoneid,"created_by":req.done_by});
                                         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
-                                    }                                    
+                                    }  
                                 }
                             }
                         }
                     }
-                    var updatestockquery = "update Stock set quantity="+getstocks[i].vpid+" and zoneid="+req.zoneid;
+                    var updatestockquery = "update Stock set quantity="+getstocks[i].quantity+" and zoneid="+req.zoneid;
                     var updatestock = await query(updatestockquery);
                 }         
             }
@@ -1697,7 +1735,7 @@ SCM.pop_to_dayorder =async function pop_to_dayorder(req, result) {
                                                     if(updateDOP.affectedRows>0){
                                                         console.log("=====>4");
                                                         var stocklogdataout = [];
-                                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":getpop[0].stand_by,"zoneid":req.zoneid,"created_by":req.done_by});
+                                                        stocklogdataout.push({"stockid":getstock[0].stockid,"vpid":getstock[0].vpid,"popid":req.popid,"dopid":getdayorderproduct[i].id,"type":2,"from_type":1,"quantity":upqty,"zoneid":req.zoneid,"created_by":req.done_by});
                                                         StockLog.createStockLog(stocklogdataout[0], async function(err,stocklogdatares){ });
                                                     }
                                                     
@@ -1909,17 +1947,27 @@ SCM.stock_check_update =async function stock_check_update(req, result) {
 /////////Get Sorting List///////////
 SCM.get_soring_list =async function get_soring_list(req,result) {
     if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
         var where = "";
         if(req.doid){
             where = where+" and dayo.id="+req.doid;
         }
-        if(req.date){
-            where = where+" and date(dayo.date)='"+req.date+"' ";
+        if(req.from_date && req.to_date){
+            where = where+" and (date(dayo.date) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
-
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id IN (select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        if(req.report && req.report==1){
+            var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id IN (select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        }else{
+            var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id IN (select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id order by dayo.id limit " +startlimit +"," +pagelimit +" ";
+        }
         var getpolist = await query(getpolistquery);
-        //  console.log("getpolist==>",getpolist);
+
+        var totalcountquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=1 and dayo.id IN (select DISTINCT(doid) from Dayorder_products where scm_status=3) and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        var total_count = await query(totalcountquery);
+        
         if(getpolist.length > 0){
             for (let i = 0; i < getpolist.length; i++) {
                 getpolist[i].products = JSON.parse(getpolist[i].products);
@@ -1945,14 +1993,17 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
                 //     }
                 // }
             }
+
             // if (!getpolist.action) {
             //     getpolist.sort((a, b) => parseFloat(b.action) - parseFloat(a.action));
-            // }
-            
+            // }            
             // if(getpolist[0].actival_weight > 0 || getpolist[0].received_weight > 0){
+                var totalcount = total_count.length; 
                 let resobj = {
                     success: true,
                     status: true,
+                    totalcount: totalcount,
+                    pagelimit: pagelimit,
                     result: getpolist
                 };
                 result(null, resobj);
@@ -1961,6 +2012,7 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                totalcount: 0,
                 message: "no records found"
             };
             result(null, resobj);
@@ -1969,6 +2021,7 @@ SCM.get_soring_list =async function get_soring_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            totalcount: 0,
             message: "check your post values"
         };
         result(null, resobj);
@@ -2210,17 +2263,30 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 /////////Get Return List///////////
 SCM.get_return_list =async function get_return_list(req,result) {
     if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
         var where = "";
         if(req.doid){
-            where = where+" and dayo.id="+req.doid;
+            where = where+" and dayo.id='"+req.doid+"' ";
         }
-        if(req.date){
-            where = where+" and date(dayo.date)='"+req.date+"' ";
+        
+        if(req.from_date && req.to_date){
+            wherecon = wherecon+" and (date(dayo.date) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
 
-        var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'driver_return_quantity',dop.driver_return_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        if(req.report && req.report==1){
+            var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'driver_return_quantity',dop.driver_return_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id order by dayo.id asc ";
+        }else{
+            var getpolistquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'driver_return_quantity',dop.driver_return_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id order by dayo.id asc limit " +startlimit +"," +pagelimit +" ";
+        }        
         var getpolist = await query(getpolistquery);
         //  console.log("getpolist==>",getpolist);
+
+        var totalcountquery = "select dayo.date,dayo.id as doid,dayo.dayorderstatus,dayo.revoke_flag,JSON_ARRAYAGG(JSON_OBJECT('dopid',dop.id,'vpid', dop.vpid,'product_name',dop.productname,'quantity',dop.quantity,'received_quantity',dop.received_quantity,'driver_return_quantity',dop.driver_return_quantity,'sorting_status',dop.sorting_status,'scm_status',dop.scm_status,'actival_weight',(dop.quantity*dop.product_weight),'received_weight',(dop.received_quantity*dop.product_weight),'report_quantity',0,'report_flag',0)) AS products,0 as actival_weight,0 as received_weight,0 as action from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id where dayo.dayorderstatus=12 and return_status=1 and dayo.zoneid="+req.zoneid+" "+where+" group by dayo.id";
+        var total_count = await query(totalcountquery);
+
         if(getpolist.length > 0){
             for (let i = 0; i < getpolist.length; i++) {
                 getpolist[i].products = JSON.parse(getpolist[i].products);
@@ -2230,9 +2296,12 @@ SCM.get_return_list =async function get_return_list(req,result) {
                     getpolist[i].received_weight =parseInt(getpolist[i].received_weight)+parseInt(productlist[j].received_weight);     
                 }
             }
+            var totalcount = total_count.length;   
             let resobj = {
                 success: true,
                 status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
                 result: getpolist
             };
             result(null, resobj);                  
@@ -2240,6 +2309,7 @@ SCM.get_return_list =async function get_return_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                totalcount: 0,
                 message: "no records found"
             };
             result(null, resobj);
@@ -2248,6 +2318,7 @@ SCM.get_return_list =async function get_return_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            totalcount: 0,
             message: "check your post values"
         };
         result(null, resobj);
