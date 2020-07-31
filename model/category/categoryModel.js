@@ -770,7 +770,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
     if (req.vpid ) {
 
         
-        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +req.vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,if(pm.uom=1 || pm.uom=7,pm.weight*1000,pm.weight) as  weight From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +req.vpid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";
@@ -787,7 +787,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
 
    
      
-        subscription_product_list[0].weight = subscription_product_list[0].weight * 1000;
+        // subscription_product_list[0].weight = subscription_product_list[0].weight * 1000;
         subscription_product_list[0].offer='offer';
         subscription_product_list[0].discount_cost_status=false;
         subscription_product_list[0].mrp_discount_amout=0;
