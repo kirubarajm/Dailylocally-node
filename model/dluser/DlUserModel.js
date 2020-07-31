@@ -786,11 +786,32 @@ result(null, resobj);
            result(err, null);
          } else {
  
-
+          console.log(userdetails.length);
+ 
           var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
 
           if (address_details.length !=0) {
-            var userdetails = userdetails.push(address_details[0]);
+            console.log("-----------zvzzv--------",address_details[0]);
+            //  userdetails = userdetails.push(address_details[0]);
+
+             userdetails[0].aid= address_details[0].aid;
+             userdetails[0].lat= address_details[0].lat;
+             userdetails[0].lon= address_details[0].lon;
+             userdetails[0].city=address_details[0].city;
+           userdetails[0].address_type= address_details[0].address_type;
+           userdetails[0].delete_status=address_details[0].delete_status;
+           userdetails[0].address_default=address_details[0].address_default;
+           userdetails[0].flat_house_no=address_details[0].flat_house_no;
+           userdetails[0].plot_house_no=address_details[0].plot_house_no;
+           userdetails[0].floor=address_details[0].floor;
+           userdetails[0].block_name=address_details[0].block_name;
+           userdetails[0].apartment_name=address_details[0].apartment_name;
+           userdetails[0].google_address=address_details[0].google_address;
+           userdetails[0].complete_address=address_details[0].complete_address;
+
+
+
+            console.log("-----------zvzzv--------",userdetails);
           }else{
             userdetails[0].aid=  0;
             userdetails[0].lat= 0.0;
@@ -806,9 +827,11 @@ result(null, resobj);
           userdetails[0].apartment_name='';
           userdetails[0].google_address='';
           userdetails[0].complete_address='';
+          console.log("-------------------",userdetails);
+
            }
         
-           
+           console.log(userdetails);
  
 
            let resobj = {

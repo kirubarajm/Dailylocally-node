@@ -107,9 +107,9 @@ Category.get_category_list =async function get_category_list(req,result) {
            
               for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
-                potrate_collectionlist[i].category=true,
-                potrate_collectionlist[i].clickable= false
-                potrate_collectionlist[i].collection_status= true    
+                potrate_collectionlist[i].category=true;
+                potrate_collectionlist[i].clickable= true;
+                potrate_collectionlist[i].collection_status= true;
                 potrate_collectionlist[i].catid = i.cid;
                 potrate_collectionlist[i].servicable_status=servicable_status;    
                 
@@ -137,7 +137,7 @@ Category.get_category_list =async function get_category_list(req,result) {
                 temp1 = temp1 + 4
                 console.log("temp1",temp1);
                 i.category=true,
-                i.clickable= false
+                i.clickable= true
                 i.collection_status= true
     
                 i.catid = i.cid;
