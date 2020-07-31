@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {	
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  line-height: 1.6;
+  font-size: 10px;
+}
+
+.border {
+  border: 1px solid #000000;
+  text-align: center;
+  margin: 0px;
+}
+
+table.d {
+  table-layout: fixed;
+  width: 100%;  
+}
+
+.css-serial {
+  counter-reset: serial-number;  /* Set the serial number counter to 0 */
+}
+
+.css-serial td:first-child:before {
+  counter-increment: serial-number;  /* Increment the serial number counter */
+  content: counter(serial-number);  /* Display the counter */
+}
+
+.div2 {
+  width: 300px;
+  height: 100px;  
+  padding: 50px;
+  border: 1px solid #000000;
+}
+
+</style>
+</head>
+<body> <!-- style="border: 1px solid #000000; margin:0%; font-size:12px;" -->
+    
+    <table style="margin:1%;">        
+        <tr>
+            <td  width=50%>{{#each header}}                      
+                <table>
+                    <tr>
+                        <td style="padding-left:80px"> <img src="https://dailylocally.s3.amazonaws.com/admin/1595952461064-Daily%20locally3.png" width="30%" class="img-fluid" alt="Responsive image"> </td>
+                    </tr>                    
+                </table> 
+            </td>
+            {{/each}}
+            {{#each order}}  
+            <td  width=50%>
+                <table>
+                    <tr>
+                        <td style="font-weight: bold; font-size: 16px; ">INVOICE</td>
+                    </tr>
+                    <tr>
+                        <td>Invoice No : &nbsp; &nbsp; &nbsp; &nbsp; {{this.doid}}</td>
+                    </tr>
+                    <tr>
+                        <td>Date : &nbsp; &nbsp; {{this.date}} </td>
+                    </tr>
+                </table> 
+            </td>
+            
+        </tr>
+    </table>
+
+    <table style="margin:1%;">        
+        <tr>
+            <td> 
+                <table>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Bill to: </span>  {{this.customername}},<br/> {{this.customeraddress}}</span> </td>
+                    </tr>
+                    
+                </table> 
+            </td>
+            <td>
+                <table>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Order ID: </span> {{this.doid}} </td>
+                    </tr>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Payment Mode : </span> online </td>
+                    </tr>
+                    <tr>
+                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Total.No.of items : </span> {{this.itemcount}} </td>
+                    </tr>
+                    
+                </table> 
+            </td>
+        </tr>
+        <tr>
+            <td width=50%><span style="font-weight: bold; font-size: 12px;"> Total Amount: RS.{{this.finalamount}} </span></td>
+            <td width=50%> </td>
+        </tr>
+    </table>
+    {{/each}}  
+    <table>        
+        <tr>
+            <td colspan="3">
+                <table style="margin: 0px" class="css-serial border d">
+                    <tr class="border">
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">S.No</th>
+                      <th class="border" style="table-layout: fixed; width: 100%; font-weight: bold;">Item</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;" >HSN</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Unit Price</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Quantity</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Price</th>
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Availability</th>
+                    </tr>
+                    {{#each items}}
+                    <tr class="border">
+                      <td class="border"> </td>
+                      <td class="border">{{this.product_name}}</td>
+                      <td class="border">{{this.hsn}}</td>
+                      <td class="border">{{this.unit_price}}</td>
+                      <td class="border">{{this.quantity}}</td>
+                      <td class="border">{{this.price}}</td>
+                      <td class="border"></td>
+                    </tr>
+                    {{/each}}
+                  </table> 
+            </td>
+        </tr>
+    </table>
+    {{#each order}}
+    <table>
+        <tr> 
+            <td width="40%"> &nbsp; </td>
+            <td width="30%">Sub total: {{this.sumof}}</td>
+            <td width="30%">Delivery Charge: {{this.deliverycharge}}</td>
+        </tr>
+        <tr> 
+            <td width="40%"> &nbsp;  </td>
+            <td width="30%">Discount: 0</td>
+            <td width="30%">CGST(9%): {{this.CGST}}</td>
+        </tr>
+        <tr> 
+            <td width="40%"> &nbsp;  </td>
+            <td width="30%">Total Supply Value: {{this.sumof}}</td>
+            <td width="30%">SGST(9%): {{this.SGST}}</td>
+        </tr>        
+    </table>
+    <table>
+        <tr> 
+            <td width="40%"> &nbsp;  </td>
+            <td width="30%"> &nbsp;  </td>
+            <td width="30%" style="font-weight: bold; font-size: 12px;">Final Total: {{this.finalamount}}</td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td>Total Invoice Amount : {{this.sumof}}({{this.finalamountvalue}} only/-)</td>
+            {{/each}}
+        </tr>
+    </table>
+
+    <table>
+        <tr> 
+            <td width="50%" style="font-weight: bold; font-size: 12px;"> Daily Locally Quality Promise </td>
+            <td width="30%"> &nbsp; </td>
+            <td width="20%"> &nbsp; </td>
+        </tr>
+        <tr> 
+            <td> . Packaging Material Hygiene Checks </td>
+            <td><input type="checkbox" id="1" name="1" value="1"></td>
+            <td> &nbsp; </td>
+        </tr>
+        <tr> 
+            <td> . Warehouse Sanitation Check </td>
+            <td><input type="checkbox" id="1" name="1" value="1"></td>
+            <td> &nbsp; </td>
+        </tr>
+        <tr> 
+            <td> . Driver Temperature Check  </td>
+            <td><input type="checkbox" id="1" name="1" value="1"></td>
+            <td> &nbsp; </td>
+        </tr>
+        <tr> 
+            <td> . Footprint Packaging And Sealing  </td>
+            <td><input type="checkbox" id="1" name="1" value="1"></td>
+            <td> &nbsp; </td>
+        </tr>
+    </table>
+
+<br/>
+
+    
+<br/>
+    <table>
+        <tr>
+            <td colspan="2">  </td>
+        </tr>
+        <tr>
+            <td> Payment Terms: </td>
+            <td style="text-align: center; font-weight: bold; font-size: 12px; ">Authorized Sign</td>
+        </tr>
+    </table>
+<br/>
+
+    <table style="text-align: center;">
+        <tr>
+            <td > Note: The products that are marked unavailable will be refunded to you. kindly get in touch with our support through our app for any other assistance</td>
+        </tr>
+    </table>
+<br/>
+    <table style="text-align: center;">
+        <tr>
+            <td style="font-weight: bold; font-size: 20px; color:green"> Thank you for your business!</td>
+        </tr>
+        <tr>
+            <td > Visit us at www.dailylocally.com</td>
+        </tr>
+        <tr>
+            <td > This is computer generated invoice</td>
+        </tr>
+        <tr>
+            <td > * As per section 31 of CGST Act 2017 read with Rules, invoice at the point of delivering the good</td>
+        </tr>
+    </table>
+<br/>
+
+{{#each footer}}
+    <table style="text-align: center;">
+        <tr>
+            <td> {{this.footername}} {{this.footeraddress}} </td>
+        </tr>
+        <tr>
+            <td>{{this.footerarea}}</td>
+        </tr>
+    </table>
+{{/each}}       
+
+</body> 
+</html>

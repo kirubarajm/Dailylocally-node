@@ -28,7 +28,8 @@ var Notification = require("../common/notificationModel.js");
 var pdf = require("pdf-creator-node");
 var fs = require('fs');
 // Read HTML Template
-var html = fs.readFileSync('checklisttemplate.html', 'utf8');
+var popdfhtml = fs.readFileSync('popdftemplate.html', 'utf8');
+var invoicepdfhtml = fs.readFileSync('invoicepdftemplate.html', 'utf8');
 
 var SCM = function(scm) {};
 
@@ -1159,7 +1160,124 @@ SCM.po_pdf= async function po_pdf(req,result) {
                 // console.log("items ===>",items);
             var pathfilename = "./uploads/po_pdf/"+getchecklist[0]['poid']+".pdf";
             var document = {
-                html: html,
+                html: popdfhtml,
+                data: {
+                    items: items,
+                    order: order,
+                    footer: footerdata,
+                    header:headerdata,
+                },
+                path: pathfilename
+            };
+            //console.log(document);
+            pdf.create(document, options)
+                .then(res => {
+                    console.log(res.filename);
+                    ///////
+
+                    // Document.newmoveitdocumentupload(res.filename);
+
+
+                    let resobj = {
+                    success: true,
+                    message: "pdf Created Successfully",
+                    status:true,
+                    url: res
+                    };
+                    result(null, resobj);
+                })
+                .catch(error => {
+                    console.error(error)
+                    let resobj = {
+                    success: false,
+                    message: "something went wrong",
+                    status:false
+                    };
+                    result(null, resobj);
+                });    
+        }else{
+          let resobj = {
+            success: false,
+            message: "no record in this order",
+            status:false
+          };
+          result(null, resobj);
+        } 
+    }else{
+        let resobj = {
+            success: false,
+            message: "check post values",
+            status:false
+          };
+          result(null, resobj);
+    }    
+};
+
+/////// Invoice PDF ////////
+SCM.invoice_pdf= async function invoice_pdf(req,result) {
+    if(req.doid){
+        var getchecklistquery ="select dayo.id,dayo.date,dayo.userid,us.name,us.phoneno,dayo.google_address,dayo.delivery_charge,count(DISTINCT dop.vpid) as u_product_count,JSON_ARRAYAGG(JSON_OBJECT('product_name',dop.productname,'hsn',dop.product_hsn_code,'unit_price',dop.product_mrp,'quantity',dop.quantity,'price',dop.price)) AS items from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join User as us on us.userid=dayo.userid where  dayo.id="+req.doid+" group by dop.doid";
+        var getchecklist = await query(getchecklistquery);
+        
+        for (let i = 0; i < getchecklist.length; i++) {
+            getchecklist[i].items = JSON.parse(getchecklist[i].items); 
+        }
+        
+        var sumof = 0;
+        for (let j = 0; j < getchecklist[0].items.length; j++) {
+            sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].price);
+        }       
+        var finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
+        var finalamountvalue = converter.toWords(finalamount);
+
+        var gst = 0;
+        if(getchecklist[0].delivery_charge>0){
+            gst = (parseInt(getchecklist[0].delivery_charge)*9)/100;
+        }
+        if(gst>0){
+            getchecklist[0].delivery_charge= parseFloat(getchecklist[0].delivery_charge)-(parseFloat(gst*2));
+        }
+        if(getchecklist.length != 0){
+            var options = {
+                format: "A4",
+                orientation: "landscap",
+                border: "10mm"
+            };
+            var order = [{
+                doid: getchecklist[0]['id'],
+                date: moment(getchecklist[0]['date']).format("DD-MM-YYYY"),
+                itemcount:getchecklist[0]['u_product_count'],
+                customername: getchecklist[0]['name'],
+                customeraddress: getchecklist[0]['google_address'],
+                customerphoneno: getchecklist[0]['phoneno'],
+                deliverycharge: getchecklist[0].delivery_charge,
+                sumof: sumof,
+                finalamount: finalamount,
+                finalamountvalue: finalamountvalue,
+                discount:0,
+                CGST: gst,
+                SGST: gst,
+            }]
+            var headerdata = [{
+                headername: constant.tovo_po_header_name,
+                headeraddress: constant.tovo_po_header_address,
+                headerarea: constant.tovo_po_header_area,
+                headergst: constant.tovo_po_header_gst,
+            }]
+            var footerdata = [{
+                shipto: constant.tovo_po_ship_to,
+                contactname: constant.tovo_po_contact,
+                contactnumber: constant.tovo_po_contact_number,
+                contactemail: constant.tovo_po_contact_email,
+                footername: constant.tovo_po_footer_name,
+                footeraddress: constant.tovo_po_footer_address,
+                footerarea: constant.tovo_po_footer_area,
+            }]
+            var items = getchecklist[0]['items'];
+                //  console.log("items ===>",items);
+            var pathfilename = "./uploads/invoice_pdf/"+getchecklist[0]['id']+".pdf";
+            var document = {
+                html: invoicepdfhtml,
                 data: {
                     items: items,
                     order: order,

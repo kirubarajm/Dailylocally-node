@@ -465,6 +465,8 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
     // }
     if(Dayorder.from_date && Dayorder.to_date){
       where = where+" and (date(drs.date) between '"+Dayorder.from_date+"' and  '"+Dayorder.to_date+"') ";
+    }else{
+      where = where+" and  DATE(drs.date) = ADDDATE(CURDATE(), INTERVAL 1 DAY)";
     }
 
     if(Dayorder.id){
