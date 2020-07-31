@@ -27,6 +27,7 @@ app.route("/user/edit").put(middleware.checkToken,routesVersioning({"1.0.0":dlus
 app.route("/user/referral/:userid").get(middleware.checkToken,routesVersioning({"1.0.0":dluser.user_referral}));
 app.route("/user/pushid/add").put(middleware.checkToken,routesVersioning({"1.0.0":dluser.add_a_pushid}));
 app.route("/user/customersupport").post(routesVersioning({"1.0.0":dluser.customer_support}));
+app.route("/user/checkdevice").post(routesVersioning({"1.0.0":dluser.check_device}));
 
 //User Address
 app.route("/user/address").put(middleware.checkToken,routesVersioning({"1.0.0":useraddress.update_a_user_address})).post(middleware.checkToken,routesVersioning({"1.0.0":useraddress.create_a_address}));
