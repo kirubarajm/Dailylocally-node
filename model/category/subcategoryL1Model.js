@@ -153,7 +153,7 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
   // console.log(get_collection[0].product_name);
 
   var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
-  // console.log(brand_list)
+   console.log(brand_list)
   var sub_category_query = "select sub1.* from ProductMaster as pm  left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id  where zl1.active_status=1 and pm.brand= '"+brand_list[0].id+"' and pl.live_status=1 group by pm.scl1_id";
 
 console.log(sub_category_query)
