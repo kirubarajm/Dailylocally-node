@@ -273,7 +273,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
           if (!otpstatus) {
             
             
-            sql.query("Select * from Address where userid = '" +res[0].userid+"' and address_default = 1 and delete_status=0",function(err, res3) {
+            sql.query("Select * from Address where userid = '" +res[0].userid+"' and  delete_status=0",function(err, res3) {
               if (err) {
                 console.log("error: ", err);
                 result(err, null);
