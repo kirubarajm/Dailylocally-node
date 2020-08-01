@@ -21,35 +21,37 @@ Collection.list_all_active_collection =async function list_all_active_collection
   var userdetails  = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
 
   if (userdetails.length !==0) {
-    sql.query("Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid  join Collection_mapping_product cmp on cmp.cid=cs.cid  left join ProductMaster pm on pm.pid=cmp.pid left join Product_live pl on pl.pid=pm.pid where cs.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1  group by cs.cid ",async function(err, res) {
+    var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by cs.cid";
+    
+    sql.query(collection_query,async function(err, res) {
       if (err) {
         result(err, null);
       } else {
       
-      //  var collection=  await Collection.getcollectionlist(res,req);
-
-
-      //  Collection.getcollectionlist(res,req,async function(err,res2) {
-      //   if (err) {
-      //     result(err, null);
-      //   } else {
+        // console.log("res",res.length);
+        for (let i = 0; i < res.length; i++) {
         
-       
-      //       console.log("getcollectionlist-----------------",res2);
+          if (res[i].clickable=1) {
+            res[i].clickable=true;
+          } else {
+            res[i].clickable=false;
+          }
+          product_query = "select pm.*,br.brandname from  ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.brandname like '%"+res[i].product_name+"%' and pl.live_status=1"
            
-           
-      //       let resobj = {
-      //         success: true,
-      //         status:true,
-      //         collection: res2
-      //       };
-      //       result(null, resobj);              
-
-         
-      //   }
-      // });
-
-
+          var productlist = await query(product_query);
+          // console.log("productlist[0]",productlist[0].brand);
+     
+   
+          if (productlist.length !=0) {
+            res[i].collection_status = true;
+          
+          }else{
+            res[i].collection_status = false;
+          }
+        }
+      
+         res  =  res.filter(re => re.collection_status ==true);
+        // console.log(res);
       if (res.length != 0 ) {
         
         let resobj = {

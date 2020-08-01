@@ -5691,7 +5691,7 @@ Dluser.check_device= async function check_device(req,result) {
     let resobj = {
       success: true,
       status:false,
-      result : "Following device not availabe"
+      message : "Following device not availabe"
   };
 
   result(null, resobj);

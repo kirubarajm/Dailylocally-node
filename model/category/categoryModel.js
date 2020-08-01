@@ -108,12 +108,13 @@ Category.get_category_list =async function get_category_list(req,result) {
               for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
                 potrate_collectionlist[i].category=true;
-                potrate_collectionlist[i].clickable= true;
                 potrate_collectionlist[i].collection_status= true;
-                potrate_collectionlist[i].catid = i.cid;
+                potrate_collectionlist[i].catid = potrate_collectionlist[i].cid;
                 potrate_collectionlist[i].servicable_status=servicable_status;    
                 
               }
+
+              console.log(potrate_collectionlist);
               // var temp = 0
               // potrate_collectionlist.forEach(i => {
                 
@@ -131,40 +132,29 @@ Category.get_category_list =async function get_category_list(req,result) {
               res = res.concat(potrate_collectionlist); 
               var temp1 = 0
 
-              landscape_collectionlist.forEach(i => {
+              if (landscape_collectionlist.length !=0) {
+                landscape_collectionlist.sort((a, b) => parseFloat(a.category_Position) - parseFloat(b.category_Position));
+                landscape_collectionlist.forEach(i => {
                 
-                // console.log(i.cid);
-                temp1 = temp1 + 4
-                console.log("temp1",temp1);
-                i.category=true,
-                i.clickable= true
-                i.collection_status= true
-    
-                i.catid = i.cid;
-                i.servicable_status=servicable_status;
-                i.tile_type= 2
-                      
-                res.splice(temp1, 0, i);
-                temp1 = temp1+1
-
-              });
+                  // console.log(i.cid);
+                  // temp1 = temp1 + 4
+                  // console.log("temp1",temp1);
+                  i.category=true,
+                  // i.collection_status= true
+      
+                  i.catid = i.cid;
+                  i.servicable_status=servicable_status;
+                  // i.tile_type= 2
+                        
+                  res.splice(i.category_Position, 0, i);
+                  // temp1 = temp1+1
+  
+                });
+              }
+             
 
   
-              let resobj = {
-                success: true,
-                status:true,
-                serviceablestatus: servicable_status,
-                unserviceable_title:"Sorry! Your area is not serviceable.",
-                unserviceable_subtitle :"We are serving in selected areas of Chennai only",
-                empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
-                empty_content:"Daily Locally",
-                empty_subconent :"Daily Locally",
-                header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> What can we get you for tomorrow?",
-                header_subconent :"Order or Subscribe before 12 midnight and get it before 12 noon! ",
-                category_title :"Categories",
-                result: res
-              };
-              result(null, resobj);
+          
             } 
 
             let resobj = {
@@ -364,7 +354,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < delivery_date.length; i++) {
  
        date= moment(delivery_date[i]).format("YYYY-MM-DD"); 
-       var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"' ");
+       var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"'  and dayorderstatus < 10");
  
        if (dayorderdetails.length !=0) {
         if ( dayorderdetails[0].delivery_charge !=0) {
