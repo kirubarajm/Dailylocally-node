@@ -6755,8 +6755,7 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
 
   var userquery = "select * from User";
 
-
- if (req.search) {
+  if (req.search) {
   userquery =
   userquery +
       " where (phoneno LIKE  '%" +
@@ -6770,7 +6769,13 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       "% ' )";
   }
 
-  var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+  // var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+
+  if(req.report && req.report==1){
+    var userquery1 = userquery + " order by userid desc";
+  }else{
+    var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+  }
   // console.log(userquery1);
   sql.query(userquery1,async function(err, res) {
     if (err) {
@@ -6778,16 +6783,10 @@ Dluser.dl_User_list = function dl_User_list(req, result) {
       result(err, null);
     } else {
       var totalcount = 0;
-
-
-      for (let i = 0; i < res.length; i++) {
-      
+      for (let i = 0; i < res.length; i++) {      
         var address_details  = await query("select * from Address where userid= '"+res[i].userid+"' order by aid desc limit 1");
-
         res[i].address_details=address_details;
       }
-
-
 
       // console.log(userquery);
       sql.query(userquery, function(err, res2) {

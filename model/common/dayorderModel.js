@@ -832,11 +832,9 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
 
 ///// crm Day Order List ///////////
 Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) {
-
   var pagelimit = 20;
   var page = Dayorder.page || 1;
   var startlimit = (page - 1) * pagelimit;
-
 
   if(Dayorder){
     var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
@@ -850,23 +848,15 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     // }
     
     if(Dayorder.starting_date && Dayorder.end_date){
-
            where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
-
     }else{
-
-
         // where = where+" and  DATE(drs.created_at) = CURDATE() ";
-
     }
 
 
     // if (Dayorder.slot===1) {
- 
-
     //   // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 23:00:00");
     //   // let datetimeB = moment(end_date).format("YYYY-MM-DD 19:00:00");
-
     //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
     //   let datetimeB = moment(end_date).format("YYYY-MM-DD");
     //   let datetimeC =  moment().format("00:00:00");
@@ -874,62 +864,59 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     //   //TIME(DATE) BETWEEN '09:00' AND '19:00'
     //   // where = where+" and HOUR(drs.order_place_time) <= 19 ";
     //   where = where+" and TIME(drs.order_place_time) BETWEEN '00:00:00' and '19:00:00' ";
-
     // }else if(Dayorder.slot===2){
-
     //   // let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD 19:00:00");
-    //   // let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");
-    
+    //   // let datetimeB = moment(end_date).format("YYYY-MM-DD 23:00:00");    
     //   let datetimeA =  moment(Dayorder.starting_date).format("YYYY-MM-DD");
     //   let datetimeB = moment(end_date).format("YYYY-MM-DD");
     //   // where = where+" and HOUR(drs.order_place_time) > 19";
     //   where = where+" and TIME(drs.order_place_time) BETWEEN '19:00:00' and '00:00:00' ";
-
     // }
     // else{
-
     //   where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date +"')";
-
     // }
 
 
     if(Dayorder.slot==1){
       where = where+" and HOUR(time(drs.order_place_time))<=19 ";
-  }else if(Dayorder.slot==2){
-    where = where+" and HOUR(time(drs.order_place_time))>=19 ";
-  } 
+    }else if(Dayorder.slot==2){
+      where = where+" and HOUR(time(drs.order_place_time))>=19 ";
+    } 
 
     if(Dayorder.id){
-        where = where+" and drs.id="+Dayorder.id;
+      where = where+" and drs.id="+Dayorder.id;
     }
 
     if(Dayorder.userid){
       where = where+" and drs.userid="+Dayorder.userid;
-  }
-  
+    }  
     
     if (Dayorder.trip_id && Dayorder.moveit_type==1) {
       where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
     }
+
     if (Dayorder.moveit_type==2) {
       where = where+" and drs.moveit_type='"+Dayorder.moveit_type+"' "
     }
     //   where = where+" and drs.moveit_type='"+Dayorder.moveit_type+"' "
-
     // }
     
     if(Dayorder.dayorderstatus !=null){
-        where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
+      where = where+" and drs.dayorderstatus="+Dayorder.dayorderstatus;
     }
 
     if (Dayorder.search) {
-
       where = where+" and (us.phoneno like '%"+Dayorder.search+"%' or us.userid like '%"+Dayorder.search+"%' or us.name like '%"+Dayorder.search+"%') ";
     }
 
-      where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
-  
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" ";
+    // where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
+
+    if(req.report && req.report==1){
+      var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
+    }else{
+      var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
+    }  
+    
 
     // console.log(getdayorderquery);
 
@@ -937,12 +924,11 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     if(getdayorder.length>0){
       for (let i = 0; i < getdayorder.length; i++) {
         getdayorder[i].products = JSON.parse(getdayorder[i].products);
-      }        
-
+      }
       var getdayorder1 = "select drs.*,us.name,us.phoneno,us.email,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+"  group by drs.id,drs.userid order by drs.id ";
 
       var totalcountgetdayorder = await query(getdayorder1);
-         var totalcount = totalcountgetdayorder.length;
+      var totalcount = totalcountgetdayorder.length;
       // var totalcount = getdayorder.length;
 
       let resobj = {
