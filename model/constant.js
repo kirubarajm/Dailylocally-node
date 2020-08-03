@@ -58,8 +58,12 @@ const calculate = {
   //  razorpay_key_secret : 'GX0bqRNINZwCqp01M8p4xDQh',
 
   //EAT-Clone Demo Testing Razorpay Details
-  razorpay_key_id : 'rzp_test_8ZBt2J9hAsxH9Q',
-  razorpay_key_secret : 'hvaGojdH4IwolHeDh246ibjz',
+  ////01-aug-2020 commaded demo key
+  // razorpay_key_id : 'rzp_test_8ZBt2J9hAsxH9Q',
+  // razorpay_key_secret : 'hvaGojdH4IwolHeDh246ibjz',
+
+  razorpay_key_id : 'rzp_live_kelnGLZvTecvPV',
+  razorpay_key_secret : 'GX0bqRNINZwCqp01M8p4xDQh',
 
   Xfactor_value:1.9,
   Xfactor_subtraction_value:1,

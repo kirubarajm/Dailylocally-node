@@ -36,6 +36,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
         }
         else{
 
+            // console.log(res);
         if (res.length === 0 || new_address.address_type == 3) {
             sql.query("INSERT INTO Address set ?", new_address,async function (err, res) {
                 
@@ -63,11 +64,13 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
         }else{
             
     
-          if (new_address.address_type === 1) {
+          if (res[0].address_type === 1) {
                 var message = "Sorry Individual address already exist!";
-            }else if(new_address.address_type === 2){
+            }else if(res[0].address_type === 2){
                 var message = "Sorry Appratments address already exist!";
             }
+
+
                   let sucobj=true;
                   let mesobj = message;
                   let resobj = {  

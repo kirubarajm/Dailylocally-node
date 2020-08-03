@@ -212,7 +212,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
                         };
                         result(null, resobj);
                 
-                    }s
+                    }
 
                 });   
      }
