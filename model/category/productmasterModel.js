@@ -426,7 +426,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
 
   var get_collection = await query("select * from  Collections where cid='"+req.cid+"'");
 
-  console.log(get_collection[0].product_name);
+
   var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
 
   var product_list = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id  left join Brand br on br.id=pm.brand left join Zone_l1_subcategory_mapping z1 on z1.master_l1_subcatid= sub1.scl1_id";

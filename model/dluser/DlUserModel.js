@@ -105,7 +105,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
   var otpstatus = false;
   var genderstatus = false;
-
+  var registrationstatus = false;
 
 
    if (newUser.otpcode) {
