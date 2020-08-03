@@ -387,6 +387,10 @@ Logistics.moveit_edit =async function moveit_edit(req,result) {
 /////////Moveit List//////////
 Logistics.moveit_list =async function moveit_list(req,result) {
     if(req){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
         var wherecon = "";
         if(req.zoneid && req.zoneid!=''){
             wherecon = wherecon+" and mu.zone='"+req.zoneid+"' ";
@@ -397,12 +401,23 @@ Logistics.moveit_list =async function moveit_list(req,result) {
         if(req.moveit_search){
             wherecon = wherecon+" and (mu.userid like '%"+req.userid+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
         }
-        var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
+
+        if(req.report && req.report==1){
+            var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
+        }else{
+            var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" group by mu.userid order by mu.userid desc limit " +startlimit +"," +pagelimit +"";
+        }        
         var moveitlist = await query(moveitlistquery);
+
+        var totalcountquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
+        var total_count = await query(totalcountquery);
         if(moveitlist.length>0){
+            var totalcount = total_count.length;
             let resobj = {
                 success: true,
                 status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
                 result: moveitlist
             };
             result(null, resobj);
@@ -410,6 +425,7 @@ Logistics.moveit_list =async function moveit_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                totalcount: 0,
                 message: "no data found"
             };
             result(null, resobj);
@@ -418,6 +434,7 @@ Logistics.moveit_list =async function moveit_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            totalcount: 0,
             message: "check your post values"
         };
         result(null, resobj);

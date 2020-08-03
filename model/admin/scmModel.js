@@ -1216,7 +1216,7 @@ SCM.po_pdf= async function po_pdf(req,result) {
 /////// Invoice PDF ////////
 SCM.invoice_pdf= async function invoice_pdf(req,result) {
     if(req.doid){
-        var getchecklistquery ="select dayo.id,dayo.date,dayo.userid,us.name,us.phoneno,dayo.google_address,dayo.delivery_charge,count(DISTINCT dop.vpid) as u_product_count,JSON_ARRAYAGG(JSON_OBJECT('product_name',dop.productname,'hsn',dop.product_hsn_code,'unit_price',dop.product_mrp,'quantity',dop.quantity,'price',dop.price)) AS items from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join User as us on us.userid=dayo.userid where  dayo.id="+req.doid+" group by dop.doid";
+        var getchecklistquery ="select dayo.id,dayo.date,dayo.userid,us.name,us.phoneno,dayo.google_address,dayo.delivery_charge,count(DISTINCT dop.vpid) as u_product_count,JSON_ARRAYAGG(JSON_OBJECT('product_name',dop.productname,'hsn',dop.product_hsn_code,'unit_price',dop.price,'quantity',dop.quantity,'price',(dop.price*dop.quantity))) AS items from Dayorder as dayo left join Dayorder_products as dop on dop.doid=dayo.id left join User as us on us.userid=dayo.userid where  dayo.id="+req.doid+" group by dop.doid";
         var getchecklist = await query(getchecklistquery);
         
         for (let i = 0; i < getchecklist.length; i++) {
