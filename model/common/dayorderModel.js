@@ -146,7 +146,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           }
         });
       }
-    } else {        
+    } else {
+
         var dates = [];
         // var d = moment(getproduct[i].starting_date).format("YYYY-MM-DD") ;       
         var d = new Date(getproduct[i].starting_date);
@@ -193,6 +194,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           
         for(let k=0; k < getproduct[i].no_of_deliveries; k++){               
           d=moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD");
+
           if (monday==1) {
             if(dates.length<getproduct[i].no_of_deliveries){
               dates.push(moment(d).format("YYYY-MM-DD"));
@@ -236,12 +238,13 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           }            
         }
 
+
         if (dates.length==0) {     
 
-          console.log("dates ila",dates);
+          // console.log("dates ila",dates);
           for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
           var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
-          var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+          var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10 ");
           if (dayorders.length !=0) {
             var updatedayorderstatus = "update Dayorder set dayorderstatus=0,,order_place_time='"+day+"' where id="+dayorders[0].id;
             var updatedayorder = await query(updatedayorderstatus);
@@ -283,8 +286,6 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.zoneid=Dayorder.zoneid;   
             new_day_order.virtualkey=Dayorder.virtualkey;  
                 //address
-
-         
             new_day_order.cus_lat=ordersdetails[0].cus_lat;
             new_day_order.cus_lon=ordersdetails[0].cus_lon;
             new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
@@ -338,15 +339,15 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                 }
               });  
-            }  
+          }  
           }
         }else{
-          console.log("dates iruku",dates);
+          // console.log("dates iruku",dates);
           for (let j = 0; j < dates.length; j++) {           
             var date  =dates[j];  
-            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");  
+            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");  
             if (dayorders.length !=0) {   
-              console.log("dayorders iruku",dates);               
+              // console.log("dayorders iruku",dates);               
               var new_createDayorderproducts={};
 
               new_createDayorderproducts.orderid=Dayorder.orderid;
@@ -377,27 +378,27 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;            
               Dayorderproducts.createDayorderproducts(new_createDayorderproducts);  
             }else{   
-              console.log("day order ila",dates);                  
+              // console.log("day order ila",dates);                  
               var new_day_order={};
               new_day_order.userid=Dayorder.userid;
               new_day_order.date=date;
               new_day_order.zoneid=Dayorder.zoneid;   
               new_day_order.order_place_time=day; 
                   //address
-                new_day_order.cus_lat=ordersdetails[0].cus_lat;
-                new_day_order.cus_lon=ordersdetails[0].cus_lon;
-                new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
-                new_day_order.landmark=ordersdetails[0].landmark;
-                new_day_order.apartment_name=ordersdetails[0].apartment_name;
-                new_day_order.google_address=ordersdetails[0].google_address;
-                new_day_order.complete_address=ordersdetails[0].complete_address;
-                new_day_order.flat_house_no=ordersdetails[0].flat_house_no;
-                new_day_order.plot_house_no=ordersdetails[0].plot_house_no;
-                new_day_order.floor=ordersdetails[0].floor;
-                new_day_order.block_name=ordersdetails[0].block_name;
-                new_day_order.city=ordersdetails[0].city;
-                new_day_order.delivery_charge=noof_delivery || 0;
-                new_day_order.address_type = ordersdetails[0].address_type;
+              new_day_order.cus_lat=ordersdetails[0].cus_lat;
+              new_day_order.cus_lon=ordersdetails[0].cus_lon;
+              new_day_order.cus_pincode=ordersdetails[0].cus_pincode;
+              new_day_order.landmark=ordersdetails[0].landmark;
+              new_day_order.apartment_name=ordersdetails[0].apartment_name;
+              new_day_order.google_address=ordersdetails[0].google_address;
+              new_day_order.complete_address=ordersdetails[0].complete_address;
+              new_day_order.flat_house_no=ordersdetails[0].flat_house_no;
+              new_day_order.plot_house_no=ordersdetails[0].plot_house_no;
+              new_day_order.floor=ordersdetails[0].floor;
+              new_day_order.block_name=ordersdetails[0].block_name;
+              new_day_order.city=ordersdetails[0].city;
+              new_day_order.delivery_charge=noof_delivery || 0;
+              new_day_order.address_type = ordersdetails[0].address_type;
     
               sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
                 if (err) {
@@ -438,7 +439,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             }  
           }
         }
-      }        
+    }        
   }
 };
 

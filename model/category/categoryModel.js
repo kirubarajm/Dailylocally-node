@@ -447,7 +447,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
           subscription_product_list[0].pkts='pkts';
           // subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
-          subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
+          subscription_product_list[0].packet_info = subscription[i].quantity ;
 
           // subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity *  subscription_product_list[0].packetsize);
           subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity );
@@ -953,15 +953,18 @@ Category.subscribeplan_totalamount_by_pid = async function subscribeplan_totalam
       
 
         if (req.planid) {
+
+          console.log(req.planid);
           var getplan=await query("select * from Subscription_plan where spid='"+req.planid+"' ");
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
           subscription_product_list[0].pkts='pkts';
           // subscription_product_list[0].packet_info = req.quantity *  subscription_product_list[0].packetsize;
+
+          console.log("req.quantity",req.quantity );
           subscription_product_list[0].packet_info = req.quantity ;
           // subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity *  subscription_product_list[0].packetsize);
           subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity );
-
         }
 
 
