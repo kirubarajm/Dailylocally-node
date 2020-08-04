@@ -1110,7 +1110,7 @@ SCM.view_po =async function view_po(req,result) {
 /////// PO PDF ////////
 SCM.po_pdf= async function po_pdf(req,result) {
     if(req.poid){
-        var getchecklistquery ="select po.poid,po.created_at as podate,pop.due_date as deliveryduedate,ven.name as vendorname,ven.address as vendoraddress,ven.phoneno as vendorphoneno,ven.email as vendoremail,ven.gst as vendorgst,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'product_name',dop.productname,'rate',pop.cost,'quantity',pop.requested_quantity,'unit',uom.name,'amount',pop.requested_quantity*pop.cost)) as items from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid left join UOM as uom on uom.uomid=dop.product_uom where po.poid="+req.poid;
+        var getchecklistquery ="select po.poid,po.created_at as podate,pop.due_date as deliveryduedate,ven.name as vendorname,ven.address as vendoraddress,ven.phoneno as vendorphoneno,ven.email as vendoremail,ven.gst as vendorgst,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'product_name',dop.productname,'rate',pop.cost,'quantity',pop.requested_quantity,'unit',CONCAT(dop.product_packetsize,'-',uom.name),'amount',pop.requested_quantity*pop.cost)) as items from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid left join UOM as uom on uom.uomid=dop.product_uom where po.poid="+req.poid;
         var getchecklist = await query(getchecklistquery);
         
         for (let i = 0; i < getchecklist.length; i++) {
@@ -1142,6 +1142,7 @@ SCM.po_pdf= async function po_pdf(req,result) {
                 sumofvalue: sumofvalue
             }]
             var headerdata = [{
+                headerlogo: constant.tovo_po_header_logo,
                 headername: constant.tovo_po_header_name,
                 headeraddress: constant.tovo_po_header_address,
                 headerarea: constant.tovo_po_header_area,
@@ -1155,6 +1156,7 @@ SCM.po_pdf= async function po_pdf(req,result) {
                 footername: constant.tovo_po_footer_name,
                 footeraddress: constant.tovo_po_footer_address,
                 footerarea: constant.tovo_po_footer_area,
+                footersign: constant.tovo_po_authorized_sign,
             }]
             var items = getchecklist[0]['items'];
                 // console.log("items ===>",items);
