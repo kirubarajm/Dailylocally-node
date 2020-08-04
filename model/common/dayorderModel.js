@@ -25,6 +25,7 @@ var Dayorder = function(Dayorder) {
   this.moveit_type=Dayorder.moveit_type || 0;
   this.return_status=Dayorder.return_status || 0;
   this.address_type=Dayorder.address_type;
+  this.virtualkey=Dayorder.virtualkey ||0;
   
 };
 
