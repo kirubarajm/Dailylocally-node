@@ -140,6 +140,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
         if (res.length === 0) {
          
+          
           if (!otpstatus) {
 
             var new_user = new  Dluser(newUser);
@@ -161,9 +162,10 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
                      var user = {};
                      user.userid= res2.insertId
 
-                      var new_cluster = new clusteruser(user);
-                      new_cluster.userid= res2.insertId;
-                      clusteruser.create_a_cluster_user(new_cluster);
+                    var new_cluster = new clusteruser(user);
+                  new_cluster.userid= res2.insertId;
+                  console.log("newUser",new_cluster);
+                  clusteruser.create_a_cluster_user(new_cluster);
                  var new_res = await query("select * from User where userid= '"+res2.insertId+"'");
                  var res3 = await query("Select * from Address where userid = '" +res2.insertId+"' and  delete_status=0");
                
@@ -511,7 +513,6 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
       }
     });
   }
-
 
 };
 

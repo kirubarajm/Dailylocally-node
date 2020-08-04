@@ -317,7 +317,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           
       
             // console.log( moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"));
-            res1[0].deliverydate= moment(orderitems[i].dayorderdate).format("YYYY-MM-DD"); 
+            res1[0].deliverydate= orderitems[i].dayorderdate
              
           }
 
@@ -353,7 +353,8 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
  
       for (let i = 0; i < delivery_date.length; i++) {
  
-       date= moment(delivery_date[i]).format("YYYY-MM-DD"); 
+       date= delivery_date[i]
+       date= i; 
        var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"'  and dayorderstatus < 10");
  
        if (dayorderdetails.length !=0) {
@@ -445,8 +446,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
           subscription_product_list[0].pkts='pkts';
+          // subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
           subscription_product_list[0].packet_info = subscription[i].quantity *  subscription_product_list[0].packetsize;
-          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity *  subscription_product_list[0].packetsize);
+
+          // subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity *  subscription_product_list[0].packetsize);
+          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * subscription[i].quantity );
 
           
         }
@@ -953,8 +957,10 @@ Category.subscribeplan_totalamount_by_pid = async function subscribeplan_totalam
           subscription_product_list[0].no_of_deliveries = getplan[0].numberofdays;
           amount = amount * getplan[0].numberofdays;
           subscription_product_list[0].pkts='pkts';
-          subscription_product_list[0].packet_info = req.quantity *  subscription_product_list[0].packetsize;
-          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity *  subscription_product_list[0].packetsize);
+          // subscription_product_list[0].packet_info = req.quantity *  subscription_product_list[0].packetsize;
+          subscription_product_list[0].packet_info = req.quantity ;
+          // subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity *  subscription_product_list[0].packetsize);
+          subscription_product_list[0].packet_total_info = (subscription_product_list[0].no_of_deliveries * req.quantity );
 
         }
 

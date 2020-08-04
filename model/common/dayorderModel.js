@@ -39,7 +39,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
     if (getproduct[i].subscription==0) {
       var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
-      var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"'");
+      var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");
       if (dayorders.length !=0) {
 
       

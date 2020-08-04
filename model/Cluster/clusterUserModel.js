@@ -18,13 +18,14 @@ var ClusterUser = function(clusteruser) {
 
 
 ClusterUser.create_a_cluster_user =async function create_a_cluster_user(new_cluster,result) {
-  
+  console.log(new_cluster);
   sql.query("INSERT INTO Cluster_user_table set ?", new_cluster, function(err,res2) {
     if (err) {
       console.log("error: ", err);
       result(null, err);
     } else {
 
+      console.log(res2.insertId);
    
     }
   });
