@@ -166,17 +166,43 @@ table.d {
         </tr>
     </table>
 <br/>
-    <table>
+{{#each footer}}
+    <!--<table>
         <tr>
-            <td colspan="2"> . Kindly send 2 copies of invoice for each PO</td>
+            <td> . Kindly send 2 copies of invoice for each PO</td>
+            <td style="text-align: center; font-weight: bold; font-size: 12px; "><img src="{{this.footersign}}" width="30%" class="img-fluid" alt="Responsive image"></td>
         </tr>
         <tr>
             <td> . please notify us immediately if you are unable to ship as specified</td>
             <td style="text-align: center; font-weight: bold; font-size: 12px; ">Authorized Sign</td>
         </tr>
+    </table>-->
+    <table>
+        <tr>
+            <td width="70%">
+                <table>
+                    <tr>
+                        <td> . Kindly send 2 copies of invoice for each PO</td>
+                    </tr>
+                    <tr>
+                        <td> . please notify us immediately if you are unable to ship as specified</td>
+                    </tr>
+                </table>
+            </td>
+            <td width="30%">
+                <table>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; font-size: 12px; "><img src="{{this.footersign}}" width="30%" class="img-fluid" alt="Responsive image"></td>
+                    </tr>
+                    <tr>
+                       <td style="text-align: center; font-weight: bold; font-size: 12px; ">Authorized Sign</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
     </table>
 <br/>
-{{#each footer}}
+
     <table style="text-align: center;">
         <tr>
             <td > if you any questions about this purchase order please contact {{this.contactname}} ({{this.contactnumber}}, {{this.contactemail}})</td>
