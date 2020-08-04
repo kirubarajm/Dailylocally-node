@@ -1537,7 +1537,7 @@ Catalog.home_quick_search =async function home_quick_search(req,result) {
         }
 
         var subcategory_title = 'Sub category';
-        var subcategory_list = await query("SELECT sub1.name as sub_category,sub1.scl1_id,sub1.catid,cat.name as category_name FROM  SubcategoryL1 as sub1 left join Category cat on cat.catid=sub1.scl1_id WHERE  sub1.active_status=1 and  sub1.name LIKE '%"+req.search+"%' group by sub1.scl1_id");
+        var subcategory_list = await query("SELECT sub1.name as sub_category,sub1.scl1_id,sub1.catid,cat.name as category_name FROM  SubcategoryL1 as sub1 left join Category cat on cat.catid=sub1.scl1_id   left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id WHERE  zl1.active_status=1 and  sub1.name LIKE '%"+req.search+"%' group by sub1.scl1_id");
         if (subcategory_list.length !=0) {
             suggestion_list.subcategory_title=subcategory_title;
             suggestion_list.subcategory_list=subcategory_list;

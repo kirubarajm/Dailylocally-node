@@ -88,6 +88,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.zoneid=Dayorder.zoneid;
         new_day_order.date=getproduct[i].deliverydate;  
         new_day_order.order_place_time=day;  
+        new_day_order.virtualkey=Dayorder.virtualkey;  
         //address
 
         new_day_order.cus_lat=ordersdetails[0].cus_lat;
@@ -253,6 +254,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_createDayorderproducts.productname=getproduct[i].productname;
             new_createDayorderproducts.quantity=getproduct[i].quantity;
             new_createDayorderproducts.price=getproduct[i].price;
+            
             /////////////////////Insert Product Details/////////
             new_createDayorderproducts.product_hsn_code = getproduct[i].hsn_code;
             new_createDayorderproducts.product_image = getproduct[i].image;
@@ -279,6 +281,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.userid=Dayorder.userid;
             new_day_order.date=date;
             new_day_order.zoneid=Dayorder.zoneid;   
+            new_day_order.virtualkey=Dayorder.virtualkey;  
                 //address
 
          

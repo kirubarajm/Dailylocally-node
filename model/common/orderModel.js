@@ -251,12 +251,13 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
 
        if (new_Order.payment_status == 1) {
         var order_place = {};
-        order_place.orderid=orderid;
-        var getproductdetails = "select ors.address_type,ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+orderid;
+        new_Order.orderid=orderid;
+        var getproductdetails = "select ors.*,ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+orderid;
         var getproduct = await query(getproductdetails,);
         // console.log("getproduct==========>",getproduct);
-        getproduct[0].virtualkey=1;
-        dayorder.checkdayorder(order_place,getproduct);
+        new_Order.virtualkey=1;
+        console.log("new_Order",new_Order);
+        dayorder.checkdayorder(new_Order,getproduct);
 
        }
 
