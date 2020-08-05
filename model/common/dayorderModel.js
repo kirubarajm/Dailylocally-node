@@ -698,10 +698,12 @@ Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) 
     // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
+
       for (let i = 0; i < getdayorder.length; i++) {
         getdayorder[i].Products = JSON.parse(getdayorder[i].Products);
         getdayorder[i].moveitdetail = JSON.parse(getdayorder[i].moveitdetail);
       }        
+
       let resobj = {
         success: true,
         status: true,
@@ -1167,6 +1169,7 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
     var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
 
     PushConstant.Pageid_dl_order_cancel = 8;
+    orders[0].product_cancel_reason=Dayorder.product_cancel_reason;
     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_order_cancel);
   
   }

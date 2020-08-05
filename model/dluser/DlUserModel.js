@@ -534,7 +534,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
       token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ijk1MDAzMTM2ODkiLCJpYXQiOjE1NjM5NzEwMDN9.LIDR8Fbqyiw_A-lglOhUb-Mc-j1LV6_OLp8JHZb4yH8',
       otpstatus: true,
       genderstatus: true,
-      registrationstatus:registrationstatus,
+      registrationstatus:true,
       userid: 3,
       result: userdetails
     };

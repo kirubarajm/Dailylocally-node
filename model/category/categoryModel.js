@@ -876,7 +876,7 @@ Category.get_dayorder_date = async function get_dayorder_date(req,result) {
 
    
    
-    if (currenthour < 21) {
+    if (currenthour < 24) {
        order_delivery_day_message = "Your Order delivery will be Tomorrow 12 pm";
        order_delivery_day = tomorrow;
     } else {
