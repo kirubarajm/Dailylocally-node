@@ -61,6 +61,7 @@ var Order = function(order) {
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
 
+  console.log("req",req);
  var virtualkey = req.virtualkey || 0
 
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
@@ -687,7 +688,7 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
           let resobj = {
             success: true,
             status: false,
-            empty_title : "No Orders found!",
+            empty_title : "No orders for today!",
             empty_content : "Order before 12 midnight & get delivered before 12 noon",
             message: "orders not found!"
           };
@@ -720,7 +721,7 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
            let resobj = {
              success: true,
              status: true,
-             empty_title : "No Orders found!",
+             empty_title : "No orders for today!",
              empty_content : "Order before 12 midnight & get delivered before 12 noon",
              result: history_list
            };

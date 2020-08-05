@@ -63,7 +63,6 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
       var productlimit = 5;
       var page = req.page || 1;
       var startlimit = (page - 1) * productlimit;
-    
 
       var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
       req.lat +

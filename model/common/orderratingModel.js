@@ -100,7 +100,7 @@ if (get_day_details.length !==0) {
         
     let resobj = {
       success: true,
-      status: false,
+      status: true,
       rating_status:true,
       message:  "Please completed rating",
       title : 'How was the rating?',

@@ -5,14 +5,15 @@ const util = require("util");
 var moment = require("moment");
 var constant = require("../constant");
 var SCM = require("../admin/scmModel.js");
+var cron = require('node-cron');
+
 
 const start_cron=1;
 const end_cron=2;
 const query = util.promisify(sql.query).bind(sql);
+
 var QuickSearch   = function(QuickSearch) {
-  this.eatuserid  = QuickSearch.eatuserid;
-  this.productid  = QuickSearch.productid || 0;
-  this.makeit_userid = QuickSearch.makeit_userid || 0;
+
 };
 // console.log("this is cron file");
 /////Dont Remove Cron Not Work///////////////
