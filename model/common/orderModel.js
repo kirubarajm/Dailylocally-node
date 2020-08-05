@@ -61,6 +61,7 @@ var Order = function(order) {
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
 
+  console.log("req",req);
  var virtualkey = req.virtualkey || 0
 
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;

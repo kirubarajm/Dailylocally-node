@@ -149,96 +149,213 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     } else {
 
         var dates = [];
-        // var d = moment(getproduct[i].starting_date).format("YYYY-MM-DD") ;       
+        var current_date = new Date();
+        // var d = moment(getproduct[i].starting_date).format("YYYY-MM-DD") ;   
+        // console.log(getproduct[i].starting_date);    
         var d = new Date(getproduct[i].starting_date);
-     
-        d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+        // console.log(d);
+        // d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+
+        // console.log(d);
+        // console.log("mon",getproduct[i].mon);
+        // console.log("tue",getproduct[i].tue);
+        // console.log("wed",getproduct[i].wed);
+        // console.log("thur",getproduct[i].thur);
+        // console.log("fri",getproduct[i].fri);
+        // console.log("sat",getproduct[i].sat);
+        // console.log("sun",getproduct[i].sun);
+
+
+        var curr = new Date;
+        var today = moment().format("YYYY-MM-DD");
 
         if (getproduct[i].mon==1) {
-          dates.push(moment(d).format("YYYY-MM-DD"));
+          //  dates.push(moment(d).format("YYYY-MM-DD"));
+          // d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+          d =  new Date(curr.setDate(curr.getDate() - curr.getDay()+1));
+          d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
           var monday = 1;
         }
 
         if (getproduct[i].tue==1) {
-            dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+          //  dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));
+          // d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
+          d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+2));
+          d1= moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
+
             var tuesday = 2;
         }
 
         if (getproduct[i].wed==1) {
-          dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));//wed
+          //  dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));//wed
+          // d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
+          d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+3));
+
+          d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
           var wednesday = 3;
         }
 
         if (getproduct[i].thur==1) {
-            dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+          //  dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+          // d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+          d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+4));
+
+          d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
             var Thursday = 4;
         }
 
         if (getproduct[i].fri==1) {
-          dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));//fri
+          //  dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));//fri
+          // d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
+          d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+5));
+          d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
           var friday = 5;
         }
 
         if (getproduct[i].sat==1) {
-            dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
+            // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+            // d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
+            d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+6));
+            d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
             var saturday = 6;
         }
 
         if (getproduct[i].sun==1) {
-            dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+          //  dates.push(moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD"));
+          // d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
+          d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+7));
+
+          d1 = moment(d).format("YYYY-MM-DD")
+          if (d1 > today) {
+            dates.push(moment(d1).format("YYYY-MM-DD"));
+          }
             var sunday = 7;
         }
 
 
+        // console.log(dates);
+        // console.log("monday",monday);
+        // console.log("tuesday",tuesday);
+        // console.log("wednesday",wednesday);
+        // console.log("Thursday",Thursday);
+        // console.log("friday",friday);
+        // console.log("saturday",saturday);
+        // console.log("sunday",sunday);
+
         /////formula for i max ---->[31-3(daycount)]/3(daycount)
           
-        for(let k=0; k < getproduct[i].no_of_deliveries; k++){               
-          d=moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD");
-
+        for(let k=0; k < getproduct[i].no_of_deliveries; k++){   
+          
           if (monday==1) {
+
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d).format("YYYY-MM-DD"));
+
+              // dates.push(moment(d).format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
+              
             }
           }
           
           if (tuesday == 2) {
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+              // dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             }
           }
 
           if (wednesday == 3) {
+
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));
+              // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             }
           }
 
           if (Thursday == 4) {
+
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+              // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+              d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             }
           }
             
           if (friday == 5) {
+
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"))
+              // dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             } 
           }
             
           if (saturday == 6) {
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"))
+              // dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             } 
           }
           
           if (sunday == 7) {
             if(dates.length<getproduct[i].no_of_deliveries){
-              dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"))
+              // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+
+              d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
+              d1 = moment(d).format("YYYY-MM-DD")
+              if (d1 > today) {
+                dates.push(moment(d1).format("YYYY-MM-DD"));
+              }
             }    
           }            
         }
 
 
+        // console.log(dates);
         if (dates.length==0) {     
 
           // console.log("dates ila",dates);
@@ -246,7 +363,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
           var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10 ");
           if (dayorders.length !=0) {
-            var updatedayorderstatus = "update Dayorder set dayorderstatus=0,,order_place_time='"+day+"' where id="+dayorders[0].id;
+            var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
             var updatedayorder = await query(updatedayorderstatus);
             
             var new_createDayorderproducts={};
@@ -577,7 +694,7 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('Transactionid',ors.tsid,'delivery_quantity',orp.received_quantity,'orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')),'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  left join Orders ors on ors.orderid=orp.orderid where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('Transactionid',ors.tsid,'delivery_quantity',orp.received_quantity,'orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')),'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  left join Orders ors on ors.orderid=orp.orderid where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
     // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -919,7 +1036,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     if(Dayorder.report && Dayorder.report==1){
       var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
     }else{
-      var getdayorderquery = "select drs.*,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
+      var getdayorderquery = "select drs.*,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
     }  
     
 
