@@ -55,10 +55,10 @@ table.d {
             <td  width=30%>
                 <table>
                     <tr>
-                        <td style="font-weight: bold; font-size: 16px; ">INVOICE</td>
+                        <td style="font-weight: bold; font-size: 14px; ">INVOICE</td>
                     </tr>
                     <tr>
-                        <td>Invoice No : &nbsp; &nbsp; &nbsp; &nbsp; {{this.doid}}</td>
+                        <td>Invoice No : &nbsp; &nbsp; &nbsp; &nbsp; {{this.invoiceno}}</td>
                     </tr>
                     <tr>
                         <td>Date : &nbsp; &nbsp; {{this.date}} </td>
@@ -71,31 +71,31 @@ table.d {
 
     <table style="margin:1%;">        
         <tr>
-            <td> 
+            <td width="60%"> 
                 <table>
                     <tr>
-                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Bill to: </span>  {{this.customername}},<br/> {{this.customeraddress}}</span> </td>
+                        <td width=50%><span style="font-weight: bold; font-size: 10px;"> Bill to: </span>  {{this.customername}},<br/> {{this.customeraddress}}</span> </td>
                     </tr>
                     
                 </table> 
             </td>
-            <td>
+            <td width="40%">
                 <table>
                     <tr>
-                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Order ID: </span> {{this.doid}} </td>
+                        <td width=50%><span style="font-weight: bold; font-size: 10px;"> Order ID: </span> {{this.doid}} </td>
                     </tr>
                     <tr>
-                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Payment Mode : </span> online </td>
+                        <td width=50%><span style="font-weight: bold; font-size: 10px;"> Payment Mode : </span> online </td>
                     </tr>
                     <tr>
-                        <td width=50%><span style="font-weight: bold; font-size: 12px;"> Total.No.of items : </span> {{this.itemcount}} </td>
+                        <td width=50%><span style="font-weight: bold; font-size: 10px;"> Total.No.of items : </span> {{this.itemcount}} </td>
                     </tr>
                     
                 </table> 
             </td>
         </tr>
         <tr>
-            <td width=50%><span style="font-weight: bold; font-size: 12px;"> Total Amount: RS.{{this.finalamount}} </span></td>
+            <td width=50%><span style="font-weight: bold; font-size: 10px;"> Total Amount: RS.{{this.finalamount}} </span></td>
             <td width=50%> </td>
         </tr>
     </table>
@@ -150,19 +150,19 @@ table.d {
         <tr> 
             <td width="40%"> &nbsp;  </td>
             <td width="30%"> &nbsp;  </td>
-            <td width="30%" style="font-weight: bold; font-size: 12px;">Final Total: {{this.finalamount}}</td>
+            <td width="30%" style="font-weight: bold; font-size: 10px;">Final Total: {{this.finalamount}}</td>
         </tr>
     </table>
     <table>
         <tr>
-            <td>Total Invoice Amount : {{this.sumof}}({{this.finalamountvalue}} only/-)</td>
+            <td>Total Invoice Amount : {{this.finalamount}}({{this.finalamountvalue}} only/-)</td>
             {{/each}}
         </tr>
     </table>
 
     <table>
         <tr> 
-            <td width="50%" style="font-weight: bold; font-size: 12px;"> Daily Locally Quality Promise </td>
+            <td width="50%" style="font-weight: bold; font-size: 10px;"> Daily Locally Quality Promise </td>
             <td width="30%"> &nbsp; </td>
             <td width="20%"> &nbsp; </td>
         </tr>
@@ -187,21 +187,28 @@ table.d {
             <td> &nbsp; </td>
         </tr>
     </table>
-
-<br/>
-
-    
-<br/>
+    {{#each footer}}
     <table>
         <tr>
-            <td colspan="2">  </td>
-        </tr>
-        <tr>
-            <td> Payment Terms: </td>
-            <td style="text-align: center; font-weight: bold; font-size: 12px; ">Authorized Sign</td>
+            <td width="70%">
+                <table>
+                    <tr>
+                        <td> Payment Terms:</td>
+                    </tr>
+                </table>
+            </td>
+            <td width="30%">
+                <table>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; font-size: 12px; "><img src="{{this.footersign}}" width="30%" class="img-fluid" alt="Responsive image"></td>
+                    </tr>
+                    <tr>
+                       <td style="text-align: center; font-weight: bold; font-size: 10px; ">Authorized Sign</td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
-<br/>
 
     <table style="text-align: center;">
         <tr>
@@ -225,7 +232,7 @@ table.d {
     </table>
 <br/>
 
-{{#each footer}}
+
     <table style="text-align: center;">
         <tr>
             <td> {{this.footername}} {{this.footeraddress}} </td>

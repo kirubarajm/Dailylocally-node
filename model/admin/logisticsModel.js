@@ -225,7 +225,6 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
                 
                 //////// Customer App Notification //////////
                 var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch,DATE_FORMAT(qa.created_at, '%d-%m-%Y') as timeofqa from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id left join QA_check_list as qa on qa.doid=ors.id where ors.id = '"+req.doid+"' group by ors.id");
-                PushConstant.Pageid_dl_dispatched_after_qa_notification = 9;
                 await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_dispatched_after_qa_notification);
                 let resobj = {
                     success: true,

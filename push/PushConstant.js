@@ -25,9 +25,9 @@ const PushConstant={
     Pageid_dl_Refund_unapproved_notification:16,
     Pageid_dl_reorder_notification:17,
     
-    Pageid_dl_trip_assigned_notification:9,
+    Pageid_dl_trip_assigned_notification:18,
     Pageid_dl_ready_at_wherehouse_notification:29,
-    Pageid_dl_dispatched_after_qa_notification:9,
+    Pageid_dl_dispatched_after_qa_notification:19,
 
 
     pageidMoveit_Order_Assigned:1,
