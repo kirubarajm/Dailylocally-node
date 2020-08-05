@@ -1378,8 +1378,8 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     }
 
 
-    var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
-
+    var orders = await query("SELECT DATE(ors.date) as date,ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
+    orders[0].date = moment(orders[0].date,"YYYY-MM-DD").format("DD-MM-YYYY");
     PushConstant.Pageid_dl_reorder_notification = 17;
     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
 
@@ -1476,9 +1476,9 @@ Dayorder.reorder_order_create=async function reorder_order_create(Dayorder,order
     
         }
 
-        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+res1.insertId+"'" );
-
-        PushConstant.Pageid_dl_reorder_notification = 14;
+        var orders = await query("SELECT DATE(ors.date) as date,ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+res1.insertId+"'" );
+        orders[0].date = moment(orders[0].date,"YYYY-MM-DD").format("DD-MM-YYYY");
+        PushConstant.Pageid_dl_reorder_notification = 17;
         await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_reorder_notification);
         // result(null, resobj);
     

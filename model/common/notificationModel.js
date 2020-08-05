@@ -155,7 +155,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
     case PushConstant.Pageid_dl_order_cancel:
         data = {
         title: "Your Order #"+orders[0].id+" has been cancelled!.",
-        message: "Apologies! Your order has been cancelled due to the following reason" + orders[0].product_cancel_reason,
+        message: "Apologies! Your order has been cancelled due to the following reason " + orders[0].product_cancel_reason,
         pageid: "" +29,
         date:orders[0].date,
         app: "Dl",
@@ -167,7 +167,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
       case PushConstant.Pageid_dl_reorder_notification:
         data = {
         title: "Re-delivery has been booked for your order #"+orders[0].id,
-        message: "Your new order number is #"+orders[0].id+". Your redelivery will be completed by <Date>. Kindly get in touch with us through our chat support to know more",
+        message: "Your new order number is #"+orders[0].id+". Your redelivery will be completed by  "+orders[0].date+". Kindly get in touch with us through our chat support to know more",
         pageid: "" +9,
         date:orders[0].date,
         app: "Dl",
