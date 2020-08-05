@@ -40,8 +40,8 @@ const day_order_address_update_cron = new CronJob("0 22 * * *", async function(s
 day_order_address_update_cron.start();
 
 ///// Procurement Qty Set To Zero ///////////
-const procurement_qty_cron = new CronJob("0 1 * * *", async function(search, result) {
-  console.log("Procurment Quantity Cron at 1 am ====>");
+const procurement_qty_cron = new CronJob("0 2 * * *", async function(search, result) {
+  console.log("Procurment Quantity Cron at 2 am ====>");
   var stockmapping = [];
   stockmapping.push({"zoneid":1});
   await SCM.remove_boh_mapping(stockmapping[0], async function(err,stockmappingres){
@@ -51,8 +51,8 @@ const procurement_qty_cron = new CronJob("0 1 * * *", async function(search, res
 // procurement_qty_cron.start();
 
 ///// Create Invoice ///////////
-const create_invoice_cron = new CronJob("0 2 * * *", async function(search, result) {
-  console.log("Created Invoice Cron at 2 am ====>");
+const create_invoice_cron = new CronJob("0 1 * * *", async function(search, result) {
+  console.log("Created Invoice Cron at 1 am ====>");
   var getdayordersquery = "select * from Dayorder where date(date)=CURDATE()";
   var getdayorders = await query(getdayordersquery);
   if(getdayorders.length>0){
