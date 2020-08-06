@@ -652,8 +652,17 @@ if (req.scl2_id ==0) {
 
 ProductMaster.get_collection_brand_list = async function get_collection_brand_list(req,result) {  
 
-  var brand_list = "select pm.brand,br.brandname from Collection_mapping_product cmp left join ProductMaster as pm  on cmp.pid=pm.pid left join Brand br on br.id=pm.brand left join Product_live pl on pl.vpid=pm.pid  where cmp.cid= pl.live_status=1 and (cmp.cid= '"+req.cid+"' or pm.scl1_id='"+req.scl1_id+"') group by  pm.brand ";
-  sql.query(brand_list,async function(err, res) {
+
+  var get_collection = await query("select * from  Collections where cid='"+req.cid+"'");
+
+
+  var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
+
+
+  var brand_list_query = " select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid  where pl.live_status=1 and pm.scl1_id='"+req.scl1_id+"' and pm.brand='"+brand_list[0].id+"' group by  pm.brand";
+
+  // console.log(brand_list_query);
+  sql.query(brand_list_query,async function(err, res) {
     if (err) {
       result(err, null);
     } else {
