@@ -203,9 +203,19 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
       };
       break;
     case PushConstant.Pageid_dl_ready_at_wherehouse_notification:
+      var msg = "";
+      if(orders[0].missingproducts.length>0){
+        msg = msg+ "We regret to inform you that we will not be able to deliver these products today. ";
+        for (let i = 0; i < orders[0].missingproducts.length; i++) {
+          msg = msg+ " "+orders[0].missingproducts[i].productname+" - "+orders[0].missingproducts[i].missingqty+" ";          
+        }
+        msg = msg+ " Refund will be initiated for these products immediately. Kindly get in touch with our support for more assistance ";
+      }else{
+        msg = "Each product is locally sourced and packed with care in our Daily Locally's footprinted boxes.";
+      }
       data = {
         title: "Your order is ready at our warehouse!",
-        message: "Each product is locally sourced and packed with care in our Daily Locally's footprinted boxes.",
+        message: "" +msg,
         pageid: "" +29,
         date: "" +orders[0].date,
         userid: "" +orders[0].userid,
