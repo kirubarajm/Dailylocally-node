@@ -2348,13 +2348,24 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
         var updateDO = await query("update Dayorder set dayorderstatus=5 where id = '"+req.doid+"'");
 
-        ////////Create Day order Log ////////////
+        //////Create Day order Log ////////////
         var insertlogdata = [];
         insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         //////// Customer App Notification //////////
-        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch,DATE_FORMAT(qc.created_at, '%d-%m-%Y') as timeofqc from Dayorder as ors left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id left join QC_check_list as qc on qc.doid=ors.id where ors.id = '"+req.doid+"' group by ors.id" );
+        var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail,DATE_FORMAT(mt.created_at, '%d-%m-%Y') as timeofdispatch,DATE_FORMAT(qc.created_at, '%d-%m-%Y') as timeofqc,JSON_ARRAYAGG(JSON_OBJECT('dpoid',dop.id,'doid',dop.doid,'vpid',dop.vpid,'productname',dop.productname,'requested_qty',dop.quantity,'received_qty',dop.received_quantity)) as products,'' as missingproducts from Dayorder as ors left join Dayorder_products as dop on dop.doid=ors.id left join User as us on ors.userid=us.userid left join Moveit_trip as mt on mt.tripid=ors.trip_id left join QC_check_list as qc on qc.doid=ors.id where ors.id = '"+req.doid+"' group by ors.id" );
+
+        orders[0].products = JSON.parse(orders[0].products);    
+        var products = orders[0].products;
+        var missingproducts = [];
+        for (let j = 0; j < products.length; j++) {
+            if(products[j].requested_qty > products[j].received_qty){
+                var missqty = parseInt(products[j].requested_qty)-parseInt(products[j].received_qty);
+                missingproducts.push({"vpid":products[j].vpid,"productname":products[j].productname,"missingqty":missqty});
+            }            
+        }
+        orders[0].missingproducts = missingproducts;
         await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_ready_at_wherehouse_notification);
 
         let resobj = {
@@ -2367,7 +2378,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"'");
         var updateDO_revoke = await query("update Dayorder set revoke_flag=1 where id = '"+req.doid+"'");
 
-        ////////Create Day order Log ////////////
+        //////Create Day order Log ////////////
         var insertlogdata = [];
         insertlogdata.push({"comments":"revoke moved from qc to sorting","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments_crm(insertlogdata);  
