@@ -119,25 +119,52 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
     }
     }
 
-    if (req.sortid==1) {
+
+    if (req.page  !=0 && req.page !=null) {
+      if (req.sortid==1) {
     
-      product_list = product_list+ " ORDER BY pm.Productname ASC limit " +startlimit +"," +productlimit +"";
+        product_list = product_list+ " ORDER BY pm.Productname ASC limit " +startlimit +"," +productlimit +"";
+       
+      }else if(req.sortid==2) {
+      
+        product_list = product_list+ " ORDER BY pm.Productname Desc limit " +startlimit +"," +productlimit +"";
+       
+      }else if (req.sortid==3) {
+  
+        product_list = product_list+ " ORDER BY pm.mrp ASC limit " +startlimit +"," +productlimit +"";
+  
+      }else if (req.sortid==4) {
+  
+        product_list = product_list+ " ORDER BY pm.mrp DESC limit " +startlimit +"," +productlimit +"";
+      }else{
+        product_list = product_list+ " ORDER BY pm.Productname  limit " +startlimit +"," +productlimit +"";
+      }
+  
+
+    } else {
+      
+       if (req.sortid==1) {
+    
+      product_list = product_list+ " ORDER BY pm.Productname ASC ";
      
     }else if(req.sortid==2) {
     
-      product_list = product_list+ " ORDER BY pm.Productname Desc limit " +startlimit +"," +productlimit +"";
+      product_list = product_list+ " ORDER BY pm.Productname Desc ";
      
     }else if (req.sortid==3) {
 
-      product_list = product_list+ " ORDER BY pm.mrp ASC limit " +startlimit +"," +productlimit +"";
+      product_list = product_list+ " ORDER BY pm.mrp ASC  ";
 
     }else if (req.sortid==4) {
 
-      product_list = product_list+ " ORDER BY pm.mrp DESC limit " +startlimit +"," +productlimit +"";
+      product_list = product_list+ " ORDER BY pm.mrp DESC ";
     }else{
-      product_list = product_list+ " ORDER BY pm.Productname  limit " +startlimit +"," +productlimit +"";
+      product_list = product_list+ " ORDER BY pm.Productname  ";
+    }
     }
 
+
+ 
 
     // if (req.sortid==1) {
     
