@@ -17,8 +17,9 @@ module.exports = function(app) {
   var refundOnline = require("../controllers/common/refundController");
   var Razorpay = require("../controllers/common/RazorpayController");
   var adminuser = require("../controllers/admin/adminUserController");
+  var quicksearch = require("../controllers/common/QuickSearchController.js");
 
-  //////// ==============> Admin Routes <================= /////////  
+  //////// ==============> Admin Routes <================= /////////    
   ///////// Search /////////////
   app.route("/admin/search/catalog").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog}));
   app.route("/admin/search/catalogdata").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.search_catalog_data}));
@@ -113,11 +114,7 @@ module.exports = function(app) {
   app.route("/admin/stockkeeping/view").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_view}));
   app.route("/admin/stockkeeping/edit").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_edit}));
   app.route("/admin/stockkeeping/delete").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_delete}));
-
   
-//CRM
-app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
-
   ///////// Logistics //////////////
   app.route("/admin/logistics/readytodispatchlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.ready_to_dispatch_list}));
   app.route("/admin/logistics/qa/type_list").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.qa_type_list}));
@@ -140,7 +137,8 @@ app.route("/admin/dayorderlist").post(middleware.checkToken,routesVersioning({"1
   app.route("/admin/logistics/dunzo/pickup").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_pickup}));
   app.route("/admin/logistics/dunzo/delivered").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.dunzo_delivered}));
   
-
+  ////Dont Remove Cron Not Work /////////////
+  app.route("/eat/explore").get(middleware.checkToken,routesVersioning({"1.0.0":quicksearch.eat_explore_store_data}));
 
 app.route("/admin/crm/dayorderlist").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_list}));
 app.route("/admin/crm/dayorderview").post(middleware.checkToken,routesVersioning({"1.0.0": dayorder.crm_day_order_view}));

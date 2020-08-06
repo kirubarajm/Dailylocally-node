@@ -6756,62 +6756,107 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 };
 
 
-Dluser.dl_User_list = function dl_User_list(req, result) {
+// Dluser.dl_User_list = function dl_User_list(req, result) {
+//   var pagelimit = 20;
+//   var page = req.page || 1;
+//   var startlimit = (page - 1) * pagelimit;
+
+//   var userquery = "select * from User";
+
+//   if (req.search) {
+//   userquery =
+//   userquery +
+//       " where (phoneno LIKE  '%" +
+//       req.search +
+//       "%' OR email LIKE  '%" +
+//       req.search +
+//       "%' OR userid LIKE  '%" +
+//       req.search +
+//       "%' or name LIKE  '%" +
+//       req.search +
+//       "% ' )";
+//   }
+
+//   // var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+
+//   if(req.report && req.report==1){
+//     var userquery1 = userquery + " order by userid desc";
+//   }else{
+//     var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
+//   }
+//    console.log(userquery1);
+//   sql.query(userquery1,async function(err, res) {
+//     if (err) {
+//       console.log("error: ", err);
+//       result(err, null);
+//     } else {
+//       var totalcount = 0;
+//       for (let i = 0; i < res.length; i++) {      
+//         var address_details  = await query("select * from Address where userid= '"+res[i].userid+"' order by aid desc limit 1");
+//         res[i].address_details=address_details;
+//       }
+
+//       // console.log(userquery);
+//       sql.query(userquery, function(err, res2) {
+//         totalcount = res2.length;
+
+//         let sucobj = true;
+//         let resobj = {
+//           success: sucobj,
+//           pagelimit:pagelimit,
+//           totalcount: totalcount,
+//           result: res
+//         };
+
+//         result(null, resobj);
+//       });
+//     }
+//   });
+// };
+
+/////////DL User List///////////////////////
+Dluser.dl_User_list =async function dl_User_list(req, result) {
   var pagelimit = 20;
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
 
-  var userquery = "select * from User";
-
-  if (req.search) {
-  userquery =
-  userquery +
-      " where (phoneno LIKE  '%" +
-      req.search +
-      "%' OR email LIKE  '%" +
-      req.search +
-      "%' OR userid LIKE  '%" +
-      req.search +
-      "%' or name LIKE  '%" +
-      req.search +
-      "% ' )";
+  var where = "";
+  if(req.search){
+      where = where+" and (phoneno LIKE  '%" +req.search+ "%' OR email LIKE  '%" +req.search+ "%' OR userid LIKE  '%" +req.search+ "%' or name LIKE  '%" +req.search+ "% ' ) ";
   }
-
-  // var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
 
   if(req.report && req.report==1){
-    var userquery1 = userquery + " order by userid desc";
+    var getusersquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
   }else{
-    var userquery1 = userquery + " order by userid desc limit " + startlimit + "," + pagelimit + " ";
-  }
-  // console.log(userquery1);
-  sql.query(userquery1,async function(err, res) {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-    } else {
-      var totalcount = 0;
-      for (let i = 0; i < res.length; i++) {      
-        var address_details  = await query("select * from Address where userid= '"+res[i].userid+"' order by aid desc limit 1");
-        res[i].address_details=address_details;
-      }
+      var getusersquery = "select us.*,JSON_ARRAYAGG(JSON_OBJECT('userid',addr.userid,'pincode',addr.pincode,'aid',addr.aid,'lat',addr.lat,'lon',addr.lon,'landmark',addr.landmark,'address_type',addr.address_type,'delete_status',addr.delete_status,'address_default',addr.address_default,'created_at',addr.created_at,'updated_at',addr.updated_at,'city',addr.city,'google_address',addr.google_address,'complete_address',addr.complete_address,'flat_house_no',addr.flat_house_no,'plot_house_no',addr.plot_house_no,'floor',addr.floor,'block_name',addr.block_name,'apartment_name',addr.apartment_name)) as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc limit " +startlimit +"," +pagelimit +" ";
+  }        
+  var getusers = await query(getusersquery);
 
-      // console.log(userquery);
-      sql.query(userquery, function(err, res2) {
-        totalcount = res2.length;
+  var totalcountquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
+  var total_count = await query(totalcountquery);
 
-        let sucobj = true;
-        let resobj = {
-          success: sucobj,
-          pagelimit:pagelimit,
-          totalcount: totalcount,
-          result: res
-        };
-
-        result(null, resobj);
-      });
+  if(getusers.length > 0){
+    for (let i = 0; i < getusers.length; i++) {
+      getusers[i].address_details = JSON.parse(getusers[i].address_details);
     }
-  });
+    var totalcount = total_count.length;   
+    let resobj = {
+        success: true,
+        status: true,
+        totalcount: totalcount,
+        pagelimit: pagelimit,
+        result: getusers
+    };
+    result(null, resobj);                  
+  }else{
+      let resobj = {
+          success: true,
+          status: false,
+          totalcount: 0,
+          message: "no records found"
+      };
+      result(null, resobj);
+  }  
 };
 
 Dluser.dl_user_send_message = function dl_user_send_message(User, result) { 
