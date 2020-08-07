@@ -1229,6 +1229,12 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
         for (let j = 0; j < getchecklist[0].items.length; j++) {
             sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].price);
         }       
+
+        if(getchecklist[0].delivery_charge){
+            getchecklist[0].delivery_charge=getchecklist[0].delivery_charge;
+        }else{
+            getchecklist[0].delivery_charge=0;
+        }
         var finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
         var finalamountvalue = converter.toWords(finalamount);
 
