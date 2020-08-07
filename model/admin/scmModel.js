@@ -969,7 +969,7 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
                                         received_qty = getpop[0].requested_quantity;
                                     }else{
                                         addition_qty = 0;
-                                        received_qty = getpop[0].requested_quantity;
+                                        received_qty = popstock_qty;
                                     }
     
                                     var updatepopquery = "update POproducts set received_quantity="+received_qty+",aditional_quantity="+addition_qty+" where popid="+getdop[0].popid;
@@ -2274,6 +2274,13 @@ SCM.missing_quantity_report =async function missing_quantity_report(req,result) 
                     wastmanagement_data.push({"dopid":req.dopid,"vpid":req.vpid,"quantity":req.report_quantity,"from_type":req.from_type,"zoneid":req.zoneid});
                     WasteManagement.createWasteManagement(wastmanagement_data[0],async function(err,wastmanagement_datares){
                         if(wastmanagement_datares.status==true){
+                            var getdopquery = "select * from Dayorder_products where id="+req.dopid;
+                            var getdop = await query(getdopquery);
+                            if(getdop.length>0){
+                                var qty = parseInt(getdop[0].received_quantity) - parseInt(req.report_quantity);
+                                var updatedopquery = "update Dayorder_products set received_quantity="+qty+" where id="+req.dopid;
+                                var updatedop = await query(updatedopquery);
+                            }                            
                             let resobj = {
                                 success: true,
                                 status: true,
