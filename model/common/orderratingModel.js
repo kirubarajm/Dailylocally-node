@@ -2,7 +2,7 @@
 var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
-
+var moment = require("moment");
 //Task object constructor
 var Orderrating = function(orderrating) {
   this.rating_product = orderrating.rating_product;
@@ -89,37 +89,56 @@ Orderrating.createOrderrating = function createOrderrating(Order_rating,result) 
 
 Orderrating.day_order_rating_check =async function day_order_rating_check(Order_rating,result) {
 
- get_day_details = await query("select * from Dayorder WHERE userid='"+Order_rating.userid +"'  and dayorderstatus=0 order by id desc limit 1");
+  var date =  moment().format("YYYY-MM-DD");
+ // get_day_details = await query("select * from Dayorder WHERE userid='"+Order_rating.userid +"' and date ='"+date+"' order by id desc limit 1");
+ get_day_details = await query("select * from Dayorder WHERE userid='"+Order_rating.userid +"' and date ='"+date+"'");
 
 if (get_day_details.length !==0) {
 
-  get_day_details[0].rating_skip_available = 2;
-  res = await query("Select * from day_order_rating where doid = '" + get_day_details[0].id + "'");
 
-  if (res.length == 0) {      
-        
-    let resobj = {
-      success: true,
-      status: true,
-      rating_status:true,
-      message:  "Please completed rating",
-      title : 'How was the rating?',
-      result: get_day_details
-    };
-    result(null, resobj);
-   
+  if (get_day_details[0].dayorderstatus==10) {
+    
+    get_day_details[0].rating_skip_available = 2;
+    res = await query("Select * from day_order_rating where doid = '" + get_day_details[0].id + "'");
+  
+    if (res.length == 0) {      
+          
+      let resobj = {
+        success: true,
+        status: true,
+        rating_status:true,
+        message:  "Please completed rating",
+        title : 'How was the rating?',
+        result: get_day_details
+      };
+      result(null, resobj);
+     
+    } else {
+  
+      let resobj = {
+        success: true,
+        status: true,
+        rating_status: false,
+        message:  "Already order rating completed",
+        title : 'how was the rating?',
+        result: get_day_details
+      };
+      result(null, resobj);
+    }
+
   } else {
-
     let resobj = {
       success: true,
       status: true,
       rating_status: false,
-      message:  "Already order rating completed",
-      title : 'how was the rating?',
+      message: "Please completed rating",
+      title : 'How was the rating?',
       result: get_day_details
     };
-    result(null, resobj);
+    result(null, resobj)
   }
+
+ 
 } else {
   let resobj = {
     success: true,

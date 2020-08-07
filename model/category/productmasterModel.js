@@ -658,10 +658,16 @@ ProductMaster.get_collection_brand_list = async function get_collection_brand_li
 
   var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
 
+  var query1 = "";
+  if (req.scl1_id !=0) {
+     query1 = "and  pm.scl1_id='"+req.scl1_id+"'  ";
+  }else{
+    query1 = "group by  pm.brand";
+  }
 
-  var brand_list_query = " select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid  where pl.live_status=1 and pm.scl1_id='"+req.scl1_id+"' and pm.brand='"+brand_list[0].id+"' group by  pm.brand";
+  var brand_list_query = " select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid  where pl.live_status=1 and pm.brand='"+brand_list[0].id+"' "+query1+" ";
 
-  // console.log(brand_list_query);
+   console.log(brand_list_query);
   sql.query(brand_list_query,async function(err, res) {
     if (err) {
       result(err, null);

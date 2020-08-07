@@ -23,7 +23,7 @@ QuickSearch.eat_explore_store_data_by_cron = async function eat_explore_store_da
 const day_order_address_update_cron = new CronJob("0 22 * * *", async function(search, result) {
   console.log("day_order_address_update_cron Cron at 22 am ====>");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
-  var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = tomorrow");
+  var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '"+tomorrow+"'");
   if (get_day_orderlist.length !=0) {    
     for (let i = 0; i < get_day_orderlist.length; i++) {
       sql.query("Select * from Address where userid = '"+get_day_orderlist[0].userid+"'  ",async function(err, res) {
