@@ -660,7 +660,7 @@ ProductMaster.get_collection_brand_list = async function get_collection_brand_li
 
   var query1 = "";
   if (req.scl1_id !=0) {
-     query1 = "and  pm.scl1_id='"+req.scl1_id+"'  ";
+     query1 = "and  pm.scl1_id='"+req.scl1_id+"'  group by  pm.brand ";
   }else{
     query1 = "group by  pm.brand";
   }
