@@ -1,7 +1,10 @@
 const express = require("express"),
   app = express(),
   bodyParser = require("body-parser");
-
+  ////// Demon Url ////
+  domainname = "http://68.183.87.233";
+  /// Live Url ////
+  // domainname = "http://dailylocally.co.in/";
 
 
 port = process.env.PORT || 4000;
