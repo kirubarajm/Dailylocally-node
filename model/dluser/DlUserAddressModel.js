@@ -77,7 +77,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
                     success: sucobj,
                     message:mesobj,
                     status:false,
-                    aid: res.insertId
+                    aid: res[0]
                     }; 
               
                  result(null, resobj);          
@@ -247,12 +247,13 @@ UserAddress.updateById =async function updateById(req, result){
             else {
 
                   var address=  await query("select * from Address WHERE userid='"+req.userid+"'");
-                console.log(address);
+         
                 let resobj = {
                     success: true,
                     status:true,
                     message: "Address Updated successfully",
-                    result : address
+                    result : address,
+                    aid:address[0].aid
 
                 };
 
