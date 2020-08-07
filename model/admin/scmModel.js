@@ -1343,7 +1343,8 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
-        var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        // var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        var getpoquery = "select po.*,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and po.poid="+req.poid+" group by po.poid order by po.poid desc";
         var getpo = await query(getpoquery);
 
         var getpopbeforequery = "select * from POproducts where poid=+"+req.poid;
@@ -1353,35 +1354,44 @@ SCM.delete_po =async function delete_po(req,result) {
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
             switch (getpo[0].po_status) {
                 case 0:
-                    //////Update PO///////////////
-                    var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=0 then pop.popid end) as open_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and pop.poid="+req.poid;
-                    var getpop = await query(getpopquery);
-                    if(getpop.length>0){
-                        if(getpop[0].total_count == getpop[0].open_count){
-                            var updatepoquery = "update PO set po_status=4 where zoneid="+req.zoneid+" and poid="+req.poid;
-                            var updatepo = await query(updatepoquery);
+                    if(getpo[0].delete_flag==1){
+                        //////Update PO///////////////
+                        var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=0 then pop.popid end) as open_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and pop.poid="+req.poid;
+                        var getpop = await query(getpopquery);
+                        if(getpop.length>0){
+                            if(getpop[0].total_count == getpop[0].open_count){
+                                var updatepoquery = "update PO set po_status=4 where zoneid="+req.zoneid+" and poid="+req.poid;
+                                var updatepo = await query(updatepoquery);
 
-                            var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
-                            var updatepo = await query(updatepoquery);
-                            if(updatepo.affectedRows>0){
-                                for (let i = 0; i < getpopbefore.length; i++) {
-                                    var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
-                                    var updatepro = await query(updateproquery);
+                                var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
+                                var updatepo = await query(updatepoquery);
+                                if(updatepo.affectedRows>0){
+                                    for (let i = 0; i < getpopbefore.length; i++) {
+                                        var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
+                                        var updatepro = await query(updateproquery);
+                                    }
+                                    polog_data = [];
+                                    polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
+                                    POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
+                                    resobj = {
+                                        success: true,
+                                        status: true,
+                                        message: "po deleted successfully"
+                                    };
+                                    result(null, resobj);
+                                }else{
+                                    resobj = {
+                                        success: true,
+                                        status: false,
+                                        message: "something went wrong plz try again"
+                                    };
+                                    result(null, resobj);
                                 }
-                                polog_data = [];
-                                polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
-                                POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
-                                resobj = {
-                                    success: true,
-                                    status: true,
-                                    message: "po deleted successfully"
-                                };
-                                result(null, resobj);
                             }else{
                                 resobj = {
                                     success: true,
                                     status: false,
-                                    message: "something went wrong plz try again"
+                                    message: "some poproducts status not match"
                                 };
                                 result(null, resobj);
                             }
@@ -1389,7 +1399,7 @@ SCM.delete_po =async function delete_po(req,result) {
                             resobj = {
                                 success: true,
                                 status: false,
-                                message: "some poproducts status not match"
+                                message: "no data"
                             };
                             result(null, resobj);
                         }
@@ -1397,10 +1407,10 @@ SCM.delete_po =async function delete_po(req,result) {
                         resobj = {
                             success: true,
                             status: false,
-                            message: "no data"
+                            message: "Already Received"
                         };
                         result(null, resobj);
-                    }                    
+                    }                   
                     break;
                 case 1:
                     /////Already Received//////
@@ -1470,51 +1480,54 @@ SCM.delete_po =async function delete_po(req,result) {
 /////////Close PO///////////
 SCM.close_po =async function close_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
-        var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        // var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        var getpoquery = "select po.*,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and po.poid="+req.poid+" group by po.poid order by po.poid desc";
         var getpo = await query(getpoquery);
         if(getpo.length>0){
             let resobj = { };
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
             switch (getpo[0].po_status) {
-                case 0:
-                    resobj = {
-                        success: true,
-                        status: false,
-                        message: "no receiving products try to po delete"
-                    };
-                    result(null, resobj);                                                                                      
-                    break;
+                case 0:                    
                 case 1:
-                    //////Update PO///////////////
-                    var updatepoquery = "update PO set po_status=3 where zoneid="+req.zoneid+" and poid="+req.poid;
-                    var updatepo = await query(updatepoquery);
+                    if(getpo[0].close_flag==1){
+                        //////Update PO///////////////
+                        var updatepoquery = "update PO set po_status=3 where zoneid="+req.zoneid+" and poid="+req.poid;
+                        var updatepo = await query(updatepoquery);
 
-                    var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
-                    var updatepo = await query(updatepoquery);
-                    if(updatepo.affectedRows>0){
-                        /////Remove Mapping Stock Quantity//////////
-                        var checkpoid= [];
-                        checkpoid.push({"poid":req.poid});
-                        await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });
-                        ////////////PO Log ////////////////
-                        polog_data = [];
-                        polog_data.push({"poid":req.poid,"from_type":4,"zoneid":req.zoneid,"created_by":req.done_by});
-                        POLog.createPOlog(polog_data[0],async function(err,polog_datares){  });                          
+                        var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
+                        var updatepo = await query(updatepoquery);
+                        if(updatepo.affectedRows>0){
+                            /////Remove Mapping Stock Quantity//////////
+                            var checkpoid= [];
+                            checkpoid.push({"poid":req.poid});
+                            await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });
+                            ////////////PO Log ////////////////
+                            polog_data = [];
+                            polog_data.push({"poid":req.poid,"from_type":4,"zoneid":req.zoneid,"created_by":req.done_by});
+                            POLog.createPOlog(polog_data[0],async function(err,polog_datares){  });                          
 
-                        resobj = {
-                            success: true,
-                            status: true,
-                            message: "updated successfully"
-                        };
-                        result(null, resobj);
+                            resobj = {
+                                success: true,
+                                status: true,
+                                message: "updated successfully"
+                            };
+                            result(null, resobj);
+                        }else{
+                            resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong plz try again"
+                            };
+                            result(null, resobj);
+                        }
                     }else{
                         resobj = {
                             success: true,
                             status: false,
-                            message: "something went wrong plz try again"
+                            message: "no receiving products try to po delete"
                         };
                         result(null, resobj);
-                    }                  
+                    }                                      
                     break;
                 case 2:
                     /////Already UN-Received//////  
@@ -1698,7 +1711,7 @@ SCM.remove_boh_mapping =async function remove_boh_mapping(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                message: "potemp deleted successfully"
+                message: "procurement quantity removed successfully"
             };
             result(null, resobj);                     
         }else{
