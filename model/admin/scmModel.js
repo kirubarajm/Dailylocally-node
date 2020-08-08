@@ -355,10 +355,11 @@ SCM.create_po =async function create_po(req,result) {
                                     if(vendor_polist[j].vid == uniquevendors[i]){
                                         var getvendorcostquery = "select * from Vendor_products_mapping where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
                                         var getvendorcost = await query(getvendorcostquery);
-                                        //  console.log("getvendorcost -->",j,"=>",getvendorcost);
+                                          console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
                                             var inserpopdata = [];
                                             inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price*vendor_polist[j].qty,"other_charges":getvendorcost[0].other_charges*vendor_polist[j].qty,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
+                                            console.log("inserpopdata -->=>",inserpopdata);
                                             POProducts.createPOProducts(inserpopdata[0],async function(err,popres){
                                                 // console.log("Step 5: after popres createPOProducts ==>",popres);
                                                 if(popres.status==true){
@@ -424,11 +425,7 @@ SCM.create_po =async function create_po(req,result) {
                         var updatepotemp = await query(updatepotempquery);
                     }                    
                 }else{ console.log("invalid vendor id"); }                    
-            }
-
-            
-            
-            
+            }            
             let resobj = {
                 success: true,
                 status: true,
@@ -1227,6 +1224,7 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
         
         var sumof = 0;
         for (let j = 0; j < getchecklist[0].items.length; j++) {
+            if(getchecklist[0].items[j].price>0){}else{ getchecklist[0].items[j].price = 0; }
             sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].price);
         }       
 
@@ -1235,7 +1233,8 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
         }else{
             getchecklist[0].delivery_charge=0;
         }
-        var finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
+        var finalamount = 0;
+        finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
         var finalamountvalue = converter.toWords(finalamount);
 
         var gst = 0;
@@ -2649,6 +2648,68 @@ SCM.return_reorder =async function return_reorder(req,result) {
         };
         result(null, resobj);
     }  
+};
+
+///////PO Auto Creation Loop//////
+SCM.autopopdfcreate =async function autopopdfcreate(req,result) {
+    var getpolistquery = "select * from PO where po_pdf_url IS NULL";
+    var getpolist = await query(getpolistquery);
+    if(getpolist.length>0){
+        for (let i = 0; i < getpolist.length; i++) {
+            var popdfid = [];
+            popdfid.push({"poid":getpolist[i].poid});
+            await SCM.po_pdf(popdfid[0],async function(err, popdfres){
+                if(popdfres.status==true){
+                    var updatepopdfurlquery = "update PO set po_pdf_url='"+popdfres.url.filename+"' where poid="+getpolist[i].poid;
+                    var updatepopdfurl = await query(updatepopdfurlquery);
+                }
+            });
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "po created successfully"
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "sorry no po"
+        };
+        result(null, resobj);
+    }
+};
+
+///////Invoice Auto Creation Loop//////
+SCM.autoinvoicepdfcreate =async function autoinvoicepdfcreate(req,result) {
+    var getdayolistquery = "select * from Dayorder where invoice_url IS NULL";
+    var getdayolist = await query(getdayolistquery);
+    if(getdayolist.length>0){
+        for (let i = 0; i < getdayolist.length; i++) {
+            var invoicepdfid = [];
+            invoicepdfid.push({"doid":getdayolist[i].id});
+            await SCM.invoice_pdf(invoicepdfid[0],async function(err, invoicepdfdfres){
+                if(invoicepdfdfres.status==true){
+                    var updatepopdfurlquery = "update Dayorder set invoice_url='"+invoicepdfdfres.url.filename+"',invoice_no='INV"+getdayolist[i].id+"' where id="+getdayolist[i].id;
+                    var updatepopdfurl = await query(updatepopdfurlquery);
+                }
+            });
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "Invoice created successfully"
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "sorry no Invoice"
+        };
+        result(null, resobj);
+    }
 };
 
 module.exports = SCM;

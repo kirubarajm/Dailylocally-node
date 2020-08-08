@@ -178,6 +178,26 @@ exports.remove_boh_mapping = function(req, res) {
     });    
 };
 
+///////PO Auto Creation Loop//////
+exports.autopopdfcreate = function(req, res) {    
+    SCM.autopopdfcreate(req.body, function(err, ress) {
+        //console.log("autopopdfcreate controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+///////Invoice Auto Creation Loop//////
+exports.autoinvoicepdfcreate = function(req, res) {    
+    SCM.autoinvoicepdfcreate(req.body, function(err, ress) {
+        //console.log("autoinvoicepdfcreate controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Get Sorting List///////////
 exports.get_soring_list = function(req, res) {    
     SCM.get_soring_list(req.body, function(err, ress) {
