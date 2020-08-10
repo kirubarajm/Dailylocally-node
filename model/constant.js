@@ -146,9 +146,17 @@ const calculate = {
     Xfactor_status:false,
     Xfactor_moveit_count:5,
     order_waiting_min:30, //min
-    zendesk_url:"https://dailylocallytest.zendesk.com/",
-    Username:"aravind@tovogroup.com",
-    Password:"Dailylocally12!",
+
+    ///// Testing Zendesk//////////
+    // zendesk_url:"https://dailylocallytest.zendesk.com/",
+    // Username:"aravind@tovogroup.com",
+    // Password:"Dailylocally12!",
+
+    ///// Live Zendesk//////////
+    zendesk_url:"https://dailylocallyapp.zendesk.com/",
+    Username:"dailylocally@gmail.com",
+    Password:"Admincrm12!",
+
     isCronStart:true,
     zoho_refresh_token:"1000.86b2dd470174b25acacf0817f4353584.5f33e9df83931f63717d24fa1a022198",
     zoho_client_id:"1000.86b2dd470174b25acacf0817f4353584.5f33e9df83931f63717d24fa1a022198",
