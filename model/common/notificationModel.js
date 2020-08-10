@@ -245,7 +245,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
           message: "Your refund request has been raised and will be completed within 7 bank working days",
           pageid: "" +29,
           userid: "" +orders[0].userid,
-          orderid: "" +orders[0].doid,
+          orderid: "" +orders[0].id,
           refund_amount:""+orders[0].original_amt,
           app: "Dl",
           notification_type: "2"
@@ -258,7 +258,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
             message: " Your refund request has been raised and will be completed within 5-7 bank working days ",
             pageid: "" +29,
             userid: "" +orders[0].userid,
-            orderid: "" +orders[0].doid,
+            orderid: "" +orders[0].id,
             refund_amount:""+orders[0].original_amt,
             app: "Dl",
             notification_type: "2"
