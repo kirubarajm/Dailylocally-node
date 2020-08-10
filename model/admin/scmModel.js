@@ -355,10 +355,11 @@ SCM.create_po =async function create_po(req,result) {
                                     if(vendor_polist[j].vid == uniquevendors[i]){
                                         var getvendorcostquery = "select * from Vendor_products_mapping where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
                                         var getvendorcost = await query(getvendorcostquery);
-                                        //  console.log("getvendorcost -->",j,"=>",getvendorcost);
+                                          console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
                                             var inserpopdata = [];
                                             inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price*vendor_polist[j].qty,"other_charges":getvendorcost[0].other_charges*vendor_polist[j].qty,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
+                                            console.log("inserpopdata -->=>",inserpopdata);
                                             POProducts.createPOProducts(inserpopdata[0],async function(err,popres){
                                                 // console.log("Step 5: after popres createPOProducts ==>",popres);
                                                 if(popres.status==true){
@@ -424,11 +425,7 @@ SCM.create_po =async function create_po(req,result) {
                         var updatepotemp = await query(updatepotempquery);
                     }                    
                 }else{ console.log("invalid vendor id"); }                    
-            }
-
-            
-            
-            
+            }            
             let resobj = {
                 success: true,
                 status: true,
@@ -483,13 +480,13 @@ SCM.get_po_list =async function get_po_list(req,result) {
             where = where+" and po.po_status="+req.po_status;
         }        
         if(req.report && req.report==1){
-            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
         }else{
-            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc limit " +startlimit +"," +pagelimit +"";
+            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc limit " +startlimit +"," +pagelimit +"";
         }
         var getpolist = await query(getpolistquery);
 
-        var totalcountquery = "select po.poid,po.po_pdf_url, CONCAT('http://68.183.87.233:9000/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
+        var totalcountquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
         var total_count = await query(totalcountquery);
 
         if(getpolist.length > 0){
@@ -969,7 +966,7 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
                                         received_qty = getpop[0].requested_quantity;
                                     }else{
                                         addition_qty = 0;
-                                        received_qty = getpop[0].requested_quantity;
+                                        received_qty = popstock_qty;
                                     }
     
                                     var updatepopquery = "update POproducts set received_quantity="+received_qty+",aditional_quantity="+addition_qty+" where popid="+getdop[0].popid;
@@ -1227,9 +1224,17 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
         
         var sumof = 0;
         for (let j = 0; j < getchecklist[0].items.length; j++) {
+            if(getchecklist[0].items[j].price>0){}else{ getchecklist[0].items[j].price = 0; }
             sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].price);
         }       
-        var finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
+
+        if(getchecklist[0].delivery_charge){
+            getchecklist[0].delivery_charge=getchecklist[0].delivery_charge;
+        }else{
+            getchecklist[0].delivery_charge=0;
+        }
+        var finalamount = 0;
+        finalamount = parseInt(sumof)+parseInt(getchecklist[0].delivery_charge);
         var finalamountvalue = converter.toWords(finalamount);
 
         var gst = 0;
@@ -1337,7 +1342,8 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
-        var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        // var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        var getpoquery = "select po.*,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and po.poid="+req.poid+" group by po.poid order by po.poid desc";
         var getpo = await query(getpoquery);
 
         var getpopbeforequery = "select * from POproducts where poid=+"+req.poid;
@@ -1347,35 +1353,44 @@ SCM.delete_po =async function delete_po(req,result) {
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
             switch (getpo[0].po_status) {
                 case 0:
-                    //////Update PO///////////////
-                    var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=0 then pop.popid end) as open_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and pop.poid="+req.poid;
-                    var getpop = await query(getpopquery);
-                    if(getpop.length>0){
-                        if(getpop[0].total_count == getpop[0].open_count){
-                            var updatepoquery = "update PO set po_status=4 where zoneid="+req.zoneid+" and poid="+req.poid;
-                            var updatepo = await query(updatepoquery);
+                    if(getpo[0].delete_flag==1){
+                        //////Update PO///////////////
+                        var getpopquery = "select count(pop.popid) as total_count,count(case when pop.pop_status=0 then pop.popid end) as open_count from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and pop.poid="+req.poid;
+                        var getpop = await query(getpopquery);
+                        if(getpop.length>0){
+                            if(getpop[0].total_count == getpop[0].open_count){
+                                var updatepoquery = "update PO set po_status=4 where zoneid="+req.zoneid+" and poid="+req.poid;
+                                var updatepo = await query(updatepoquery);
 
-                            var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
-                            var updatepo = await query(updatepoquery);
-                            if(updatepo.affectedRows>0){
-                                for (let i = 0; i < getpopbefore.length; i++) {
-                                    var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
-                                    var updatepro = await query(updateproquery);
+                                var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
+                                var updatepo = await query(updatepoquery);
+                                if(updatepo.affectedRows>0){
+                                    for (let i = 0; i < getpopbefore.length; i++) {
+                                        var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
+                                        var updatepro = await query(updateproquery);
+                                    }
+                                    polog_data = [];
+                                    polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
+                                    POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
+                                    resobj = {
+                                        success: true,
+                                        status: true,
+                                        message: "po deleted successfully"
+                                    };
+                                    result(null, resobj);
+                                }else{
+                                    resobj = {
+                                        success: true,
+                                        status: false,
+                                        message: "something went wrong plz try again"
+                                    };
+                                    result(null, resobj);
                                 }
-                                polog_data = [];
-                                polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
-                                POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
-                                resobj = {
-                                    success: true,
-                                    status: true,
-                                    message: "po deleted successfully"
-                                };
-                                result(null, resobj);
                             }else{
                                 resobj = {
                                     success: true,
                                     status: false,
-                                    message: "something went wrong plz try again"
+                                    message: "some poproducts status not match"
                                 };
                                 result(null, resobj);
                             }
@@ -1383,7 +1398,7 @@ SCM.delete_po =async function delete_po(req,result) {
                             resobj = {
                                 success: true,
                                 status: false,
-                                message: "some poproducts status not match"
+                                message: "no data"
                             };
                             result(null, resobj);
                         }
@@ -1391,10 +1406,10 @@ SCM.delete_po =async function delete_po(req,result) {
                         resobj = {
                             success: true,
                             status: false,
-                            message: "no data"
+                            message: "Already Received"
                         };
                         result(null, resobj);
-                    }                    
+                    }                   
                     break;
                 case 1:
                     /////Already Received//////
@@ -1464,51 +1479,54 @@ SCM.delete_po =async function delete_po(req,result) {
 /////////Close PO///////////
 SCM.close_po =async function close_po(req,result) {
     if(req.zoneid && req.poid && req.done_by){  
-        var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        // var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
+        var getpoquery = "select po.*,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and po.poid="+req.poid+" group by po.poid order by po.poid desc";
         var getpo = await query(getpoquery);
         if(getpo.length>0){
             let resobj = { };
             //console.log("getpo[0].po_status==>",getpo[0].po_status);
             switch (getpo[0].po_status) {
-                case 0:
-                    resobj = {
-                        success: true,
-                        status: false,
-                        message: "no receiving products try to po delete"
-                    };
-                    result(null, resobj);                                                                                      
-                    break;
+                case 0:                    
                 case 1:
-                    //////Update PO///////////////
-                    var updatepoquery = "update PO set po_status=3 where zoneid="+req.zoneid+" and poid="+req.poid;
-                    var updatepo = await query(updatepoquery);
+                    if(getpo[0].close_flag==1){
+                        //////Update PO///////////////
+                        var updatepoquery = "update PO set po_status=3 where zoneid="+req.zoneid+" and poid="+req.poid;
+                        var updatepo = await query(updatepoquery);
 
-                    var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
-                    var updatepo = await query(updatepoquery);
-                    if(updatepo.affectedRows>0){
-                        /////Remove Mapping Stock Quantity//////////
-                        var checkpoid= [];
-                        checkpoid.push({"poid":req.poid});
-                        await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });
-                        ////////////PO Log ////////////////
-                        polog_data = [];
-                        polog_data.push({"poid":req.poid,"from_type":4,"zoneid":req.zoneid,"created_by":req.done_by});
-                        POLog.createPOlog(polog_data[0],async function(err,polog_datares){  });                          
+                        var updatepoquery = "update POproducts set pop_status=3 where poid="+req.poid;
+                        var updatepo = await query(updatepoquery);
+                        if(updatepo.affectedRows>0){
+                            /////Remove Mapping Stock Quantity//////////
+                            var checkpoid= [];
+                            checkpoid.push({"poid":req.poid});
+                            await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });
+                            ////////////PO Log ////////////////
+                            polog_data = [];
+                            polog_data.push({"poid":req.poid,"from_type":4,"zoneid":req.zoneid,"created_by":req.done_by});
+                            POLog.createPOlog(polog_data[0],async function(err,polog_datares){  });                          
 
-                        resobj = {
-                            success: true,
-                            status: true,
-                            message: "updated successfully"
-                        };
-                        result(null, resobj);
+                            resobj = {
+                                success: true,
+                                status: true,
+                                message: "updated successfully"
+                            };
+                            result(null, resobj);
+                        }else{
+                            resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong plz try again"
+                            };
+                            result(null, resobj);
+                        }
                     }else{
                         resobj = {
                             success: true,
                             status: false,
-                            message: "something went wrong plz try again"
+                            message: "no receiving products try to po delete"
                         };
                         result(null, resobj);
-                    }                  
+                    }                                      
                     break;
                 case 2:
                     /////Already UN-Received//////  
@@ -1692,7 +1710,7 @@ SCM.remove_boh_mapping =async function remove_boh_mapping(req,result) {
             let resobj = {
                 success: true,
                 status: true,
-                message: "potemp deleted successfully"
+                message: "procurement quantity removed successfully"
             };
             result(null, resobj);                     
         }else{
@@ -2268,6 +2286,13 @@ SCM.missing_quantity_report =async function missing_quantity_report(req,result) 
                     wastmanagement_data.push({"dopid":req.dopid,"vpid":req.vpid,"quantity":req.report_quantity,"from_type":req.from_type,"zoneid":req.zoneid});
                     WasteManagement.createWasteManagement(wastmanagement_data[0],async function(err,wastmanagement_datares){
                         if(wastmanagement_datares.status==true){
+                            var getdopquery = "select * from Dayorder_products where id="+req.dopid;
+                            var getdop = await query(getdopquery);
+                            if(getdop.length>0){
+                                var qty = parseInt(getdop[0].received_quantity) - parseInt(req.report_quantity);
+                                var updatedopquery = "update Dayorder_products set received_quantity="+qty+" where id="+req.dopid;
+                                var updatedop = await query(updatedopquery);
+                            }                            
                             let resobj = {
                                 success: true,
                                 status: true,
@@ -2623,6 +2648,68 @@ SCM.return_reorder =async function return_reorder(req,result) {
         };
         result(null, resobj);
     }  
+};
+
+///////PO Auto Creation Loop//////
+SCM.autopopdfcreate =async function autopopdfcreate(req,result) {
+    var getpolistquery = "select * from PO where po_pdf_url IS NULL";
+    var getpolist = await query(getpolistquery);
+    if(getpolist.length>0){
+        for (let i = 0; i < getpolist.length; i++) {
+            var popdfid = [];
+            popdfid.push({"poid":getpolist[i].poid});
+            await SCM.po_pdf(popdfid[0],async function(err, popdfres){
+                if(popdfres.status==true){
+                    var updatepopdfurlquery = "update PO set po_pdf_url='"+popdfres.url.filename+"' where poid="+getpolist[i].poid;
+                    var updatepopdfurl = await query(updatepopdfurlquery);
+                }
+            });
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "po created successfully"
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "sorry no po"
+        };
+        result(null, resobj);
+    }
+};
+
+///////Invoice Auto Creation Loop//////
+SCM.autoinvoicepdfcreate =async function autoinvoicepdfcreate(req,result) {
+    var getdayolistquery = "select * from Dayorder where invoice_url IS NULL";
+    var getdayolist = await query(getdayolistquery);
+    if(getdayolist.length>0){
+        for (let i = 0; i < getdayolist.length; i++) {
+            var invoicepdfid = [];
+            invoicepdfid.push({"doid":getdayolist[i].id});
+            await SCM.invoice_pdf(invoicepdfid[0],async function(err, invoicepdfdfres){
+                if(invoicepdfdfres.status==true){
+                    var updatepopdfurlquery = "update Dayorder set invoice_url='"+invoicepdfdfres.url.filename+"',invoice_no='INV"+getdayolist[i].id+"' where id="+getdayolist[i].id;
+                    var updatepopdfurl = await query(updatepopdfurlquery);
+                }
+            });
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "Invoice created successfully"
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "sorry no Invoice"
+        };
+        result(null, resobj);
+    }
 };
 
 module.exports = SCM;

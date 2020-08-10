@@ -91,6 +91,11 @@ module.exports = function(app) {
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
   app.route("/admin/po/removebohmapping").post(middleware.checkToken,routesVersioning({"1.0.0": scm.remove_boh_mapping}));
+
+  ///////PO Auto Creation Loop//////
+  app.route("/admin/po/pdfloop").post(middleware.checkToken,routesVersioning({"1.0.0": scm.autopopdfcreate}));
+  ///////Invoice Auto Creation Loop//////
+  app.route("/admin/invoice/pdfloop").post(middleware.checkToken,routesVersioning({"1.0.0": scm.autoinvoicepdfcreate}));
   /////// SCM Sorting /////////////
   app.route("/admin/sorting/getsortinglist").post(middleware.checkToken,routesVersioning({"1.0.0": scm.get_soring_list}));
   app.route("/admin/sorting/savesorting").post(middleware.checkToken,routesVersioning({"1.0.0": scm.save_sorting}));
@@ -178,6 +183,7 @@ app.route("/admin/login").post(routesVersioning({"1.0.0":adminuser.login}));
 app.route("/admin/logout").post(routesVersioning({"1.0.0":adminuser.logout}));
 
 app.route("/admin/userdetails").post(routesVersioning({"1.0.0":adminuser.user_details}));
+
 
 }
 
