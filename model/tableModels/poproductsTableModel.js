@@ -12,6 +12,7 @@ var POproducts = function(poproducts) {
   this.vid = poproducts.vid;
   this.cost = poproducts.cost;
   this.other_charges = poproducts.other_charges;
+  this.rate = poproducts.rate ||0;
   this.requested_quantity = poproducts.requested_quantity || 0;
   this.received_quantity = poproducts.received_quantity || 0;
   this.aditional_quantity = poproducts.aditional_quantity || 0;

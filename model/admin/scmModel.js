@@ -358,8 +358,12 @@ SCM.create_po =async function create_po(req,result) {
                                           console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
                                             var inserpopdata = [];
-                                            inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price*vendor_polist[j].qty,"other_charges":getvendorcost[0].other_charges*vendor_polist[j].qty,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
-                                            console.log("inserpopdata -->=>",inserpopdata);
+                                            var rate = 0;
+                                            var calculatedprice = 0;
+                                            calculatedprice = ((parseFloat(getvendorcost[0].base_price)*parseFloat(getvendorcost[0].other_charges))/100);
+                                            rate = parseFloat(getvendorcost[0].base_price)+parseFloat(calculatedprice);
+                                            inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price,"other_charges":getvendorcost[0].other_charges,"rate":rate,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
+                                            // console.log("inserpopdata -->=>",inserpopdata);
                                             POProducts.createPOProducts(inserpopdata[0],async function(err,popres){
                                                 // console.log("Step 5: after popres createPOProducts ==>",popres);
                                                 if(popres.status==true){
@@ -390,7 +394,7 @@ SCM.create_po =async function create_po(req,result) {
                                                 }
                                             });
                                             
-                                            vendorcost = parseInt(vendorcost)+(( parseInt(getvendorcost[0].base_price) * parseInt(vendor_polist[j].qty) ) + ( parseInt(getvendorcost[0].other_charges) * parseInt(vendor_polist[j].qty) ));
+                                            vendorcost = parseFloat(vendorcost)+parseFloat(rate);
                                             // console.log("Step 6: sum of vendor cost ==>",vendorcost);
                                         }
                                         /////Update Dayorder product status =>removed///////
@@ -419,7 +423,7 @@ SCM.create_po =async function create_po(req,result) {
                             }else{ console.log("po not created"); }
                         });
                     }else{ 
-                        console.log("vendor quantity 0"); 
+                        // console.log("vendor quantity 0"); 
                         /////Delete PO Temp///////////
                         var updatepotempquery = "update POtemp set delete_status=1 where tempid in("+req.templist+") and vid="+checkvendor[0].vid;
                         var updatepotemp = await query(updatepotempquery);
@@ -496,7 +500,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
                 }     
                 if(getpolist[i].po_status ==3 || getpolist[i].po_status == 4){
                     getpolist[i].close_flag=0;
-                    getpolist[i].delete_flag=0
+                    getpolist[i].delete_flag=0;
                 }           
             }
             var totalcount = total_count.length;
@@ -1078,12 +1082,16 @@ SCM.update_po_unreceive_from_sorting =async function update_po_unreceive_from_so
 /////////View PO/////////////
 SCM.view_po =async function view_po(req,result) {
     if(req.zoneid && req.poid){   
-        var poviewquery = "select po.*,ven.name as vendorname,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'prid',pop.prid,'vpid',pop.vpid,'productname',dop.productname,'vid',pop.vid,'vendorname',ven.name,'cost',pop.cost,'other_charges',pop.other_charges,'requested_quantity',pop.requested_quantity,'received_quantity',pop.received_quantity,'aditional_quantity',pop.aditional_quantity,'pop_status',pop.pop_status,'stand_by',pop.stand_by,'due_date',pop.due_date,'buyer_comment',pop.buyer_comment,'delivery_note',pop.delivery_note,'sorting_status',pop.sorting_status,'created_at',pop.created_at,'updated_at',pop.updated_at)) as products from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid where po.poid="+req.poid;
+        var poviewquery = "select po.*,ven.name as vendorname,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'prid',pop.prid,'vpid',pop.vpid,'productname',dop.productname,'vid',pop.vid,'vendorname',ven.name,'cost',pop.cost,'other_charges',pop.other_charges,'requested_quantity',pop.requested_quantity,'received_quantity',pop.received_quantity,'aditional_quantity',pop.aditional_quantity,'pop_status',pop.pop_status,'stand_by',pop.stand_by,'due_date',pop.due_date,'buyer_comment',pop.buyer_comment,'delivery_note',pop.delivery_note,'sorting_status',pop.sorting_status,'created_at',pop.created_at,'updated_at',pop.updated_at)) as products from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid where po.poid="+req.poid+" group by pop.popid";
         var poview = await query(poviewquery);
         if(poview.length>0){
             for (let i = 0; i < poview.length; i++) {
-                poview[i].products = JSON.parse(poview[i].products);                
+                poview[i].products = JSON.parse(poview[i].products);  
+                // poview[i].products = poview[i].products.from(new Set(a));              
             }
+            poview[0].products = poview[0].products.map(JSON.stringify).reverse() // convert to JSON string the array content, then reverse it (to check from end to begining)
+                .filter(function(item, index, arr){ return arr.indexOf(item, index + 1) === -1; }) // check if there is any occurence of the item in whole array
+                .reverse().map(JSON.parse) // revert it to original state
             let resobj = {
                 success: true,
                 status: true,
@@ -1108,16 +1116,21 @@ SCM.view_po =async function view_po(req,result) {
     }     
 };
 
+
 /////// PO PDF ////////
 SCM.po_pdf= async function po_pdf(req,result) {
     if(req.poid){
-        var getchecklistquery ="select po.poid,po.created_at as podate,pop.due_date as deliveryduedate,ven.name as vendorname,ven.address as vendoraddress,ven.phoneno as vendorphoneno,ven.email as vendoremail,ven.gst as vendorgst,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'product_name',dop.productname,'rate',pop.cost,'quantity',pop.requested_quantity,'unit',CONCAT(dop.product_packetsize,'-',uom.name),'amount',pop.requested_quantity*pop.cost)) as items from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid left join UOM as uom on uom.uomid=dop.product_uom where po.poid="+req.poid;
+        var getchecklistquery ="select po.poid,po.created_at as podate,pop.due_date as deliveryduedate,ven.name as vendorname,ven.address as vendoraddress,ven.phoneno as vendorphoneno,ven.email as vendoremail,ven.gst as vendorgst,JSON_ARRAYAGG(JSON_OBJECT('popid',pop.popid,'poid',pop.poid,'product_name',dop.productname,'rate',pop.rate,'quantity',pop.requested_quantity,'unit',CONCAT(dop.product_packetsize,'-',uom.name),'amount',pop.requested_quantity*pop.rate)) as items from PO as po left join POproducts as pop on pop.poid=po.poid left join Procurement as pr on pr.prid=pop.prid left join Dayorder_products as dop on dop.prid=pr.prid left join Vendor as ven on ven.vid=po.vid left join UOM as uom on uom.uomid=dop.product_uom where po.poid="+req.poid+" group by pop.popid";
         var getchecklist = await query(getchecklistquery);
         
         for (let i = 0; i < getchecklist.length; i++) {
             getchecklist[i].items = JSON.parse(getchecklist[i].items); 
         }
-    
+        //////Start: Remove Duplicate////////
+        getchecklist[0].items  = getchecklist[0].items .map(JSON.stringify).reverse() // convert to JSON string the array content, then reverse it (to check from end to begining)
+                .filter(function(item, index, arr){ return arr.indexOf(item, index + 1) === -1; }) // check if there is any occurence of the item in whole array
+                .reverse().map(JSON.parse) // revert it to original state
+        //////End: Remove Duplicate////////
         var sumof = 0;
         for (let j = 0; j < getchecklist[0].items.length; j++) {
             sumof = parseInt(sumof)+parseInt(getchecklist[0].items[j].amount);

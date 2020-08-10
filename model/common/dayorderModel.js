@@ -961,7 +961,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
   
   }
      
-  };
+};
 
 
 ///// crm Day Order List ///////////
