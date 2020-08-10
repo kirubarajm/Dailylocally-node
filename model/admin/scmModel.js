@@ -2239,7 +2239,7 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
         let resobj = {
             success: true,
             status: true,
-            message: "moved to QC",
+            message: "moved to QA",
             error_msg: error_poid
                        
         };
