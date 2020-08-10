@@ -30,8 +30,8 @@ const calculate = {
   //  moveitversioncode : 1,
  
 
-  eatiosversioncodenew: 1, //normal update
-  eatiosversionforceupdate: 1, //forceupdate version
+  dlversioncodenew: 1, //normal update
+  dlversionforceupdate: 1, //forceupdate version
   eatforceupdate: 1,
 
   distanceapiKey: "AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc",

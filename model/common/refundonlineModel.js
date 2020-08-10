@@ -21,10 +21,11 @@ var RefundOnline = function(refund) {
 
 RefundOnline.createRefund = async function createRefund(req, result) {
 
+  console.log("req.doid",req.doid);
+  const orderrefunddetails = await query("select * from Refund_Online where doid ='" + req.doid + "' and active_status=0 order by rs_id desc  limit 1");
 
-  const orderrefunddetails = await query("select * from Refund_Online where orderid ='" + req.orderid + "' and active_status=0 order by rs_id desc  limit 1");
-  
   if (orderrefunddetails.length ==0) {
+   
     sql.query("INSERT INTO Refund_Online set ?",req,async function(err, res1) {
       if (err) result(true, null);
       else {
@@ -42,8 +43,8 @@ RefundOnline.createRefund = async function createRefund(req, result) {
 }else{
 
   console.log("---------------------");
-  var update_query = "Update Refund_Online set refund_amt='"+ req.refund_amt+"',refunded_by='"+req.refunded_by+"',doid='"+req.doid+"',refund_delivery_charge='"+req.refund_delivery_charge+"' where orderid ='" + req.orderid + "' "
-  
+  var update_query = "Update Refund_Online set original_amt= original_amt + "+ req.original_amt+",refunded_by='"+req.refunded_by+"',doid='"+req.doid+"',refund_delivery_charge='"+req.refund_delivery_charge+"' where orderid ='" + req.orderid + "' "
+  console.log(update_query);
   var update = await query(update_query);
  
 }

@@ -101,9 +101,9 @@ Category.get_category_list =async function get_category_list(req,result) {
               const landscape_collectionlist  = collection.filter(collection => collection.tile_type > 1);
 
 
-              console.log(collection.length);
-              console.log(potrate_collectionlist.length);
-              console.log(landscape_collectionlist.length);
+              // console.log(collection.length);
+              // console.log(potrate_collectionlist.length);
+              // console.log(landscape_collectionlist.length);
            
               for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
@@ -137,7 +137,7 @@ Category.get_category_list =async function get_category_list(req,result) {
                 landscape_collectionlist.forEach(i => {
                 
                   // console.log(i.cid);
-                  // temp1 = temp1 + 4
+                  temp1 = temp1 + 4
                   // console.log("temp1",temp1);
                   i.category=true,
                   // i.collection_status= true
@@ -146,9 +146,9 @@ Category.get_category_list =async function get_category_list(req,result) {
                   i.servicable_status=servicable_status;
                   // i.tile_type= 2
                         
-                  res.splice(i.category_Position, 0, i);
-                  // temp1 = temp1+1
-  
+                  res.splice(temp1, 0, i);
+                  temp1 = temp1+1
+                  console.log("temp1",temp1);
                 });
               }
              
