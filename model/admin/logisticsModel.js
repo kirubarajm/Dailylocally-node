@@ -989,10 +989,10 @@ Logistics.trip_list =async function trip_list(req,result) {
 
         var wherecon="";
         if(req.moveit_id){
-            wherecon = wherecon+" and (mt.moveit_id='"+req.moveit_id+"' or mu.name='"+req.moveit_id+"' )";
+            wherecon = wherecon+" and (mt.moveit_id LIKE '%"+req.moveit_id+"%' or mu.name LIKE '%"+req.moveit_id+"%' )";
         }
         if(req.tripid){
-            wherecon = wherecon+" and (dayo.trip_id='"+req.tripid+"' or mu.name='"+req.tripid+"' )";
+            wherecon = wherecon+" and (dayo.trip_id LIKE '%"+req.tripid+"%' or mu.name LIKE '%"+req.tripid+"%' )";
         }
         if(req.from_date && req.to_date){
             wherecon = wherecon+" and (date(dayo.date) between '"+req.from_date+"' and  '"+req.to_date+"') ";

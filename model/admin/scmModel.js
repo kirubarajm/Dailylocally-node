@@ -472,7 +472,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
             where = where+" and pop.pop_status="+req.pop_status;
         }
         if(req.vendorsearch){
-            where = where+" and po.vid='"+req.vendorsearch+"' or ven.name='"+req.vendorsearch+"' ";
+            where = where+" and (po.vid LIKE '%"+req.vendorsearch+"%' or ven.name LIKE '%"+req.vendorsearch+"%') ";
         }
         if(req.due_date){
             where = where+" and date(pop.due_date)='"+req.due_date+"' ";
@@ -544,10 +544,10 @@ SCM.get_po_receive_list =async function get_po_receive_list(req,result) {
             where = where+" and (date(po.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
         if(req.productsearch){
-            where = where+" and pop.vpid='"+req.productsearch+"' or dop.productname='"+req.productsearch+"' ";
+            where = where+" and (pop.vpid LIKE '%"+req.productsearch+"%' or dop.productname LIKE '%"+req.productsearch+"%') ";
         }
         if(req.vendorsearch){
-            where = where+" and po.vid='"+req.vendorsearch+"' or ven.name='"+req.vendorsearch+"' ";
+            where = where+" and (po.vid LIKE '%"+req.vendorsearch+"%' or ven.name LIKE '%"+req.vendorsearch+"%') ";
         }
         if(req.poid){
             where = where+" and po.poid="+req.poid;
