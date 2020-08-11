@@ -371,11 +371,36 @@ Order.online_order_place_conformation = async function(order_place, result) {
       order_place.orderid +
       "' ";
 
+      if(order_place.payment_status === 1){
+         const getprice = await query("select price from Orders where orderid ='"+order_place.orderid+"'");
+         var paymentid  = order_place.transactionid;
+         var amount     = getprice[0].price*100;
+         instance.payments.capture(paymentid, parseInt(amount))
+         .then((data)=>{
+           captionupdate = "update Orders set captured_status=1 where transactionid='"+order_place.transactionid+"'";
+           sql.query(captionupdate, async function(err, captionresult) {
+             if (err) {
+               result(err, null);
+             }else{
+               console.log(captionresult);
+             }
+           });
+         }).catch((err)=>{
+           console.log(err);      
+         });
+
+      }
+
       sql.query(orderUpdateQuery, async function(err, res1) {
         if (err) {
           result(err, null);
         } else {
-          if (order_place.payment_status === 1) {         
+          if (order_place.payment_status === 1) {   
+            
+            
+
+
+
             var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
             var getordertype = await query(getordertypequery);
             order_place.userid=getordertype[0].userid;
