@@ -687,7 +687,7 @@ Catalog.search_catalog_data =async function search_catalog_data(req,result) {
         }
 
         if(pid>0){
-            var productdataquery = "select pid,Productname,active_status,scl1_id,scl2_id,image from ProductMaster where delete_status=0 and pid="+pid;
+            var productdataquery = "select pid,Productname,'' as active_status,scl1_id,scl2_id,image from ProductMaster where delete_status=0 and pid="+pid;
             product = await query(productdataquery);            
         }
         
