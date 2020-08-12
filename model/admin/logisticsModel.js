@@ -397,14 +397,14 @@ Logistics.moveit_list =async function moveit_list(req,result) {
             wherecon = wherecon+" and mu.online_status='"+req.livestatus+"' ";
         }        
         if(req.moveit_search){
-            wherecon = wherecon+" and (mu.userid like '%"+req.userid+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
+            wherecon = wherecon+" and (mu.userid like '%"+req.moveit_search+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
         }
 
         if(req.report && req.report==1){
             var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
         }else{
             var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" group by mu.userid order by mu.userid desc limit " +startlimit +"," +pagelimit +"";
-        }        
+        }      
         var moveitlist = await query(moveitlistquery);
 
         var totalcountquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
