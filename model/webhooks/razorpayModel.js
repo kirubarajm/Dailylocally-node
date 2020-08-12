@@ -49,7 +49,7 @@ RazorpayWebhook.order_success_update = async function order_success_update(New_R
       return(err, null);
     } else { 
       if(res.length >=1){
-        if(res && res[0].payment_type==1 && res[0].payment_status==0 && res[0].transactionid==null && res[0].transaction_status ==null){
+        if(res && res[0].payment_type==1 && res[0].payment_status==0 && res[0].tsid==null && res[0].transaction_status ==null){
           console.log("=============================================> Razorpay Captured");
           var paymentid  = New_Razorpay.payment_id;
           var amount     = New_Razorpay.amount;
@@ -78,16 +78,18 @@ RazorpayWebhook.order_success_update = async function order_success_update(New_R
         }else if((res[0].payment_type ==1 && res[0].payment_status ==1) || (res[0].payment_type ==1 && res[0].payment_status ==2)){
           var paymentid  = New_Razorpay.payment_id;
           var amount     = New_Razorpay.amount;
-          instance.payments.capture(paymentid, parseInt(amount)).then((data) => {
-            console.log("==================================>refund Init");
-            instance.payments.refund(paymentid, {amount: amount, notes: {note1: 'OrderID: '+orderid}}).then((data) =>{
-              console.log("====>Refund Date===========>",data);
-              var New_OnlineRefund =  {};
-              New_OnlineRefund.orderid = orderid;
-              New_OnlineRefund.paymentid = data.id;
-              Onlineautorefund.create_Onlineautorefund(New_OnlineRefund);
+          if(paymentid != res[0].tsid){
+            instance.payments.capture(paymentid, parseInt(amount)).then((data) => {
+              console.log("==================================>refund Init");
+              instance.payments.refund(paymentid, {amount: amount, notes: {note1: 'OrderID: '+orderid}}).then((data) =>{
+                console.log("====>Refund Date===========>",data);
+                var New_OnlineRefund =  {};
+                New_OnlineRefund.orderid = orderid;
+                New_OnlineRefund.paymentid = data.id;
+                Onlineautorefund.create_Onlineautorefund(New_OnlineRefund);
+              });
             });
-          });
+          }          
         }else{
           let resobj = {
             success: true,
