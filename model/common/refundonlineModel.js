@@ -81,15 +81,14 @@ RefundOnline.get_all_refunds = function get_all_refunds(req, result) {
     where = where+" and rf.userid="+req.userid;
     }
 
-    if (req.search) {
+    if (req.user_search) {
 
-      where = where+" and (us.phoneno like '%"+req.search+"%' or us.userid like '%"+req.search+"%' or us.name like '%"+req.search+"%') ";
+      where = where+" and (us.phoneno like '%"+req.user_search+"%' or us.userid like '%"+req.user_search+"%' or us.name like '%"+req.user_search+"%') ";
     }
-
+ 
   where= where+ "  group by rf.orderid order by active_status=0 DESC,created_at DESC limit " +startlimit +"," +pagelimit +" " 
 
-  var refund_list = "select rf.*,ors.userid,ors.created_at as order_created_time,au.name as adminname,us.name,us.phoneno,us.email,if(rf.active_status=0,'Waiting for refund',if(rf.active_status=1,'Refunded','Rejected')) as status_message,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products   from Refund_Online rf left join Orders as ors on ors.orderid = rf.orderid  left join Admin_users au on au.admin_userid=rf.refunded_by  left join User as us on us.userid=ors.userid join Dayorder_products orp on orp.orderid=rf.orderid where ors.zoneid="+req.zoneid+" and orp.refund_status !=0 "+where+"  "
-
+  var refund_list = "select rf.*,ors.userid,ors.created_at as order_created_time,au.name as adminname,us.name,us.phoneno,us.email,if(rf.active_status=0,'Waiting for refund',if(rf.active_status=1,'Refunded','Rejected')) as status_message,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products   from Refund_Online rf left join Orders as ors on ors.orderid = rf.orderid  left join Admin_users au on au.admin_userid=rf.refunded_by  left join User as us on us.userid=ors.userid join Dayorder_products orp on orp.orderid=rf.orderid where ors.zoneid="+req.zoneid+" and orp.refund_status !=0 "+where+"  ";
   sql.query(refund_list,async function(err, res) {
     if (err) result(err, null);
     else {

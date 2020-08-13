@@ -6823,7 +6823,7 @@ Dluser.dl_User_list =async function dl_User_list(req, result) {
 
   var where = "";
   if(req.search){
-      where = where+" and (phoneno LIKE  '%" +req.search+ "%' OR email LIKE  '%" +req.search+ "%' OR userid LIKE  '%" +req.search+ "%' or name LIKE  '%" +req.search+ "% ' ) ";
+      where = where+" and (us.phoneno LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
   }
 
   if(req.report && req.report==1){

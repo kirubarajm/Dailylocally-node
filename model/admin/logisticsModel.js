@@ -397,14 +397,14 @@ Logistics.moveit_list =async function moveit_list(req,result) {
             wherecon = wherecon+" and mu.online_status='"+req.livestatus+"' ";
         }        
         if(req.moveit_search){
-            wherecon = wherecon+" and (mu.userid like '%"+req.userid+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
+            wherecon = wherecon+" and (mu.userid like '%"+req.moveit_search+"%' or mu.name like '%"+req.moveit_search+"%' or mu.phoneno like '%"+req.moveit_search+"%') ";
         }
 
         if(req.report && req.report==1){
             var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
         }else{
             var moveitlistquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" group by mu.userid order by mu.userid desc limit " +startlimit +"," +pagelimit +"";
-        }        
+        }      
         var moveitlist = await query(moveitlistquery);
 
         var totalcountquery = "select *,mu.phoneno as phoneno from MoveitUser as mu left join Zone as zo on zo.id=mu.zone where mu.userid!='' "+wherecon+" ";
@@ -989,10 +989,10 @@ Logistics.trip_list =async function trip_list(req,result) {
 
         var wherecon="";
         if(req.moveit_id){
-            wherecon = wherecon+" and (mt.moveit_id='"+req.moveit_id+"' or mu.name='"+req.moveit_id+"' )";
+            wherecon = wherecon+" and (mt.moveit_id LIKE '%"+req.moveit_id+"%' or mu.name LIKE '%"+req.moveit_id+"%' )";
         }
         if(req.tripid){
-            wherecon = wherecon+" and (dayo.trip_id='"+req.tripid+"' or mu.name='"+req.tripid+"' )";
+            wherecon = wherecon+" and (dayo.trip_id LIKE '%"+req.tripid+"%' or mu.name LIKE '%"+req.tripid+"%' )";
         }
         if(req.from_date && req.to_date){
             wherecon = wherecon+" and (date(dayo.date) between '"+req.from_date+"' and  '"+req.to_date+"') ";

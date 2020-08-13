@@ -7,6 +7,8 @@ var constant = require('../constant');
 var Notification = require('../common/notificationModel');
 var PushConstant = require("../../push/PushConstant.js");
 var Razorpay = require("razorpay");
+var Onlineautorefund = require('../common/Online_autorefundModel.js');
+var Order = require('../common/orderModel.js');
 //Task object constructor
 var RazorpayWebhook = function(razorpay){
     this.payment_id = razorpay.payment_id || 0;
@@ -41,45 +43,53 @@ RazorpayWebhook.create_Razorpayresponse = async function create_Razorpayresponse
 RazorpayWebhook.order_success_update = async function order_success_update(New_Razorpay) {
   var orderid = New_Razorpay.orderid;
   var selectquery = "select * from  Orders where orderid="+orderid;
-  sql.query(selectquery,function(err, res){
+  sql.query(selectquery,async function(err, res){
     if (err) {
       console.log("error: ", err);
       return(err, null);
     } else { 
       if(res.length >=1){
-        if(res && res[0].orderstatus==0 && res[0].payment_type==1 && res[0].payment_status==0 && res[0].transactionid==null && res[0].transaction_status ==null){
+        if(res && res[0].payment_type==1 && res[0].payment_status==0 && res[0].tsid==null && res[0].transaction_status ==null){
           console.log("=============================================> Razorpay Captured");
           var paymentid  = New_Razorpay.payment_id;
           var amount     = New_Razorpay.amount;
           instance.payments.capture(paymentid, parseInt(amount));
-          var updatesuccessquery = "update Orders set captured_status=1,payment_status=1,lock_status=0,transactionid='"+New_Razorpay.payment_id+"',transaction_status='success' where orderid="+orderid;
-          sql.query(updatesuccessquery,function(err, res1){
-            if (err) {
-              console.log("error: ", err);
-              return(err, null);
-            }else{
-              Notification.orderEatPushNotification(orderid,null,PushConstant.pageid_eat_razorpay_payment_success);
+          // var updatesuccessquery = "update Orders set captured_status=1,payment_status=1,tsid='"+New_Razorpay.payment_id+"',transaction_status='success' where orderid="+orderid;
+
+          var dayorderdata = [];
+          dayorderdata.push({"orderid":orderid,"payment_status":1,"transactionid":New_Razorpay.payment_id});
+          Order.online_order_place_conformation(dayorderdata[0],async function(err,dayorderres){
+            if(dayorderres.status==true){
               let resobj = {
                 success: true,
                 status : true,
                 message: "Order Updated successfully"
               };    
               return(null, resobj);
+            }else{
+              let resobj = {
+                success: true,
+                status : false,
+                message: "something went wrong plz try again"
+              };    
+              return(null, resobj);
             }
           });
-        }else if((res[0].payment_type ==1 && res[0].payment_status ==1) || (res[0].payment_type ==1 && res[0].payment_status ==2) || res[0].orderstatus==7){
+        }else if((res[0].payment_type ==1 && res[0].payment_status ==1) || (res[0].payment_type ==1 && res[0].payment_status ==2)){
           var paymentid  = New_Razorpay.payment_id;
           var amount     = New_Razorpay.amount;
-          instance.payments.capture(paymentid, parseInt(amount)).then((data) => {
-            console.log("==================================>refund Init");
-            instance.payments.refund(paymentid, {amount: amount, notes: {note1: 'OrderID: '+orderid}}).then((data) =>{
-              console.log("====>Refund Date===========>",data);
-              var New_OnlineRefund =  {};
-              New_OnlineRefund.orderid = orderid;
-              New_OnlineRefund.paymentid = data.id;
-              Onlineautorefund.create_Onlineautorefund(New_OnlineRefund);
+          if(paymentid != res[0].tsid){
+            instance.payments.capture(paymentid, parseInt(amount)).then((data) => {
+              console.log("==================================>refund Init");
+              instance.payments.refund(paymentid, {amount: amount, notes: {note1: 'OrderID: '+orderid}}).then((data) =>{
+                console.log("====>Refund Date===========>",data);
+                var New_OnlineRefund =  {};
+                New_OnlineRefund.orderid = orderid;
+                New_OnlineRefund.paymentid = data.id;
+                Onlineautorefund.create_Onlineautorefund(New_OnlineRefund);
+              });
             });
-          });
+          }          
         }else{
           let resobj = {
             success: true,
