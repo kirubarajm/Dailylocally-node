@@ -30,8 +30,8 @@ const calculate = {
   //  moveitversioncode : 1,
  
 
-  dlversioncodenew: 1, //normal update
-  dlversionforceupdate: 1, //forceupdate version
+  eatiosversioncodenew: 1, //normal update
+  eatiosversionforceupdate: 1, //forceupdate version
   eatforceupdate: 1,
 
   distanceapiKey: "AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc",
@@ -146,13 +146,6 @@ const calculate = {
     Xfactor_status:false,
     Xfactor_moveit_count:5,
     order_waiting_min:30, //min
-
-    ///// Testing Zendesk//////////
-    // zendesk_url:"https://dailylocallytest.zendesk.com/",
-    // Username:"aravind@tovogroup.com",
-    // Password:"Dailylocally12!",
-
-    ///// Live Zendesk//////////
     zendesk_url:"https://dailylocallyapp.zendesk.com/",
     Username:"dailylocally@gmail.com",
     Password:"Admincrm12!",
@@ -171,7 +164,7 @@ const calculate = {
     makeit_live_quantity_restrict_count:10,
 
     email_user:'dailylocally@gmail.com',
-    email_pass:'Dailylocally12!',
+    email_pass:'Admincrm12!',
 
     virtual_order_sms_contact_number:'9150265900',
     Real_order_sms_link:'https://bit.ly/2WIHsYs',

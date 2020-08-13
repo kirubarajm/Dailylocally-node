@@ -80,7 +80,7 @@ ZendeskWebhook.ZendeskController_webhooks_tickets =async function ZendeskControl
       if(data.ticket){
         var zendesk_userid=data.ticket.requester_id;
         console.log("zendesk_userid-->",zendesk_userid);
-        var get_zendesk_chat_query="select id,orderid,issueid,type from Zendesk_chat_requests where zendeskuserid= "+zendesk_userid +" order by id desc LIMIT 1";
+        var get_zendesk_chat_query="select id,doid,issueid,type from Zendesk_chat_requests where zendeskuserid= "+zendesk_userid +" order by id desc LIMIT 1";
         var get_zendesk_chat=await query(get_zendesk_chat_query);
         console.log("get_zendesk_chat_query-->",get_zendesk_chat);
         if(get_zendesk_chat.length>0){
@@ -89,7 +89,7 @@ ZendeskWebhook.ZendeskController_webhooks_tickets =async function ZendeskControl
           console.log("updateTicketQuery-->",updateTicketQuery);
           var update_ticket=await query(updateTicketQuery);
 
-          var updateOrderQuery="update Orders set zendesk_ticketid= "+ticketid+" where orderid= "+get_zendesk_chat[0].orderid; 
+          var updateOrderQuery="update Dayorder set zendesk_ticketid= "+ticketid+" where id= "+get_zendesk_chat[0].doid; 
           var update_orders=await query(updateOrderQuery);
           console.log("updateOrderQuery-->",updateOrderQuery);
 
@@ -100,10 +100,20 @@ ZendeskWebhook.ZendeskController_webhooks_tickets =async function ZendeskControl
 
            if(select_tags.length>0){
             var type =get_zendesk_chat[0].type;
-            var tags_type= type==1?"currentOrder":"oldOrder"
+
+            if (type==1) {
+              tags_type='Future_Order'
+            } else if(type==2) {
+              tags_type='admin'
+            }else if(type==3) {
+              tags_type='queries'
+            }else  {
+              tags_type='Completed_orders'
+            }
+            // var tags_type= type==1?"currentOrder":"oldOrder"
             var tags=[];
             tags.push(tags_type);
-            tags.push("order_id_"+get_zendesk_chat[0].orderid);
+            tags.push("order_id_"+get_zendesk_chat[0].doid);
             //console.log("model select_tags[0].tag_name--",select_tags[0].tag_name.replace(/\s+/g,"_"));
             tags.push(select_tags[0].tag_name.replace(/\s+/g,"_"));
             console.log("select_tags-->",tags);

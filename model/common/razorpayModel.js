@@ -76,6 +76,7 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
     const onlinerefunddetails = await query("select * from Refund_Online where  rs_id ="+req.rs_id+"");
     const Orderproductsdetails = await query("select * from Orderproducts where  orderid ="+onlinerefunddetails[0].orderid+"");
     const servicecharge = constant.servicecharge;
+    
     if (req.active_status == 1) {
       if (onlinerefunddetails[0].active_status == 0 ) {
       
@@ -97,7 +98,7 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
        
         // success
         var refunded_by=req.done_by ||0;
-        updatequery = "update Refund_Online set active_status= 1,refunded_time='"+time+"',refund_amt = '"+refund_amt+"',payment_id='"+data.id+"',refunded_by = '"+refunded_by+"',cancellation_charges='"+servicecharge+"' where rs_id ='" + req.rs_id + "'"
+        updatequery = "update Refund_Online set active_status= 1,refunded_time='"+time+"',refund_amt = '"+refund_amt+"',payment_id='"+data.id+"',refunded_by = '"+refunded_by+"' where rs_id ='" + req.rs_id + "'"
         
         sql.query(updatequery, async function (err, res) {
             if(err) {
@@ -117,10 +118,11 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
           OrderComments.create_OrderComments_crm(New_comments)
     
               
-          var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid where  rf.rs_id ="+req.rs_id+" " );
+           
+    var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android,dor.date from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid left join Dayorder dor on dor.id=rf.doid where  rf.rs_id ="+req.rs_id+" " );
 
-          PushConstant.Pageid_dl_refund_create = 10;
-          await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_refund_create);
+    PushConstant.Pageid_dl_refund_repayment = 11;
+    await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_refund_repayment);
 
                   var  message = "Amount refunded successfully"
                   let sucobj=true;
@@ -199,7 +201,7 @@ Razorpay.create_customerid_by_razorpay = async function create_customerid_by_raz
                     New_comments.done_type=1
                     OrderComments.create_OrderComments_crm(New_comments)
     
-                    var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid where  rf.rs_id ="+req.rs_id+" " );
+                    var orders = await query("select rf.*,us.userid,us.pushid_ios,us.pushid_android,dor.date from Refund_Online rf left join Orders as ors on ors.orderid=rf.orderid left join User us on us.userid=ors.userid left join Dayorder dor on dor.id=rf.doid where  rf.rs_id ="+req.rs_id+" " );
             
                     PushConstant.Pageid_dl_Refund_unapproved_notification = 16;
                     await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_Refund_unapproved_notification);

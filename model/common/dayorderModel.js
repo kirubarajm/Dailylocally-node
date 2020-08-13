@@ -166,18 +166,215 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         // console.log("sun",getproduct[i].sun);
 
 
-        var curr = new Date;
+        // var curr = new Date;
+        // var today = moment().format("YYYY-MM-DD");
+
+        // if (getproduct[i].mon==1) {
+        //   //  dates.push(moment(d).format("YYYY-MM-DD"));
+        //   // d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+        //   d =  new Date(curr.setDate(curr.getDate() - curr.getDay()+1));
+        //   d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //   var monday = 1;
+        // }
+
+        // if (getproduct[i].tue==1) {
+        //   //  dates.push(moment(d, "YYYY-MM-DD").add(2, 'days').format("YYYY-MM-DD"));
+        //   // d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
+        //   d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+2));
+        //   d1= moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+
+        //     var tuesday = 2;
+        // }
+
+        // if (getproduct[i].wed==1) {
+        //   //  dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));//wed
+        //   // d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
+        //   d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+3));
+
+        //   d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //   var wednesday = 3;
+        // }
+
+        // if (getproduct[i].thur==1) {
+        //   //  dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+        //   // d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+        //   d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+4));
+
+        //   d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //     var Thursday = 4;
+        // }
+
+        // if (getproduct[i].fri==1) {
+        //   //  dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));//fri
+        //   // d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
+        //   d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+5));
+        //   d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //   var friday = 5;
+        // }
+
+        // if (getproduct[i].sat==1) {
+        //     // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+        //     // d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
+        //     d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+6));
+        //     d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //     var saturday = 6;
+        // }
+
+        // if (getproduct[i].sun==1) {
+        //   //  dates.push(moment(d, "YYYY-MM-DD").add(7, 'days').format("YYYY-MM-DD"));
+        //   // d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
+        //   d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+7));
+
+        //   d1 = moment(d).format("YYYY-MM-DD")
+        //   if (d1 > today) {
+        //     dates.push(moment(d1).format("YYYY-MM-DD"));
+        //   }
+        //     var sunday = 7;
+        // }
+
+
+        // // console.log(dates);
+        // // console.log("monday",monday);
+        // // console.log("tuesday",tuesday);
+        // // console.log("wednesday",wednesday);
+        // // console.log("Thursday",Thursday);
+        // // console.log("friday",friday);
+        // // console.log("saturday",saturday);
+        // // console.log("sunday",sunday);
+
+        // /////formula for i max ---->[31-3(daycount)]/3(daycount)
+          
+        // for(let k=0; k < getproduct[i].no_of_deliveries; k++){   
+          
+        //   if (monday==1) {
+
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+
+        //       // dates.push(moment(d).format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+              
+        //     }
+        //   }
+          
+        //   if (tuesday == 2) {
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     }
+        //   }
+
+        //   if (wednesday == 3) {
+
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     }
+        //   }
+
+        //   if (Thursday == 4) {
+
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+        //       d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     }
+        //   }
+            
+        //   if (friday == 5) {
+
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     } 
+        //   }
+            
+        //   if (saturday == 6) {
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     } 
+        //   }
+          
+        //   if (sunday == 7) {
+        //     if(dates.length<getproduct[i].no_of_deliveries){
+        //       // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+
+        //       d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
+        //       d1 = moment(d).format("YYYY-MM-DD")
+        //       if (d1 > today) {
+        //         dates.push(moment(d1).format("YYYY-MM-DD"));
+        //       }
+        //     }    
+        //   }            
+        // }
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+
+   var curr = new Date(getproduct[i].starting_date);
+        var curr_condition= moment(curr).format("YYYY-MM-DD");
+        console.log("curr",curr);
         var today = moment().format("YYYY-MM-DD");
+        var temp = 0;
 
         if (getproduct[i].mon==1) {
           //  dates.push(moment(d).format("YYYY-MM-DD"));
           // d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
           d =  new Date(curr.setDate(curr.getDate() - curr.getDay()+1));
           d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition ) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
           var monday = 1;
+          temp =temp + 1;
         }
 
         if (getproduct[i].tue==1) {
@@ -185,11 +382,12 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           // d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
           d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+2));
           d1= moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
 
             var tuesday = 2;
+            temp = temp + 1;
         }
 
         if (getproduct[i].wed==1) {
@@ -198,10 +396,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+3));
 
           d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 > curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
           var wednesday = 3;
+          temp = temp + 1;
         }
 
         if (getproduct[i].thur==1) {
@@ -210,10 +409,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+4));
 
           d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
             var Thursday = 4;
+            temp = temp + 1;
         }
 
         if (getproduct[i].fri==1) {
@@ -221,10 +421,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           // d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
           d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+5));
           d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
           var friday = 5;
+          temp = temp + 1;
         }
 
         if (getproduct[i].sat==1) {
@@ -232,10 +433,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             // d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
             d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+6));
             d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
             var saturday = 6;
+            temp = temp + 1;
         }
 
         if (getproduct[i].sun==1) {
@@ -244,15 +446,16 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           d=  new Date(curr.setDate(curr.getDate() - curr.getDay()+7));
 
           d1 = moment(d).format("YYYY-MM-DD")
-          if (d1 > today) {
+          if (d1 > today && d1 >= curr_condition) {
             dates.push(moment(d1).format("YYYY-MM-DD"));
           }
             var sunday = 7;
+            temp = temp + 1;
         }
 
 
-        // console.log(dates);
-        // console.log("monday",monday);
+         console.log(dates);
+         // console.log("monday",monday);
         // console.log("tuesday",tuesday);
         // console.log("wednesday",wednesday);
         // console.log("Thursday",Thursday);
@@ -261,98 +464,368 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         // console.log("sunday",sunday);
 
         /////formula for i max ---->[31-3(daycount)]/3(daycount)
+        
+
+         
+          if (temp==1) {
+            
+
+            for(let k=0; k < getproduct[i].no_of_deliveries; k++){   
           
-        for(let k=0; k < getproduct[i].no_of_deliveries; k++){   
-          
-          if (monday==1) {
+              if (monday==1) {
+    
+                if(dates.length < getproduct[i].no_of_deliveries){
 
-            if(dates.length<getproduct[i].no_of_deliveries){
-
-              // dates.push(moment(d).format("YYYY-MM-DD"));
-
-              d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (1 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 1 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
               }
               
+    
+              if (tuesday == 2) {
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (2 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (2 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 2 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
+              }
+    
+              if (wednesday == 3) {
+    
+    
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (3 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (3 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 3 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
+              }
+    
+              if (Thursday == 4) {
+    
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (4 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (4 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 4 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
+              }
+                
+              if (friday == 5) {
+    
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (5 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (5 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 5 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
+              }
+                
+              if (saturday == 6) {
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (6 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (6 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 6 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }
+              }
+              
+              if (sunday == 7) {
+                if(dates.length < getproduct[i].no_of_deliveries){
+
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", (7 + 7 - d.getDay()) % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (7 + 7 - d.getDay()) % 7);
+                  
+                  var nooddays = 7 + 7 - d.getDay() % 7;
+                  if (nooddays==0) {
+                    nooddays = 7;
+                  }
+                  d.setDate(d.getDate() + nooddays);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  // console.log("current_date2",current_date);
+                  
+                }   
+              }            
             }
-          }
+
+
+          } else {
+            for(let k=0; k < getproduct[i].no_of_deliveries; k++){   
           
-          if (tuesday == 2) {
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
-
-              d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
+              if (monday==1) {
+    
+                if(dates.length < getproduct[i].no_of_deliveries){
+    
+                  // dates.push(moment(d).format("YYYY-MM-DD"));
+    
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", 1 + 7 - d.getDay());
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+    
+                  d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
+    
+                    //   day_in_week=  d.getDay()
+    
+                    // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
+    
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  console.log("d1",d1);
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+    
+                  
+                }
               }
+              
+    
+              if (tuesday == 2) {
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(1, 'days').format("YYYY-MM-DD"));
+    
+                  d.setDate(d.getDate() + (2 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                }
+              }
+    
+              if (wednesday == 3) {
+    
+    
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+                  console.log("current_date",d);
+                  console.log("d.getDate()",d.getDate());
+                  console.log("d.getDay()",d.getDay());
+                  console.log("---------->", 1 + 7 - d.getDay() % 7);
+                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+    
+                  d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                }
+              }
+    
+              if (Thursday == 4) {
+    
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
+                  d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                }
+              }
+                
+              if (friday == 5) {
+    
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+    
+                  d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                } 
+              }
+                
+              if (saturday == 6) {
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
+    
+                  d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                } 
+              }
+              
+              if (sunday == 7) {
+                if(dates.length<getproduct[i].no_of_deliveries){
+                  // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
+    
+                  d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
+                  d1 = moment(d).format("YYYY-MM-DD")
+                  if (d1 > today && d1 >= curr_condition) {
+                    dates.push(moment(d1).format("YYYY-MM-DD"));
+                  }
+                }    
+              }            
             }
           }
 
-          if (wednesday == 3) {
 
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
 
-              d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
-              }
-            }
-          }
 
-          if (Thursday == 4) {
 
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
-              d.setDate(d.getDate() + (4 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
-              }
-            }
-          }
-            
-          if (friday == 5) {
 
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(4, 'days').format("YYYY-MM-DD"));
+//////////////////////////////////////////////////////////////////////////
 
-              d.setDate(d.getDate() + (5 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
-              }
-            } 
-          }
-            
-          if (saturday == 6) {
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(5, 'days').format("YYYY-MM-DD"));
 
-              d.setDate(d.getDate() + (6 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
-              }
-            } 
-          }
-          
-          if (sunday == 7) {
-            if(dates.length<getproduct[i].no_of_deliveries){
-              // dates.push(moment(d, "YYYY-MM-DD").add(6, 'days').format("YYYY-MM-DD"));
-
-              d.setDate(d.getDate() + (7 + 7 - d.getDay()) % 7);
-              d1 = moment(d).format("YYYY-MM-DD")
-              if (d1 > today) {
-                dates.push(moment(d1).format("YYYY-MM-DD"));
-              }
-            }    
-          }            
-        }
 
 
         // console.log(dates);
@@ -961,7 +1434,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
   
   }
      
-};
+  };
 
 
 ///// crm Day Order List ///////////
@@ -1577,7 +2050,7 @@ Dayorder.refund_reasonlist=async function refund_reasonlist(req,result) {
       
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
 
-  var reasonquery = " select * from Day_Order_Return_reason"
+  var reasonquery = " select * from Refund_Reason"
 
   var reason_list = await query(reasonquery);
  
@@ -1730,7 +2203,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
                       New_comments.done_type=1
                       OrderComments.create_OrderComments_crm(New_comments)
 
-                      var orders = await query("SELECT rf.original_amt,ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid left join Refund_Online rf on rf.doid=ors.id where ors.id = '"+req.doid+"'" );
+                      var orders = await query("SELECT ors.date,rf.original_amt,ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid left join Refund_Online rf on rf.doid=ors.id where ors.id = '"+req.doid+"'" );
 
                       PushConstant.Pageid_dl_refund_create = 10;
                       await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_refund_create);
