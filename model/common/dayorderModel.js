@@ -1455,7 +1455,7 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     // }
     
     if(Dayorder.starting_date && Dayorder.end_date){
-           where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+end_date+"')";
+           where = where+" and (drs.date BETWEEN '"+Dayorder.starting_date +"' AND '"+Dayorder.end_date+"')";
     }else{
         // where = where+" and  DATE(drs.created_at) = CURDATE() ";
     }
