@@ -6825,6 +6825,13 @@ Dluser.dl_User_list =async function dl_User_list(req, result) {
       where = where+" and (us.phoneno LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
   }
 
+  if(req.ordertype==1){
+    where = where+" and us.userid IN(select userid from Dayorder where userid group by userid) "; 
+  }
+  if(req.ordertype==2){
+    where = where+" and us.userid NOT IN(select userid from Dayorder where userid group by userid) ";
+  }
+
   if(req.report && req.report==1){
     var getusersquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
   }else{
