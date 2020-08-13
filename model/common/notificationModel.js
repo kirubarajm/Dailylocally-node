@@ -199,7 +199,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         orderid: "" +orders[0].id,
         timeofdelivery: "" +orders[0].timeofdispatch,
         app: "Dl",
-        notification_type: "2"
+        notification_type: "1"
       };
       break;
     case PushConstant.Pageid_dl_ready_at_wherehouse_notification:
@@ -222,7 +222,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         orderid: "" +orders[0].id,
         qcchecklistfilledup: "" +orders[0].timeofqc,
         app: "Dl",
-        notification_type: "2"
+        notification_type: "1"
       };
       break;
     case PushConstant.Pageid_dl_dispatched_after_qa_notification:
@@ -235,7 +235,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         orderid: "" +orders[0].id,
         qachecklistfilledup: ""+orders[0].timeofqa,
         app: "Dl",
-        notification_type: "2"
+        notification_type: "1"
       };
       break;
 
@@ -248,7 +248,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
           orderid: "" +orders[0].id,
           refund_amount:""+orders[0].original_amt,
           app: "Dl",
-          notification_type: "2"
+          notification_type: "1"
         };
         break;
       
@@ -258,10 +258,11 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
             message: " Your refund request has been raised and will be completed within 5-7 bank working days ",
             pageid: "" +29,
             userid: "" +orders[0].userid,
-            orderid: "" +orders[0].id,
+            orderid: "" +orders[0].doid,
             refund_amount:""+orders[0].original_amt,
             app: "Dl",
-            notification_type: "2"
+            date :orders[0].date,
+            notification_type: "1"
           };
           break;
         
@@ -273,8 +274,9 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
               userid: "" +orders[0].userid,
               orderid: "" +orders[0].doid,
               refund_amount:""+orders[0].original_amt,
+              date :orders[0].date,
               app: "Dl",
-              notification_type: "2"
+              notification_type: "1"
             };
             break;
   }

@@ -6048,6 +6048,7 @@ Dluser.user_growth_order_report = async function user_growth_order_report(req, r
 Dluser.new_zendesk_request_create = function new_zendesk_request_create(req) {
 
   var new_ZendeskRequestsModel= new Zendeskrequest(req);
+  new_ZendeskRequestsModel.doid = req.orderid;
   Zendeskrequest.createZendeskrequest(new_ZendeskRequestsModel, function(err, res) {
     if (err) return err;
     else return res;
@@ -6075,18 +6076,18 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           console.log("userdetails----------->",userdetails);
 
 
-        var Username = 'tovologies@gmail.com';
-        var Password = 'Temptovo';
+        var Username = 'dailylocally@gmail.com';
+        var Password = 'Admincrm12!';
         
       //   console.log(user11111);
-        auth = "Basic " + Buffer.from(Username + ":" + Password).toString("base64");
+        auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
         var headers= {
           'Content-Type': 'application/json',
           'Authorization': auth,
          };
   
     //set request parameter
-       request.post({headers: headers, url: 'https://tovogroup.zendesk.com/api/v2/users.json?', json: userdetails, method: 'POST'},async function (e, r, body) {
+       request.post({headers: headers, url: 'https://dailylocallyapp.zendesk.com/api/v2/users.json?', json: userdetails, method: 'POST'},async function (e, r, body) {
     
        if (!body.error) {
          
@@ -6105,7 +6106,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
          result(null, resobj);
          
        }else{
-         var url = "https://tovogroup.zendesk.com/api/v2/users/search.json?query=email:"+res[0].email+""
+         var url = "https://dailylocallyapp.zendesk.com/api/v2/users/search.json?query=email:"+res[0].email+""
     
          console.log("-------------------------------url",url);
 
@@ -6517,7 +6518,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
               req.zendeskuserid=obj.users[0].id;
 
-              Eatuser.new_zendesk_request_create(req);
+              Dluser.new_zendesk_request_create(req);
         
               let resobj = {
                 success: true,
