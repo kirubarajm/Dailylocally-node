@@ -23,6 +23,7 @@ var StockKeeping = function(stockkeeping) {
     this.type = stockkeeping.type;
     this.purchase_type = stockkeeping.purchase_type ||0;
     this.purchase_quantity = stockkeeping.purchase_quantity ||0;
+    this.other_purchase_quantity = stockkeeping.other_purchase_quantity ||0;
     this.purchase_image = stockkeeping.purchase_image ||0;
     this.wastage = stockkeeping.wastage ||0;
     this.wastage_image = stockkeeping.wastage_image;
