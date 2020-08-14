@@ -1028,6 +1028,7 @@ Order.insert_order_status = function insert_order_status(req) {
 };
 
 Order.moveit_order_accept = async function moveit_order_accept(req, result) {
+  
   const orderdetails = await query("select dor.*,mt.moveit_id from Dayorder dor left join Moveit_trip mt on mt.tripid=dor.trip_id where dor.trip_id="+ req.trip_id);
   if (orderdetails.length !== 0) {    
     for(let i=0; i<orderdetails.length; i++){                  
@@ -1043,6 +1044,7 @@ Order.moveit_order_accept = async function moveit_order_accept(req, result) {
     req.lon = req.lon || 0;
     const updateorderdetails = await query("UPDATE Moveit_trip SET moveit_accept_time = '"+orderaccepttime+"',moveit_accept_lat='" + req.lat +"',moveit_accept_long='" + req.lon +"' WHERE tripid ='" +req.trip_id+"'");
  
+
 
 
 
@@ -1323,9 +1325,10 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
 
 Order.order_delivery_status_by_moveituser =async function(req, result) {
 
-  console.log(req);
   req.lat = req.lat || 0;
   req.lon = req.lon || 0;
+
+
   var order_delivery_time = moment().format("YYYY-MM-DD HH:mm:ss");
   sql.query("Select * from Dayorder where id = ? ",[req.id],async function(err, res1) {
       if (err) {
@@ -1333,6 +1336,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
       } else {
         if (res1.length !== 0) {
    
+          var zone_details = await query("select * from Zone where id='"+res1[0].zoneid+"'");
 
           if (res1[0].dayorderstatus == 11) {
             let resobj = {
@@ -1357,6 +1361,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
             result(null, resobj);
           }else{
 
+           
        
 
             req.moveitid = req.moveit_user_id;
@@ -1375,6 +1380,19 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                   var trip_status = await MoveitUser.updatetripstatus(req.trip_id);
                 }
               
+                 if (zone_details.length !=0) {
+              
+                  console.log("distance",zone_details[0].lat);
+                  console.log("distance",zone_details[0].lon);
+                    req.orglat = zone_details[0].lat;
+                    req.orglon = zone_details[0].lon;
+                    req.deslat = req.lat;
+                    req.deslon = req.lon;
+                    req.id = req.id;
+
+                   Order.dayorder_distance_calculation(req);
+
+                }
 
                 var cancel_comments = 'Delivered by moveit'
                 var New_comments  ={};
@@ -1452,5 +1470,41 @@ Order.moveit_notification_time_orderid = async function moveit_notification_time
     result(null, resobj);
   }
 };
+
+
+Order.dayorder_distance_calculation = async function dayorder_distance_calculation(req,result) {
+  //https://maps.googleapis.com/maps/api/directions/json?origin=12.9801,80.2184&destination=13.0072,80.2064&key=AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc
+    var distance_url ="https://maps.googleapis.com/maps/api/directions/json?origin="+req.orglat+","+req.orglon+"&destination="+req.deslat+","+req.deslon+"&key="+constant.distanceapiKey+"";
+  
+    
+    request({method: "GET",rejectUnauthorized: false,url: distance_url},async function(error,data) {
+        if (error) {
+          console.log("error: ", err);
+          result(null, err);
+        } else {
+        
+          // console.log(data.statusCode);
+          if (data.statusCode === 200) {
+            routesdata = JSON.parse(data.body)
+      
+            var caldistance = routesdata.routes;
+            var deliverytimedata = caldistance[0].legs;
+                 
+            var Lastmile = parseInt(deliverytimedata[0].distance.text);
+
+              console.log("Lastmile",Lastmile);
+              console.log("req.id",req.id);
+
+              var update_lastmile = await query("UPDATE Dayorder SET Lastmile ='"+Lastmile+"' WHERE id = '"+req.id+"' ");
+
+    
+          }
+             
+        }
+      }
+    );
+  
+  };
+
 
 module.exports = Order;
