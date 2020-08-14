@@ -124,6 +124,8 @@ StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
             if(req.type){  var type=req.type; }else{ var type=0; }
             if(req.purchase_type){  var purchase_type=req.purchase_type; }else{ var purchase_type=0; }
             if(req.purchase_image){  var purchase_image=req.purchase_image; }else{ var purchase_image=""; }   
+            if(req.purchase_quantity){  var purchase_quantity=req.purchase_quantity; }else{ var purchase_quantity=0; }   
+            if(req.other_purchase_quantity){  var other_purchase_quantity=req.other_purchase_quantity; }else{ var other_purchase_quantity=""; }   
                         
             var checkstockdata = [];
             checkstockdata.push({"vpid":req.vpid,"quantity":0,"zoneid":req.zoneid});
@@ -132,11 +134,8 @@ StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
                     var getotherquery = "select st.stockid,st.vpid,pm.Productname,pm.weight,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,st.quantity as boh,pm.mrp from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Dayorder_products as dop on dop.vpid=st.vpid where st.zoneid="+req.zoneid+" and st.vpid="+req.vpid+" group by st.vpid";
                     var getother = await query(getotherquery);
                     if(getother.length>0){
-                        if(purchase_type>0){
-                            purchase_quantity = actual_quantity - getother[0].boh;
-                        }
                         var sklist = [];
-                        sklist.push({"stockid":getother[0].stockid,"vpid":req.vpid,"product_name":getother[0].Productname,"cat_id":getother[0].catid,"category_name":getother[0].catagory_name,"scl1_id":getother[0].scl1_id,"subcategoryl1_name":getother[0].subcatL1name,"scl2_id":getother[0].scl2_id,"subcategoryl2_name":getother[0].subcatL2name,"price":getother[0].mrp,"missing_quantity":missing_quantity,"boh":getother[0].boh,"actual_quantity":actual_quantity,"in_sorting":getother[0].insorting,"type":type,"purchase_type":purchase_type,"purchase_quantity":purchase_quantity,"purchase_image":purchase_image,"wastage":wastage,"wastage_image":wastage_image,"zoneid":req.zoneid,"commend":getother[0].Productname,"weight":getother[0].weight});
+                        sklist.push({"stockid":getother[0].stockid,"vpid":req.vpid,"product_name":getother[0].Productname,"cat_id":getother[0].catid,"category_name":getother[0].catagory_name,"scl1_id":getother[0].scl1_id,"subcategoryl1_name":getother[0].subcatL1name,"scl2_id":getother[0].scl2_id,"subcategoryl2_name":getother[0].subcatL2name,"price":getother[0].mrp,"missing_quantity":missing_quantity,"boh":getother[0].boh,"actual_quantity":actual_quantity,"in_sorting":getother[0].insorting,"type":type,"purchase_type":purchase_type,"purchase_quantity":purchase_quantity,"other_purchase_quantity":other_purchase_quantity,"purchase_image":purchase_image,"wastage":wastage,"wastage_image":wastage_image,"zoneid":req.zoneid,"commend":getother[0].Productname,"weight":getother[0].weight});
         
                         ////////insert missing quantity/////////
                         if(missing_quantity>0){
