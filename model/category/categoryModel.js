@@ -354,9 +354,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < delivery_date.length; i++) {
  
        date= delivery_date[i]
-       date= i; 
+      //  date= i; 
+       console.log(date);
        var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"'  and dayorderstatus < 10");
  
+       console.log("dayorderdetails",dayorderdetails.length);
        if (dayorderdetails.length !=0) {
         if ( dayorderdetails[0].delivery_charge !=0) {
          delivery_date.splice(i, 1);

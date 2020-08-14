@@ -26,6 +26,7 @@ var Dayorder = function(Dayorder) {
   this.return_status=Dayorder.return_status || 0;
   this.address_type=Dayorder.address_type;
   this.virtualkey=Dayorder.virtualkey ||0;
+  this.gst=Dayorder.gst ||0;
   
 };
 
@@ -35,16 +36,19 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
   var Orderproductssdetails = await query("select * from Orderproducts where orderid='"+Dayorder.orderid+"' and subscription = 0");
   var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
+  var gst_value = ordersdetails[0].gst  / Orderproductssdetails.length;
+  console.log("gst_value",gst_value);
   for (let i = 0; i < getproduct.length; i++) {
 
     if (getproduct[i].subscription==0) {
+
       var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");
       if (dayorders.length !=0) {
 
       
         if (dayorders[0].delivery_charge==0) {
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"' where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"' where id="+dayorders[0].id;
 
         }else{
           var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
@@ -105,6 +109,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.city=ordersdetails[0].city;
         new_day_order.delivery_charge=noof_delivery;
         new_day_order.address_type=ordersdetails[0].address_type;
+        new_day_order.gst=gst_value;
     
         
 
@@ -2169,8 +2174,10 @@ Dayorder.refund_create = async function refund_create(req,result) {
           
                         var update = await query(update_query);
                         var delivery_charge = 0;
+                        var gst = 0;
                         delivery_charge=  req.delivery_charge || 0
-                        product_price = productdetails[0].product_price + delivery_charge;
+                        gst=  req.gst || 0
+                        product_price = productdetails[0].product_price + delivery_charge + gst;
                   
                         console.log(productdetails[0].orderid);
                         var refundDetail = {
@@ -2183,7 +2190,8 @@ Dayorder.refund_create = async function refund_create(req,result) {
                           refund_reason : req.refund_reason,
                           refunded_by : req.done_by,
                           doid : productdetails[0].doid,
-                          refund_delivery_charge:delivery_charge
+                          refund_delivery_charge:delivery_charge,
+                          gst:gst
 
                         };
 
