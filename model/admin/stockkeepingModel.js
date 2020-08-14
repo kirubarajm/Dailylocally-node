@@ -399,4 +399,124 @@ StockKeeping.stockkeeping_delete =async function stockkeeping_delete(req,result)
     }  
 };
 
+/////////Wastage List///////////
+StockKeeping.wastage_list =async function wastage_list(req,result) {
+    if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
+        var where = "";
+        if(req.cat_id){
+            where = where+" and cat_id="+req.cat_id+" ";
+        }
+        if(req.scl1_id){
+            where = where+" and scl1_id="+req.scl1_id+" ";
+        }
+        if(req.type){
+            where = where+" and type="+req.type+" ";
+        }        
+        if(req.from_date && req.to_date){
+            wherecon = wherecon+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+        }
+
+        if(req.report && req.report==1){
+            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        }else{
+            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC limit " +startlimit +"," +pagelimit +" ";
+        }        
+        var stockkeppinglist = await query(stockkeppinglistquery);
+
+        var totalcountquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        var total_count = await query(totalcountquery);        
+        if(stockkeppinglist.length > 0){
+            var totalcount = total_count.length;
+            let resobj = {
+                success: true,
+                status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
+                result: stockkeppinglist
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                totalcount: 0,
+                message: "no stock found"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            totalcount: 0,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }  
+};
+
+/////////Missing Item List///////////
+StockKeeping.missingitem_list =async function missingitem_list(req,result) {
+    if(req.zoneid){
+        var pagelimit = 20;
+        var page = req.page || 1;
+        var startlimit = (page - 1) * pagelimit;
+
+        var where = "";
+        if(req.cat_id){
+            where = where+" and cat_id="+req.cat_id+" ";
+        }
+        if(req.scl1_id){
+            where = where+" and scl1_id="+req.scl1_id+" ";
+        }
+        if(req.type){
+            where = where+" and type="+req.type+" ";
+        }        
+        if(req.from_date && req.to_date){
+            wherecon = wherecon+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+        }
+
+        if(req.report && req.report==1){
+            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        }else{
+            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC limit " +startlimit +"," +pagelimit +" ";
+        }        
+        var stockkeppinglist = await query(stockkeppinglistquery);
+
+        var totalcountquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        var total_count = await query(totalcountquery);        
+        if(stockkeppinglist.length > 0){
+            var totalcount = total_count.length;
+            let resobj = {
+                success: true,
+                status: true,
+                totalcount: totalcount,
+                pagelimit: pagelimit,
+                result: stockkeppinglist
+            };
+            result(null, resobj);
+        }else{
+            let resobj = {
+                success: true,
+                status: false,
+                totalcount: 0,
+                message: "no stock found"
+            };
+            result(null, resobj);
+        }
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            totalcount: 0,
+            message: "check your post values"
+        };
+        result(null, resobj);
+    }  
+};
+
 module.exports = StockKeeping;
