@@ -16,6 +16,7 @@ var RefundOnline = function(refund) {
   this.refunded_by= refund.refunded_by;
   this.doid=refund.doid;
   this.refund_delivery_charge=refund.refund_delivery_charge 
+  this.gst=refund.gst
 
 };
 
@@ -42,9 +43,9 @@ RefundOnline.createRefund = async function createRefund(req, result) {
   
 }else{
 
-  console.log("---------------------");
-  var update_query = "Update Refund_Online set original_amt= original_amt + "+ req.original_amt+",refunded_by='"+req.refunded_by+"',doid='"+req.doid+"',refund_delivery_charge='"+req.refund_delivery_charge+"' where orderid ='" + req.orderid + "' "
-  console.log(update_query);
+  // console.log("---------------------");
+  var update_query = "Update Refund_Online set original_amt= original_amt + "+ req.original_amt+",refunded_by='"+req.refunded_by+"',doid='"+req.doid+"',refund_delivery_charge='"+req.refund_delivery_charge+"',gst='"+req.gst+"' where orderid ='" + req.orderid + "' "
+  // console.log(update_query);
   var update = await query(update_query);
  
 }
