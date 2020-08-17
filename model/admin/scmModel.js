@@ -24,6 +24,7 @@ var Document = require("../../model/common/documentsModel.js");
 var MoveitUserModel = require("../moveit/moveitUserModel.js");
 var PushConstant = require("../../push/PushConstant.js");
 var Notification = require("../common/notificationModel.js");
+var MissingProducts = require("../tableModels/missingproductsTableModel.js");
 
 var pdf = require("pdf-creator-node");
 var fs = require('fs');
@@ -2279,9 +2280,17 @@ SCM.missing_quantity_report =async function missing_quantity_report(req,result) 
         insert_MQR_data.push({"dopid":req.dopid,"vpid":req.vpid,"report_quantity":req.report_quantity,"report_type":req.report_type,"from_type":req.from_type,"zoneid":req.zoneid,});        
         MissingQuantity_Report.createMissingQuantityReport(insert_MQR_data[0],async function(err,insert_MQR_res){
             if(insert_MQR_res.success==true){
+                var getcostquery = "select st.stockid,st.vpid,pl.pid,vpm.vid,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid where st.zoneid="+req.zoneid+" and st.vpid="+req.vpid+" group by st.vpid";
+                var getcost = await query(getcostquery);
                 if(req.report_type == 1){
+                    var insertmissingproductdata = [];
+                    insertmissingproductdata.push({"dopid":req.dopid,"vpid":req.vpid,"quantity":req.report_quantity,"cost":getcost[0].cost,"zoneid":req.zoneid,"from_type":req.from_type});
+                    await MissingProducts.createMissingProducts(insertmissingproductdata[0], async function(err,missingproductdatares){
+                        // console.log("missingproductdatares ==>",missingproductdatares);
+                    });
+
                     var unreceive_data = [];
-                    unreceive_data.push({"dopid":req.dopid,"vpid":req.vpid ,"report_quantity":req.report_quantity,"zoneid":req.zoneid,"from_type":req.from_type});
+                    unreceive_data.push({"dopid":req.dopid,"vpid":req.vpid ,"report_quantity":req.report_quantity,"cost":getcost[0].cost,"zoneid":req.zoneid,"from_type":req.from_type});
                     SCM.update_po_unreceive_from_sorting(unreceive_data[0],async function(err,unreceive_datares){
                         if(unreceive_datares.status == true){
                             let resobj = {

@@ -4,20 +4,20 @@ var sql = require("../db.js");
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 
-var WasteManagement = function(wastemanagement) {
-  this.waste_id = wastemanagement.waste_id;
-  this.dopid = wastemanagement.dopid;
-  this.vpid = wastemanagement.vpid;
-  this.quantity = wastemanagement.quantity ||0;
-  this.cost = wastemanagement.cost ||0;
-  this.zoneid = wastemanagement.zoneid
-  this.from_type = wastemanagement.from_type;
+var MissingProducts = function(misingproducts) {
+  this.missing_id = misingproducts.missing_id;
+  this.dopid = misingproducts.dopid;
+  this.vpid = misingproducts.vpid;
+  this.quantity = misingproducts.quantity ||0;
+  this.cost = misingproducts.cost ||0;
+  this.zoneid = misingproducts.zoneid
+  this.from_type = misingproducts.from_type;
 }
 
 //For Admin
-WasteManagement.createWasteManagement = async function createWasteManagement(req, result) {
-    var insertdata = new WasteManagement(req);
-    sql.query("INSERT INTO Waste_Management set ?", insertdata,async function(err, res) {
+MissingProducts.createMissingProducts = async function createMissingProducts(req, result) {
+    var insertdata = new MissingProducts(req);
+    sql.query("INSERT INTO Missing_Products set ?", insertdata,async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -36,9 +36,9 @@ WasteManagement.createWasteManagement = async function createWasteManagement(req
     });    
 };
 
-WasteManagement.updateWasteManagement =async function updateWasteManagement(req, result) {
-    var updatedata = new WasteManagement(req);
-    sql.query("UPDATE Waste_Management SET ? WHERE waste_id = ?", [updatedata, updatedata.waste_id],async function(err, res) {
+MissingProducts.updateMissingProducts =async function updateMissingProducts(req, result) {
+    var updatedata = new MissingProducts(req);
+    sql.query("UPDATE Missing_Products SET ? WHERE missing_id = ?", [updatedata, updatedata.missing_id],async function(err, res) {
         if (err) {
             let resobj = {
                 success: true,
@@ -58,4 +58,4 @@ WasteManagement.updateWasteManagement =async function updateWasteManagement(req,
     );
 };
 
-module.exports = WasteManagement;
+module.exports = MissingProducts;

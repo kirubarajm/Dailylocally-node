@@ -17,6 +17,7 @@ var Stock = require('../tableModels/stockTableModel.js');
 var MissingQuantityReport = require('../tableModels/missingquantityreportTableModel.js');
 var WasteManagement = require('../tableModels/wastemanagementTableModel.js');
 var StockLog = require('../tableModels/stocklogTableModel.js');
+var MissingProducts = require('../tableModels/missingproductsTableModel.js');
 
 
 var StockKeeping = function(stockkeeping) {};
@@ -131,7 +132,9 @@ StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
             checkstockdata.push({"vpid":req.vpid,"quantity":0,"zoneid":req.zoneid});
             await StockKeeping.checkstock(checkstockdata[0], async function(err,checkstockdatares){
                 if(checkstockdatares.status == true){
-                    var getotherquery = "select st.stockid,st.vpid,pm.Productname,pm.weight,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,st.quantity as boh,pm.mrp from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Dayorder_products as dop on dop.vpid=st.vpid where st.zoneid="+req.zoneid+" and st.vpid="+req.vpid+" group by st.vpid";
+                    // var getotherquery = "select st.stockid,st.vpid,pm.Productname,pm.weight,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,st.quantity as boh,pm.mrp from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Dayorder_products as dop on dop.vpid=st.vpid where st.zoneid="+req.zoneid+" and st.vpid="+req.vpid+" group by st.vpid";
+
+                    var getotherquery = "select st.stockid,st.vpid,pl.pid,vpm.vid,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as cost,pm.Productname,pm.weight,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pm.uom as uomid,uom.name as uom_name,st.quantity as boh,pm.mrp from Stock as st left join Product_live as pl on pl.vpid=st.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL2 as scl2 on scl2.scl2_id=pm.scl2_id left join SubcategoryL1 as scl1 on scl1.scl1_id=pm.scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=pm.uom left join Dayorder_products as dop on dop.vpid=st.vpid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid where st.zoneid="+req.zoneid+" and st.vpid="+req.vpid+" group by st.vpid";
                     var getother = await query(getotherquery);
                     if(getother.length>0){
                         var sklist = [];
@@ -139,14 +142,17 @@ StockKeeping.stockkeeping_add =async function stockkeeping_add(req,result) {
         
                         ////////insert missing quantity/////////
                         if(missing_quantity>0){
-                            var insertmissingdata = [];
-                            insertmissingdata.push({"dopid":0,"vpid":req.vpid,"report_quantity":missing_quantity,"report_type":1,"from_type":3,"zoneid":req.zoneid});                
-                            await MissingQuantityReport.createMissingQuantityReport(insertmissingdata[0], async function(err,missingdatares){});
+                            // var insertmissingdata = [];
+                            // insertmissingdata.push({"dopid":0,"vpid":req.vpid,"report_quantity":missing_quantity,"cost":getother[0].cost,"report_type":1,"from_type":3,"zoneid":req.zoneid});                
+                            // await MissingQuantityReport.createMissingQuantityReport(insertmissingdata[0], async function(err,missingdatares){});
+                            var insertmissingproductdata = [];
+                            insertmissingproductdata.push({"dopid":0,"vpid":req.vpid,"quantity":missing_quantity,"cost":getother[0].cost,"zoneid":req.zoneid,"from_type":3});
+                            await MissingProducts.createMissingProducts(insertmissingproductdata[0], async function(err,missingproductdatares){ });
                         }                
                         ////////insert waste management/////////
                         if(wastage>0){
                             var insertwastedata = [];
-                            insertwastedata.push({"dopid":0,"vpid":req.vpid,"quantity":wastage,"zoneid":req.zoneid,"from_type":3});
+                            insertwastedata.push({"dopid":0,"vpid":req.vpid,"quantity":wastage,"cost":getother[0].cost,"zoneid":req.zoneid,"from_type":3});
                             await WasteManagement.createWasteManagement(insertwastedata[0], async function(err,wastedatares){});
                         }
         
