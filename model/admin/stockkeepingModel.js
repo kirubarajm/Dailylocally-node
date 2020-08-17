@@ -296,7 +296,23 @@ StockKeeping.stockkeeping_edit =async function stockkeeping_edit(req,result) {
         var checkskquery = "select * from StockKeeping where zoneid="+req.zoneid+" and skid="+req.skid;
         var checksk = await query(checkskquery);
         if(checksk.length>0){
-            var updateskquery = "update StockKeeping set actual_quantity="+req.actual_quantity+",missing_quantity="+req.missing_quantity+",wastage="+req.wastage+",wastage_image='"+req.wastage_image+"',type="+req.type+" where zoneid="+req.zoneid+" and skid="+req.skid;
+            var actual_quantity = 0;
+            var missing_quantity = 0;
+            var wastage_quantity = 0;
+            var local_quantity = 0;
+            var other_quantity = 0;
+            var wastage_image = "";
+            var purchase_image = "";
+
+            if(req.actual_quantity){ actual_quantity=req.actual_quantity; }
+            if(req.missing_quantity){ missing_quantity=req.missing_quantity; }
+            if(req.wastage){ wastage_quantity=req.wastage; }
+            if(req.purchase_quantity){ local_quantity=req.purchase_quantity; }
+            if(req.other_purchase_quantity){ other_quantity=req.other_purchase_quantity; }
+            if(req.wastage_image){ wastage_image=req.wastage_image; }
+            if(req.purchase_image){ purchase_image=req.purchase_image; }
+
+            var updateskquery = "update StockKeeping set actual_quantity="+actual_quantity+",missing_quantity="+missing_quantity+",wastage="+wastage_quantity+",wastage_image='"+wastage_image+"',purchase_quantity='"+local_quantity+"',other_purchase_quantity='"+other_quantity+"',purchase_image='"+purchase_image+"',type="+req.type+",purchase_type="+req.purchase_type+" where zoneid="+req.zoneid+" and skid="+req.skid;
             var updatesk = await query(updateskquery);
             if(updatesk.affectedRows>0){          
                 /////////Update Stock//////////
