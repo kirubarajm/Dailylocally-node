@@ -354,14 +354,15 @@ SCM.create_po =async function create_po(req,result) {
                                 var vendorcost = 0;
                                 for (let j = 0; j < vendor_polist.length; j++) {
                                     if(vendor_polist[j].vid == uniquevendors[i]){
-                                        var getvendorcostquery = "select * from Vendor_products_mapping where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
+                                        var getvendorcostquery = "select * from Vendor_products_mapping as vpm left join ProductMaster as pm on pm.pid=vpm.pid where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
                                         var getvendorcost = await query(getvendorcostquery);
                                           console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
                                             var inserpopdata = [];
                                             var rate = 0;
                                             var calculatedprice = 0;
-                                            calculatedprice = ((parseFloat(getvendorcost[0].base_price)*parseFloat(getvendorcost[0].other_charges))/100);
+                                            if(getvendorcost[0].gst){  }else{ getvendorcost[0].gst=0 }
+                                            calculatedprice = ((parseFloat(getvendorcost[0].base_price)*parseFloat(getvendorcost[0].gst))/100);
                                             rate = parseFloat(getvendorcost[0].base_price)+parseFloat(calculatedprice);
                                             inserpopdata.push({"poid":pores.result.insertId,"prid":vendor_polist[j].prid,"vpid":vendor_polist[j].vpid,"vid":vendor_polist[j].vid,"cost":getvendorcost[0].base_price,"other_charges":getvendorcost[0].other_charges,"rate":rate,"requested_quantity":vendor_polist[j].qty,"pop_status":0,"due_date":vendor_polist[j].due_date,"buyer_comment":vendor_polist[j].buyer_comment});
                                             // console.log("inserpopdata -->=>",inserpopdata);

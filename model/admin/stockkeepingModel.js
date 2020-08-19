@@ -40,7 +40,7 @@ StockKeeping.stockkeeping_list =async function stockkeeping_list(req,result) {
             where = where+" and type="+req.type+" ";
         }        
         if(req.from_date && req.to_date){
-            wherecon = wherecon+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+            where = where+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
 
         if(req.report && req.report==1){
@@ -429,29 +429,45 @@ StockKeeping.wastage_list =async function wastage_list(req,result) {
         var startlimit = (page - 1) * pagelimit;
 
         var where = "";
-        if(req.cat_id){
-            where = where+" and cat_id="+req.cat_id+" ";
+        if(req.catagorysearch){
+            where = where+" and (cat.catid='"+req.catagorysearch+"' or cat.name='"+req.catagorysearch+"') ";
         }
-        if(req.scl1_id){
-            where = where+" and scl1_id="+req.scl1_id+" ";
+        if(req.subcategorysearch){
+            where = where+" and sc1.scl1_id='"+req.subcategorysearch+"' ";
         }
-        if(req.type){
-            where = where+" and type="+req.type+" ";
+        if(req.productsearch){
+            where = where+" and (pm.pid="+req.productsearch+" or pm.Productname LIKE '%"+req.productsearch+"%' ) ";
         }        
         if(req.from_date && req.to_date){
-            wherecon = wherecon+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+            where = where+" and (date(wm.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
 
         if(req.report && req.report==1){
-            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+            var stockkeppinglistquery = "select wm.waste_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Soring' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Waste_Management as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.waste_id!='' and um.zoneid="+req.zoneid+" "+where+" group by wm.waste_id";
         }else{
-            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC limit " +startlimit +"," +pagelimit +" ";
-        }        
+            var stockkeppinglistquery = "select wm.waste_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Soring' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Waste_Management as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.waste_id!='' and wm.zoneid="+req.zoneid+" "+where+" group by wm.waste_id order by wm.created_at DESC limit " +startlimit +"," +pagelimit +" ";
+        }  
         var stockkeppinglist = await query(stockkeppinglistquery);
 
-        var totalcountquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        var totalcountquery = "select * from Waste_Management as wm where wm.waste_id!='' and wm.zoneid="+req.zoneid+" "+where+" order by wm.created_at DESC";
         var total_count = await query(totalcountquery);        
         if(stockkeppinglist.length > 0){
+            var getfullcostquery = "select vpid,sum(quantity) as quantity, sum(cost*quantity) as cost from Waste_Management group by vpid";
+            var getfullcost = await query(getfullcostquery);
+
+            if(getfullcost.length>0){
+                for (let i = 0; i < getfullcost.length; i++) {
+                    for (let j = 0; j < stockkeppinglist.length; j++) {
+                        if (getfullcost[i].vpid == stockkeppinglist[j].vpid) {
+                            stockkeppinglist[j].waste_tillnow = getfullcost[i].quantity;
+                            stockkeppinglist[j].cost_tillnow = getfullcost[i].cost;
+                        }
+                        
+                    }
+                    
+                }
+            }
+
             var totalcount = total_count.length;
             let resobj = {
                 success: true,
@@ -489,29 +505,45 @@ StockKeeping.missingitem_list =async function missingitem_list(req,result) {
         var startlimit = (page - 1) * pagelimit;
 
         var where = "";
-        if(req.cat_id){
-            where = where+" and cat_id="+req.cat_id+" ";
+        if(req.catagorysearch){
+            where = where+" and (cat.catid='"+req.catagorysearch+"' or cat.name='"+req.catagorysearch+"') ";
         }
-        if(req.scl1_id){
-            where = where+" and scl1_id="+req.scl1_id+" ";
+        if(req.subcategorysearch){
+            where = where+" and sc1.scl1_id='"+req.subcategorysearch+"' or sc1.name LIKE '%"+req.subcategorysearch+"%' )";
         }
-        if(req.type){
-            where = where+" and type="+req.type+" ";
+        if(req.productsearch){
+            where = where+" and (pm.pid='"+req.productsearch+"' or pm.Productname LIKE '%"+req.productsearch+"%' ) ";
         }        
         if(req.from_date && req.to_date){
-            wherecon = wherecon+" and (date(created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+            where = where+" and (date(wm.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
 
         if(req.report && req.report==1){
-            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+            var stockkeppinglistquery = "select wm.missing_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Soring' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Missing_Products as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.missing_id!='' and um.zoneid="+req.zoneid+" "+where+" group by wm.missing_id";
         }else{
-            var stockkeppinglistquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC limit " +startlimit +"," +pagelimit +" ";
-        }        
+            var stockkeppinglistquery = "select wm.missing_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Soring' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Missing_Products as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.missing_id!='' and wm.zoneid="+req.zoneid+" "+where+" group by wm.missing_id order by wm.created_at DESC limit " +startlimit +"," +pagelimit +" ";
+        }  
         var stockkeppinglist = await query(stockkeppinglistquery);
 
-        var totalcountquery = "select * from StockKeeping where zoneid="+req.zoneid+" "+where+" order by created_at DESC";
+        var totalcountquery = "select * from Missing_Products as wm where wm.missing_id!='' and wm.zoneid="+req.zoneid+" "+where+" order by wm.created_at DESC";
         var total_count = await query(totalcountquery);        
         if(stockkeppinglist.length > 0){
+            var getfullcostquery = "select vpid,sum(quantity) as quantity, sum(cost*quantity) as cost from Missing_Products group by vpid";
+            var getfullcost = await query(getfullcostquery);
+
+            if(getfullcost.length>0){
+                for (let i = 0; i < getfullcost.length; i++) {
+                    for (let j = 0; j < stockkeppinglist.length; j++) {
+                        if (getfullcost[i].vpid == stockkeppinglist[j].vpid) {
+                            stockkeppinglist[j].waste_tillnow = getfullcost[i].quantity;
+                            stockkeppinglist[j].cost_tillnow = getfullcost[i].cost;
+                        }
+                        
+                    }
+                    
+                }
+            }
+
             var totalcount = total_count.length;
             let resobj = {
                 success: true,
@@ -538,7 +570,7 @@ StockKeeping.missingitem_list =async function missingitem_list(req,result) {
             message: "check your post values"
         };
         result(null, resobj);
-    }  
+    } 
 };
 
 module.exports = StockKeeping;
