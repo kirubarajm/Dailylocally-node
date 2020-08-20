@@ -119,6 +119,9 @@ module.exports = function(app) {
   app.route("/admin/stockkeeping/view").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_view}));
   app.route("/admin/stockkeeping/edit").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_edit}));
   app.route("/admin/stockkeeping/delete").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.stockkeeping_delete}));
+
+  app.route("/admin/stockkeeping/wastage/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.wastage_list}));
+  app.route("/admin/stockkeeping/missingitem/list").post(middleware.checkToken,routesVersioning({"1.0.0": stockkeeping.missingitem_list}));
   
   ///////// Logistics //////////////
   app.route("/admin/logistics/readytodispatchlist").post(middleware.checkToken,routesVersioning({"1.0.0": Logistics.ready_to_dispatch_list}));

@@ -42,7 +42,6 @@ exports.stockkeeping_view = function(req, res) {
     });    
 };
 
-
 /////////Stockkeeping Edit///////////
 exports.stockkeeping_edit = function(req, res) {    
     StockKeeping.stockkeeping_edit(req.body, function(err, ress) {
@@ -53,10 +52,29 @@ exports.stockkeeping_edit = function(req, res) {
     });    
 };
 
-
 /////////Stockkeeping Delete///////////
 exports.stockkeeping_delete = function(req, res) {    
     StockKeeping.stockkeeping_delete(req.body, function(err, ress) {
+        //console.log("stockkeeping_delete controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Wastage List///////////
+exports.wastage_list = function(req, res) {    
+    StockKeeping.wastage_list(req.body, function(err, ress) {
+        //console.log("stockkeeping_delete controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
+/////////Missing Item List///////////
+exports.missingitem_list = function(req, res) {    
+    StockKeeping.missingitem_list(req.body, function(err, ress) {
         //console.log("stockkeeping_delete controller");
         if (err) res.send(err);
         //console.log("res", ress);
