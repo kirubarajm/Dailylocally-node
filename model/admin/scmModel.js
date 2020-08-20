@@ -354,7 +354,7 @@ SCM.create_po =async function create_po(req,result) {
                                 var vendorcost = 0;
                                 for (let j = 0; j < vendor_polist.length; j++) {
                                     if(vendor_polist[j].vid == uniquevendors[i]){
-                                        var getvendorcostquery = "select * from Vendor_products_mapping as vpm left join ProductMaster as pm on pm.pid=vpm.pid where vid="+vendor_polist[j].vid+" and pid="+vendor_polist[j].pid;
+                                        var getvendorcostquery = "select * from Vendor_products_mapping as vpm left join ProductMaster as pm on pm.pid=vpm.pid where vpm.vid="+vendor_polist[j].vid+" and vpm.pid="+vendor_polist[j].pid;
                                         var getvendorcost = await query(getvendorcostquery);
                                           console.log("getvendorcost -->",j,"=>",getvendorcost);
                                         if(getvendorcost.length>0){
