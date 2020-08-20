@@ -36,8 +36,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
         }
         else{
 
-            // console.log(res);
-        if (res.length === 0 || new_address.address_type == 3) {
+
             sql.query("INSERT INTO Address set ?", new_address,async function (err, res) {
                 
                 if(err) {
@@ -60,28 +59,53 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
                  result(null, resobj);
                 }
                 }); 
+
+            // console.log(res);
+        // if (res.length === 0 || new_address.address_type == 3) {
+        //     sql.query("INSERT INTO Address set ?", new_address,async function (err, res) {
                 
-        }else{
+        //         if(err) {
+        //             console.log("error: ", err);
+        //             result(null, err);
+        //         }
+        //         else{
+
+        //             var address=  await query("select * from Address WHERE userid='"+res.insertId+"'");
+        //           let sucobj=true;
+        //           let mesobj = "Address Created successfully";
+        //           let resobj = {  
+        //             success: sucobj,
+        //             message:mesobj,
+        //             status:true,
+        //             aid: res.insertId,
+        //             result : address
+        //             }; 
+              
+        //          result(null, resobj);
+        //         }
+        //         }); 
+                
+        // }else{
             
     
-          if (res[0].address_type === 1) {
-                var message = "Sorry Individual address already exist!";
-            }else if(res[0].address_type === 2){
-                var message = "Sorry Appratments address already exist!";
-            }
+        //   if (res[0].address_type === 1) {
+        //         var message = "Sorry Individual address already exist!";
+        //     }else if(res[0].address_type === 2){
+        //         var message = "Sorry Appratments address already exist!";
+        //     }
 
 
-                  let sucobj=true;
-                  let mesobj = message;
-                  let resobj = {  
-                    success: sucobj,
-                    message:mesobj,
-                    status:false,
-                    aid: res[0]
-                    }; 
+        //           let sucobj=true;
+        //           let mesobj = message;
+        //           let resobj = {  
+        //             success: sucobj,
+        //             message:mesobj,
+        //             status:false,
+        //             aid: res[0]
+        //             }; 
               
-                 result(null, resobj);          
-        }
+        //          result(null, resobj);          
+        // }
 
         }
     });

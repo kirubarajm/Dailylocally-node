@@ -33,6 +33,7 @@ var Dayorder = function(Dayorder) {
 
 
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
+
   var day = moment().format("YYYY-MM-DD, HH:mm:ss");
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
   var Orderproductssdetails = await query("select count(*) as productcount,sum(pm.weight)as total_product_weight from  Orderproducts op left join Product_live pl on pl.vpid=op.vpid left join ProductMaster pm on pm.pid=pl.pid where op.orderid='"+Dayorder.orderid+"' ");
@@ -121,11 +122,27 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         
 
         console.log("new_day_order===>1",new_day_order); 
-        sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
+        sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
           if (err) {
             res(err, null);
           } else {
-            var doid = result.insertId;                
+            var doid = result.insertId;    
+            
+            var zone_details = await query("select * from Zone where id='"+Dayorder.zoneid+"'");
+
+            if (zone_details.length !=0) {
+         
+             var req ={};   
+              req.orglat = zone_details[0].lat;
+               req.orglon = zone_details[0].lon;
+               req.deslat =  new_day_order.cus_lat;
+               req.deslon = new_day_order.cus_lon;
+               req.id = doid;
+
+               Dayorderproducts.dayorder_distance_calculation(req);
+              //  Dayorder.dayorder_distance_calculation(req);
+
+           }
             var new_createDayorderproducts={};
 
             new_createDayorderproducts.orderid=Dayorder.orderid;
@@ -906,11 +923,26 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             
         
             console.log("new_day_order===>2",new_day_order);    
-            sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
+            sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
                 } else {
-                  var doid = result.insertId;                    
+                  var doid = result.insertId;               
+                  
+                  var zone_details = await query("select * from Zone where id='"+Dayorder.zoneid+"'");
+
+                 if (zone_details.length !=0) {
+              
+                  var req ={}; 
+                    req.orglat = zone_details[0].lat;
+                    req.orglon = zone_details[0].lon;
+                    req.deslat =  new_day_order.cus_lat;
+                    req.deslon = new_day_order.cus_lon;
+                    req.id = doid;
+
+                    Dayorderproducts.dayorder_distance_calculation(req);
+                }
+                  
                   var new_createDayorderproducts={};
 
                   new_createDayorderproducts.orderid=Dayorder.orderid;
@@ -1004,11 +1036,27 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_day_order.address_type = ordersdetails[0].address_type;
               new_day_order.total_product_weight=total_product_weight;
     
-              sql.query("INSERT INTO Dayorder set ?", new_day_order, function(err, result) {
+              sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
                 } else {
-                  var doid = result.insertId;                    
+                  var doid = result.insertId;         
+                  
+                  
+                  var zone_details = await query("select * from Zone where id='"+Dayorder.zoneid+"'");
+
+                  if (zone_details.length !=0) {
+               
+                    var req ={}; 
+                     req.orglat = zone_details[0].lat;
+                     req.orglon = zone_details[0].lon;
+                     req.deslat =  new_day_order.cus_lat;
+                     req.deslon = new_day_order.cus_lon;
+                     req.id = doid;
+ 
+                     Dayorderproducts.dayorder_distance_calculation(req); 
+                 }
+
                   var new_createDayorderproducts={};
 
                   new_createDayorderproducts.orderid=Dayorder.orderid;
@@ -2344,5 +2392,38 @@ Dayorder.day_order_book_return_by_moveit=async function day_order_book_return_by
 };
 
 
+Dayorder.dayorder_distance_calculation = async function dayorder_distance_calculation(req,result) {
+  //https://maps.googleapis.com/maps/api/directions/json?origin=12.9801,80.2184&destination=13.0072,80.2064&key=AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc
+    var distance_url ="https://maps.googleapis.com/maps/api/directions/json?origin="+req.orglat+","+req.orglon+"&destination="+req.deslat+","+req.deslon+"&key="+constant.distanceapiKey+"";
+  
+    
+    request({method: "GET",rejectUnauthorized: false,url: distance_url},async function(error,data) {
+        if (error) {
+          console.log("error: ", err);
+          result(null, err);
+        } else {
+        
+          // console.log(data.statusCode);
+          if (data.statusCode === 200) {
+            routesdata = JSON.parse(data.body)
+      
+            var caldistance = routesdata.routes;
+            var deliverytimedata = caldistance[0].legs;
+                 
+            var Lastmile = parseInt(deliverytimedata[0].distance.text);
+
+              console.log("Lastmile",Lastmile);
+              console.log("req.id",req.id);
+
+              var update_lastmile = await query("UPDATE Dayorder SET Lastmile ='"+Lastmile+"' WHERE id = '"+req.id+"' ");
+
+    
+          }
+             
+        }
+      }
+    );
+  
+  };
 
   module.exports = Dayorder;

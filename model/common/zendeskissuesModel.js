@@ -45,13 +45,17 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
           }
 
         if (req.orderid) {
-          note = note + "orderid :"+req.orderid+" ,"
+          note = note + "dayorderid :"+req.orderid+" ,"
         }
 
        
 
         if (req.type==1) {
-          note = note +'\n'+"Current order, "+res[0].tag_name;
+          note = note +'\n'+"Future order, "+res[0].tag_name;
+        }else  if (req.type==3) {
+          note = note +'\n'+"Queries, "+res[0].tag_name;
+        }else  if (req.type==4) {
+          note = note +'\n'+"Completed Order, "+res[0].tag_name;
         }else{
           note = note +'\n'+"Old order, "+res[0].tag_name;
         }
@@ -64,7 +68,7 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
        
       
         res[0].note = note;
-        res[0].department_name = "Daily locally";
+        res[0].department_name = "Daily Locally";
 
         
         let resobj = {

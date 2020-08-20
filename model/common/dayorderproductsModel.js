@@ -3,6 +3,8 @@ var sql = require("../db.js");
 const util = require("util");
 const query = util.promisify(sql.query).bind(sql);
 var dayorder = require("../../model/common/dayorderModel");
+var constant = require("../constant.js");
+var request = require('request');
 
 var Dayorderproducts = function(Dayorderproducts) {
   this.doid = Dayorderproducts.doid;
@@ -57,5 +59,40 @@ Dayorderproducts.createDayorderproducts =async function createDayorderproducts(n
     }
   });  
 };
+  
+
+Dayorderproducts.dayorder_distance_calculation = async function dayorder_distance_calculation(req,result) {
+  //https://maps.googleapis.com/maps/api/directions/json?origin=12.9801,80.2184&destination=13.0072,80.2064&key=AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc
+    var distance_url ="https://maps.googleapis.com/maps/api/directions/json?origin="+req.orglat+","+req.orglon+"&destination="+req.deslat+","+req.deslon+"&key="+constant.distanceapiKey+"";
+  
+    
+    request({method: "GET",rejectUnauthorized: false,url: distance_url},async function(error,data) {
+        if (error) {
+          console.log("error: ", err);
+          result(null, err);
+        } else {
+        
+          // console.log(data.statusCode);
+          if (data.statusCode === 200) {
+            routesdata = JSON.parse(data.body)
+      
+            var caldistance = routesdata.routes;
+            var deliverytimedata = caldistance[0].legs;
+                 
+            var Lastmile = parseInt(deliverytimedata[0].distance.text);
+
+              console.log("Lastmile",Lastmile);
+              console.log("req.id",req.id);
+
+              var update_lastmile = await query("UPDATE Dayorder SET Lastmile ='"+Lastmile+"' WHERE id = '"+req.id+"' ");
+
+    
+          }
+             
+        }
+      }
+    );
+  
+  };
   
 module.exports = Dayorderproducts;

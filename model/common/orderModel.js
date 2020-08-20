@@ -346,6 +346,7 @@ Order.create_customerid_by_razorpay = async function create_customerid_by_razorp
 
 Order.online_order_place_conformation = async function(order_place, result) {
   var orderdetails = await query("select * from Orders where orderid ='"+order_place.orderid+"'");
+
   if (orderdetails.length!==0) {    
     if (orderdetails[0].payment_status==2) {   
       let resobj = {
@@ -560,8 +561,14 @@ Order.order_skip_count = async function order_skip_count(req,result) {
 
 Order.day_order_view_by_user = function day_order_view_by_user(req, result) {
 
-  var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.id ='"+req.doid+"'  group by dr.id order by dr.date" ;//and dm.active_status=1
-  sql.query(orderquery,async function(err, res1) {
+  // console.log(req);
+  // var orderquery =  "select dr.userid,dr.date,dr.dayorderstatus,JSON_ARRAYAGG(JSON_OBJECT('dayorderpid',op.id,'quantity', op.quantity,'vpid',op.vpid,'price',op.price,'product_name',op.productname)) AS items from Dayorder dr left join Dayorder_products dp on dp.doid=dr.id left join Orderproducts op on op.orderid=dp.orderid and op.vpid=dp.vpid where dr.id ='"+req.doid+"'  group by dr.id order by dr.date" ;//and dm.active_status=1
+
+  var getdayorderquery = "select drs.*,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('qcchecklist','0','Transactionid',ors.tsid,'delivery_quantity',orp.received_quantity,'orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')),'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS items,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=8 then 'Moveit Pickup' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg,'' as qachecklist  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  left join Orders ors on ors.orderid=orp.orderid where drs.id='"+req.doid+"' group by drs.id,drs.userid";
+  // console.log(getdayorderquery);
+  // var getdayorder = await query(getdayorderquery);
+
+  sql.query(getdayorderquery,async function(err, res1) {
       if (err) {
         result(err, null);
       } else {
@@ -583,8 +590,8 @@ Order.day_order_view_by_user = function day_order_view_by_user(req, result) {
               
 
                 if (res1[0].items) {
-                  var items = JSON.parse(res1[0].items);
-                  res1[0].items = items.item;
+                  res1[0].items = JSON.parse(res1[0].items);
+                  // res1[0].items = items.item;
                 }
 
           
@@ -821,7 +828,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
 //,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items
   // var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where ors.orderid  ='"+req.orderid+"' " ;//and dm.active_status=1
   var pkts='pkts';
-  var orderquery =  "select ors.*,us.*,JSON_ARRAYAGG(JSON_OBJECT('pkts','"+pkts+"','packet_size',dp.product_packetsize,'quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',if(dp.product_uom=1 || dp.product_uom=7,dp.product_weight*1000,dp.product_weight),'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand left join User as us on us.userid=ors.userid where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
+  var orderquery =  "select ors.*,us.*,JSON_ARRAYAGG(JSON_OBJECT('doid',dp.doid,'dayorderpid',dp.id,'pkts','"+pkts+"','packet_size',dp.product_packetsize,'quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',if(dp.product_uom=1 || dp.product_uom=7,dp.product_weight*1000,dp.product_weight),'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,false,true),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand left join User as us on us.userid=ors.userid where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -1336,7 +1343,6 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
       } else {
         if (res1.length !== 0) {
    
-          var zone_details = await query("select * from Zone where id='"+res1[0].zoneid+"'");
 
           if (res1[0].dayorderstatus == 11) {
             let resobj = {
@@ -1380,6 +1386,8 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                   var trip_status = await MoveitUser.updatetripstatus(req.trip_id);
                 }
               
+                var zone_details = await query("select * from Zone where id='"+res1[0].zoneid+"'");
+
                  if (zone_details.length !=0) {
               
                   console.log("distance",zone_details[0].lat);
@@ -1390,7 +1398,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                     req.deslon = req.lon;
                     req.id = req.id;
 
-                   Order.dayorder_distance_calculation(req);
+                  //  Order.dayorder_distance_calculation(req);
 
                 }
 

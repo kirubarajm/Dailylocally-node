@@ -51,6 +51,8 @@ app.route("/user/checkaddress").post(middleware.checkToken,routesVersioning({"1.
  // products
  app.route("/user/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_ProductMaster_list}));
  app.route("/user/productdetail").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_Product_detail}));
+ app.route("/user/categoryproductlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.category_product_list}));
+
 
  //cart 
  app.route("/user/cartdetails").post(middleware.checkToken,routesVersioning({"1.0.0":category.read_a_cartdetails}));
@@ -116,7 +118,7 @@ app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.
  app.route("/user/filterlist/").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_brand_list}));
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
  app.route("/user/collection/filterlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_brand_list}));
-
+ app.route("/user/category/filterlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_category_product_brand_list}));
  //coupon
 app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
 app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
