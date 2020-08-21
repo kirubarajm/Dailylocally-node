@@ -30,7 +30,7 @@ const calculate = {
 
   dliosversioncodenew: 1, //normal update
   dliosversionforceupdate: 1, //forceupdate version
-  dlforceupdate: 1,
+  dliosforceupdate: 8,
 
   dlversionforceupdate: 17, //forceupdate version
   dlforceupdate: 17,
