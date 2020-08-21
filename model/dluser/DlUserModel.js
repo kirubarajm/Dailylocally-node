@@ -69,14 +69,17 @@ Dluser.user_app_version_check_vid= async function user_app_version_check_vid(req
   }
 
   }else if (headers.apptype === '2' || headers.apptype === 2) {
-   if (req.dlversioncode < constant.dlversionforceupdate) {
+
+   if (req.dlversioncode < constant.dliosversionforceupdate) {
       
       versionstatus = true;
       dluserforceupdatestatus = true;
       
-    }else if(req.dlversioncode < constant.dlversionforceupdate){
+    }else if(req.dlversioncode < constant.dliosversioncodenew){
+
       versionstatus = true;
       dluserforceupdatestatus = false;
+      
     }else{
       versionstatus = false;
       dluserforceupdatestatus = false;

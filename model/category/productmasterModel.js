@@ -60,7 +60,7 @@ ProductMaster.get_ProductMaster_list = async function get_ProductMaster_list(req
   
     }else{
 
-      var productlimit = 5;
+      var productlimit = 20;
       var page = req.page || 1;
       var startlimit = (page - 1) * productlimit;
 
@@ -288,7 +288,7 @@ ProductMaster.get_category_product_list = async function get_category_product_li
 
  }else{
 
-   var productlimit = 5;
+   var productlimit = 20;
    var page = req.page || 1;
    var startlimit = (page - 1) * productlimit;
 
@@ -843,7 +843,7 @@ if (req.scl2_id ==0) {
     var brand_list = "select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand where pm.scl1_id= "+req.scl1_id+" or pm.scl2_id= "+req.scl2_id+" group by  pm.brand ";
 
 }
-  console.log(brand_list)
+  // console.log(brand_list)
   sql.query(brand_list,async function(err, res) {
     if (err) {
       result(err, null);

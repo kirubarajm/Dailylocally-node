@@ -15,10 +15,8 @@ const calculate = {
   servicecharge: 0,
   cancellationmessage: "Are you sure! you want to cancel the order?",
   makeit_nearby_moveit_radius: 4, // in kilometers
-  eatversioncodenew: 1, //normal update
-  eatversionforceupdate: 5, //forceupdate version
-  eatforceupdate: 5,
-  eat_delivery_min: 60,
+   //normal update
+
   product_commission_percentage: 50, // percentage
   breatfastcycle: 8, //8 -12
   lunchcycle: 12, //12 - 4
@@ -30,9 +28,15 @@ const calculate = {
   //  moveitversioncode : 1,
  
 
-  eatiosversioncodenew: 1, //normal update
-  eatiosversionforceupdate: 1, //forceupdate version
-  eatforceupdate: 1,
+  dliosversioncodenew: 1, //normal update
+  dliosversionforceupdate: 1, //forceupdate version
+  dlforceupdate: 1,
+
+  dlversionforceupdate: 17, //forceupdate version
+  dlforceupdate: 17,
+  dlversioncodenew: 17, 
+  
+  eat_delivery_min: 60,
 
   distanceapiKey: "AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc",
   orderbuffertime: 10, //min
