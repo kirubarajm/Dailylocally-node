@@ -2,7 +2,7 @@
 
 var Dluser = require("../../model/dluser/DlUserModel");
 var constant = require("../../model/constant.js");
-
+var Community = require("../../model/common/CommunityModel");
 
 
 
@@ -186,4 +186,58 @@ exports.zendesk_ticket_create = function(req, res) {
     res.send(user);
   });
 
+};
+
+
+
+exports.community_search = function(req, res) {
+  Community.community_search(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.community_list = function(req, res) {
+  Community.community_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.join_new_community = function(req, res) {
+  Community.join_new_community(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.join_new_community_approval= function(req, res) {
+  Community.join_new_community_approval(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.new_community_registration= function(req, res) {
+  var new_community = new Community(req.body);
+  if (!new_community.requested_userid) {
+    res
+      .status(400)
+      .send({ error: true, status: false, message: "Please provide Userid" });
+  } else if (!new_community.communityname) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide communityname"
+      });
+  } else {
+    
+    Community.new_community_registration(req.body, function(err, user) {
+      if (err) res.send(err);
+      res.send(user);
+    });
+  }
+  
 };

@@ -79,6 +79,7 @@ Category.get_category_list =async function get_category_list(req,result) {
         res[i].clickable= true
         res[i].collection_status= false
         res[i].tile_type= 1
+        res[i].type= 1 // category
         //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
       }
 
@@ -110,11 +111,12 @@ Category.get_category_list =async function get_category_list(req,result) {
                 potrate_collectionlist[i].category=true;
                 potrate_collectionlist[i].collection_status= true;
                 potrate_collectionlist[i].catid = potrate_collectionlist[i].cid;
-                potrate_collectionlist[i].servicable_status=servicable_status;    
+                potrate_collectionlist[i].servicable_status=servicable_status;  
+                potrate_collectionlist[i].type= 2  
                 
               }
 
-              console.log(potrate_collectionlist);
+              // console.log(potrate_collectionlist);
               // var temp = 0
               // potrate_collectionlist.forEach(i => {
                 
@@ -144,11 +146,12 @@ Category.get_category_list =async function get_category_list(req,result) {
       
                   i.catid = i.cid;
                   i.servicable_status=servicable_status;
+                  i.type= 2 
                   // i.tile_type= 2
                         
                   res.splice(temp1, 0, i);
                   temp1 = temp1+1
-                  console.log("temp1",temp1);
+                  // console.log("temp1",temp1);
                 });
               }
              
@@ -156,6 +159,29 @@ Category.get_category_list =async function get_category_list(req,result) {
   
           
             } 
+
+
+            var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
+
+            if (get_community.length !=0) {
+
+              get_community.forEach(i => {
+                
+
+                i.servicable_status=servicable_status;
+                i.category=true,
+                i.clickable= true
+                i.collection_status= false
+                i.tile_type= 1
+                i.category=true,
+                i.catid = i.comid;
+                i.type= 3
+    
+                      
+                res.splice(0, 0, i);
+               
+              });
+            }
 
             let resobj = {
               success: true,
