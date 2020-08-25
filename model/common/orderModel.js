@@ -398,9 +398,6 @@ Order.online_order_place_conformation = async function(order_place, result) {
         } else {
           if (order_place.payment_status === 1) {   
             
-            
-
-
 
             var getordertypequery = "select us.phoneno,us.userid from Orders as ord left join User as us on us.userid=ord.userid where ord.orderid="+order_place.orderid;
             var getordertype = await query(getordertypequery);

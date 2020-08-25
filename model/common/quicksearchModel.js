@@ -17,7 +17,7 @@ var QuickSearch   = function(QuickSearch) {
 };
 // console.log("this is cron file");
 /////Dont Remove Cron Not Work///////////////
-QuickSearch.eat_explore_store_data_by_cron = async function eat_explore_store_data_by_cron(search, result) { };
+// QuickSearch.eat_explore_store_data_by_cron = async function eat_explore_store_data_by_cron(search, result) { };
 
 // This cron is to running all day order address edit
 const day_order_address_update_cron = new CronJob("0 22 * * *", async function(search, result) {

@@ -35,7 +35,9 @@ var Dayorder = function(Dayorder) {
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
   var day = moment().format("YYYY-MM-DD, HH:mm:ss");
+
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
+
   var Orderproductssdetails = await query("select count(*) as productcount,sum(pm.weight)as total_product_weight from  Orderproducts op left join Product_live pl on pl.vpid=op.vpid left join ProductMaster pm on pm.pid=pl.pid where op.orderid='"+Dayorder.orderid+"' ");
   // var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
   // var gst_value = ordersdetails[0].gst  / Orderproductssdetails.length;
@@ -44,16 +46,20 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
   var total_product_weight = Orderproductssdetails[0].total_product_weight ;
   
   console.log("gst_value",gst_value);
+
   for (let i = 0; i < getproduct.length; i++) {
 
     if (getproduct[i].subscription==0) {
 
       var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
+
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");
+
       if (dayorders.length !=0) {
 
       
         if (dayorders[0].delivery_charge==0) {
+          
           var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"',total_product_weight='"+total_product_weight+"' where id="+dayorders[0].id;
 
         }else{
@@ -92,6 +98,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
         new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
         Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
+
       }else{
         // console.log("dayorders.length1",dayorders.length);
         var new_day_order={};
@@ -175,6 +182,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           }
         });
       }
+
+
     } else {
 
         var dates = [];

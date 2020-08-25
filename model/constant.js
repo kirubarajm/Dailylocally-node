@@ -28,14 +28,15 @@ const calculate = {
   //  moveitversioncode : 1,
  
 
-  dliosversioncodenew: 1, //normal update
-  dliosversionforceupdate: 1, //forceupdate version
-  dlforceupdate: 1,
+  dliosversioncodenew: 8, //normal update
+  dliosversionforceupdate: 8, //forceupdate version
+  dliosforceupdate: 7,
 
+  dlversioncodenew: 17, 
   dlversionforceupdate: 17, //forceupdate version
   dlforceupdate: 17,
-  dlversioncodenew: 17, 
   
+
   eat_delivery_min: 60,
 
   distanceapiKey: "AIzaSyDsjqcaz5Ugj7xoBn9dhOedDWE1uyW82Nc",
