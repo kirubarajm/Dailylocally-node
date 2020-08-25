@@ -28,9 +28,15 @@ const calculate = {
   //  moveitversioncode : 1,
  
 
+<<<<<<< HEAD
   dliosversioncodenew: 8, //normal update
   dliosversionforceupdate: 8, //forceupdate version
   dliosforceupdate: 7,
+=======
+  dliosversioncodenew: 1, //normal update
+  dliosversionforceupdate: 1, //forceupdate version
+  dliosforceupdate: 8,
+>>>>>>> 591b8134311ca6c5b1885c18914bbec1f138a512
 
   dlversioncodenew: 17, 
   dlversionforceupdate: 17, //forceupdate version
