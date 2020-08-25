@@ -4,6 +4,7 @@ var request = require('request');
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 var constant = require('../constant.js');
+
 //Task object constructor
 var SMS = function(Sms) {
   this.faqid = Sms.faqid;

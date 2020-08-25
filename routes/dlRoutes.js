@@ -41,14 +41,14 @@ app.route("/user/checkaddress").post(middleware.checkToken,routesVersioning({"1.
  // category
  app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list}));
 
-// sub_category_L1
+//sub_category_L1
  app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
 
- // sub_category_L2
+ //sub_category_L2
  app.route("/user/subcategoryL2").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L2.get_Sub_Category_L2_list}));
 
 
- // products
+ //products
  app.route("/user/productlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_ProductMaster_list}));
  app.route("/user/productdetail").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_Product_detail}));
  app.route("/user/categoryproductlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.category_product_list}));
@@ -89,7 +89,7 @@ app.route("/user/checkaddress").post(middleware.checkToken,routesVersioning({"1.
   // app.route("/user/homescreen").post(middleware.checkToken,routesVersioning({"1.0.0":Promotion.get_all_Promotion_by_userid}));
 
 
-//////zen desk//////
+//////zendesk//////
  app.route("/user/zendesk/issues").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissues}));
  app.route("/user/zendesk/issuesdetails").post(middleware.checkToken,routesVersioning({"1.0.0":Zendeskissues.getZendeskissuesDetails}));
  app.route("/user/zendesk/requestcreate").post(middleware.checkToken,routesVersioning({"1.0.0":dluser.zendesk_requestcreate}));
@@ -119,6 +119,7 @@ app.route("/user/fav/category").post(middleware.checkToken,routesVersioning({"1.
  app.route("/user/sortlist").get(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_sort_list}));
  app.route("/user/collection/filterlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_collection_brand_list}));
  app.route("/user/category/filterlist").post(middleware.checkToken,routesVersioning({"1.0.0":productmaster.get_category_product_brand_list}));
+ 
  //coupon
 app.route("/user/coupon/validate").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.coupons_code_validate}));
 app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":coupon.get_all_coupons_by_userid}));
@@ -127,5 +128,9 @@ app.route("/user/coupon").post(middleware.checkToken,routesVersioning({"1.0.0":c
 app.route("/user/transaction").post(middleware.checkToken,routesVersioning({"1.0.0":orders.transaction_list}));
 app.route("/user/transaction/view").post(middleware.checkToken,routesVersioning({"1.0.0":orders.day_order_transaction_view_by_user}));
 app.route("/user/faqs/:id").get(routesVersioning({"1.0.0":dluser.faq_by_type}));
+
+//Community API list
+
+
 
 }

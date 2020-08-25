@@ -258,7 +258,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         
         var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +orderitems[i].vpid +"' ");
       
-        delivery_date.push(orderitems[i].dayorderdate);
+        // console.log("delivery_date",orderitems[i].dayorderdate);
+        // delivery_date.push(orderitems[i].dayorderdate);
+        // console.log("delivery_date",delivery_date.length);
+
+        if (orderitems[i].dayorderdate) {
+          delivery_date.push(orderitems[i].dayorderdate);
+        }
+
+        console.log("delivery_date",delivery_date.length);
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;
@@ -307,6 +315,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
         if (orderitems[i].dayorderdate) {
+          
           res1[0].deliverydate=orderitems[i].dayorderdate;
 
 
@@ -322,13 +331,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           }
 
         }else{
-              if (currenthour <=24) {
+          if (currenthour <=24) {
     
-                res1[0].deliverydate = tomorrow;
-              } else {
-                
-                res1[0].deliverydate= dayafertomorrow;
-              }
+            res1[0].deliverydate = tomorrow;
+               delivery_date.push( res1[0].deliverydate);
+          } else {
+            
+            res1[0].deliverydate= dayafertomorrow;
+             delivery_date.push( res1[0].deliverydate);
+          }
 
         }
         
