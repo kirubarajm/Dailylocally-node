@@ -325,9 +325,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               if (currenthour <=24) {
     
                 res1[0].deliverydate = tomorrow;
+                delivery_date.push( res1[0].deliverydate);
               } else {
                 
                 res1[0].deliverydate= dayafertomorrow;
+                delivery_date.push( res1[0].deliverydate);
               }
 
         }
