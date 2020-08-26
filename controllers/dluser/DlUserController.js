@@ -198,10 +198,28 @@ exports.community_search = function(req, res) {
 };
 
 exports.community_list = function(req, res) {
+   if (!req.body.userid) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide userid"
+      });
+  }else if(!req.body.lat || !req.body.long){
+    res
+    .status(400)
+    .send({
+      error: true,
+      status: false,
+      message: "Please provide lat/long"
+    });
+  } else {
   Community.community_list(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);
   });
+}
 };
 
 exports.join_new_community = function(req, res) {

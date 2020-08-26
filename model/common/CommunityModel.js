@@ -13,6 +13,10 @@ var Community = function(Community) {
   this.apartmentname = Community.apartmentname;
   this.image = Community.image;
   this.requested_userid=Community.requested_userid;
+  this.no_of_apartments=Community.no_of_apartments;
+  this.flat_no=Community.flat_no;
+  this.floor_no=Community.floor_no;
+  this.community_address=Community.community_address;
 };
 
 
@@ -49,12 +53,15 @@ Community.community_list =async function community_list(req, result){
   var search_community = await query("select * from Community where status=1");
 
   if (search_community.length !=0) {
+
+
     let resobj = {
       success: true,
       status: true,
       result: search_community
     };
     result(null, resobj);
+
   }else{
 
     let resobj = {
@@ -107,6 +114,10 @@ Community.join_new_community =async function join_new_community(req, result){
     new_community.userid = req.userid;
     new_community.comid = req.comid;
     new_community.status = 0;
+    new_community.profile_image = req.profile_image;
+    new_community.flat_no = req.flat_no;
+    new_community.floor_no=req.floor_no;
+
     
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {

@@ -170,10 +170,10 @@ Category.get_category_list =async function get_category_list(req,result) {
 
                 i.servicable_status=servicable_status;
                 i.category=true,
-                i.clickable= true
+                i.clickable= true;
                 i.collection_status= false
-                i.tile_type= 1
-                i.category=true,
+                i.tile_type= 1;
+                i.category=true;
                 i.catid = i.comid;
                 i.type= 3
     
@@ -274,6 +274,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   // var orderlist = await query("Select * From Orders where userid = '" +req.userid +"' and orderstatus >= 6");
   var ordercount = 0
   var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+  var comunity_userdetails = await query("Select * From join_community where userid = '" +req.userid +"' and status=1");
+
+  if (comunity_userdetails.length !=0) {
+    userdetails[0].status=1
+  }else{
+    userdetails[0].status=0;
+  }
 
   if (userdetails.length !==0) {   
   
@@ -621,7 +628,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             
           }
           
-          if (userdetails[0].premium_user==1) {
+          if (userdetails[0].premium_user==1  ||  userdetails[0].status==1) {
             product_cost_limit_status = true;//if false don't show message           
           }
 
@@ -727,7 +734,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           res2[0].subscription_item = subscription_product;
           res2[0].ordercount = ordercount;
           res2[0].cartdetails = cartdetails;
-          res2[0].first_tunnel = userdetails[0].first_tunnel;
           res2[0].minimum_cart_value = constant.minimum_cart_value;
          
 
