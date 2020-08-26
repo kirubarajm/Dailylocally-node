@@ -135,5 +135,7 @@ app.route("/user/communitylist").post(middleware.checkToken,routesVersioning({"1
 app.route("/user/joincommunity").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community}));
 app.route("/user/communityapproval").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community_approval}));
 app.route("/user/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration}));
+app.route("/user/communityuserdetails").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.communityuserdetails}));
+app.route("/user/Community/homepage").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.homepage}));
 
 }

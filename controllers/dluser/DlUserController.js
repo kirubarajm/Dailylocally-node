@@ -259,3 +259,17 @@ exports.new_community_registration= function(req, res) {
   }
   
 };
+
+exports.communityuserdetails = function(req, res) {
+  Community.get_community_userdetails(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.homepage = function(req, res) {
+  Community.get_homepage(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};

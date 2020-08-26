@@ -242,4 +242,105 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 };
 
+
+Community.get_community_userdetails=async function get_community_userdetails(req, result){
+
+  var community = await query("Select * From User us left join join_community jc on jc.userid=us.userid where us.userid ='"+req.userid+"' and status=1  ");
+
+  if (community.length ==0) {
+
+    let resobj = {
+      success: true,
+      status: false,
+      message: "No Request Found!"
+    };
+    result(null, resobj);
+
+    
+  }else{
+
+    let resobj = {
+      success: true,
+      status: true,
+      result: community
+    };
+    result(null, resobj);
+  }
+  
+
+};
+
+
+Community.get_homepage=async function get_homepage(req, result){
+
+
+  get= [
+    {
+      
+        "event": {
+            "image_url": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png ",
+            "topic": "new event"
+        },
+        "whatsapp ": {
+            "title":"new event",
+            "des": "new event",
+            "group_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png"
+        },
+        "sneak_peak": {
+            "title": "new event",
+            "des": "new event",
+            "video_url ": null
+        },
+        "cat_list": [
+            {
+                "title ": "new event",
+                "des": "new event",
+                "image_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png"
+            }
+          ],
+          "about": [
+                    {
+                        "title": "new event",
+                        "des": 25
+                    }
+                  ]
+    }
+]
+ 
+//   get_details[0].whatsapp ={
+//                       title : "",
+//                       des : "Community event ",
+//                       group_url : ""
+//                }
+
+//  get_details[0].sneak_peak = {
+//                       title : "",
+//                       des : "Community event ",
+//                       video_url : ""
+//                }
+ 
+//                get_details[0].cat_list= {
+//                       title : "",
+//                       des : "Community event ",
+//                      image_url : "",
+//                },
+//               about= {
+//                       title : "",
+//                       des : "Community event ",
+//                }
+ 
+ 
+
+
+
+ let resobj = {
+  success: true,
+  status: true,
+  result: get
+};
+result(null, resobj);
+
+};
+
+
 module.exports = Community;
