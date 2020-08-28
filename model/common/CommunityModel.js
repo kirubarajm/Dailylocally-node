@@ -17,6 +17,7 @@ var Community = function(Community) {
   this.flat_no=Community.flat_no;
   this.floor_no=Community.floor_no;
   this.community_address=Community.community_address;
+  this.area=Community.area;
 };
 
 
@@ -50,7 +51,7 @@ Community.community_search =async function community_search(req, result){
 
 Community.community_list =async function community_list(req, result){
 
-  var search_community = await query("select * from Community where status=1");
+  var search_community = await query("select *,if(status=1,'Live Mode','Offline')as status_msg from Community where status=1 and zoneid=1");
 
   if (search_community.length !=0) {
 
@@ -278,13 +279,13 @@ Community.get_homepage=async function get_homepage(req, result){
     {
       
         "event": {
-            "image_url": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png ",
+            "image_url": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
             "topic": "new event"
         },
         "whatsapp ": {
             "title":"new event",
             "des": "new event",
-            "group_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png"
+            "group_url ": "https://dailylocally.s3.ap-south-1.amazonaws.com/admin/1596196480459-DLV2%20Category-Spreads.jpg"
         },
         "sneak_peak": {
             "title": "new event",
@@ -295,15 +296,15 @@ Community.get_homepage=async function get_homepage(req, result){
             {
                 "title ": "new event",
                 "des": "new event",
-                "image_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/3.png"
+                "image_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595847977688-Category%20Milk-01.jpg"
             }
           ],
           "about": [
-                    {
-                        "title": "new event",
-                        "des": 25
-                    }
-                  ]
+               {
+                  "title": "new event",
+                  "des": 25
+                }
+              ]
     }
 ]
  
