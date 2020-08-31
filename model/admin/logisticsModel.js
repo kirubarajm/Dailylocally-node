@@ -1101,70 +1101,78 @@ Logistics.dunzo_order_list =async function dunzo_orders_list(req,result) {
 
 /////////Dunzo Assign//////////
 Logistics.dunzo_assign =async function dunzo_assign(req,result) {
-    if(req.zoneid && req.doid && req.done_by){
-        var getdayorderquery = "select * from Dayorder where id="+req.doid;
-        var getdayorder = await query(getdayorderquery);
-        if(getdayorder.length>0){
-            if(getdayorder[0].dayorderstatus==6){
-                if(!getdayorder[0].moveit_type){
-                    var updatedayorderquery = "update Dayorder set moveit_type=2,dayorderstatus=7 where id="+req.doid;
-                    var updatedayorder = await query(updatedayorderquery);
-                    if(updatedayorder.affectedRows>0){
-                        var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
-                        var dunzodata = [];
-                        dunzodata.push({"doid":req.doid,"assigned_by":req.done_by,"assigned_at":currentdate,"zoneid":req.zoneid});
-                        await DunzoTrip.createDunzoTrip(dunzodata[0],async function(err,dunzodatares){ 
-                            if(dunzodatares.status==true){
-                                var dunzohistorydata = [];
-                                dunzohistorydata.push({"doid":req.doid,"type":1,"created_by":req.done_by,"zoneid":req.zoneid});
-                                await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
-                                let resobj = {
-                                    success: true,
-                                    status: true,
-                                    message: "Order successfully assigned to dunzo"
-                                };
-                                result(null, resobj);
-                            }else{
-                                let resobj = {
-                                    success: true,
-                                    status: false,
-                                    message: "something went wrong plz try again 1"
-                                };
-                                result(null, resobj);
-                            }
-                        });                        
+    if(req.zoneid && req.doid.length>0 && req.done_by){
+        for (let i = 0; i < req.doid.length; i++) {
+            var getdayorderquery = "select * from Dayorder where id="+req.doid[i];
+            var getdayorder = await query(getdayorderquery);
+            if(getdayorder.length>0){
+                if(getdayorder[0].dayorderstatus==6){
+                    if(!getdayorder[0].moveit_type){
+                        var updatedayorderquery = "update Dayorder set moveit_type=2,dayorderstatus=7 where id="+req.doid[i];
+                        var updatedayorder = await query(updatedayorderquery);
+                        if(updatedayorder.affectedRows>0){
+                            var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+                            var dunzodata = [];
+                            dunzodata.push({"doid":req.doid[i],"assigned_by":req.done_by,"assigned_at":currentdate,"zoneid":req.zoneid});
+                            await DunzoTrip.createDunzoTrip(dunzodata[0],async function(err,dunzodatares){ 
+                                if(dunzodatares.status==true){
+                                    var dunzohistorydata = [];
+                                    dunzohistorydata.push({"doid":req.doid[i],"type":1,"created_by":req.done_by,"zoneid":req.zoneid});
+                                    await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
+                                    let resobj = {
+                                        success: true,
+                                        status: true,
+                                        message: "Order successfully assigned to dunzo"
+                                    };
+                                   // result(null, resobj);
+                                }else{
+                                    let resobj = {
+                                        success: true,
+                                        status: false,
+                                        message: "something went wrong plz try again 1"
+                                    };
+                                   // result(null, resobj);
+                                }
+                            });                        
+                        }else{
+                            let resobj = {
+                                success: true,
+                                status: false,
+                                message: "something went wrong plz try again 2"
+                            };
+                           // result(null, resobj);
+                        }
                     }else{
                         let resobj = {
                             success: true,
                             status: false,
-                            message: "something went wrong plz try again 2"
+                            message: "already moveit assigned"
                         };
-                        result(null, resobj);
+                       // result(null, resobj);
                     }
                 }else{
                     let resobj = {
                         success: true,
                         status: false,
-                        message: "already moveit assigned"
+                        message: "plz check day order status"
                     };
-                    result(null, resobj);
+                   // result(null, resobj);
                 }
             }else{
                 let resobj = {
                     success: true,
                     status: false,
-                    message: "plz check day order status"
+                    message: "invalid doid"
                 };
-                result(null, resobj);
+               // result(null, resobj);
             }
-        }else{
-            let resobj = {
-                success: true,
-                status: false,
-                message: "invalid doid"
-            };
-            result(null, resobj);
-        }   
+        }
+        let resobj = {
+            success: true,
+            status: true,
+            message: "Order successfully assigned to dunzo"
+        };
+        result(null, resobj);           
     }else{
         let resobj = {
             success: true,

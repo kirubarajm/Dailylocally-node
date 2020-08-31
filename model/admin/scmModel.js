@@ -67,7 +67,22 @@ SCM.waiting_po_list_old =async function waiting_po_list_old(req,result) {
 /////////Get Waiting PO List///////////
 SCM.waiting_po_list =async function waiting_po_list(req,result) {
     if(req.zoneid){
-        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pl.pid,dop.Productname,dop.product_productdetails,dop.product_uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as rate,pot.due_date,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+((vpm.base_price*vpm.other_charges)/100))) as amount from POtemp as pot left join Dayorder_products as dop on dop.prid=pot.prid left join SubcategoryL2 as scl2 on scl2.scl2_id=dop.product_scl1_id left join SubcategoryL1 as scl1 on scl1.scl1_id=dop.product_scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=dop.product_uom left join Vendor as ven on ven.vid=pot.vid left join Product_live as pl on pl.vpid=pot.vpid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid  where pot.delete_status=0 and pot.zoneid="+req.zoneid+" group by pot.tempid";
+        var whercon = "";
+
+        if(req.categorysearch){
+            whercon = " and (cat.name LIKE '%"+req.categorysearch+"%' or cat.catid LIKE '"+req.categorysearch+"') ";
+        }
+        if(req.L1subcategorysearch){
+            whercon = " and (scl1.name LIKE '%"+req.L1subcategorysearch+"%' or scl1.scl1_id LIKE '"+req.L1subcategorysearch+"') ";
+        }
+        if(req.l2subcategorysearch){
+            whercon = " and (scl2.name LIKE '%"+req.l2subcategorysearch+"%' or scl2.scl2_id LIKE '"+req.l2subcategorysearch+"') ";
+        }
+        if(req.productsearch){
+            whercon = " and (dop.Productname LIKE '%"+req.productsearch+"%' or dop.vpid LIKE '"+req.productsearch+"') ";
+        }
+
+        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pl.pid,dop.Productname,dop.product_productdetails,dop.product_uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as rate,pot.due_date,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+((vpm.base_price*vpm.other_charges)/100))) as amount from POtemp as pot left join Dayorder_products as dop on dop.prid=pot.prid left join SubcategoryL2 as scl2 on scl2.scl2_id=dop.product_scl1_id left join SubcategoryL1 as scl1 on scl1.scl1_id=dop.product_scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=dop.product_uom left join Vendor as ven on ven.vid=pot.vid left join Product_live as pl on pl.vpid=pot.vpid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid  where pot.delete_status=0 and pot.zoneid="+req.zoneid+" "+whercon+" group by pot.tempid";
 
         var getwaitingpo = await query(getwaitingpouery);
         if(getwaitingpo.length > 0){
@@ -1361,7 +1376,7 @@ SCM.invoice_pdf= async function invoice_pdf(req,result) {
 
 /////////Delete PO///////////
 SCM.delete_po =async function delete_po(req,result) {
-    if(req.zoneid && req.poid && req.done_by){  
+    if(req.zoneid && req.poid && req.done_by && req.delete_reason){  
         // var getpoquery = "select * from PO where zoneid="+req.zoneid+" and poid="+req.poid;
         var getpoquery = "select po.*,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid where po.zoneid="+req.zoneid+" and po.poid="+req.poid+" group by po.poid order by po.poid desc";
         var getpo = await query(getpoquery);
@@ -1379,7 +1394,7 @@ SCM.delete_po =async function delete_po(req,result) {
                         var getpop = await query(getpopquery);
                         if(getpop.length>0){
                             if(getpop[0].total_count == getpop[0].open_count){
-                                var updatepoquery = "update PO set po_status=4 where zoneid="+req.zoneid+" and poid="+req.poid;
+                                var updatepoquery = "update PO set po_status=4,delete_reason='"+req.delete_reason+"' where zoneid="+req.zoneid+" and poid="+req.poid;
                                 var updatepo = await query(updatepoquery);
 
                                 var updatepoquery = "update POproducts set pop_status=4 where poid="+req.poid;
@@ -1719,6 +1734,27 @@ SCM.delete_po_temp =async function delete_po_temp(req,result) {
         };
         result(null, resobj);
     }     
+};
+
+/////////List Of Delete PO Reason///////////
+SCM.delete_po_reson_list =async function delete_po_reson_list(req,result) {
+    var getdeleteporesonlistquery = "select * from DeletePO_Reason where active_status=1";
+    var getdeleteporesonlist = await query(getdeleteporesonlistquery);
+    if(getdeleteporesonlist.length>0){            
+        let resobj = {
+            success: true,
+            status: true,
+            result: getdeleteporesonlist
+        };
+        result(null, resobj);
+    }else{
+        let resobj = {
+            success: true,
+            status: false,
+            message: "no data"
+        };
+        result(null, resobj);
+    }      
 };
 
 /////////Remove BOH Mapping///////////

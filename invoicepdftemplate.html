@@ -58,7 +58,7 @@ table.d {
                         <td style="font-weight: bold; font-size: 14px; ">INVOICE</td>
                     </tr>
                     <tr>
-                        <td>Invoice No : &nbsp; &nbsp; &nbsp; &nbsp; {{this.invoiceno}}</td>
+                        <td>Invoice No : &nbsp; &nbsp; &nbsp; &nbsp; INV{{this.doid}}</td>
                     </tr>
                     <tr>
                         <td>Date : &nbsp; &nbsp; {{this.date}} </td>
@@ -106,20 +106,20 @@ table.d {
                 <table style="margin: 0px" class="css-serial border d">
                     <tr class="border">
                       <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">S.No</th>
-                      <th class="border" style="table-layout: fixed; width: 100%; font-weight: bold;">Item</th>
                       <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;" >HSN</th>
-                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Unit Price</th>
-                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Quantity</th>
+                      <th class="border" style="table-layout: fixed; width: 100%; font-weight: bold;">Item</th>   
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Quantity</th>                   
+                      <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Unit Price</th>                      
                       <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Price</th>
                       <th class="border" style="table-layout: fixed; width: 20%; font-weight: bold;">Availability</th>
                     </tr>
                     {{#each items}}
                     <tr class="border">
                       <td class="border"> </td>
-                      <td class="border">{{this.product_name}}</td>
                       <td class="border">{{this.hsn}}</td>
-                      <td class="border">{{this.unit_price}}</td>
+                      <td class="border">{{this.product_name}}</td>
                       <td class="border">{{this.quantity}}</td>
+                      <td class="border">{{this.unit_price}}</td>                      
                       <td class="border">{{this.price}}</td>
                       <td class="border"></td>
                     </tr>
@@ -221,7 +221,7 @@ table.d {
             <td style="font-weight: bold; font-size: 20px; color:green"> Thank you for your business!</td>
         </tr>
         <tr>
-            <td > Visit us at www.dailylocally.com</td>
+            <td > Visit us at www.dailylocally.in</td>
         </tr>
         <tr>
             <td > This is computer generated invoice</td>

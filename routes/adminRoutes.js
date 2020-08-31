@@ -18,6 +18,8 @@ module.exports = function(app) {
   var Razorpay = require("../controllers/common/RazorpayController");
   var adminuser = require("../controllers/admin/adminUserController");
   var quicksearch = require("../controllers/common/QuickSearchController.js");
+  var Vendor = require("../controllers/common/VendorController.js");
+  
 
   //////// ==============> Admin Routes <================= /////////    
   ///////// Search /////////////
@@ -91,6 +93,7 @@ module.exports = function(app) {
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
   app.route("/admin/po/removebohmapping").post(middleware.checkToken,routesVersioning({"1.0.0": scm.remove_boh_mapping}));
+  app.route("/admin/po/reason/list").get(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_reson_list}));
 
   ///////PO Auto Creation Loop//////
   app.route("/admin/po/pdfloop").post(middleware.checkToken,routesVersioning({"1.0.0": scm.autopopdfcreate}));
@@ -186,6 +189,13 @@ app.route("/admin/login").post(routesVersioning({"1.0.0":adminuser.login}));
 app.route("/admin/logout").post(routesVersioning({"1.0.0":adminuser.logout}));
 
 app.route("/admin/userdetails").post(routesVersioning({"1.0.0":adminuser.user_details}));
+
+
+////////Vendor Details////////////////
+app.route("/admin/vendor/add").post(routesVersioning({"1.0.0":Vendor.createVendorModel}));
+app.route("/admin/vendor/edit").post(routesVersioning({"1.0.0":Vendor.updateVendorModel}));
+app.route("/admin/vendor/view").post(routesVersioning({"1.0.0":Vendor.VendorModelview}));
+app.route("/admin/vendor/list").post(routesVersioning({"1.0.0":Vendor.VendorModelList}));
 
 
 }

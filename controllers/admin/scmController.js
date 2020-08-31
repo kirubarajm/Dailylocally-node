@@ -168,6 +168,16 @@ exports.delete_po_temp = function(req, res) {
     });    
 };
 
+/////////List Of Delete PO Reason///////////
+exports.delete_po_reson_list = function(req, res) {    
+    SCM.delete_po_reson_list(req.body, function(err, ress) {
+        //console.log("delete_po_reson_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};
+
 /////////Remove BOH Mapping///////////
 exports.remove_boh_mapping = function(req, res) {    
     SCM.remove_boh_mapping(req.body, function(err, ress) {
