@@ -188,5 +188,10 @@ app.route("/admin/logout").post(routesVersioning({"1.0.0":adminuser.logout}));
 app.route("/admin/userdetails").post(routesVersioning({"1.0.0":adminuser.user_details}));
 
 
+app.route("/admin/communitylist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.admin_community_list}));
+
+app.route("/admin/community/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.community_dl_User_list}));
+
+
 }
 

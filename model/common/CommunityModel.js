@@ -246,7 +246,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select * From User us left join join_community jc on jc.userid=us.userid where us.userid ='"+req.userid+"' and status=1  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid where us.userid ='"+req.userid+"' and status=1  ");
 
   if (community.length ==0) {
 
@@ -259,6 +259,19 @@ Community.get_community_userdetails=async function get_community_userdetails(req
 
     
   }else{
+
+    for (let i = 0; i < community.length; i++) {
+      
+
+      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status=1 ");
+
+      console.log(get_count[0].members_count);
+      community[i].members_count=get_count[0].members_count;
+      community[i].members='Members';
+      community[i].total_credits=get_count[0].members_count;
+      community[i].credits_text='credits';
+    }
+
 
     let resobj = {
       success: true,
@@ -343,5 +356,37 @@ result(null, resobj);
 
 };
 
+
+
+
+
+Community.admin_community_list =async function admin_community_list(req, result){
+
+
+
+  var search_community = await query("select *,if(status=1,'Live Mode','Offline')as status_msg from Community where status=1 and zoneid=1");
+
+  if (search_community.length !=0) {
+
+
+    let resobj = {
+      success: true,
+      status: true,
+      result: search_community
+    };
+    result(null, resobj);
+
+  }else{
+
+    let resobj = {
+      success: true,
+      status: false,
+      result: search_community
+    };
+    result(null, resobj);
+  }
+  
+
+};
 
 module.exports = Community;

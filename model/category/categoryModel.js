@@ -161,27 +161,97 @@ Category.get_category_list =async function get_category_list(req,result) {
             } 
 
 
-            var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
+            // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
 
-            if (get_community.length !=0) {
+            var get_community = [{
+              "comid": 1,
+              "communityname": "Soundarya Apartment",
+              "lat": "13.0418",
+              "long": "80.2341",
+              "apartmentname": "Soundarya Apartment",
+              "image": "https://q-xx.bstatic.com/images/hotel/max1024x768/155/155397174.jpg",
+              "created_at": "2020-08-25 15:41:42",
+              "status": 1,
+              "requested_userid": null,
+              "zoneid": 1,
+              "no_of_apartments": null,
+              "flat_no": null,
+              "floor_no": null,
+              "community_address": null,
+              "area": null,
+              "servicable_status": false,
+              "category": true,
+              "clickable": true,
+              "collection_status": false,
+              "tile_type": 1,
+              "catid": 1,
+              "type": 3,
+              "approval_status": true,
+              "join_status": true
+          }];
 
-              get_community.forEach(i => {
+
+            var get_community_list = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' ");
+
+            if (get_community_list.length !=0) {
+              
+              if (get_community_list[0].status=0) {
                 
+                if (get_community.length !=0) {
 
-                i.servicable_status=servicable_status;
-                i.category=true,
-                i.clickable= true;
-                i.collection_status= false
-                i.tile_type= 1;
-                i.category=true;
-                i.catid = i.comid;
-                i.type= 3
+                  get_community.forEach(i => {
+                    
     
-                      
-                res.splice(0, 0, i);
-               
-              });
+                    i.servicable_status=servicable_status;
+                    i.category=true,
+                    i.clickable= true;
+                    i.collection_status= false
+                    i.tile_type= 1;
+                    i.category=true;
+                    i.catid = i.comid;
+                    i.type= 3;
+                    i.approval_status= false;
+                    i.join_status= true;
+                   
+        
+                          
+                    res.splice(0, 0, i);
+                   
+                  });
+                }
+
+              }
+            }else{
+
+              if (get_community.length !=0) {
+
+                console.log("get_community",get_community.length);
+                get_community.forEach(i => {
+                  
+  
+                  i.servicable_status=servicable_status;
+                  i.category=true,
+                  i.clickable= true;
+                  i.collection_status= false
+                  i.tile_type= 1;
+                  i.category=true;
+                  i.catid = 0;
+                  i.type= 3;
+                  i.approval_status= false;
+                  i.join_status= false;
+                 
+      
+                        
+                  res.splice(0, 0, i);
+                 
+                });
+              }
+
             }
+
+
+
+           
 
             let resobj = {
               success: true,

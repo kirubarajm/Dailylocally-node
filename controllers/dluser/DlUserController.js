@@ -170,6 +170,15 @@ exports.dl_User_list = function(req, res) {
 
 };
 
+
+
+exports.community_dl_User_list = function(req, res) {
+  Dluser.community_dl_User_list(req.body, function(err, user) {
+    if (err) res.send(err);  
+    res.send(user);
+  });
+
+};
 exports.dl_user_send_message = function(req, res) {
 
   Dluser.dl_user_send_message(req.body, function(err, user) {
@@ -272,4 +281,30 @@ exports.homepage = function(req, res) {
     if (err) res.send(err);
     res.send(user);
   });
+};
+
+
+exports.admin_community_list = function(req, res) {
+  if (!req.body.userid) {
+   res
+     .status(400)
+     .send({
+       error: true,
+       status: false,
+       message: "Please provide userid"
+     });
+ }else if(!req.body.lat || !req.body.long){
+   res
+   .status(400)
+   .send({
+     error: true,
+     status: false,
+     message: "Please provide lat/long"
+   });
+ } else {
+ Community.admin_community_list(req.body, function(err, user) {
+   if (err) res.send(err);
+   res.send(user);
+ });
+}
 };

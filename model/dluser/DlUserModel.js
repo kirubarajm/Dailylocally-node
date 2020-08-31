@@ -7015,4 +7015,60 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
   }
 }
 
+
+Dluser.community_dl_User_list =async function community_dl_User_list(req, result) {
+  var pagelimit = 20;
+  var page = req.page || 1;
+  var startlimit = (page - 1) * pagelimit;
+
+  var where = "";
+  if(req.search){
+      where = where+" and (us.phoneno LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
+  }
+
+  if(req.ordertype==1){
+    where = where+"  us.userid IN(select userid from Dayorder where userid group by userid) "; 
+  }
+  if(req.ordertype==2){
+    where = where+" us.userid NOT IN(select userid from Dayorder where userid group by userid) ";
+  }
+
+  // if(req.report && req.report==1){
+  //   var getusersquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
+  // }else{
+      var getusersquery = "select us.*,JSON_ARRAYAGG(JSON_OBJECT('userid',addr.userid,'pincode',addr.pincode,'aid',addr.aid,'lat',addr.lat,'lon',addr.lon,'landmark',addr.landmark,'address_type',addr.address_type,'delete_status',addr.delete_status,'address_default',addr.address_default,'created_at',addr.created_at,'updated_at',addr.updated_at,'city',addr.city,'google_address',addr.google_address,'complete_address',addr.complete_address,'flat_house_no',addr.flat_house_no,'plot_house_no',addr.plot_house_no,'floor',addr.floor,'block_name',addr.block_name,'apartment_name',addr.apartment_name)) as address_details from User as us left join Address as addr on addr.userid=us.userid  left join  join_community jc on jc.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc limit " +startlimit +"," +pagelimit +" ";
+  // }      
+  
+  // console.log("getusersquery",getusersquery);
+  var getusers = await query(getusersquery);
+
+  var totalcountquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
+  var total_count = await query(totalcountquery);
+
+  if(getusers.length > 0){
+    for (let i = 0; i < getusers.length; i++) {
+      getusers[i].address_details = JSON.parse(getusers[i].address_details);
+    }
+    var totalcount = total_count.length;   
+    let resobj = {
+        success: true,
+        status: true,
+        totalcount: totalcount,
+        pagelimit: pagelimit,
+        result: getusers
+    };
+    result(null, resobj);                  
+  }else{
+      let resobj = {
+          success: true,
+          status: false,
+          totalcount: 0,
+          message: "no records found"
+      };
+      result(null, resobj);
+  }  
+};
+
+
+
 module.exports = Dluser;
