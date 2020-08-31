@@ -7020,53 +7020,69 @@ Dluser.community_dl_User_list =async function community_dl_User_list(req, result
   var pagelimit = 20;
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
-
   var where = "";
+  if(req.starting_date && req.end_date){
+    where = where+" and (co.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date+"')";
+ }
+
+
   if(req.search){
-      where = where+" and (us.phoneno LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
+      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
   }
 
-  if(req.ordertype==1){
-    where = where+"  us.userid IN(select userid from Dayorder where userid group by userid) "; 
+  if(req.status==1){
+    where = where+" and  co.status=1 "; 
   }
-  if(req.ordertype==2){
-    where = where+" us.userid NOT IN(select userid from Dayorder where userid group by userid) ";
+  if(req.status==0){
+    where = where+" and  co.status=0 "; 
+  }
+  if(req.status==2){
+    where = where+" and  co.status=2 ";
   }
 
-  // if(req.report && req.report==1){
-  //   var getusersquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
-  // }else{
-      var getusersquery = "select us.*,JSON_ARRAYAGG(JSON_OBJECT('userid',addr.userid,'pincode',addr.pincode,'aid',addr.aid,'lat',addr.lat,'lon',addr.lon,'landmark',addr.landmark,'address_type',addr.address_type,'delete_status',addr.delete_status,'address_default',addr.address_default,'created_at',addr.created_at,'updated_at',addr.updated_at,'city',addr.city,'google_address',addr.google_address,'complete_address',addr.complete_address,'flat_house_no',addr.flat_house_no,'plot_house_no',addr.plot_house_no,'floor',addr.floor,'block_name',addr.block_name,'apartment_name',addr.apartment_name)) as address_details from User as us left join Address as addr on addr.userid=us.userid  left join  join_community jc on jc.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc limit " +startlimit +"," +pagelimit +" ";
-  // }      
+   
+  var zoneid = req.zoneid || 1;
+
+
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+
+ console.log(admin_community_list);
+
+  var admin_community = await query(admin_community_list);
+
+  if (admin_community.length !=0) {
+
+    
+for (let i = 0; i < admin_community.length; i++) {
   
-  // console.log("getusersquery",getusersquery);
-  var getusers = await query(getusersquery);
 
-  var totalcountquery = "select us.*,'0' as address_details from User as us left join Address as addr on addr.userid=us.userid where us.userid!='' "+where+" group by us.userid order by us.userid desc";
-  var total_count = await query(totalcountquery);
+  var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
 
-  if(getusers.length > 0){
-    for (let i = 0; i < getusers.length; i++) {
-      getusers[i].address_details = JSON.parse(getusers[i].address_details);
-    }
-    var totalcount = total_count.length;   
+  admin_community[i].total_converted_user=total_converted_user[0].total || 0;
+
+  var total_revenue = await query("select sum(price)as total_Revenue,count(orderid)as total_orders from Orders where userid in(select userid from join_community where comid='"+admin_community[i].comid+"'  group by userid) and payment_status=1 ");
+
+  admin_community[i].total_Revenue=total_revenue[0].total_Revenue || 0;
+  admin_community[i].total_orders=total_revenue[0].total_orders || 0;
+}
+
+
     let resobj = {
-        success: true,
-        status: true,
-        totalcount: totalcount,
-        pagelimit: pagelimit,
-        result: getusers
+      success: true,
+      status: true,
+      result: admin_community
     };
-    result(null, resobj);                  
+    result(null, resobj);
+
   }else{
-      let resobj = {
-          success: true,
-          status: false,
-          totalcount: 0,
-          message: "no records found"
-      };
-      result(null, resobj);
-  }  
+
+    let resobj = {
+      success: true,
+      status: false,
+      result: admin_community
+    };
+    result(null, resobj);
+  }
 };
 
 

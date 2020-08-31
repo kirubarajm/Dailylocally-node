@@ -285,26 +285,18 @@ exports.homepage = function(req, res) {
 
 
 exports.admin_community_list = function(req, res) {
-  if (!req.body.userid) {
-   res
-     .status(400)
-     .send({
-       error: true,
-       status: false,
-       message: "Please provide userid"
-     });
- }else if(!req.body.lat || !req.body.long){
-   res
-   .status(400)
-   .send({
-     error: true,
-     status: false,
-     message: "Please provide lat/long"
-   });
- } else {
  Community.admin_community_list(req.body, function(err, user) {
    if (err) res.send(err);
    res.send(user);
  });
-}
+
+};
+
+
+exports.community_edit = function(req, res) {
+  Community.admin_edit_community(req.body, function(err, user) {
+    if (err) res.send(err);  
+    res.send(user);
+  });
+
 };

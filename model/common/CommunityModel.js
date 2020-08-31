@@ -265,11 +265,19 @@ Community.get_community_userdetails=async function get_community_userdetails(req
 
       var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status=1 ");
 
-      console.log(get_count[0].members_count);
       community[i].members_count=get_count[0].members_count;
       community[i].members='Members';
       community[i].total_credits=get_count[0].members_count;
       community[i].credits_text='credits';
+      community[i].welcome_name_title='Hi';
+      community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
+      community[i].min_cart_text='Minimum Cart Value';
+      community[i].min_cart_value='Zero';
+      community[i].free_delivery_text='Free delivery across Chennai';
+      community[i].free_delivery_value='Free Home Delivery';
+      community[i].cod_text='COD';
+      community[i].cod_value='Cash on Delivery on all orders';
+
     }
 
 
@@ -363,16 +371,60 @@ result(null, resobj);
 Community.admin_community_list =async function admin_community_list(req, result){
 
 
+  var pagelimit = 20;
+  var page = req.page || 1;
+  var startlimit = (page - 1) * pagelimit;
+  var where = "";
+  if(req.starting_date && req.end_date){
+    where = where+" and (co.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date+"')";
+ }
 
-  var search_community = await query("select *,if(status=1,'Live Mode','Offline')as status_msg from Community where status=1 and zoneid=1");
 
-  if (search_community.length !=0) {
+  if(req.search){
+      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or co.area LIKE  '%" +req.search+ "% ' ) ";
+  }
+
+  if(req.status==1){
+    where = where+" and  co.status=1 "; 
+  }
+  if(req.status==0){
+    where = where+" and  co.status=0 "; 
+  }
+  if(req.status==2){
+    where = where+" and  co.status=2 ";
+  }
+
+   
+  var zoneid = req.zoneid || 1;
+
+
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+
+ 
+
+  var admin_community = await query(admin_community_list);
+
+  if (admin_community.length !=0) {
+
+    
+for (let i = 0; i < admin_community.length; i++) {
+  
+
+  var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
+
+  admin_community[i].total_converted_user=total_converted_user[0].total || 0;
+
+  var total_revenue = await query("select sum(price)as total_Revenue,count(orderid)as total_orders from Orders where userid in(select userid from join_community where comid='"+admin_community[i].comid+"'  group by userid) and payment_status=1 ");
+
+  admin_community[i].total_Revenue=total_revenue[0].total_Revenue || 0;
+  admin_community[i].total_orders=total_revenue[0].total_orders || 0;
+}
 
 
     let resobj = {
       success: true,
       status: true,
-      result: search_community
+      result: admin_community
     };
     result(null, resobj);
 
@@ -381,12 +433,47 @@ Community.admin_community_list =async function admin_community_list(req, result)
     let resobj = {
       success: true,
       status: false,
-      result: search_community
+      result: admin_community
     };
     result(null, resobj);
   }
   
 
 };
+
+
+Community.admin_edit_community = async function admin_edit_community(req, result) {
+
+    var email_status = true;
+    var staticquery = "UPDATE Community SET updated_at = ?, ";
+    var column = "";
+    var column = '';
+    var values =[];
+   
+    values.push(new Date());
+    for (const [key, value] of Object.entries(req)) {
+      if (key !== "comid") {
+        column = column + key +" = ?,";
+        values.push(value);
+      }
+    }
+    column=column.slice(0, -1)
+    values.push(req.comid);
+ 
+    var query1 = staticquery + column  + " where comid = ?";
+ 
+    console.log(query1);
+    console.log(values);
+    sql.query(query1, values, function(err) {
+      if (err) {
+        result(err, null);
+      } else {
+  
+
+      }
+    });
+   };
+
+
 
 module.exports = Community;
