@@ -160,6 +160,13 @@ exports.faq_by_type = function(req, res) {
 
 };
 
+exports.about_us= function(req, res) {
+  Dluser.about_us(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
 
 exports.dl_User_list = function(req, res) {
 
@@ -283,6 +290,12 @@ exports.homepage = function(req, res) {
   });
 };
 
+exports.wapscreen = function(req, res) {
+  Community.get_wapscreen(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
 
 exports.admin_community_list = function(req, res) {
  Community.admin_community_list(req.body, function(err, user) {

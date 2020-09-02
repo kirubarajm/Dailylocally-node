@@ -39,7 +39,7 @@ app.route("/user/checkaddress").post(middleware.checkToken,routesVersioning({"1.
 
 
  // category
- app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list}));
+ app.route("/user/categorylist").post(middleware.checkToken,routesVersioning({"1.0.0":category.get_category_list,"2":category.get_category_list_v2}));
 
 //sub_category_L1
  app.route("/user/subcategoryL1").post(middleware.checkToken,routesVersioning({"1.0.0":sub_category_L1.get_Sub_Category_L1_list}));
@@ -137,5 +137,7 @@ app.route("/user/communityapproval").post(middleware.checkToken,routesVersioning
 app.route("/user/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration}));
 app.route("/user/communityuserdetails").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.communityuserdetails}));
 app.route("/user/Community/homepage").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.homepage}));
+app.route("/user/Community/wapscreen").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.wapscreen}));
+app.route("/user/Community/aboutus").post(routesVersioning({"1.0.0":dluser.about_us}));
 
 }

@@ -112,18 +112,25 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
 };
 
 UserAddress.getaddressById = function getaddressById(userId, result) {
-        sql.query("Select * from Address where userid = ? and delete_status = 0", userId, function (err, res) {             
+        sql.query("Select * from Address where userid = ? and delete_status = 0", userId,async function (err, res) {             
             if(err) {
                 console.log("error: ", err);
                 result(err, null);
             }
             else{
+
+                var get_community_details = await query("select * from join_community where userid ="+userId+" " );
                 status = true;
-                if (res.length ===0) {
-                    
+                if (res.length ===0) {   
                     status = false;
                 }else{
-                    res[0].note= 'All your current orders will also be delivered to the new address!';
+                    if (get_community_details.length==0) {
+                        res[0].note= 'All your current orders will also be delivered to the new address!';
+
+                    } else {
+                        res[0].note= 'Changing the delivery address will cancel the perks Of Being a DL Exclusive member!';
+
+                    }
                 }
                
                 let resobj = {  
@@ -154,107 +161,22 @@ UserAddress.getAllAddress = function getAllAddress(result) {
 };
 
 UserAddress.updateById =async function updateById(req, result){
+    var get_community=  await query("select * from join_community WHERE userid='"+req.userid+"' and status=1");
 
-//  var servicable_status = false;
+    if (get_community.length !=0) {
+        var address_details=  await query("select ( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+") ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Address where aid='"+req.aid+"'");
 
-//  var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
-//  req.lat +
-//  "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
-//  req.lon +
-//  "') ) + sin( radians('" +
-//  req.lat +
-//  "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
-
-
-// if (get_nearby_zone.length !=0) {
- 
-//  if (get_nearby_zone[0].distance > constant.radiuslimit) {
-//    servicable_status =false;
-//  }
-// }
-
-// var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
-
-// if (user_day_order_details.length !=0) {
-    
-//   if (!servicable_status) {
-//     let resobj = {
-//         success: true,
-//         status: false,
-//         message: "Your location is unserviceable",
-//     };
-
-//     result(null, resobj);
-//   }else{
-//     staticquery = "UPDATE Address SET updated_at = ?,";
-//     var column = '';
-//     for (const [key, value] of Object.entries(req)) {
-//         //  console.log(`${key} ${value}`); 
-
-//         if (key !== 'userid') {
-//             // var value = `=${value}`;
-//             column = column + key + "='" + value + "',";
-//         }
-//     }
-
-//   var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-//     sql.query(query1,[new Date()], function (err, res) {
-//         if (err) {
-//             console.log("error: ", err);
-//             result(err, null);
-//         }
-//         else {
-
-//             let resobj = {
-//                 success: true,
-//                 status:true,
-//                 message: "Address Updated successfully",
-
-//             };
-
-//             result(null, resobj);
-//         }
-
-//     });
-//   }
-
-// } else {
-//     staticquery = "UPDATE Address SET updated_at = ?,";
-//         var column = '';
-//         for (const [key, value] of Object.entries(req)) {
-//             //  console.log(`${key} ${value}`); 
-
-//             if (key !== 'userid') {
-//                 // var value = `=${value}`;
-//                 column = column + key + "='" + value + "',";
-//             }
-//         }
-
-//       var  query1 = staticquery + column.slice(0, -1) + " where aid = " + req.aid;
-//         sql.query(query1,[new Date()], function (err, res) {
-//             if (err) {
-//                 console.log("error: ", err);
-//                 result(err, null);
-//             }
-//             else {
-
-//                 let resobj = {
-//                     success: true,
-//                     status:true,
-//                     message: "Address Updated successfully",
-
-//                 };
-
-//                 result(null, resobj);
-//             }
-
-//         });
-// }
+        if (address_details.length !=0) {
+            if (address_details[0].distance > 1) {
+                var update_query =  await query("update join_community set status=0 where jcid='"+get_community[0].jcid+"' ");
+            }
+        } 
+    }
 
   staticquery = "UPDATE Address SET updated_at = ?,";
         var column = '';
         for (const [key, value] of Object.entries(req)) {
-            //  console.log(`${key} ${value}`); 
+            //  console.log(`${key} ${value}`);k./.ki;../ /
 
             if (key !== 'userid') {
                 // var value = `=${value}`;

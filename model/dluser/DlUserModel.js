@@ -6774,6 +6774,23 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 };
 
 
+Dluser.about_us = async function about_us(id, result) {
+
+  sql.query("Select * from About_us ", function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+      let resobj = {
+        success: true,
+        status:true,
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+
+};
+
 // Dluser.dl_User_list = function dl_User_list(req, result) {
 //   var pagelimit = 20;
 //   var page = req.page || 1;

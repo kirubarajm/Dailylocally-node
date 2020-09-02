@@ -114,7 +114,7 @@ Community.join_new_community =async function join_new_community(req, result){
     var new_community = {};
     new_community.userid = req.userid;
     new_community.comid = req.comid;
-    new_community.status = 0;
+    new_community.status = 1;
     new_community.profile_image = req.profile_image;
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
@@ -246,7 +246,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid where us.userid ='"+req.userid+"' and status=1  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status=1  ");
 
   if (community.length ==0) {
 
@@ -268,8 +268,8 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].members_count=get_count[0].members_count;
       community[i].members='Members';
       community[i].total_credits=get_count[0].members_count;
-      community[i].credits_text='credits';
-      community[i].welcome_name_title='Hi';
+      community[i].credits_text='DL Credits';
+      community[i].welcome_name_title='Hi ';//+community[0].name
       community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
       community[i].min_cart_text='Minimum Cart Value';
       community[i].min_cart_value='Zero';
@@ -301,57 +301,34 @@ Community.get_homepage=async function get_homepage(req, result){
       
         "event": {
             "image_url": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
-            "topic": "new event"
+            "topic": "community_event"
         },
         "whatsapp ": {
-            "title":"new event",
-            "des": "new event",
-            "group_url ": "https://dailylocally.s3.ap-south-1.amazonaws.com/admin/1596196480459-DLV2%20Category-Spreads.jpg"
+            "title":"What's Cooking in community",
+            "des": "Join your community's whatapp group and socialize with the memebrs",
+            "group_url ": "https://chat.whatsapp.com/LQGeWpyi2v6LpWjMH1SGxL"
         },
         "sneak_peak": {
-            "title": "new event",
-            "des": "new event",
-            "video_url ": null
+            "title": "Sneak Peak",
+            "des": "Watch a short video on Daily Locally Exclusive",
+            "video_url ": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
         },
-        "cat_list": [
-            {
+        "cat_list": {
                 "title ": "new event",
                 "des": "new event",
                 "image_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595847977688-Category%20Milk-01.jpg"
-            }
-          ],
-          "about": [
+                 }
+          ,
+          "about": 
                {
-                  "title": "new event",
-                  "des": 25
+                "title": "About Us",
+                "des": "Know More about daily locally Exclusive"
                 }
-              ]
+              
     }
 ]
  
-//   get_details[0].whatsapp ={
-//                       title : "",
-//                       des : "Community event ",
-//                       group_url : ""
-//                }
 
-//  get_details[0].sneak_peak = {
-//                       title : "",
-//                       des : "Community event ",
-//                       video_url : ""
-//                }
- 
-//                get_details[0].cat_list= {
-//                       title : "",
-//                       des : "Community event ",
-//                      image_url : "",
-//                },
-//               about= {
-//                       title : "",
-//                       des : "Community event ",
-//                }
- 
- 
 
 
 
@@ -366,7 +343,28 @@ result(null, resobj);
 
 
 
+Community.get_wapscreen=async function get_wapscreen(req, result){
 
+
+  get= [
+    {
+          imageUrl: "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
+          phoneno: "8939904769",
+          title: "Hi",
+          subtitle1: "We have received the registration request for your community",
+          subtitle2: "Our DL Exclusive Team will get in touch with you within 24 Hours" ,
+          whats_up_link:"https://wa.me/message/2DPUU5JCTASKN1"
+    }]
+ 
+
+ let resobj = {
+  success: true,
+  status: true,
+  result: get
+};
+result(null, resobj);
+
+};
 
 Community.admin_community_list =async function admin_community_list(req, result){
 
@@ -375,8 +373,8 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
   var where = "";
-  if(req.starting_date && req.end_date){
-    where = where+" and (co.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date+"')";
+  if(req.from_date  && req.to_date){
+    where = where+" and (co.created_at BETWEEN '"+req.from_date +"' AND '"+req.to_date+"')";
  }
 
 
@@ -400,9 +398,12 @@ Community.admin_community_list =async function admin_community_list(req, result)
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
 
- 
+var admin_community = await query(admin_community_list);
 
-  var admin_community = await query(admin_community_list);
+
+var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc");
+
+
 
   if (admin_community.length !=0) {
 
@@ -424,6 +425,8 @@ for (let i = 0; i < admin_community.length; i++) {
     let resobj = {
       success: true,
       status: true,
+      pagelimit:pagelimit,
+      totalcount:totalcount.length,
       result: admin_community
     };
     result(null, resobj);
@@ -462,13 +465,16 @@ Community.admin_edit_community = async function admin_edit_community(req, result
  
     var query1 = staticquery + column  + " where comid = ?";
  
-    console.log(query1);
-    console.log(values);
     sql.query(query1, values, function(err) {
       if (err) {
         result(err, null);
       } else {
-  
+        let resobj = {
+          success: true,
+          status: true,
+          message: "Updated successfully"
+        };
+        result(null, resobj);
 
       }
     });
