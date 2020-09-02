@@ -46,8 +46,8 @@ Procurement.procurement_view=async function procurement_view(req,result) {
   }    
 };
 
-//////// Create New Precurment //////////
-Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
+//////// Create New Precurment Old//////////
+Procurement.new_procurement_create_old=async function new_procurement_create_old(new_Procurement,result) {
   var productquery= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid,'"+new_Procurement.done_by+"' as created_by from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.vpid"
   var get_product = await query(productquery);  
 
@@ -81,6 +81,74 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
           // }                    
         }
       });
+    }
+
+    ////////Create Day order Log ////////////
+    if(new_Procurement.doid.length>0){
+      for (let i = 0; i < new_Procurement.doid.length; i++) {        
+        var insertlogdata = [];
+        if(new_Procurement.done_by){ }else{ new_Procurement.done_by=0}
+        insertlogdata.push({"comments":"procurement_created","done_by":new_Procurement.done_by,"doid":new_Procurement.doid[i],"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments_crm(insertlogdata);        
+      }
+    }
+    
+    let resobj = {  
+      success: true,
+      status: true,
+      message:"procurement created!"
+    };
+    result(null, resobj); 
+  }else{
+    let resobj = {  
+      success: true,
+      status: false,
+      message:"data not available"
+    };
+    result(null, resobj);
+  }
+};
+
+//////// Create New Precurment //////////
+Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
+  var get_product_query= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid,'"+new_Procurement.done_by+"' as created_by from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.vpid"
+  var get_product = await query(get_product_query);
+
+  if (get_product.length !=0) {
+    for (let i = 0; i < get_product.length; i++) {
+      var checkprocurementquery = "select * from Procurement where vpid="+get_product[i].vpid+" and pr_status=1";
+      var checkprocurement = await query(checkprocurementquery);
+      if(checkprocurement.length>0){
+        ////Update////
+        var qty = parseInt(checkprocurement[0].quantity) + parseInt(get_product[i].quantity);
+        var updateprocurmentquery = "update Procurement set quantity="+qty+" where prid="+checkprocurement[0].prid;
+        var updateprocurment = await query(updateprocurmentquery);
+        if(updateprocurment.affectedRows>0){
+            var updatedayorderproductquery = "update Dayorder_products set scm_status=1,prid="+checkprocurement[0].prid+" where doid IN("+new_Procurement.doid+") and vpid="+get_product[i].vpid+" ";
+            var updatedayorderproduct = await query(updatedayorderproductquery);
+            if(updatedayorderproduct.affectedRows>0){ }
+        }
+      }else{
+        ////Insert///
+        var items = new Procurement(get_product[i]);
+        sql.query("INSERT INTO Procurement set ?", items,async function(err, res) {
+          if (err) {
+            console.log(err);
+            result(err, null);
+          } else {       
+            var Dayorder_products_query="update Dayorder_products set scm_status=1,prid='"+res.insertId+"' where vpid="+get_product[i].vpid+" and doid IN("+new_Procurement.doid+")";
+            var update_query=await query(Dayorder_products_query);
+            if(update_query.affectedRows>0){  }                            
+          }
+        });
+      }
+
+      if(i+1 == get_product.length){
+        ////// update day order status ////
+        for (let j = 0; j < new_Procurement.doid.length; j++) {        
+          Dayorder.update_scm_status(new_Procurement.doid[j]);
+        } 
+      }      
     }
 
     ////////Create Day order Log ////////////
