@@ -5876,11 +5876,11 @@ Dluser.user_based_notification = async function user_based_notification(req, res
  
   if (req.apptype==1) {
     var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
-  } else  if (req.apptype==2){
+  } else  if(req.apptype==2){
     var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
   }else{
     // var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios from User ";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios  ";
 
   }
 
@@ -5889,6 +5889,9 @@ Dluser.user_based_notification = async function user_based_notification(req, res
       console.log("error: ", err);
       result(err, null);
     } else {
+
+
+     
    
     //   var message="all";
     //   if (req.type==1) {
@@ -5907,17 +5910,15 @@ Dluser.user_based_notification = async function user_based_notification(req, res
         user.userid = userlist[i].userid;
         user.user_message = req.user_message;
         user.title = req.title;
-        user.pushid_android = userlist[i].pushid_android | '';
-        user.pushid_ios = userlist[i].pushid_ios || '';
+        user.pushid_android = userlist[i].pushid_android || 0;
+        user.pushid_ios = userlist[i].pushid_ios || 0;
         if (req.image) {
           user.image = req.image;
         }
+
+        // console.log(user);
         userid=userid+","+userlist[i].userid;
-        await Notification.dlBulkPushNotification(
-          null,
-          user,
-          PushConstant.Pageid_dl_bulk_notification
-        );
+        await Notification.dlBulkPushNotification(null,user,PushConstant.Pageid_dl_bulk_notification);
         
       } 
     
@@ -5928,7 +5929,7 @@ Dluser.user_based_notification = async function user_based_notification(req, res
     success: true,
     status: true,
     message: "notification sent successfully",
-    ms:message,
+    // ms:req.user_message,
     res:userid
   };
 

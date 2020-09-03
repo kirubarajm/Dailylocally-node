@@ -19,6 +19,7 @@ var Community = function(Community) {
   this.community_address=Community.community_address;
   this.area=Community.area;
   this.request_type=Community.request_type|| 1;
+  this.zoneid=Community.zoneid|| 1;
 };
 
 
@@ -404,16 +405,16 @@ Community.admin_community_list =async function admin_community_list(req, result)
   }
 
    
-  var zoneid = req.zoneid || 1;
+  var zoneid = req.zoneid || 0;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-// console.log("admin_community_list",admin_community_list);
-var admin_community = await query(admin_community_list);
+//  console.log("admin_community_list",admin_community_list);
+var admin_community = await query(admin_community_list);  
 
 
-var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by jc.comid order by jc.comid desc");
+var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc");
 
 
 

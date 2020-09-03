@@ -297,6 +297,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 
 Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
  
+  console.log("userid",userid);
 
   var data = null;
   switch (pageid) {
@@ -305,7 +306,7 @@ Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
         data = {
           title: userid.title,
           message:userid.user_message,
-          pageid: "" + pageid,
+          pageid: "" +1,
          
       //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
           app: "Dl",
@@ -322,6 +323,8 @@ Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
  
   //const user = await Notification.getEatUserDetail(userid);
   console.log("admin notification data->", data);
+  console.log("admin notification data->", userid.pushid_android);
+  console.log("admin notification data->", userid.pushid_ios);
   if (userid.pushid_android) {
     FCM_DL.sendNotificationAndroid(userid.pushid_android, data,1 );
   }
