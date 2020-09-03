@@ -143,10 +143,11 @@ const master = [
 
 
     {
-        'apptype': [{
+        'apptype': [
+            {
             "apptypeid": 0,
             "description": 'admin'
-        },{
+            },{
                 "apptypeid": 1,
                 "description": 'android'
             },
@@ -193,7 +194,20 @@ const master = [
                 "description": "Community"
             }
         ]
-    }
+    },
+    {
+        'community_type': [
+            {
+            "id": 1,
+            "description": 'Commmunity user'
+            },
+            {
+            "id": 2,
+            "description": 'admin'
+            }
+
+        ]
+    },
 
 ]
 module.exports = master;

@@ -9,7 +9,7 @@ var constant = require('../constant.js');
 var Community = function(Community) {
   this.communityname = Community.communityname;
   this.lat = Community.lat;
-  this.long = Community.long;
+  this.lon = Community.lon;
   this.apartmentname = Community.apartmentname;
   this.image = Community.image;
   this.requested_userid=Community.requested_userid;
@@ -18,6 +18,7 @@ var Community = function(Community) {
   this.floor_no=Community.floor_no;
   this.community_address=Community.community_address;
   this.area=Community.area;
+  this.request_type=Community.request_type|| 1;
 };
 
 
@@ -48,32 +49,42 @@ Community.community_search =async function community_search(req, result){
 
 };
 
+//
 
 Community.community_list =async function community_list(req, result){
 
-  var search_community = await query("select *,if(status=1,'Live Mode','Offline')as status_msg from Community where status=1 and zoneid=1");
-
-  if (search_community.length !=0) {
-
-
-    let resobj = {
-      success: true,
-      status: true,
-      result: search_community
-    };
-    result(null, resobj);
-
-  }else{
-
-    let resobj = {
-      success: true,
-      status: false,
-      result: search_community
-    };
-    result(null, resobj);
-  }
+  //having distance <= 1
+  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status=1 and zoneid=1   order by distance ";
   
+  // console.log(query1);
+  var search_community = await query(query1);
 
+  // if (search_community.length !=0) {
+
+
+  //   let resobj = {
+  //     success: true,
+  //     status: true,
+  //     result: search_community
+  //   };
+  //   result(null, resobj);
+
+  // }else{
+
+  //   let resobj = {
+  //     success: true,
+  //     status: false,
+  //     result: search_community
+  //   };
+  //   result(null, resobj);
+  // }
+  
+  let resobj = {
+    success: true,
+    status: true,
+    result: search_community
+  };
+  result(null, resobj);
 };
 
 Community.join_new_community =async function join_new_community(req, result){
@@ -147,9 +158,9 @@ Community.join_new_community =async function join_new_community(req, result){
 
 Community.join_new_community_approval=async function join_new_community_approval(req, result){
 
-  var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"' ");
+  var community = await query("select * from Community where  comid='"+req.comid+"' ");
 
-  if (join_community.length ==0) {
+  if (community.length ==0) {
 
     let resobj = {
       success: true,
@@ -161,7 +172,7 @@ Community.join_new_community_approval=async function join_new_community_approval
     
   }else{
 
-    var join_community = await query("update join_community set status='"+req.status+"' where userid='"+req.userid+"' and comid='"+req.comid+"' ");
+    var community = await query("update Community set status='"+req.status+"' where   comid='"+req.comid+"' ");
 
 
     if (req.status=1) {
@@ -396,12 +407,13 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var zoneid = req.zoneid || 1;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
 
+// console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);
 
 
-var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc");
+var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by jc.comid order by jc.comid desc");
 
 
 

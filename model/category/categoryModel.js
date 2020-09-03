@@ -841,8 +841,14 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               }
           }
           
+          if (userdetails[0].premium_user==1  ||  userdetails[0].status==1) {
+            delivery_charge = 0;//if false don't show message           
+          }
+
          var gstcharge = (delivery_charge / 100) * constant.gst;
          gstcharge = Math.round(gstcharge);
+        
+
         
         
        var grandtotal = gstcharge + totalamount + delivery_charge + convenience_charge;

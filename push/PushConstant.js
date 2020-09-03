@@ -28,6 +28,7 @@ const PushConstant={
     Pageid_dl_trip_assigned_notification:18,
     Pageid_dl_ready_at_wherehouse_notification:29,
     Pageid_dl_dispatched_after_qa_notification:19,
+    Pageid_dl_bulk_notification:20,
 
 
     pageidMoveit_Order_Assigned:1,

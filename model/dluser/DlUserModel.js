@@ -5874,10 +5874,14 @@ Dluser.hub_based_userlist = async function hub_based_userlist(req, result) {
 /////user_based_notification
 Dluser.user_based_notification = async function user_based_notification(req, result) {
  
-  if (req.type==0) {
+  if (req.apptype==1) {
     var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
-  } else {
-    var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
+  } else  if (req.apptype==2){
+    var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
+  }else{
+    // var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User ";
+
   }
 
   sql.query(getuserquery,async function(err, res) {
@@ -5886,16 +5890,16 @@ Dluser.user_based_notification = async function user_based_notification(req, res
       result(err, null);
     } else {
    
-      var message="all";
-      if (req.type==1) {
-       var userlist = res.filter(re => re.with7day ===0);
-       message="without orders last 7 days users";
-     }else if(req.type==2){
-       var userlist = res.filter(re => re.with7day !==0);
-       message="with orders last 7 days users";
-     }else{
+    //   var message="all";
+    //   if (req.type==1) {
+    //    var userlist = res.filter(re => re.with7day ===0);
+    //    message="without orders last 7 days users";
+    //  }else if(req.type==2){
+    //    var userlist = res.filter(re => re.with7day !==0);
+    //    message="with orders last 7 days users";
+    //  }else{
        var userlist = res;
-     }
+    //  }
      
      var userid="";
       for (let i = 0; i < userlist.length; i++) {
@@ -5903,22 +5907,23 @@ Dluser.user_based_notification = async function user_based_notification(req, res
         user.userid = userlist[i].userid;
         user.user_message = req.user_message;
         user.title = req.title;
-        user.pushid_android = userlist[i].pushid_android;
+        user.pushid_android = userlist[i].pushid_android | '';
+        user.pushid_ios = userlist[i].pushid_ios || '';
         if (req.image) {
           user.image = req.image;
         }
         userid=userid+","+userlist[i].userid;
-        await Notification.orderEatBulkPushNotification(
+        await Notification.dlBulkPushNotification(
           null,
           user,
-          PushConstant.Pageid_eat_send_notification
+          PushConstant.Pageid_dl_bulk_notification
         );
         
       } 
     
-    console.log("Notification Via Admin--->",message);
-    console.log("userquery--->",getuserquery);
-    console.log("User-ids--->",userid);
+    // console.log("Notification Via Admin--->",message);
+    // console.log("userquery--->",getuserquery);
+    // console.log("User-ids--->",userid);
   let resobj = {
     success: true,
     status: true,
@@ -7038,8 +7043,8 @@ Dluser.community_dl_User_list =async function community_dl_User_list(req, result
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
   var where = "";
-  if(req.starting_date && req.end_date){
-    where = where+" and (co.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date+"')";
+  if(req.from_date  && req.to_date){
+    where = where+" and (co.created_at BETWEEN '"+req.from_date+"' AND '"+req.to_date+"')";
  }
 
 
@@ -7061,9 +7066,9 @@ Dluser.community_dl_User_list =async function community_dl_User_list(req, result
   var zoneid = req.zoneid || 1;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name,us.phoneno,us.email from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
 
- console.log(admin_community_list);
+//  console.log(admin_community_list);
 
   var admin_community = await query(admin_community_list);
 
@@ -7087,6 +7092,8 @@ for (let i = 0; i < admin_community.length; i++) {
     let resobj = {
       success: true,
       status: true,
+      pagelimit:pagelimit,
+      total_count :admin_community.length,
       result: admin_community
     };
     result(null, resobj);

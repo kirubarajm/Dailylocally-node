@@ -222,7 +222,7 @@ exports.community_list = function(req, res) {
         status: false,
         message: "Please provide userid"
       });
-  }else if(!req.body.lat || !req.body.long){
+  }else if(!req.body.lat || !req.body.lon){
     res
     .status(400)
     .send({
@@ -257,7 +257,7 @@ exports.new_community_registration= function(req, res) {
   if (!new_community.requested_userid) {
     res
       .status(400)
-      .send({ error: true, status: false, message: "Please provide Userid" });
+      .send({ error: true, status: false, message: "Please provide requested_userid" });
   } else if (!new_community.communityname) {
     res
       .status(400)
@@ -312,4 +312,10 @@ exports.community_edit = function(req, res) {
     res.send(user);
   });
 
+};
+exports.user_based_notification = function(req, res) {
+  Dluser.user_based_notification(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.json(user);
+  });
 };
