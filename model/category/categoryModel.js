@@ -481,7 +481,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var deliverydate_status = true;
   var Subdeliverydate_status = true;
   let delivery_date = [];
-  let community_user_status = true;
+  let community_user_status = false;
   let cod_available = false;
  
  
@@ -501,10 +501,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
   if (comunity_userdetails.length !=0) {
     userdetails[0].status=1
+    community_user_status = true;
     cod_available = true;
   }else{
-    userdetails[0].status=0;
-    community_user_status = false;
+    userdetails[0].status=0;    
   }
 
   if (userdetails.length !==0) {   
@@ -796,6 +796,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
        
           res2[0].isAvaliablezone = isAvaliablezone;
           res2[0].community_user_status=community_user_status;
+          res2[0].cod_available=cod_available;
          
           
           product_orginal_price = totalamount;
