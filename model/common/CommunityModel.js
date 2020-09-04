@@ -386,12 +386,12 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var startlimit = (page - 1) * pagelimit;
   var where = "";
   if(req.from_date  && req.to_date){
-    where = where+" and (co.created_at BETWEEN '"+req.from_date +"' AND '"+req.to_date+"')";
+    where = where+" and (date(co.created_at) BETWEEN '"+req.from_date +"' AND '"+req.to_date+"')";
  }
 
 
   if(req.search){
-      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or co.area LIKE  '%" +req.search+ "% ' ) ";
+      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or co.area LIKE  '%" +req.search+ "%') ";
   }
 
   if(req.status==1){
@@ -410,7 +410,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-  // console.log("admin_community_list",admin_community_list);
+   console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
 
 

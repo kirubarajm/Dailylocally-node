@@ -7045,12 +7045,12 @@ Dluser.community_dl_User_list =async function community_dl_User_list(req, result
   var startlimit = (page - 1) * pagelimit;
   var where = "";
   if(req.from_date  && req.to_date){
-    where = where+" and (co.created_at BETWEEN '"+req.from_date+"' AND '"+req.to_date+"')";
+    where = where+" and (date(co.created_at) BETWEEN '"+req.from_date+"' AND '"+req.to_date+"')";
  }
 
 
   if(req.search){
-      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "% ' ) ";
+      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "%' ) ";
   }
 
   if(req.status==1){
