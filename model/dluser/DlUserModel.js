@@ -7067,9 +7067,9 @@ Dluser.community_dl_User_list =async function community_dl_User_list(req, result
   var zoneid = req.zoneid || 1;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name,us.phoneno,us.email from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.comid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name,us.phoneno,us.email from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.jcid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-//  console.log(admin_community_list);
+  // console.log(admin_community_list);
 
   var admin_community = await query(admin_community_list);
 

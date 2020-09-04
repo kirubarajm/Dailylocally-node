@@ -257,17 +257,26 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
+
   var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status=1  ");
+
   if (community.length ==0) {
+
     let resobj = {
       success: true,
       status: false,
       message: "No Request Found!"
     };
-    result(null, resobj);    
+    result(null, resobj);
+
+    
   }else{
-    for (let i = 0; i < community.length; i++) { 
+
+    for (let i = 0; i < community.length; i++) {
+      
+
       var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status=1 ");
+
       community[i].members_count=get_count[0].members_count;
       community[i].members='Members';
       community[i].total_credits=get_count[0].members_count;
@@ -280,9 +289,10 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].free_delivery_value='Free Home Delivery';
       community[i].cod_text='COD';
       community[i].cod_value='Cash on Delivery on all orders';
-      community[i].show_credits_info= true;
-      community[i].credits_info= 'DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits';
+
     }
+
+
     let resobj = {
       success: true,
       status: true,
@@ -290,6 +300,8 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     };
     result(null, resobj);
   }
+  
+
 };
 
 
@@ -344,22 +356,26 @@ result(null, resobj);
 
 
 Community.get_wapscreen=async function get_wapscreen(req, result){
+
+
   get= [
     {
-      imageUrl: "https://dailylocally.s3.amazonaws.com/admin/1599216998960-Group%20490.png",
-      phoneno: "8939904769",
-      title: "Hi",
-      subtitle1: "We have received the registration request for your community",
-      subtitle2: "Our DL Exclusive Team will get in touch with you within 24 Hours" ,
-      whats_up_link:"https://wa.me/message/2DPUU5JCTASKN1"
+          imageUrl: "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
+          phoneno: "8939904769",
+          title: "Hi",
+          subtitle1: "We have received the registration request for your community",
+          subtitle2: "Our DL Exclusive Team will get in touch with you within 24 Hours" ,
+          whats_up_link:"https://wa.me/message/2DPUU5JCTASKN1"
     }]
+ 
 
-  let resobj = {
-    success: true,
-    status: true,
-    result: get
-  };
-  result(null, resobj);
+ let resobj = {
+  success: true,
+  status: true,
+  result: get
+};
+result(null, resobj);
+
 };
 
 Community.admin_community_list =async function admin_community_list(req, result){
@@ -389,7 +405,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
   }
 
    
-  var zoneid = req.zoneid || 0;
+  var zoneid = req.zoneid || 1;
 
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
