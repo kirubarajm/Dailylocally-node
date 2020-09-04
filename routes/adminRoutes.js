@@ -93,7 +93,7 @@ module.exports = function(app) {
   app.route("/admin/po/close").post(middleware.checkToken,routesVersioning({"1.0.0": scm.close_po}));
   app.route("/admin/po/deletepotemp").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_temp}));
   app.route("/admin/po/removebohmapping").post(middleware.checkToken,routesVersioning({"1.0.0": scm.remove_boh_mapping}));
-  app.route("/admin/po/reason/list").get(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_reson_list}));
+  app.route("/admin/po/reason/list").post(middleware.checkToken,routesVersioning({"1.0.0": scm.delete_po_reson_list}));
 
   ///////PO Auto Creation Loop//////
   app.route("/admin/po/pdfloop").post(middleware.checkToken,routesVersioning({"1.0.0": scm.autopopdfcreate}));
