@@ -112,37 +112,34 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
 };
 
 UserAddress.getaddressById = function getaddressById(userId, result) {
-        sql.query("Select * from Address where userid = ? and delete_status = 0", userId,async function (err, res) {             
-            if(err) {
-                console.log("error: ", err);
-                result(err, null);
-            }
-            else{
-
-                var get_community_details = await query("select * from join_community where userid ="+userId+" " );
-                status = true;
-                if (res.length ===0) {   
-                    status = false;
-                }else{
-                    if (get_community_details.length==0) {
-                        res[0].note= 'All your current orders will also be delivered to the new address!';
-
-                    } else {
-                        res[0].note= 'Changing the delivery address will cancel the perks Of Being a DL Exclusive member!';
-
-                    }
+    sql.query("Select * from Address where userid = ? and delete_status = 0", userId,async function (err, res) {             
+        if(err) {
+            console.log("error: ", err);
+            result(err, null);
+        }else{
+            var get_community_details = await query("select * from join_community where userid ="+userId+" " );
+            status = true;
+            if (res.length ===0) {   
+                status = false;
+            }else{
+                res[0].exclusive_tag = "DAILY LOCALLY EXCLUSIVE";
+                res[0].community_user_status = false;
+                if (get_community_details.length==0) {
+                    res[0].note= 'All your current orders will also be delivered to the new address!';                    
+                } else {
+                    res[0].note= 'Changing the delivery address will cancel the perks Of Being a DL Exclusive member!';
+                    res[0].community_user_status= true;
                 }
-               
-                let resobj = {  
+            }
+            
+            let resobj = {  
                 success: true,
                 status:status,
                 result: res
-                }; 
-
-             result(null, resobj);
-          
-            }
-            });   
+            };
+            result(null, resobj);        
+        }
+    });   
 };
 
 UserAddress.getAllAddress = function getAllAddress(result) {

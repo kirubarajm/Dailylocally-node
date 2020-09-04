@@ -482,6 +482,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var Subdeliverydate_status = true;
   let delivery_date = [];
   let community_user_status = true;
+  let cod_available = false;
  
  
 
@@ -500,6 +501,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
   if (comunity_userdetails.length !=0) {
     userdetails[0].status=1
+    cod_available = true;
   }else{
     userdetails[0].status=0;
     community_user_status = false;
