@@ -366,8 +366,8 @@ Community.get_wapscreen=async function get_wapscreen(req, result){
 
   get= [
     {
-          imageUrl: "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
-          phoneno: "8939904769",
+      imageUrl: "https://dailylocally.s3.amazonaws.com/admin/1599216998960-Group%20490.png",
+       phoneno: "8939904769",
           title: "Hi",
           subtitle1: "We have received the registration request for your community",
           subtitle2: "Our DL Exclusive Team will get in touch with you within 24 Hours" ,
