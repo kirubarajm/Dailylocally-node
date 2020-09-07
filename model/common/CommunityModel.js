@@ -176,7 +176,7 @@ Community.join_new_community_approval=async function join_new_community_approval
     var community = await query("update Community set status='"+req.status+"' where   comid='"+req.comid+"' ");
 
 
-    if (req.status=1) {
+    if (req.status===1) {
       message= "Approval successfully";
     }else{
       message= "Rejected successfully";
