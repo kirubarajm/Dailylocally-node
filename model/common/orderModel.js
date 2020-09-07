@@ -60,23 +60,23 @@ var Order = function(order) {
 
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
-  console.log("req",req);
+  // console.log("req",req);
   var virtualkey = req.virtualkey || 0;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
 
-  cur_hr = moment().format("HH:mm:ss");
-  if(cur_hr >= '06:45:00' && cur_hr < '09:00:00'){
-    console.log("1st slot -->",cur_hr);
-  }else if(cur_hr >= '11:45:00' && cur_hr < '14:00:00'){
-    console.log("2nd slot -->",cur_hr);
-  }else if(cur_hr >= '17:45:00' && cur_hr < '20:30:00'){
-    console.log("3rd slot -->",cur_hr);
-  }else{
-    console.log("no slot -->",cur_hr);
-  }
+  // cur_hr = moment().format("HH:mm:ss");
+  // if(cur_hr >= '06:45:00' && cur_hr < '09:00:00'){
+  //   console.log("1st slot -->",cur_hr);
+  // }else if(cur_hr >= '11:45:00' && cur_hr < '14:00:00'){
+  //   console.log("2nd slot -->",cur_hr);
+  // }else if(cur_hr >= '17:45:00' && cur_hr < '20:30:00'){
+  //   console.log("3rd slot -->",cur_hr);
+  // }else{
+  //   console.log("no slot -->",cur_hr);
+  // }
   
-  if (req.payment_type==1) {
+  // if (req.payment_type==1) {
     var address_data = await query("Select * from Address where aid = '" +req.aid +"' and userid = '" +req.userid +"'");
     //console.log("address_data-->",address_data);
     if(address_data.length === 0) { //address validation
@@ -87,6 +87,7 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
       };
       result(null, resobj);
     }else{  
+
       req.lat = address_data[0].lat;
       req.lon = address_data[0].lon;
       Category.read_a_cartdetails(req, orderitems, subscription,async function(err,res3) {
@@ -125,26 +126,44 @@ Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitem
 
             var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
 
-            Order.OrderOnline(req,Other_Item_list,function(err,res){
-              if (err) {
-                result(err, null);
-              } else {
-                console.log("res",res);
-                result(null, res);
-              }
-            });
+            if (req.payment_type == 0) {
+
+              Order.OrderInsert(req,Other_Item_list,true,false,async function(err,res){
+                if (err) {
+                  result(err, null);
+                } else {
+           
+                  ////Insert Order History////
+                          
+                  ////////////////////////////
+                  result(null, res);
+                }
+              });
+
+            }else if(req.payment_type == 1){
+              Order.OrderOnline(req,Other_Item_list,function(err,res){
+                if (err) {
+                  result(err, null);
+                } else {
+                  console.log("res",res);
+                  result(null, res);
+                }
+              });
+            }
+
+            
           }
         }
       });
     }
-  } else {      
-    let resobj = {
-      success: true,
-      status: false,
-      message: "Sorry! Please make a Payment via online, Currently we are not accepting COD orders"
-    };
-    result(null, resobj);
-  } 
+  // } else {      
+  //   let resobj = {
+  //     success: true,
+  //     status: false,
+  //     message: "Sorry! Please make a Payment via online, Currently we are not accepting COD orders"
+  //   };
+  //   result(null, resobj);
+  // } 
 };
 
 Order.OrderOnline = async function OrderOnline(req,Other_Item_list,result) {
@@ -236,14 +255,14 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
          
           }
 
-       if (new_Order.payment_status == 1) {
+       if (new_Order.payment_status == 1 || new_Order.payment_type == 0) {
         var order_place = {};
         new_Order.orderid=orderid;
         var getproductdetails = "select ors.*,ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+orderid;
         var getproduct = await query(getproductdetails,);
         // console.log("getproduct==========>",getproduct);
         new_Order.virtualkey=1;
-        console.log("new_Order",new_Order);
+        // console.log("new_Order",new_Order);
         dayorder.checkdayorder(new_Order,getproduct);
 
        }
