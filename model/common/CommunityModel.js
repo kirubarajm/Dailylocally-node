@@ -289,6 +289,9 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].free_delivery_value='Free Home Delivery';
       community[i].cod_text='COD';
       community[i].cod_value='Cash on Delivery on all orders';
+      community[i].show_credits_info =true;
+      community[i].credits_info  ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
+      
 
     }
 
@@ -307,40 +310,43 @@ Community.get_community_userdetails=async function get_community_userdetails(req
 
 Community.get_homepage=async function get_homepage(req, result){
 
+var get_whatsup = await query("select co.* from join_community jd left join  Community co on co.comid=jd.comid where jd.userid='"+req.userid+"'");
 
   get= [
     {
       
         "event": {
-            "image_url": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595868674050-DLV2%20Category-Bakery.jpg",
-            "topic": "community_event"
+            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599470824386-Community%20Event%20Thumb.jpg",
+            "topic": "community_event",
+            "title":"Community event"
         },
         "whatsapp ": {
             "title":"What's Cooking in community",
             "des": "Join your community's whatapp group and socialize with the memebrs",
-            "group_url ": "https://chat.whatsapp.com/LQGeWpyi2v6LpWjMH1SGxL"
+            "group_url ":  get_whatsup[0].whatsapp_group_link || '',
+            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471348215-WHATS%20COOKING.jpg",
         },
         "sneak_peak": {
             "title": "Sneak Peak",
             "des": "Watch a short video on Daily Locally Exclusive",
-            "video_url ": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            "video_url ": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471258113-SNEAK%20PEAK.jpg",
         },
         "cat_list": {
                 "title ": "new event",
                 "des": "new event",
-                "image_url ": "https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1595847977688-Category%20Milk-01.jpg"
-                 }
-          ,
-          "about": 
+                "image_url ": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg"
+                 },
+        "about": 
                {
                 "title": "About Us",
-                "des": "Know More about daily locally Exclusive"
+                "des": "Know More about daily locally Exclusive",
+                "image_url ": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg"
                 }
               
     }
 ]
  
-
 
 
 
