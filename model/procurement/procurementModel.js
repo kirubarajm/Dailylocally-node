@@ -126,7 +126,14 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
         if(updateprocurment.affectedRows>0){
             var updatedayorderproductquery = "update Dayorder_products set scm_status=1,prid="+checkprocurement[0].prid+" where doid IN("+new_Procurement.doid+") and vpid="+get_product[i].vpid+" ";
             var updatedayorderproduct = await query(updatedayorderproductquery);
-            if(updatedayorderproduct.affectedRows>0){ }
+            if(updatedayorderproduct.affectedRows>0){ 
+              if(i+1 == get_product.length){
+                ////// update day order status ////
+                for (let j = 0; j < new_Procurement.doid.length; j++) {  
+                  Dayorder.update_scm_status(new_Procurement.doid[j]);
+                } 
+              } 
+            }
         }
       }else{
         ////Insert///
@@ -138,17 +145,17 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
           } else {       
             var Dayorder_products_query="update Dayorder_products set scm_status=1,prid='"+res.insertId+"' where vpid="+get_product[i].vpid+" and doid IN("+new_Procurement.doid+")";
             var update_query=await query(Dayorder_products_query);
-            if(update_query.affectedRows>0){  }                            
+            if(update_query.affectedRows>0){ 
+              if(i+1 == get_product.length){
+                ////// update day order status ////
+                for (let j = 0; j < new_Procurement.doid.length; j++) {  
+                  Dayorder.update_scm_status(new_Procurement.doid[j]);
+                } 
+              } 
+            }                            
           }
         });
-      }
-
-      if(i+1 == get_product.length){
-        ////// update day order status ////
-        for (let j = 0; j < new_Procurement.doid.length; j++) {        
-          Dayorder.update_scm_status(new_Procurement.doid[j]);
-        } 
-      }      
+      }           
     }
 
     ////////Create Day order Log ////////////

@@ -1143,9 +1143,12 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
       where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
     }
 
-    if(Dayorder.dayorderstatus !=null){
-        where = where+" and drs.dayorderstatus='"+Dayorder.dayorderstatus+"' ";
-    }
+    // if(Dayorder.dayorderstatus !=null){
+    //     where = where+" and drs.dayorderstatus='"+Dayorder.dayorderstatus+"' ";
+    // }else{
+    //   where = where+" and drs.dayorderstatus=0 ";
+    // }
+    where = where+" and drs.dayorderstatus=0 ";
 
     if (Dayorder.usersearch) {
       where = where+" and (us.phoneno like '%"+Dayorder.usersearch+"%' or us.email like '%"+Dayorder.usersearch+"%' or us.name like '%"+Dayorder.usersearch+"%') ";
@@ -1400,11 +1403,13 @@ Dayorder.quality_day_order_view=async function quality_day_order_view(Dayorder,r
 
 //////Update Day Order Status ////
 Dayorder.update_scm_status = async function update_scm_status(Dayorder){
-  // console.log("Dayorder ==>",Dayorder);
+   console.log("Dayorder ==>",Dayorder);
   if(Dayorder){
     var getcountvaluequery = "select count(dop.id) as total_dop,count(case when dop.scm_status>=1 then dop.id end) as af1 from Dayorder_products as dop where dop.doid="+Dayorder;
     var getcountvalue = await query(getcountvaluequery);
     if(getcountvalue.length>0){
+      console.log("getcountvalue[0].total_dop ==>",getcountvalue[0].total_dop);
+      console.log("getcountvalue[0].af1 ==>",getcountvalue[0].af1);
       if(getcountvalue[0].total_dop == getcountvalue[0].af1){
         var updatescmstatusquery = "update Dayorder set dayorderstatus=1 where id="+Dayorder;
         var updatescmstatus = await query(updatescmstatusquery);
