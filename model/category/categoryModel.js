@@ -320,7 +320,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               "lat": "13.0418",
               "long": "80.2341",
               "apartmentname": "Soundarya Apartment",
-              "image": "https://q-xx.bstatic.com/images/hotel/max1024x768/155/155397174.jpg",
+              "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
               "created_at": "2020-08-25 15:41:42",
               "status": 1,
               "requested_userid": null,

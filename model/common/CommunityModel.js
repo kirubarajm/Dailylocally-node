@@ -19,7 +19,7 @@ var Community = function(Community) {
   this.community_address=Community.community_address;
   this.area=Community.area;
   this.request_type=Community.request_type|| 1;
-  this.zoneid=Community.zoneid|| 1;
+  this.zoneid=Community.zoneid || 1;
 };
 
 
@@ -60,25 +60,24 @@ Community.community_list =async function community_list(req, result){
   // console.log(query1);
   var search_community = await query(query1);
 
-  // if (search_community.length !=0) {
+  if (search_community.length !=0) {
 
 
-  //   let resobj = {
-  //     success: true,
-  //     status: true,
-  //     result: search_community
-  //   };
-  //   result(null, resobj);
+        for (let i = 0; i < search_community.length; i++) {
+         
+          if (search_community[i].distance > 1) {
+            search_community[i].distance_text = "KM";
+            search_community[i].distance = search_community[i].distance.toFixed(1);
+          }else{
+            search_community[i].distance_text = "Meter";
+            search_community[i].distance = search_community[i].distance.toFixed(1);
+          }
+          
+        }
 
-  // }else{
+  }
+  
 
-  //   let resobj = {
-  //     success: true,
-  //     status: false,
-  //     result: search_community
-  //   };
-  //   result(null, resobj);
-  // }
   
   let resobj = {
     success: true,
@@ -139,7 +138,7 @@ Community.join_new_community =async function join_new_community(req, result){
       }
       else{
 
-        // res.insertId
+        var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
          
 
         let resobj = {  
@@ -195,7 +194,24 @@ Community.join_new_community_approval=async function join_new_community_approval
 
 Community.new_community_registration =async function new_community_registration(new_community, result){
 
+  var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+  new_community.lat +
+  "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+  new_community.lon +
+  "') ) + sin( radians('" +
+  new_community.lat +
+  "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
 
+
+// if (get_nearby_zone.length !=0) {
+  
+
+  // if (get_nearby_zone[0].distance > radiuslimit) {
+    new_community.zoneid =1
+  // }
+// }
+
+// console.log("new_community",new_community);
   sql.query("INSERT INTO Community set ?", new_community,async function (err, res) {            
     if(err) {
         console.log("error: ", err);
@@ -329,19 +345,19 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
         "sneak_peak": {
             "title": "Sneak Peak",
             "des": "Watch a short video on Daily Locally Exclusive",
-            "video_url ": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "video_url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471258113-SNEAK%20PEAK.jpg",
         },
         "cat_list": {
                 "title ": "new event",
                 "des": "new event",
-                "image_url ": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg"
+                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg"
                  },
         "about": 
                {
                 "title": "About Us",
                 "des": "Know More about daily locally Exclusive",
-                "image_url ": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg"
+                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg"
                 }
               
     }
@@ -416,7 +432,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-  //  console.log("admin_community_list",admin_community_list);
+    console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
 
 
