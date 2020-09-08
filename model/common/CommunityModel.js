@@ -18,7 +18,7 @@ var Community = function(Community) {
   this.floor_no=Community.floor_no;
   this.community_address=Community.community_address;
   this.area=Community.area;
-  this.request_type=Community.request_type|| 1;
+  this.request_type=Community.request_type || 1;
   this.zoneid=Community.zoneid || 1;
 };
 
@@ -407,6 +407,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
   var where = "";
+
   if(req.from_date  && req.to_date){
     where = where+" and (date(co.created_at) BETWEEN '"+req.from_date +"' AND '"+req.to_date+"')";
  }
@@ -430,7 +431,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var zoneid = req.zoneid || 1;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.flat_no,jc.profile_image,jc.floor_no,us.name from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg from Community co left outer join join_community jc on jc.comid=co.comid  where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
     console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
@@ -443,18 +444,37 @@ var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(
   if (admin_community.length !=0) {
 
     
-for (let i = 0; i < admin_community.length; i++) {
-  
+    for (let i = 0; i < admin_community.length; i++) {
+      
+      if (admin_community[i].request_type==1) {
+        
+        var userdetails = await query("select * from User where userid='"+admin_community[i].requested_userid+"' ");
 
-  var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
+        admin_community[i].request_by="User";
+        admin_community[i].name=userdetails[0].name || '';
 
-  admin_community[i].total_converted_user=total_converted_user[0].total || 0;
+      } else {
+ 
+        var userdetails = await query("select * from Admin_users where admin_userid='"+admin_community[i].requested_userid+"' ");
+        admin_community[i].request_by="admin";
 
-  var total_revenue = await query("select sum(price)as total_Revenue,count(orderid)as total_orders from Orders where userid in(select userid from join_community where comid='"+admin_community[i].comid+"'  group by userid) and payment_status=1 ");
+        if (userdetails.length !=0) {
+          admin_community[i].name=userdetails[0].name || '';
+        }else{
+          admin_community[i].name= '';
+        }
+       
+      }
+      
+      var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
 
-  admin_community[i].total_Revenue=total_revenue[0].total_Revenue || 0;
-  admin_community[i].total_orders=total_revenue[0].total_orders || 0;
-}
+      admin_community[i].total_converted_user=total_converted_user[0].total || 0;
+
+      var total_revenue = await query("select sum(price)as total_Revenue,count(orderid)as total_orders from Orders where userid in(select userid from join_community where comid='"+admin_community[i].comid+"'  group by userid) and payment_status=1 ");
+
+      admin_community[i].total_Revenue=total_revenue[0].total_Revenue || 0;
+      admin_community[i].total_orders=total_revenue[0].total_orders || 0;
+    }
 
 
     let resobj = {

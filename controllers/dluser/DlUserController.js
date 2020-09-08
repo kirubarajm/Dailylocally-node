@@ -254,6 +254,7 @@ exports.join_new_community_approval= function(req, res) {
 
 exports.new_community_registration= function(req, res) {
   var new_community = new Community(req.body);
+   new_community.request_type= req.body.request_type || 1;
   if (!new_community.requested_userid) {
     res
       .status(400)
@@ -268,7 +269,7 @@ exports.new_community_registration= function(req, res) {
       });
   } else {
     
-    Community.new_community_registration(req.body, function(err, user) {
+    Community.new_community_registration(new_community, function(err, user) {
       if (err) res.send(err);
       res.send(user);
     });
