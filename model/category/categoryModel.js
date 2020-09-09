@@ -343,7 +343,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
             var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
-            var get_join_community= await query("select * from join_community  where  userid='"+req.userid+"' ");
+            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' ");
 
 
             if (get_join_community.length !=0) {
@@ -357,7 +357,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                   i.approval_status= false;
                   i.join_status= true;
                 }
-    
+                i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
                 i.servicable_status=servicable_status;
                 i.category=true,
                 i.clickable= true;
@@ -369,7 +369,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                 // i.approval_status= true;
                 // i.join_status= true;
                
-    
+                console.log(i);
                       
                 res.splice(0, 0, i);
                
@@ -417,7 +417,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                     i.join_status= true;
                   }
 
-
+                  i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
                   i.servicable_status=servicable_status;
                   i.category=true,
                   i.clickable= true;
@@ -428,7 +428,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                   i.type= 3;
                   // i.approval_status= false;
                   // i.join_status= false;
-
+                  console.log("22222",i);
                         
                   res.splice(0, 0, i);
                  

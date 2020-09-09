@@ -31,6 +31,9 @@ var Dayorder = function(Dayorder) {
   this.cod_price=Dayorder.cod_price ||0;
   this.online_price=Dayorder.online_price ||0;
   this.payment_status=Dayorder.payment_status ||0;
+  this.community_name=Dayorder.community_name || '';
+  this.comid=Dayorder.comid ||0;
+  this.community_order_status=Dayorder.community_order_status ||0;
   
 };
 
@@ -41,25 +44,42 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
 
+  var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+Dayorder.userid+"' ");
+
+
   var Orderproductssdetails = await query("select count(*) as productcount,sum(pm.weight)as total_product_weight from  Orderproducts op left join Product_live pl on pl.vpid=op.vpid left join ProductMaster pm on pm.pid=pl.pid where op.orderid='"+Dayorder.orderid+"' ");
   // var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
   // var gst_value = ordersdetails[0].gst  / Orderproductssdetails.length;
   var noof_delivery = ordersdetails[0].delivery_charge  ;
   var gst_value = ordersdetails[0].gst ;
   var total_product_weight = Orderproductssdetails[0].total_product_weight ;
-  var cod_price = 0;
-  var online_price = 0 ;
+  var cod_price1 = 0;
+  var online_price1 = 0 ;
   var payment_status = 0 ;
+  var community_name = '';
+  var comid= 0;
+  var community_order_status=0;
+
+
 
   if (ordersdetails[0].payment_type==0) {
-     cod_price = ordersdetails[0].price || 0;
+    
+     cod_price1 = ordersdetails[0].price || 0;
      payment_status = ordersdetails[0].payment_status;
+     
   } else {
-     online_price = ordersdetails[0].price || 0 ;
+     online_price1 = ordersdetails[0].price || 0 ;
      payment_status = ordersdetails[0].payment_status;
+     
   }
-  
 
+
+  
+ if (get_join_community.length !=0) {
+   community_name = get_join_community[0].communityname;
+   comid= get_join_community[0].comid;
+   community_order_status=1;
+ } 
   
   
   // console.log("gst_value",gst_value);
@@ -77,16 +97,18 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
         if (dayorders[0].payment_status==0) {
           payment_status = 0;
-          cod_price=dayorders[0].cod_price
+          // cod_price1=dayorders[0].cod_price
         }
 
+        console.log("cod_price",cod_price1);
+        console.log("online_price",online_price1);
       
         if (dayorders[0].delivery_charge==0) {
           
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"',total_product_weight='"+total_product_weight+"',cod_price='"+cod_price+"',online_price='"+online_price+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"',total_product_weight='"+total_product_weight+"',cod_price=cod_price+'"+cod_price1+"',online_price=online_price+'"+online_price1+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
 
         }else{
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',cod_price='"+cod_price+"',online_price='"+online_price+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',cod_price=cod_price+'"+cod_price1+"',online_price=online_price+'"+online_price1+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
 
         }
 
@@ -148,13 +170,16 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.address_type=ordersdetails[0].address_type;
         new_day_order.gst=gst_value;
         new_day_order.total_product_weight=total_product_weight;
-        new_day_order.cod_price=cod_price;
-        new_day_order.online_price=online_price;
+        new_day_order.cod_price=cod_price1;
+        new_day_order.online_price=online_price1;
         new_day_order.payment_status=payment_status;
+        new_day_order.community_name=community_name;
+        new_day_order.comid=comid;
+        new_day_order.community_order_status=community_order_status;
     
-        
+    
 
-        console.log("new_day_order===>1",new_day_order); 
+        // console.log("new_day_order===>1",new_day_order); 
         sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
           if (err) {
             res(err, null);
@@ -423,9 +448,9 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
 
 
-   var curr = new Date(getproduct[i].starting_date);
+        var curr = new Date(getproduct[i].starting_date);
         var curr_condition= moment(curr).format("YYYY-MM-DD");
-        console.log("curr",curr);
+        // console.log("curr",curr);
         var today = moment().format("YYYY-MM-DD");
         var temp = 0;
 
@@ -518,7 +543,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         }
 
 
-         console.log(dates);
+        //  console.log(dates);
          // console.log("monday",monday);
         // console.log("tuesday",tuesday);
         // console.log("wednesday",wednesday);
@@ -542,11 +567,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (1 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (1 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 1 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -559,7 +584,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -575,11 +600,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (2 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (2 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (2 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (2 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 2 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -592,7 +617,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -609,11 +634,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (3 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (3 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (3 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (3 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 3 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -626,7 +651,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -642,11 +667,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (4 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (4 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (4 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (4 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 4 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -659,7 +684,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -675,11 +700,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (5 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (5 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (5 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (5 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 5 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -692,7 +717,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -707,11 +732,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (6 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (6 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (6 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (6 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 6 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -724,7 +749,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -739,11 +764,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (7 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (7 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (7 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (7 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 7 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -756,7 +781,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -777,11 +802,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", 1 + 7 - d.getDay());
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", 1 + 7 - d.getDay());
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
     
                   d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
     
@@ -790,7 +815,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -817,11 +842,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     
                 if(dates.length<getproduct[i].no_of_deliveries){
                   // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", 1 + 7 - d.getDay() % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", 1 + 7 - d.getDay() % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
     
                   d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
                   d1 = moment(d).format("YYYY-MM-DD")
@@ -955,9 +980,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.delivery_charge=noof_delivery || 0;
             new_day_order.address_type=ordersdetails[0].address_type;
             new_day_order.total_product_weight=total_product_weight;
-            
+            new_day_order.community_name=community_name;
+            new_day_order.comid=comid;
+            new_day_order.community_order_status=community_order_status;
         
-            console.log("new_day_order===>2",new_day_order);    
+            // console.log("new_day_order===>2",new_day_order);    
             sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
@@ -1070,7 +1097,10 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_day_order.delivery_charge=noof_delivery || 0;
               new_day_order.address_type = ordersdetails[0].address_type;
               new_day_order.total_product_weight=total_product_weight;
-    
+              new_day_order.community_name=community_name;
+              new_day_order.comid=comid;
+              new_day_order.community_order_status=community_order_status;
+
               sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
