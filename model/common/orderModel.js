@@ -1303,7 +1303,55 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
   });
 };
 
+Order.order_payment_status_by_moveituser = function(req, result) {
+  sql.query("Select * from Dayorder where id = ? ",[req.id],async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length > 0) {
+          // check the payment status - 1 is paid
+       
+          if (res1[0].payment_status == 0) {
 
+            req.moveitid = req.moveit_user_id;
+            req.status = 6
+            req.doid = req.id// order pickup by moveit
+            await Order.insert_order_status(req); 
+
+            sql.query("UPDATE Dayorder SET payment_status = ? WHERE id = ? ",[1, req.id],function(err, res) {
+                if (err) {
+                  result(err, null);
+                } else {
+                  let resobj = {
+                    success: true,
+                    status:true,
+                    message: "Cash received successfully"
+                  };
+                  result(null, resobj);
+                }
+              }
+            );
+          } else {
+            let resobj = {
+              success: true,
+              status:false,
+              message: "Already Payment has been paid!"
+            };
+            result(null, resobj);
+          }
+        } else {
+          let resobj = {
+            success: true,
+            status:false,
+            message: "Please check your orderid  / order values is null"
+          };
+
+          result(null, resobj);
+        }
+      }
+    }
+  );
+};
 
 Order.order_delivery_status_by_moveituser =async function(req, result) {
 
@@ -1318,6 +1366,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
       } else {
         if (res1.length !== 0) {
    
+          if (res1[0].payment_status == 1) {
 
           if (res1[0].dayorderstatus == 11) {
             let resobj = {
@@ -1408,6 +1457,15 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
            
           
         }
+
+      } else {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Sorry Payment not Paid!"
+        };
+        result(null, resobj);
+      }
         } else {
           let resobj = {
             success: true,

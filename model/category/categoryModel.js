@@ -322,7 +322,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               "apartmentname": "Soundarya Apartment",
               "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
               "created_at": "2020-08-25 15:41:42",
-              "status": 1,
+              "status": 0,
               "requested_userid": null,
               "zoneid": 1,
               "no_of_apartments": null,
@@ -342,11 +342,41 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
           }];
 
 
-            var get_community_list = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' ");
+            var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
+            var get_join_community= await query("select * from join_community  where  userid='"+req.userid+"' ");
 
-            if (get_community_list.length !=0) {
+
+            if (get_join_community.length !=0) {
               
-              if (get_community_list[0].status=0) {
+              get_join_community.forEach(i => {
+                    
+                if (i.status==1) {
+                  i.approval_status= true;
+                  i.join_status= true;
+                }else{
+                  i.approval_status= false;
+                  i.join_status= true;
+                }
+    
+                i.servicable_status=servicable_status;
+                i.category=true,
+                i.clickable= true;
+                i.collection_status= false
+                i.tile_type= 1;
+                i.category=true;
+                i.catid = i.comid;
+                i.type= 3;
+                // i.approval_status= true;
+                // i.join_status= true;
+               
+    
+                      
+                res.splice(0, 0, i);
+               
+              });
+
+
+              if (get_community_list[0].status=1) {
                 
                 if (get_community.length !=0) {
 
@@ -374,12 +404,20 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               }
             }else{
 
-              if (get_community.length !=0) {
+              if (get_community_list.length !=0) {
 
                 // console.log("get_community",get_community.length);
-                get_community.forEach(i => {
+                get_community_list.forEach(i => {
                   
-  
+                  if (i.status==1) {
+                    i.approval_status= true;
+                    i.join_status= true;
+                  }else{
+                    i.approval_status= false;
+                    i.join_status= true;
+                  }
+
+
                   i.servicable_status=servicable_status;
                   i.category=true,
                   i.clickable= true;
@@ -388,10 +426,30 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                   i.category=true;
                   i.catid = 0;
                   i.type= 3;
-                  i.approval_status= false;
-                  i.join_status= false;
+                  // i.approval_status= false;
+                  // i.join_status= false;
+
+                        
+                  res.splice(0, 0, i);
                  
-      
+                });
+              }else{
+                get_community.forEach(i => {
+                  
+              
+                    i.approval_status= false;
+                    i.join_status= false;
+                  i.servicable_status=servicable_status;
+                  i.category=true,
+                  i.clickable= true;
+                  i.collection_status= false
+                  i.tile_type= 1;
+                  i.category=true;
+                  i.catid = 0;
+                  i.type= 3;
+                  // i.approval_status= false;
+                  // i.join_status= false;
+
                         
                   res.splice(0, 0, i);
                  

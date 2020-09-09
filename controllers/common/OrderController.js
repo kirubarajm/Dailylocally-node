@@ -193,6 +193,12 @@ exports.moveit_customer_location_reached = function(req, res) {
   });
 };
 
+exports.order_payment_status = function(req, res) {
+  Order.order_payment_status_by_moveituser(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
 
 exports.order_delivery_status = function(req, res) {
  
