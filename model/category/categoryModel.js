@@ -343,7 +343,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
             var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
-            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' ");
+            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and status < 2");
 
 
             if (get_join_community.length !=0) {
@@ -369,7 +369,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
                 // i.approval_status= true;
                 // i.join_status= true;
                
-                console.log(i);
+                // console.log(i);
                       
                 res.splice(0, 0, i);
                
@@ -701,6 +701,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
     if (subscription) {
+
+      if (cod_available==true) {
+        cod_available=false;
+      }
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         

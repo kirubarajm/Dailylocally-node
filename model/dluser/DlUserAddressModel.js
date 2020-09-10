@@ -162,12 +162,12 @@ UserAddress.updateById =async function updateById(req, result){
 
     if (get_community.length !=0) {
         var queryaddress = "select ( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Address where aid='"+req.aid+"'";
-       console.log("queryaddress",queryaddress);
+    //    console.log("queryaddress",queryaddress);
         var address_details=  await query(queryaddress);
 
         if (address_details.length !=0) {
             if (address_details[0].distance > 1) {
-                var update_query =  await query("update join_community set status=0 where jcid='"+get_community[0].jcid+"' ");
+                var update_query =  await query("update join_community set status=2 where jcid='"+get_community[0].jcid+"' ");
             }
         } 
     }

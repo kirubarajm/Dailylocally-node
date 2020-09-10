@@ -69,6 +69,6 @@ app.route("/moveit/trip/orderdetails").post(routesVersioning({"1.0.0":moveituser
 app.route("/moveit/push_notification").post(routesVersioning({"1.0.0":moveituser.push_notification}));
 app.route("/latlng/check").post(routesVersioning({"1.0.0":moveituser.check_latlng_boundaries}));
 app.route("/moveit/dayorderreturn").post(routesVersioning({"1.0.0":dayorder.day_order_book_return_by_moveit}));
-
+app.route("/moveit/todayincome").post(routesVersioning({"1.0.0":orders.moveit_delivery_cash_received_by_today}));
 
 }

@@ -219,3 +219,13 @@ exports.moveit_notification_time = function(req, res) {
   });
 
 };
+
+
+
+exports.moveit_delivery_cash_received_by_today = function(req, res) {
+  // console.log(req.body);
+  Order.moveit_delivery_cash_received_by_today_by_userid(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};

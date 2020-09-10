@@ -28,9 +28,28 @@ var Community = function(Community) {
 //////community_search//////////////////////
 Community.community_search =async function community_search(req, result){
 
-  var search_community = await query("select * from Community where communityname like '%"+req.search+"%' and status=1");
+  var search_community = await query("select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where communityname like '%"+req.search+"%' and status=1");
 
   if (search_community.length !=0) {
+
+    
+    if (search_community.length !=0) {
+
+
+      for (let i = 0; i < search_community.length; i++) {
+       
+        if (search_community[i].distance > 1) {
+          search_community[i].distance_text = "KM";
+          search_community[i].distance = search_community[i].distance.toFixed(1);
+        }else{
+          search_community[i].distance_text = "Meter";
+          search_community[i].distance = search_community[i].distance.toFixed(1);
+        }
+        
+      }
+
+}
+
     let resobj = {
       success: true,
       status: true,
@@ -38,6 +57,8 @@ Community.community_search =async function community_search(req, result){
     };
     result(null, resobj);
   }else{
+
+
 
     let resobj = {
       success: true,
@@ -55,7 +76,7 @@ Community.community_search =async function community_search(req, result){
 Community.community_list =async function community_list(req, result){
 
   //having distance <= 1
-  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status=1 and zoneid=1   order by distance ";
+  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status<2 and zoneid=1   order by distance ";
   
   // console.log(query1);
   var search_community = await query(query1);
@@ -274,7 +295,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status=1  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status < 2  ");
 
   if (community.length ==0) {
 
@@ -291,7 +312,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     for (let i = 0; i < community.length; i++) {
       
 
-      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status=1 ");
+      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status <2 ");
 
       community[i].members_count=get_count[0].members_count;
       community[i].members='Members';
@@ -334,30 +355,40 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
         "event": {
             "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599470824386-Community%20Event%20Thumb.jpg",
             "topic": "community_event",
-            "title":"Community event"
+            "title":"Community event",
+            "home_community_topic":"home_page",
+            "home_community_title":"Home page"
         },
         "whatsapp ": {
             "title":"What's Cooking in community",
             "des": "Join your community's whatapp group and socialize with the memebrs",
             "group_url ":  get_whatsup[0].whatsapp_group_link || '',
-            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471348215-WHATS%20COOKING.jpg",
+            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599719408423-whatsupcommuntiy.jpg",
+            "home_community_topic":"home_page",
+            "home_community_title":"Home page"
         },
         "sneak_peak": {
             "title": "Sneak Peak",
             "des": "Watch a short video on Daily Locally Exclusive",
             "video_url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471258113-SNEAK%20PEAK.jpg",
+            "home_community_topic":"home_page",
+            "home_community_title":"Home page"
         },
         "cat_list": {
                 "title ": "new event",
                 "des": "new event",
-                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg"
+                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg",
+                "home_community_topic":"home_page",
+                "home_community_title":"Home page"
                  },
         "about": 
                {
                 "title": "About Us",
                 "des": "Know More about daily locally Exclusive",
-                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg"
+                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg",
+                "home_community_topic":"home_page",
+                "home_community_title":"Home page"
                 }
               
     }
@@ -433,7 +464,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg from Community co left outer join join_community jc on jc.comid=co.comid  where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-    console.log("admin_community_list",admin_community_list);
+    // console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
 
 
