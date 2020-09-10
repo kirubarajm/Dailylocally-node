@@ -34,7 +34,6 @@ var Dayorder = function(Dayorder) {
   this.community_name=Dayorder.community_name || '';
   this.comid=Dayorder.comid ||0;
   this.community_order_status=Dayorder.community_order_status ||0;
-  
 };
 
 
@@ -100,8 +99,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           // cod_price1=dayorders[0].cod_price
         }
 
-        console.log("cod_price",cod_price1);
-        console.log("online_price",online_price1);
+        // console.log("cod_price",cod_price1);
+        // console.log("online_price",online_price1);
       
         if (dayorders[0].delivery_charge==0) {
           

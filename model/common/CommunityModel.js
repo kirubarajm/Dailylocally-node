@@ -4,6 +4,10 @@ var request = require('request');
 const util = require('util');
 const query = util.promisify(sql.query).bind(sql);
 var constant = require('../constant.js');
+var Notification = require("../../model/common/notificationModel.js");
+var sendsms =  require("../common/smsModel");
+var PushConstant = require("../../push/PushConstant.js");
+
 
 //Task object constructor
 var Community = function(Community) {
@@ -76,7 +80,7 @@ Community.community_search =async function community_search(req, result){
 Community.community_list =async function community_list(req, result){
 
   //having distance <= 1
-  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status<2 and zoneid=1   order by distance ";
+  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status=1  order by distance ";
   
   // console.log(query1);
   var search_community = await query(query1);
@@ -201,8 +205,24 @@ Community.join_new_community_approval=async function join_new_community_approval
     var join_community = await query("update join_community set status='"+req.status+"' where  comid='"+req.comid+"' ");
 
     if (req.status===1) {
+
+      if (community[0].request_type=1) {
+        var orders = await query("SELECT * from User where userid ='" +community[0].requested_userid+"'" );
+
+      await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_community_approval_notification);
+      sendsms.community_send_sms(1,orders[0].phoneno);   
+      }
+       
+
       message= "Approval successfully";
     }else{
+      if (community[0].request_type=1) {
+        var orders = await query("SELECT * from User where userid ='" +community[0].requested_userid+"'" );
+
+      await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_community_reject_notification);
+      sendsms.community_send_sms(2,orders[0].phoneno);  
+      }
+
       message= "Rejected successfully";
     }
 
@@ -395,14 +415,20 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     
   }else{
 
+
+    var get_total_values = await query("select sum(cod_price + online_price) as total from Dayorder where userid='"+req.userid+"' and dayorderstatus=10");
+    var total_values= 0;
+    if (get_total_values.length !=0) {
+      total_values = get_total_values[0].total / 100;
+    }
     for (let i = 0; i < community.length; i++) {
       
 
-      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status <2 ");
+      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status =1 ");
 
       community[i].members_count=get_count[0].members_count;
       community[i].members='Members';
-      community[i].total_credits=get_count[0].members_count;
+      community[i].total_credits= total_values;
       community[i].credits_text='DL Credits';
       community[i].welcome_name_title='Hi ';//+community[0].name
       community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
@@ -550,7 +576,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
 
 var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg from Community co left outer join join_community jc on jc.comid=co.comid  where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
-    // console.log("admin_community_list",admin_community_list);
+    //  console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
 
 
@@ -567,8 +593,14 @@ var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(
         
         var userdetails = await query("select * from User where userid='"+admin_community[i].requested_userid+"' ");
 
-        admin_community[i].request_by="User";
+        if (userdetails.length !=0) {
+          admin_community[i].request_by="User";
         admin_community[i].name=userdetails[0].name || '';
+        } else {
+          admin_community[i].request_by="User";
+          admin_community[i].name= '';
+        }
+        
 
       } else {
  

@@ -130,9 +130,9 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
   var otpurl =
   "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
   newUser.phoneno +
-  "&senderId=BEATDM&message=Your DailyLocally App OTP is " +
+  "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
   OTP +
-  ". Note: Please DO NOT SHARE this OTP with anyone. ";
+  ". Note: Please DO NOT SHARE this OTP with anyone. "+newUser.otpcode +" ";
   }else{
 
   //  var otpurl =
@@ -151,7 +151,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
     var otpurl =
     "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
     newUser.phoneno +
-    "&senderId=BEATDM&message=Your DailyLocally App OTP is " +
+    "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
     OTP +
     ". Note: Please DO NOT SHARE this OTP with anyone. ";
    }

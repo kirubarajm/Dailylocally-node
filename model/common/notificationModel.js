@@ -279,6 +279,28 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
               notification_type: "1"
             };
             break;
+
+            case PushConstant.Pageid_dl_community_approval_notification:
+              data = {
+                title: "Yay! you've got good news from Daily Locally!",
+                message: "Your community registration has been approved. Check out the app for an all new Exclusive experience",
+                pageid: "" +1,
+                userid: "" +orders[0].userid,
+                app: "Dl",
+                notification_type: "1"
+              };
+              break;
+            
+              case PushConstant.Pageid_dl_community_reject_notification:
+                data = {
+                  title: "You've got an update from Daily Locally",
+                  message: "We regret to inform that your community registration has been rejected. Kindly get in touch with our support to know more.",
+                  pageid: "" +1,
+                  userid: "" +orders[0].userid,
+                  app: "Dl",
+                  notification_type: "1"
+                };
+                break;
   }
   if (data == null) return;
 

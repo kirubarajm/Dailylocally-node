@@ -117,7 +117,7 @@ UserAddress.getaddressById = function getaddressById(userId, result) {
             console.log("error: ", err);
             result(err, null);
         }else{
-            var get_community_details = await query("select * from join_community where userid ="+userId+" " );
+            var get_community_details = await query("select * from join_community where userid ="+userId+" and status=1 " );
             status = true;
             if (res.length ===0) {   
                 status = false;
