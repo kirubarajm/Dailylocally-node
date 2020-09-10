@@ -343,8 +343,8 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
             var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
-            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and status < 2");
-
+            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+          // console.log("get_community_list",get_community_list);
 
             if (get_join_community.length !=0) {
               

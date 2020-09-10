@@ -108,6 +108,9 @@ Community.community_list =async function community_list(req, result){
   result(null, resobj);
 };
 
+
+
+
 Community.join_new_community =async function join_new_community(req, result){
 
   var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"' ");
@@ -150,7 +153,7 @@ Community.join_new_community =async function join_new_community(req, result){
     new_community.profile_image = req.profile_image;
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
-
+    // Community.join_new_community();
     
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
@@ -161,6 +164,7 @@ Community.join_new_community =async function join_new_community(req, result){
 
         var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
          
+     
 
         let resobj = {  
           success: true,
@@ -193,8 +197,8 @@ Community.join_new_community_approval=async function join_new_community_approval
     
   }else{
 
-    var community = await query("update Community set status='"+req.status+"' where   comid='"+req.comid+"' ");
-
+    var communityupdate = await query("update Community set status='"+req.status+"' where   comid='"+req.comid+"' ");
+    var join_community = await query("update join_community set status='"+req.status+"' where  comid='"+req.comid+"' ");
 
     if (req.status===1) {
       message= "Approval successfully";
@@ -212,6 +216,80 @@ Community.join_new_community_approval=async function join_new_community_approval
   
 
 };
+
+
+Community.join_new_community1 =async function join_new_community1(req, result){
+
+  // console.log(req);
+  var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"' ");
+
+  if (join_community.length !=0) {
+
+    if (join_community[0].status==0) {
+      
+
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Sorry, Already you request!"
+      };
+      result(null, resobj);
+
+    } else if(join_community[0].status==1) {
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Already Joined Community"
+      };
+      result(null, resobj);
+    }else if(join_community[0].status==2) {
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Already Your Request rejected."
+      };
+      result(null, resobj);
+    }
+
+    
+  }else{
+
+    // console.log(req.userid);
+    var new_community = {};
+    new_community.userid = req.userid;
+    new_community.comid = req.comid;
+    new_community.status = 0;
+    new_community.profile_image = req.profile_image;
+    new_community.flat_no = req.flat_no;
+    new_community.floor_no=req.floor_no;
+    // Community.join_new_community();
+    
+    sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
+      if(err) {
+          console.log("error: ", err);
+          result(null, err);
+      }
+      else{
+
+        var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
+         
+     
+
+      //   let resobj = {  
+      //     success: true,
+      //     status: true,
+      //     message: "Thanks for your Request!"
+      //     }; 
+    
+      //  result(null, resobj);
+      }
+      }); 
+
+  }
+  
+
+};
+
 
 Community.new_community_registration =async function new_community_registration(new_community, result){
 
@@ -242,6 +320,14 @@ Community.new_community_registration =async function new_community_registration(
 
       // res.insertId
        
+      var join_community = {};
+      join_community.userid = new_community.requested_userid;
+      join_community.comid = res.insertId;
+      join_community.status = 0;
+      join_community.profile_image = new_community.image;
+      join_community.flat_no = new_community.flat_no;
+      join_community.floor_no=new_community.floor_no;
+     Community.join_new_community1(join_community);
 
       let resobj = {  
         success: true,
@@ -295,7 +381,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status < 2  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
 
   if (community.length ==0) {
 
