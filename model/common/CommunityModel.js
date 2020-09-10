@@ -159,7 +159,8 @@ Community.join_new_community =async function join_new_community(req, result){
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
     // Community.join_new_community();
-    
+    var update_image = await query("update User set profile_image='"+req.profile_image+"' where userid = '"+req.userid+"'");
+
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
           console.log("error: ", err);

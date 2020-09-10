@@ -50,8 +50,8 @@ exports.get_category_list = function(req, res) {
     }
   };
   exports.read_a_cartdetails = function(req, res) {
-    var orderitems = req.body.orderitems;
-    var subscription = req.body.subscription;
+    var orderitems = req.body.orderitems || [];
+    var subscription = req.body.subscription || [];
    if (!req.body.lat) {
       res
         .status(400)

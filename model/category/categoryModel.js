@@ -217,7 +217,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
     
   // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
   var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
-  sql.query(category_query, function(err, res) {
+  sql.query(category_query,async function(err, res) {
     if (err) {
       result(err, null);
     } else {
@@ -234,6 +234,149 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
       }
 
+      var get_community = [{
+        "comid": 1,
+        "communityname": "Soundarya Apartment",
+        "lat": "13.0418",
+        "long": "80.2341",
+        "apartmentname": "Soundarya Apartment",
+        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
+        "created_at": "2020-08-25 15:41:42",
+        "status": 0,
+        "requested_userid": null,
+        "zoneid": 1,
+        "no_of_apartments": null,
+        "flat_no": null,
+        "floor_no": null,
+        "community_address": null,
+        "area": null,
+        "servicable_status": false,
+        "category": true,
+        "clickable": true,
+        "collection_status": false,
+        "tile_type": 1,
+        "catid": 1,
+        "type": 3,
+        "approval_status": true,
+        "join_status": true
+    }];
+
+
+      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
+      var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+    // console.log("get_community_list",get_community_list);
+
+      if (get_join_community.length !=0) {
+        
+        get_join_community.forEach(i => {
+              
+          if (i.status==1) {
+            i.approval_status= true;
+            i.join_status= true;
+          }else{
+            i.approval_status= false;
+            i.join_status= true;
+          }
+          i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+          i.servicable_status=servicable_status;
+          i.category=true,
+          i.clickable= true;
+          i.collection_status= false
+          i.tile_type= 1;
+          i.category=true;
+          i.catid = i.comid;
+          i.type= 3;
+          // i.approval_status= true;
+          // i.join_status= true;
+         
+          // console.log(i);
+                
+          res.splice(0, 0, i);
+         
+        });
+
+
+        // if (get_community_list[0].status=1) {
+          
+        //   if (get_community.length !=0) {
+
+        //     get_community.forEach(i => {
+              
+
+        //       i.servicable_status=servicable_status;
+        //       i.category=true,
+        //       i.clickable= true;
+        //       i.collection_status= false
+        //       i.tile_type= 1;
+        //       i.category=true;
+        //       i.catid = i.comid;
+        //       i.type= 3;
+        //       i.approval_status= false;
+        //       i.join_status= true;
+             
+  
+                    
+        //       res.splice(0, 0, i);
+             
+        //     });
+        //   }
+
+        // }
+      }else{
+
+        if (get_community_list.length !=0) {
+
+          // console.log("get_community",get_community.length);
+          get_community_list.forEach(i => {
+            
+            if (i.status==1) {
+              i.approval_status= true;
+              i.join_status= true;
+            }else{
+              i.approval_status= false;
+              i.join_status= true;
+            }
+
+            i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+            i.servicable_status=servicable_status;
+            i.category=true,
+            i.clickable= true;
+            i.collection_status= false
+            i.tile_type= 1;
+            i.category=true;
+            i.catid = 0;
+            i.type= 3;
+            // i.approval_status= false;
+            // i.join_status= false;
+            console.log("22222",i);
+                  
+            res.splice(0, 0, i);
+           
+          });
+        }else{
+          get_community.forEach(i => {
+            
+        
+              i.approval_status= false;
+              i.join_status= false;
+            i.servicable_status=servicable_status;
+            i.category=true,
+            i.clickable= true;
+            i.collection_status= false
+            i.tile_type= 1;
+            i.category=true;
+            i.catid = 0;
+            i.type= 3;
+            // i.approval_status= false;
+            // i.join_status= false;
+
+                  
+            res.splice(0, 0, i);
+           
+          });
+        }
+
+      }
 
       Collection.list_all_active_collection(req,async function(err,res3) {
         if (err) {
@@ -314,149 +457,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
             // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
 
-            var get_community = [{
-              "comid": 1,
-              "communityname": "Soundarya Apartment",
-              "lat": "13.0418",
-              "long": "80.2341",
-              "apartmentname": "Soundarya Apartment",
-              "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
-              "created_at": "2020-08-25 15:41:42",
-              "status": 0,
-              "requested_userid": null,
-              "zoneid": 1,
-              "no_of_apartments": null,
-              "flat_no": null,
-              "floor_no": null,
-              "community_address": null,
-              "area": null,
-              "servicable_status": false,
-              "category": true,
-              "clickable": true,
-              "collection_status": false,
-              "tile_type": 1,
-              "catid": 1,
-              "type": 3,
-              "approval_status": true,
-              "join_status": true
-          }];
-
-
-            var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
-            var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
-          // console.log("get_community_list",get_community_list);
-
-            if (get_join_community.length !=0) {
-              
-              get_join_community.forEach(i => {
-                    
-                if (i.status==1) {
-                  i.approval_status= true;
-                  i.join_status= true;
-                }else{
-                  i.approval_status= false;
-                  i.join_status= true;
-                }
-                i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
-                i.servicable_status=servicable_status;
-                i.category=true,
-                i.clickable= true;
-                i.collection_status= false
-                i.tile_type= 1;
-                i.category=true;
-                i.catid = i.comid;
-                i.type= 3;
-                // i.approval_status= true;
-                // i.join_status= true;
-               
-                // console.log(i);
-                      
-                res.splice(0, 0, i);
-               
-              });
-
-
-              if (get_community_list[0].status=1) {
-                
-                if (get_community.length !=0) {
-
-                  get_community.forEach(i => {
-                    
-    
-                    i.servicable_status=servicable_status;
-                    i.category=true,
-                    i.clickable= true;
-                    i.collection_status= false
-                    i.tile_type= 1;
-                    i.category=true;
-                    i.catid = i.comid;
-                    i.type= 3;
-                    i.approval_status= false;
-                    i.join_status= true;
-                   
-        
-                          
-                    res.splice(0, 0, i);
-                   
-                  });
-                }
-
-              }
-            }else{
-
-              if (get_community_list.length !=0) {
-
-                // console.log("get_community",get_community.length);
-                get_community_list.forEach(i => {
-                  
-                  if (i.status==1) {
-                    i.approval_status= true;
-                    i.join_status= true;
-                  }else{
-                    i.approval_status= false;
-                    i.join_status= true;
-                  }
-
-                  i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
-                  i.servicable_status=servicable_status;
-                  i.category=true,
-                  i.clickable= true;
-                  i.collection_status= false
-                  i.tile_type= 1;
-                  i.category=true;
-                  i.catid = 0;
-                  i.type= 3;
-                  // i.approval_status= false;
-                  // i.join_status= false;
-                  console.log("22222",i);
-                        
-                  res.splice(0, 0, i);
-                 
-                });
-              }else{
-                get_community.forEach(i => {
-                  
-              
-                    i.approval_status= false;
-                    i.join_status= false;
-                  i.servicable_status=servicable_status;
-                  i.category=true,
-                  i.clickable= true;
-                  i.collection_status= false
-                  i.tile_type= 1;
-                  i.category=true;
-                  i.catid = 0;
-                  i.type= 3;
-                  // i.approval_status= false;
-                  // i.join_status= false;
-
-                        
-                  res.splice(0, 0, i);
-                 
-                });
-              }
-
-            }
+       
 
 
 
@@ -568,7 +569,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   if (userdetails.length !==0) {   
   
   
-    if (orderitems) {
+    if ( orderitems.length !=0 && orderitems.length !=null) {
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
@@ -700,11 +701,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
    
 
 
-    if (subscription) {
+    if (subscription.length !=0 && subscription.length !=null)  {
 
-      if (cod_available==true) {
-        cod_available=false;
-      }
+      console.log(cod_available);
+      //  if (community_user_status==true) {       
+          cod_available=false;
+      //  }
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         

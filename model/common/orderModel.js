@@ -314,14 +314,15 @@ Order.create_customerid_by_razorpay = async function create_customerid_by_razorp
   var fail_existing="0";
   var cuId = false;
 
-
+  console.log(email);
+  console.log(name);
   var req={};
     req.userid= userinfo[0].userid;
   return await instance.customers.create({name, email, contact, notes,fail_existing})
   .then((data) => {
     cuId=data.id;
     
-  // console.log("data-->",data);
+ console.log("data-->",data);
     
     req.razorpay_response = JSON.stringify(data);
     req.statuscode=1;
@@ -337,7 +338,7 @@ Order.create_customerid_by_razorpay = async function create_customerid_by_razorp
       console.log("cuId:----- ", cuId);
        return cuId;
       }).catch((error) => {
-        // console.log("error: ", error);
+         console.log("error: ", error);
        
 
         req.razorpay_response = JSON.stringify(error);
@@ -775,7 +776,7 @@ Order.order_transaction_order_list = async function order_transaction_order_list
   var pagelimit = 20;
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
-  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order,ors.created_at from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"'  and ors.payment_status =1 " ;
+  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order,ors.created_at from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"'  and ors.payment_status < 2  " ;
   if (req.starting_date && req.end_date) {
     query1 = query1 + " and  (ors.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date +"')    group by ors.orderid order by ors.created_at desc limit " + startlimit + "," + pagelimit + " ";
   }else{
