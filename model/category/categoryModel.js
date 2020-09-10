@@ -859,6 +859,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           res2[0].isAvaliablezone = isAvaliablezone;
           res2[0].community_user_status=community_user_status;
           res2[0].cod_available=cod_available;
+          res2[0].cod_unavailable_info ="Cash on delivery isn't available for subscription orders";
          
           
           product_orginal_price = totalamount;
@@ -947,10 +948,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           calculationdetails.order_delivery_day_message = order_delivery_day_message;
           calculationdetails.order_delivery_day = order_delivery_day;
           calculationdetails.minimum_cart_value = constant.minimum_cart_value;
-          calculationdetails.show_delivery_text=false;
+          calculationdetails.show_delivery_text = false;
           calculationdetails.delivery_text ="Delivery charges";
-          calculationdetails.delivery_charge  ="Free";
-          calculationdetails.exclusive_tag   ="DAILY LOCALLY EXCLUSIVE";
+          calculationdetails.delivery_charge  = "Free";
+          calculationdetails.exclusive_tag   = "DAILY LOCALLY EXCLUSIVE";
 
           if (community_user_status==true || userdetails[0].premium_user==1 ) {
             calculationdetails.show_delivery_text=true

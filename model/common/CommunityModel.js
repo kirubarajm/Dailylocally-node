@@ -46,8 +46,9 @@ Community.community_search =async function community_search(req, result){
           search_community[i].distance_text = "KM";
           search_community[i].distance = search_community[i].distance.toFixed(1);
         }else{
-          search_community[i].distance_text = "Meter";
-          search_community[i].distance = search_community[i].distance.toFixed(1);
+          search_community[i].distance_text = "KM";
+          // console.log(search_community[i].distance);
+          search_community[i].distance = search_community[i].distance;
         }
         
       }
@@ -95,7 +96,7 @@ Community.community_list =async function community_list(req, result){
             search_community[i].distance = search_community[i].distance.toFixed(1);
           }else{
             search_community[i].distance_text = "Meter";
-            search_community[i].distance = search_community[i].distance.toFixed(1);
+            search_community[i].distance = search_community[i].distance;
           }
           
         }
@@ -117,7 +118,7 @@ Community.community_list =async function community_list(req, result){
 
 Community.join_new_community =async function join_new_community(req, result){
 
-  var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"' ");
+  var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"'  and status=1");
 
   if (join_community.length !=0) {
 
@@ -166,7 +167,7 @@ Community.join_new_community =async function join_new_community(req, result){
       }
       else{
 
-        var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
+        // var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
          
      
 
@@ -291,7 +292,7 @@ Community.join_new_community1 =async function join_new_community1(req, result){
       }
       else{
 
-        var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
+        // var join_community = await query("update Community set no_of_apartments=no_of_apartments+1 where  comid='"+req.comid+"' ");
          
      
 
@@ -339,7 +340,10 @@ Community.new_community_registration =async function new_community_registration(
     else{
 
       // res.insertId
-       
+      if (new_community.request_type==1) {
+        var update_image = await query("update User set profile_image='"+new_community.image+"' where userid = '"+new_community.requested_userid+"'");
+
+      }
       var join_community = {};
       join_community.userid = new_community.requested_userid;
       join_community.comid = res.insertId;
@@ -401,7 +405,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
 
   if (community.length ==0) {
 
@@ -475,7 +479,7 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
             "title":"What's Cooking in community",
             "des": "Join your community's whatapp group and socialize with the memebrs",
             "group_url ":  get_whatsup[0].whatsapp_group_link || '',
-            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599719408423-whatsupcommuntiy.jpg",
+            "image_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599745891003-WHATS%20COOKING%403x.png",
             "home_community_topic":"home_page",
             "home_community_title":"Home page"
         },
@@ -483,14 +487,14 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
             "title": "Sneak Peak",
             "des": "Watch a short video on Daily Locally Exclusive",
             "video_url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471258113-SNEAK%20PEAK.jpg",
+            "image_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599745864472-SNEAK%20PEAK%403x.png",
             "home_community_topic":"home_page",
             "home_community_title":"Home page"
         },
         "cat_list": {
                 "title ": "new event",
                 "des": "new event",
-                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471197936-PLace%20Order%20Thumb.jpg",
+                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599747217361-PLace%20Order%20Thumb%403x.png",
                 "home_community_topic":"home_page",
                 "home_community_title":"Home page"
                  },
@@ -498,7 +502,7 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
                {
                 "title": "About Us",
                 "des": "Know More about daily locally Exclusive",
-                "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599471418432-ABOUT%20US.jpg",
+                "image_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599745820731-ABOUT%20US%403x.png",
                 "home_community_topic":"home_page",
                 "home_community_title":"Home page"
                 }
@@ -574,7 +578,7 @@ Community.admin_community_list =async function admin_community_list(req, result)
   var zoneid = req.zoneid || 1;
 
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg from Community co left outer join join_community jc on jc.comid=co.comid  where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
     //  console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  

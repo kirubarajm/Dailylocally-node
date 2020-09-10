@@ -775,7 +775,7 @@ Order.order_transaction_order_list = async function order_transaction_order_list
   var pagelimit = 20;
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
-  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order,ors.created_at from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"'  and ors.payment_status <2 " ;
+  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order,ors.created_at from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"'  and ors.payment_status =1 " ;
   if (req.starting_date && req.end_date) {
     query1 = query1 + " and  (ors.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date +"')    group by ors.orderid order by ors.created_at desc limit " + startlimit + "," + pagelimit + " ";
   }else{

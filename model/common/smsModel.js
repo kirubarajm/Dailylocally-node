@@ -48,7 +48,7 @@ SMS.ordersuccess_send_sms =async function ordersuccess_send_sms(orderid,phoneno,
 
 SMS.community_send_sms =async function community_send_sms(type,phoneno, result){
   var otpurl = "";  
-  var phoneno = '9500313689';
+  // var phoneno = '9500313689';
    if(type==1){    
     //  otpurl = "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=EATHOM&dest=" +phoneno+ "&msg=Your transaction has been successfully placed with Daily Locally. \n Due to the prevailing pandemic, we are facing brief delays in deliveries. However, for any queries about your order, please get in touch through the following link " +constant.virtual_order_sms_contact_number; 
     var otpurl =

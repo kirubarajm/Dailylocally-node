@@ -2415,6 +2415,14 @@ Moveituser.trip_order_details =async function trip_order_details(req,result) {
 
 Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_history__day_order_list(req,result) {
   // var ordersquery = " select * from Dayorder where  trip_id= "+req.tripid+" " ;
+
+  const yesterday_price = await query("select sum(cod_price)as yesterday_price from Dayorder where trip_id in(select tripid from Moveit_trip where moveit_id ="+req.moveit_userid+" and DATE(created_at) = DATE(NOW() - INTERVAL 1 DAY) and trip_status = 2)  ");
+  let yesterday_amount = 0;
+
+  if (yesterday_price.length !=0) {
+     yesterday_amount = yesterday_price[0].yesterday_price;
+  }
+
   let total_cod_price = 0;
   var tripstatuscheckquery = "select *,CASE WHEN trip_status=0 THEN 'Trip not started' WHEN trip_status=1 THEN 'trip started' WHEN trip_status=2 THEN 'trip completed' WHEN trip_status=3 THEN 'trip cancelled' END as trip_status_msg from Moveit_trip where  moveit_id="+req.moveit_userid+" and  trip_status!=1";
   var tripstatuscheck = await query(tripstatuscheckquery);
@@ -2431,12 +2439,14 @@ Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_histo
       var yesterdaycod = await query(yesterdaycodquery);
 
       total_cod_price = total_cod_price + yesterdaycod[0].total_cod_price;
+
       var ordersquery = "select drs.*,us.name as cus_name,us.phoneno as cus_phoneno,us.email as cus_email,ze.Zonename,ze.phoneno as zone_phoneno,ze.address as zone_address,ze.lon as zone_lon,ze.lat as zone_lat,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname)) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 6 then 'SCM In-Progress' when drs.dayorderstatus  < 10 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancelled' when drs.dayorderstatus=12 then 'returned' end as dayorderstatus_msg ,mt.trip_status, CASE WHEN mt.trip_status=0 THEN 'Trip not started' WHEN mt.trip_status=1 THEN 'trip started' WHEN mt.trip_status=2 THEN 'trip completed' WHEN mt.trip_status=3 THEN 'trip canceled' END as trip_status_msg,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg   from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid left join Moveit_trip mt on mt.tripid=drs.trip_id left join Zone ze on ze.id=drs.zoneid where drs.trip_id= "+tripstatuscheck[i].tripid+"  group by drs.id,drs.userid order by drs.id desc " ;
       var orders = await query(ordersquery);
 
   
       tripstatuscheck[i].order_count = orders.length;
-      tripstatuscheck[i].order_list = orders;  
+      tripstatuscheck[i].order_list = orders; 
+      tripstatuscheck[i].total_cod_price = total_cod_price;  
 
       for(let j=0; j<orders.length; j++){
         
@@ -2460,7 +2470,7 @@ Moveituser.moveit_trip_history__day_order_list =async function moveit_trip_histo
     let resobj = {
       success: true,
       status : true,
-      total_cod_price:total_cod_price,
+      total_cod_price:yesterday_amount,
       result : tripstatuscheck
     };
     result(null, resobj);
