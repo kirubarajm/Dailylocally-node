@@ -512,17 +512,16 @@ StockKeeping.missingitem_list =async function missingitem_list(req,result) {
             where = where+" and sc1.scl1_id='"+req.subcategorysearch+"' or sc1.name LIKE '%"+req.subcategorysearch+"%' )";
         }
         if(req.productsearch){
-            where = where+" and (pm.pid='"+req.productsearch+"' or pm.Productname LIKE '%"+req.productsearch+"%' ) ";
+            where = where+" and (pm.pid LIKE '%"+req.productsearch+"%' or pm.Productname LIKE '%"+req.productsearch+"%' ) ";
         }        
         if(req.from_date && req.to_date){
             where = where+" and (date(wm.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
         }
-
         if(req.report && req.report==1){
             var stockkeppinglistquery = "select wm.missing_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Sorting' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Missing_Products as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.missing_id!='' and wm.zoneid="+req.zoneid+" "+where+" group by wm.missing_id";
         }else{
             var stockkeppinglistquery = "select wm.missing_id,cat.catid,cat.name as category_name,pm.scl1_id,sc1.name as subcategoryl1_name,pm.scl2_id,sc2.name as subcategory2_name,pm.pid,pm.Productname as productname,uom.uomid,uom.name as uom,wm.vpid,wm.quantity,(wm.cost*wm.quantity) as cost,wm.created_at,case when from_type=1 then 'Sorting' when from_type=2 then 'QA' when from_type=3 then 'Stock Keeping' end as from_type,'' as waste_tillnow,'' as cost_tillnow from Missing_Products as wm left join Product_live as pl on pl.vpid=wm.vpid left join ProductMaster as pm on pm.pid=pl.pid left join SubcategoryL1 as sc1 on sc1.scl1_id=pm.scl1_id left join SubcategoryL2 as sc2 on sc2.scl2_id=pm.scl2_id left join Category as cat on cat.catid=sc1.catid left join UOM as uom on uom.uomid=pm.uom where wm.missing_id!='' and wm.zoneid="+req.zoneid+" "+where+" group by wm.missing_id order by wm.created_at DESC limit " +startlimit +"," +pagelimit +" ";
-        }  
+        }
         var stockkeppinglist = await query(stockkeppinglistquery);
 
         var totalcountquery = "select * from Missing_Products as wm where wm.missing_id!='' and wm.zoneid="+req.zoneid+" "+where+" order by wm.created_at DESC";

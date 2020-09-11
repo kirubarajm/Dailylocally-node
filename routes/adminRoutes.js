@@ -19,6 +19,7 @@ module.exports = function(app) {
   var adminuser = require("../controllers/admin/adminUserController");
   var quicksearch = require("../controllers/common/QuickSearchController.js");
   var Vendor = require("../controllers/common/VendorController.js");
+  var Brand = require("../controllers/common/BrandController.js");
   
 
   //////// ==============> Admin Routes <================= /////////    
@@ -196,6 +197,12 @@ app.route("/admin/vendor/add").post(routesVersioning({"1.0.0":Vendor.createVendo
 app.route("/admin/vendor/edit").post(routesVersioning({"1.0.0":Vendor.updateVendorModel}));
 app.route("/admin/vendor/view").post(routesVersioning({"1.0.0":Vendor.VendorModelview}));
 app.route("/admin/vendor/list").post(routesVersioning({"1.0.0":Vendor.VendorModelList}));
+
+////////Brand Details////////////////
+app.route("/admin/brand/add").post(routesVersioning({"1.0.0":Brand.createBrandModel}));
+app.route("/admin/brand/edit").post(routesVersioning({"1.0.0":Brand.updateBrandModel}));
+app.route("/admin/brand/view").post(routesVersioning({"1.0.0":Brand.BrandModelview}));
+app.route("/admin/brand/list").post(routesVersioning({"1.0.0":Brand.BrandModelList}));
 
 
 }
