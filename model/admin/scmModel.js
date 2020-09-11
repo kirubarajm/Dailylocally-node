@@ -2272,7 +2272,7 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
                 }else if(getdop[0].quantity > getdop[0].received_quantity){
                     sorting_status = 1;
                 }
-                var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+",scm_status=4 where id="+req.dopid_list[i];
+                var updatedopquery = "update Dayorder_products set sorting_status="+sorting_status+",scm_status=4 where id="+req.dopid_list[i]+" and scm_status!=11";
                 var updatedop = await query(updatedopquery);
 
                 if(getdop[0].revoke_flag==1){
@@ -2434,7 +2434,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
                 });                             
             }           
         }
-        var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"'");
+        var update = await query("update Dayorder_products set scm_status=5 where doid = '"+req.doid+"' and scm_status!=11");
         var updateDO = await query("update Dayorder set dayorderstatus=5 where id = '"+req.doid+"'");
 
         //////Create Day order Log ////////////
@@ -2464,7 +2464,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
         };
         result(null, resobj);
     } else {        
-        var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"'");
+        var update_revoke = await query("update Dayorder_products set scm_status=3 where doid = '"+req.doid+"' and scm_status!=11");
         var updateDO_revoke = await query("update Dayorder set revoke_flag=1 where id = '"+req.doid+"'");
 
         //////Create Day order Log ////////////
