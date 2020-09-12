@@ -262,7 +262,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
     }];
 
 
-      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1");
+      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2");
       var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
     // console.log("get_community_list",get_community_list);
 
@@ -296,32 +296,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         });
 
 
-        // if (get_community_list[0].status=1) {
-          
-        //   if (get_community.length !=0) {
-
-        //     get_community.forEach(i => {
-              
-
-        //       i.servicable_status=servicable_status;
-        //       i.category=true,
-        //       i.clickable= true;
-        //       i.collection_status= false
-        //       i.tile_type= 1;
-        //       i.category=true;
-        //       i.catid = i.comid;
-        //       i.type= 3;
-        //       i.approval_status= false;
-        //       i.join_status= true;
-             
-  
-                    
-        //       res.splice(0, 0, i);
-             
-        //     });
-        //   }
-
-        // }
+     
       }else{
 
         if (get_community_list.length !=0) {
@@ -348,7 +323,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
             i.type= 3;
             // i.approval_status= false;
             // i.join_status= false;
-            console.log("22222",i);
+            // console.log("22222",i);
                   
             res.splice(0, 0, i);
            
@@ -569,7 +544,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   if (userdetails.length !==0) {   
   
   
-    if ( orderitems.length !=0 && orderitems.length !=null) {
+    if (orderitems) {
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
@@ -701,12 +676,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
    
 
 
-    if (subscription.length !=0 && subscription.length !=null)  {
+    if (subscription)  {
 
-      console.log(cod_available);
-      //  if (community_user_status==true) {       
+      // console.log(cod_available);
+        if (subscription !=0) {       
           cod_available=false;
-      //  }
+        }
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         

@@ -41,7 +41,8 @@ Community.community_search =async function community_search(req, result){
 
 
       for (let i = 0; i < search_community.length; i++) {
-       
+        search_community[i].distance= search_community[i].distance * 1.6;
+
         if (search_community[i].distance > 1) {
           search_community[i].distance_text = "KM";
           search_community[i].distance = search_community[i].distance.toFixed(1);
@@ -90,7 +91,7 @@ Community.community_list =async function community_list(req, result){
 
 
         for (let i = 0; i < search_community.length; i++) {
-         
+          search_community[i].distance= search_community[i].distance * 1.6;
           if (search_community[i].distance > 1) {
             search_community[i].distance_text = "KM";
             search_community[i].distance = search_community[i].distance.toFixed(1);
@@ -487,7 +488,8 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
         "sneak_peak": {
             "title": "Sneak Peak",
             "des": "Watch a short video on Daily Locally Exclusive",
-            "video_url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            // "video_url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "video_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599842986467-DLE+sneak+peak.mp4",
             "image_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599745864472-SNEAK%20PEAK%403x.png",
             "home_community_topic":"home_page",
             "home_community_title":"Home page"
@@ -620,7 +622,7 @@ var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(
        
       }
       
-      var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
+      var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' and status=1 ");
 
       admin_community[i].total_converted_user=total_converted_user[0].total || 0;
 

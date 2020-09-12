@@ -166,7 +166,9 @@ UserAddress.updateById =async function updateById(req, result){
         var address_details=  await query(queryaddress);
 
         if (address_details.length !=0) {
-            if (address_details[0].distance > 1) {
+
+            address_details[0].distance  = address_details[0].distance  * 1.6;
+            if (address_details[0].distance > 0.5) {
                 var update_query =  await query("update join_community set status=2 where jcid='"+get_community[0].jcid+"' ");
             }
         } 

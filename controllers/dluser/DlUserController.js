@@ -71,24 +71,12 @@ exports.user_logout = function(req, res) {
 
 
 exports.edit_user = function(req, res) {
-  if (!req.body.name) {
-    res
-      .status(400)
-      .send({ error: true, status: false, message: "Please provide name" });
-  } else if (!req.body.gender) {
-    res
-      .status(400)
-      .send({
-        error: true,
-        status: false,
-        message: "Please provide phone_number"
-      });
-  } else {
+
     Dluser.edit_user(req.body, function(err, user) {
       if (err) res.send(err);
       res.json(user);
     });
-  }
+  
 };
 
 

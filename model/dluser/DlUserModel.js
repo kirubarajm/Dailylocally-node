@@ -725,10 +725,13 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
 
 
 Dluser.edit_user = async function edit_user(req, result) {
- 
-req.email=req.email.trim()
-var pattern = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,6}$/; 
-var isValid = pattern.test(req.email);
+ let  isValid= true
+ if (req.email) {
+  req.email=req.email.trim()
+  var pattern = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,6}$/; 
+   isValid = pattern.test(req.email);
+ }
+
 if (!isValid) {
 
   let resobj = {

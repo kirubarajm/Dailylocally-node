@@ -2304,7 +2304,7 @@ Moveituser.moveit_trip_day_order_list =async function moveit_trip_day_order_list
         // console.log(orders[i].moveit_status_msg);
       }
 
-      var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id;
+      var itemsquery = "select * from Dayorder_products  where doid="+orders[i].id+"  and scm_status < 10";
       var items = await query(itemsquery);
       orders[i].itemlistcount = items.length;
       orders[i].itemlist = items;
