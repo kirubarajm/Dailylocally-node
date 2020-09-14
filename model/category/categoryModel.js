@@ -262,12 +262,13 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
     }];
 
 
-      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2");
+      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2 order by comid desc limit 1");
       var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
-    // console.log("get_community_list",get_community_list);
+    // console.log("get_community_list",get_join_community.length);
 
       if (get_join_community.length !=0) {
         
+        // console.log("test");
         get_join_community.forEach(i => {
               
           if (i.status==1) {
@@ -300,7 +301,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
       }else{
 
         if (get_community_list.length !=0) {
-
+          // console.log("test1");
           // console.log("get_community",get_community.length);
           get_community_list.forEach(i => {
             
@@ -331,7 +332,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         }else{
           get_community.forEach(i => {
             
-        
+            // console.log("test3");
               i.approval_status= false;
               i.join_status= false;
             i.servicable_status=servicable_status;
