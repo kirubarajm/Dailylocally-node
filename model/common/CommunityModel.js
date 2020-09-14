@@ -465,7 +465,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
 
 Community.get_homepage=async function get_homepage(req, result){
 
-var get_whatsup = await query("select co.* from join_community jd left join  Community co on co.comid=jd.comid where jd.userid='"+req.userid+"'");
+var get_whatsup = await query("select co.* from join_community jd left join  Community co on co.comid=jd.comid where jd.userid='"+req.userid+"' and jd.status=1");
 
   get= [
     {
@@ -473,14 +473,14 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
         "event": {
             "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599470824386-Community%20Event%20Thumb.jpg",
             "topic": "community_event",
-            "title":"Community event",
+            "title":"Community events",
             "home_community_topic":"home_page",
             "home_community_title":"Home page"
         },
         "whatsapp ": {
             "title":"What's Cooking in community",
             "des": "Join your community's whatapp group and socialize with the memebrs",
-            "group_url ":  get_whatsup[0].whatsapp_group_link || '',
+            "group_url":  get_whatsup[0].whatsapp_group_link || '',
             "image_url": "https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1599745891003-WHATS%20COOKING%403x.png",
             "home_community_topic":"home_page",
             "home_community_title":"Home page"
