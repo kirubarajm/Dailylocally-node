@@ -231,6 +231,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         res[i].collection_status= false
         res[i].tile_type= 1
         res[i].type= 1 // category
+        res[i].show_video= false;
         //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
       }
 
@@ -258,7 +259,8 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         "catid": 1,
         "type": 3,
         "approval_status": true,
-        "join_status": true
+        "join_status": true,
+        "show_video":true
     }];
 
 
@@ -271,13 +273,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         // console.log("test");
         get_join_community.forEach(i => {
               
-          if (i.status==1) {
-            i.approval_status= true;
-            i.join_status= true;
-          }else{
-            i.approval_status= false;
-            i.join_status= true;
-          }
+         
           i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
           i.servicable_status=servicable_status;
           i.category=true,
@@ -287,12 +283,20 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
           i.category=true;
           i.catid = i.comid;
           i.type= 3;
+          i.show_video=true;
           // i.approval_status= true;
           // i.join_status= true;
          
           // console.log(i);
-                
-          res.splice(0, 0, i);
+          if (i.status==1) {
+            i.approval_status= true;
+            i.join_status= true;
+          }else{
+            i.approval_status= false;
+            i.join_status= true;
+            res.splice(0, 0, i);
+          }     
+          
          
         });
 
@@ -322,6 +326,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
             i.category=true;
             i.catid = 0;
             i.type= 3;
+            i.show_video=true;
             // i.approval_status= false;
             // i.join_status= false;
             // console.log("22222",i);
@@ -343,6 +348,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
             i.category=true;
             i.catid = 0;
             i.type= 3;
+            i.show_video=true;
             // i.approval_status= false;
             // i.join_status= false;
 

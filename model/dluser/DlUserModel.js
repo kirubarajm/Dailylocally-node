@@ -732,6 +732,10 @@ Dluser.edit_user = async function edit_user(req, result) {
    isValid = pattern.test(req.email);
  }
 
+ if (req.name) {
+  req.name=req.name.charAt(0).toUpperCase() + req.name.slice(1);
+ }
+
 if (!isValid) {
 
   let resobj = {
@@ -6088,13 +6092,22 @@ Dluser.new_zendesk_request_create = function new_zendesk_request_create(req) {
 
   var new_ZendeskRequestsModel= new Zendeskrequest(req);
   new_ZendeskRequestsModel.doid = req.orderid;
+  new_ZendeskRequestsModel.community_status =  req.community_status;
   Zendeskrequest.createZendeskrequest(new_ZendeskRequestsModel, function(err, res) {
     if (err) return err;
     else return res;
   });
 };
 
-Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
+Dluser.zendesk_request_create =async function zendesk_request_create(req, result) {
+
+  var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+
+  if (get_join_community.length !=0) {
+    req.community_status=1;
+  }else{
+    req.community_status=0;
+  }
 
   sql.query("Select * from User where  userid = ? ",req.userid,function(err, res) {
       if (err) {
@@ -6112,7 +6125,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           user.phone=res[0].phoneno;
           userdetails.user = user;
          
-          console.log("userdetails----------->",userdetails);
+          // console.log("userdetails----------->",userdetails);
 
 
         var Username = 'dailylocally@gmail.com';
@@ -6147,16 +6160,16 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
        }else{
          var url = "https://dailylocallyapp.zendesk.com/api/v2/users/search.json?query=email:"+res[0].email+""
     
-         console.log("-------------------------------url",url);
+        //  console.log("-------------------------------url",url);
 
 
           request.get({headers: headers, url:url, method: 'GET'},async function (e, r, body) {
-            console.log("e--",e);
+            // console.log("e--",e);
             //console.log("r--",r);
-            console.log("-------------------------------body",body);
+            // console.log("-------------------------------body",body);
 
             const obj = JSON.parse(body);
-            console.log("-------------------------------body.user[0].id",obj.users[0]);
+            // console.log("-------------------------------body.user[0].id",obj.users[0]);
             if (obj.users[0].id) {
 
               req.zendeskuserid=obj.users[0].id;
@@ -6183,7 +6196,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
           req.zendeskuserid=res[0].zendeskuserid;
 
-          console.log("req------------>",req);
+          // console.log("req------------>",req);
           Dluser.new_zendesk_request_create(req);
    
           let resobj = {

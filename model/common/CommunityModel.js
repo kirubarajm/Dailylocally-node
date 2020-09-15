@@ -119,7 +119,8 @@ Community.community_list =async function community_list(req, result){
 
 Community.join_new_community =async function join_new_community(req, result){
 
-  var join_community = await query("select * from join_community where userid='"+req.userid+"' and comid='"+req.comid+"'  and status=1");
+  //and comid='"+req.comid+"' 
+  var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
 
   if (join_community.length !=0) {
 
@@ -316,6 +317,10 @@ Community.join_new_community1 =async function join_new_community1(req, result){
 
 Community.new_community_registration =async function new_community_registration(new_community, result){
 
+
+  // var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
+
+
   var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
   new_community.lat +
   "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
@@ -345,15 +350,16 @@ Community.new_community_registration =async function new_community_registration(
       if (new_community.request_type==1) {
         var update_image = await query("update User set profile_image='"+new_community.image+"' where userid = '"+new_community.requested_userid+"'");
 
+        var join_community = {};
+        join_community.userid = new_community.requested_userid;
+        join_community.comid = res.insertId;
+        join_community.status = 0;
+        join_community.profile_image = new_community.image;
+        join_community.flat_no = new_community.flat_no;
+        join_community.floor_no=new_community.floor_no;
+       Community.join_new_community1(join_community);
       }
-      var join_community = {};
-      join_community.userid = new_community.requested_userid;
-      join_community.comid = res.insertId;
-      join_community.status = 0;
-      join_community.profile_image = new_community.image;
-      join_community.flat_no = new_community.flat_no;
-      join_community.floor_no=new_community.floor_no;
-     Community.join_new_community1(join_community);
+ 
 
       let resobj = {  
         success: true,

@@ -1754,7 +1754,7 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
     };
     result(null, resobj);
   
-  }else if (dayorder[0].dayorderstatus >= 6) {
+  }else if (day_order[0].dayorderstatus >= 6) {
     let resobj = {
       success: true,
       message: "Sorry you cannot cancel this product. Since it was already Packed and Ready to Dispatch!",
