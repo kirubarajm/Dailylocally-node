@@ -25,8 +25,8 @@ Zendeskissues.createZendeskissues = function createZendeskissues(req, result) {
   });
 };
 
-Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,result) {
-    sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.id='"+req.id+"'", function(err, res) {
+Zendeskissues.getZendeskissuesDetails =async function getZendeskissuesDetails(req,result) {
+    sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.id='"+req.id+"'",async function(err, res) {
       if (err) {
         result(err, null);
       } else {
@@ -41,8 +41,22 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
         // }
 
         if (req.userid) {
-          note = note +' userid :'+req.userid+" ,"
-          }
+          note = note +' userid :'+req.userid+" ,"          
+          // var checkcommunityquery = "select * from join_community where userid="+req.userid+" and status=1";
+          // var checkcommunity = await query(checkcommunityquery);
+          // if(checkcommunity.length>0){
+          //   note = note +'\n'+"DLE user, ";
+          // }
+          sql.query("select * from join_community where userid="+req.userid+" and status=1",async function(err, res1) {
+            if (err) {
+              result(err, null);
+            } else {
+              if(res1.length>0){
+                note = note +'\n'+"DLE user, ";
+              }
+            }
+          });          
+        }
 
         if (req.orderid) {
           note = note + "dayorderid :"+req.orderid+" ,"
