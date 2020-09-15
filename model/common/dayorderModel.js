@@ -39,7 +39,7 @@ var Dayorder = function(Dayorder) {
 
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
-  var day = moment().format("YYYY-MM-DD, HH:mm:ss");
+  var day = moment().format("YYYY-MM-DD");
 
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
 
@@ -89,7 +89,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     if (getproduct[i].subscription==0) {
 
       
-      var date  = moment(getproduct[i].deliverydate ).format("YYYY-MM-DD 12:00:00");
+      var date  = moment(getproduct[i].deliverydate ).format("YYYY-MM-DD");
 
    
       var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and Date(date)=Date('"+date+"') and dayorderstatus < 10");
@@ -151,7 +151,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         var new_day_order={};
         new_day_order.userid=Dayorder.userid;
         new_day_order.zoneid=Dayorder.zoneid;
-        new_day_order.date=  moment(getproduct[i].deliverydate).format("YYYY-MM-DD 12:00:00");  
+        new_day_order.date=  moment(getproduct[i].deliverydate).format("YYYY-MM-DD");  
         new_day_order.order_place_time=day;  
         new_day_order.virtualkey=Dayorder.virtualkey;  
         //address
@@ -182,7 +182,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     
 
 
-        //  console.log("new_day_order===>1",new_day_order); 
+       console.log("new_day_order===>1",new_day_order); 
         sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
           if (err) {
             res(err, null);
@@ -925,7 +925,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
           // console.log("dates ila",dates);
           for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
-          var date  = moment().add(j, "days").format("YYYY-MM-DD 12:00:00");; ////0-current date
+          var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
           var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and DATE(date)=DATE('"+date+"') and dayorderstatus < 10 ");
           if (dayorders.length !=0) {
             var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
@@ -1081,7 +1081,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               // console.log("day order ila",dates);                  
               var new_day_order={};
               new_day_order.userid=Dayorder.userid;
-              new_day_order.date=moment(date).format("YYYY-MM-DD 12:00:00"); ;
+              new_day_order.date=moment(date).format("YYYY-MM-DD"); ;
               new_day_order.zoneid=Dayorder.zoneid;   
               new_day_order.order_place_time=day; 
                   //address

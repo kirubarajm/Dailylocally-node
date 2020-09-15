@@ -1,6 +1,7 @@
 "user strict";
 var sql = require("../db.js");
-
+const util = require("util");
+const query = util.promisify(sql.query).bind(sql);
 //Task object constructor
 var Zendeskissues = function(zendeskissues) {
   this.active_status = zendeskissues.active_status;
@@ -47,15 +48,17 @@ Zendeskissues.getZendeskissuesDetails =async function getZendeskissuesDetails(re
           // if(checkcommunity.length>0){
           //   note = note +'\n'+"DLE user, ";
           // }
-          sql.query("select * from join_community where userid="+req.userid+" and status=1",async function(err, res1) {
-            if (err) {
-              result(err, null);
-            } else {
+          // sql.query("",async function(err, res1) {
+          //   if (err) {
+          //     result(err, null);
+          //   } else {
+            var res1 = await query ("select * from join_community where userid="+req.userid+" and status=1 ");
+
               if(res1.length>0){
                 note = note +'\n'+"DLE user, ";
               }
-            }
-          });          
+          //   }
+          // });          
         }
 
         if (req.orderid) {

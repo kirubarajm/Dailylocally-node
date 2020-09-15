@@ -82,7 +82,7 @@ Community.community_search =async function community_search(req, result){
 Community.community_list =async function community_list(req, result){
 
   //having distance <= 1
-  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where status=1  order by distance ";
+  var query1 = "select *,if(status=1,'Live Mode','Offline')as status_msg,FORMAT(( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ),2)  AS distance from Community where status=1  order by distance ";
   
   // console.log(query1);
   var search_community = await query(query1);
@@ -92,7 +92,7 @@ Community.community_list =async function community_list(req, result){
 
         for (let i = 0; i < search_community.length; i++) {
           search_community[i].distance= search_community[i].distance * 1.6;
-          if (search_community[i].distance > 1) {
+          if (search_community[i].distance > 0.5) {
             search_community[i].distance_text = "KM";
             search_community[i].distance = search_community[i].distance.toFixed(1);
           }else{
@@ -161,7 +161,8 @@ Community.join_new_community =async function join_new_community(req, result){
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
     // Community.join_new_community();
-    var update_image = await query("update User set profile_image='"+req.profile_image+"' where userid = '"+req.userid+"'");
+    var image =req.profile_image || '';
+    var update_image = await query("update User set profile_image='"+image+"' where userid = '"+new_community.requested_userid+"'");
 
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
@@ -287,7 +288,10 @@ Community.join_new_community1 =async function join_new_community1(req, result){
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
     // Community.join_new_community();
-    
+    var image =req.profile_image || '';
+    var update_image = await query("update User set profile_image='"+image+"' where userid = '"+new_community.requested_userid+"'");
+
+    var j
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
           console.log("error: ", err);
@@ -348,7 +352,8 @@ Community.new_community_registration =async function new_community_registration(
 
       // res.insertId
       if (new_community.request_type==1) {
-        var update_image = await query("update User set profile_image='"+new_community.image+"' where userid = '"+new_community.requested_userid+"'");
+        var image =new_community.image|| '';
+        var update_image = await query("update User set profile_image='"+image+"' where userid = '"+new_community.requested_userid+"'");
 
         var join_community = {};
         join_community.userid = new_community.requested_userid;

@@ -490,7 +490,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 //cart details for ear user
 Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,subscription,result) {
-
+console.log("req",req);
   var tempmessage = "";
   var coupon__error_message = "";
   var gst = 0;
@@ -934,7 +934,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           calculationdetails.minimum_cart_value = constant.minimum_cart_value;
           calculationdetails.show_delivery_text = false;
           calculationdetails.delivery_text ="Delivery charges";
-          calculationdetails.delivery_charge  = "Free";
+           calculationdetails.community_delivery_charge  = "Free";
           calculationdetails.exclusive_tag   = "DAILY LOCALLY EXCLUSIVE";
 
           if (community_user_status==true || userdetails[0].premium_user==1 ) {
