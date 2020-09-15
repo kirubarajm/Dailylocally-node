@@ -16,8 +16,159 @@ var Category = function(category) {
   this.image = category.image;
 };
 
-
 Category.get_category_list =async function get_category_list(req,result) {
+  
+  var radiuslimit         = constant.radiuslimit;
+  var servicable_status = true;
+  var userdetails       = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
+  
+  if (userdetails.length ==0) {
+    let resobj = {
+      success: true,
+      status:false,
+      serviceablestatus: servicable_status,
+      unserviceable_title:"Sorry! Your area is not serviceable.",
+      unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+      empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+      empty_content:"Daily Locally",
+      empty_subconent :"Daily Locally",
+      header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> what can we get you tomorrow morning?",
+      header_subconent :"Guaranteed one day delivery for orders before 9 PM",
+      category_title :"Categories",
+      message : 'user not found',
+      result: []
+    };  
+    result(null, resobj);
+
+  }else{
+
+
+    var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+    req.lat +
+    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+    req.lon +
+    "') ) + sin( radians('" +
+    req.lat +
+    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+
+
+  if (get_nearby_zone.length !=0) {
+    
+
+    if (get_nearby_zone[0].distance > radiuslimit) {
+      servicable_status =false;
+    }
+  }
+
+
+//var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
+  
+// var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
+var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
+sql.query(category_query, function(err, res) {
+  if (err) {
+    result(err, null);
+  } else {
+
+
+    for (let i = 0; i < res.length; i++) {
+   
+      res[i].servicable_status=servicable_status;
+      res[i].category=true,
+      res[i].clickable= true
+      res[i].collection_status= false
+      res[i].tile_type= 1
+      //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
+    }
+
+
+    Collection.list_all_active_collection(req,async function(err,res3) {
+      if (err) {
+        result(err, null);
+      } else {
+      
+     
+          // console.log(res3.status);
+          if (res3.status==true) {
+            var collectionlist        = {};
+            collectionlist.collection = res3.collection;
+
+           
+            var collection       = collectionlist.collection;
+
+            const potrate_collectionlist    = collection.filter(collection => collection.tile_type < 2);
+            const landscape_collectionlist  = collection.filter(collection => collection.tile_type > 1);
+
+            for (let i = 0; i < potrate_collectionlist.length; i++) {
+              
+              potrate_collectionlist[i].category=true;
+              potrate_collectionlist[i].collection_status= true;
+              potrate_collectionlist[i].catid = potrate_collectionlist[i].cid;
+              potrate_collectionlist[i].servicable_status=servicable_status;    
+              
+            }
+
+
+
+
+            res = res.concat(potrate_collectionlist); 
+            var temp1 = 0
+
+            if (landscape_collectionlist.length !=0) {
+              landscape_collectionlist.sort((a, b) => parseFloat(a.category_Position) - parseFloat(b.category_Position));
+              landscape_collectionlist.forEach(i => {
+              
+                // console.log(i.cid);
+                temp1 = temp1 + 4
+                // console.log("temp1",temp1);
+                i.category=true,
+                // i.collection_status= true
+    
+                i.catid = i.cid;
+                i.servicable_status=servicable_status;
+                // i.tile_type= 2
+                      
+                res.splice(temp1, 0, i);
+                temp1 = temp1+1
+                console.log("temp1",temp1);
+              });
+            }
+           
+
+
+        
+          } 
+
+          let resobj = {
+            success: true,
+            status:true,
+            serviceablestatus: servicable_status,
+            unserviceable_title:"Sorry! Your area is not serviceable.",
+            unserviceable_subtitle :"We are serving in selected areas of Chennai only",
+            empty_url:"https://eattovo.s3.ap-south-1.amazonaws.com/upload/admin/makeit/product/1586434698908-free%20delivery%20collection-03.png",
+            empty_content:"Daily Locally",
+            empty_subconent :"Daily Locally",
+            header_content:"Hi <b>"+userdetails[0].name+"</b>,<br> What can we get you for tomorrow?",
+            header_subconent :"Order or Subscribe before 12 midnight and get it before 12 noon!",
+            category_title :"Categories",
+            result: res
+          };
+          result(null, resobj);
+         
+                              
+
+       
+      }
+    });
+
+
+  }
+});
+}
+};
+
+
+Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
   
     var radiuslimit         = constant.radiuslimit;
     var servicable_status = true;
@@ -66,7 +217,7 @@ Category.get_category_list =async function get_category_list(req,result) {
     
   // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
   var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
-  sql.query(category_query, function(err, res) {
+  sql.query(category_query,async function(err, res) {
     if (err) {
       result(err, null);
     } else {
@@ -79,9 +230,135 @@ Category.get_category_list =async function get_category_list(req,result) {
         res[i].clickable= true
         res[i].collection_status= false
         res[i].tile_type= 1
+        res[i].type= 1 // category
+        res[i].show_video= false;
         //tile_type - 1 or 2   ( 1 means - portrait, 2 means - landscape )
       }
 
+      var get_community = [{
+        "comid": 1,
+        "communityname": "Soundarya Apartment",
+        "lat": "13.0418",
+        "long": "80.2341",
+        "apartmentname": "Soundarya Apartment",
+        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
+        "created_at": "2020-08-25 15:41:42",
+        "status": 0,
+        "requested_userid": null,
+        "zoneid": 1,
+        "no_of_apartments": null,
+        "flat_no": null,
+        "floor_no": null,
+        "community_address": null,
+        "area": null,
+        "servicable_status": false,
+        "category": true,
+        "clickable": true,
+        "collection_status": false,
+        "tile_type": 1,
+        "catid": 1,
+        "type": 3,
+        "approval_status": true,
+        "join_status": true,
+        "show_video":true
+    }];
+
+
+      var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2 order by comid desc limit 1");
+      var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+    // console.log("get_community_list",get_join_community.length);
+
+      if (get_join_community.length !=0) {
+        
+        // console.log("test");
+        get_join_community.forEach(i => {
+              
+         
+          i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+          i.servicable_status=servicable_status;
+          i.category=true,
+          i.clickable= true;
+          i.collection_status= false
+          i.tile_type= 1;
+          i.category=true;
+          i.catid = i.comid;
+          i.type= 3;
+          i.show_video=true;
+          // i.approval_status= true;
+          // i.join_status= true;
+         
+          // console.log(i);
+          if (i.status==1) {
+            i.approval_status= true;
+            i.join_status= true;
+          }else{
+            i.approval_status= false;
+            i.join_status= true;
+            res.splice(0, 0, i);
+          }     
+          
+         
+        });
+
+
+     
+      }else{
+
+        if (get_community_list.length !=0) {
+          // console.log("test1");
+          // console.log("get_community",get_community.length);
+          get_community_list.forEach(i => {
+            
+            if (i.status==1) {
+              i.approval_status= true;
+              i.join_status= true;
+            }else{
+              i.approval_status= false;
+              i.join_status= true;
+            }
+
+            i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+            i.servicable_status=servicable_status;
+            i.category=true,
+            i.clickable= true;
+            i.collection_status= false
+            i.tile_type= 1;
+            i.category=true;
+            i.catid = 0;
+            i.type= 3;
+            i.show_video=true;
+            // i.approval_status= false;
+            // i.join_status= false;
+            // console.log("22222",i);
+                  
+            res.splice(0, 0, i);
+           
+          });
+        }else{
+          get_community.forEach(i => {
+            
+            // console.log("test3");
+              i.approval_status= false;
+              i.join_status= false;
+            i.servicable_status=servicable_status;
+            i.category=true,
+            i.clickable= true;
+            i.collection_status= false
+            i.tile_type= 1;
+            i.category=true;
+            i.catid = 0;
+            i.type= 3;
+            i.show_video=true;
+            // i.approval_status= false;
+            // i.join_status= false;
+
+                  
+            res.splice(0, 0, i);
+           
+          });
+        }
+
+      }
 
       Collection.list_all_active_collection(req,async function(err,res3) {
         if (err) {
@@ -110,11 +387,12 @@ Category.get_category_list =async function get_category_list(req,result) {
                 potrate_collectionlist[i].category=true;
                 potrate_collectionlist[i].collection_status= true;
                 potrate_collectionlist[i].catid = potrate_collectionlist[i].cid;
-                potrate_collectionlist[i].servicable_status=servicable_status;    
+                potrate_collectionlist[i].servicable_status=servicable_status;  
+                potrate_collectionlist[i].type= 2  
                 
               }
 
-              console.log(potrate_collectionlist);
+              // console.log(potrate_collectionlist);
               // var temp = 0
               // potrate_collectionlist.forEach(i => {
                 
@@ -144,11 +422,12 @@ Category.get_category_list =async function get_category_list(req,result) {
       
                   i.catid = i.cid;
                   i.servicable_status=servicable_status;
+                  i.type= 2 
                   // i.tile_type= 2
                         
                   res.splice(temp1, 0, i);
                   temp1 = temp1+1
-                  console.log("temp1",temp1);
+                  // console.log("temp1",temp1);
                 });
               }
              
@@ -156,6 +435,15 @@ Category.get_category_list =async function get_category_list(req,result) {
   
           
             } 
+
+
+            // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
+
+       
+
+
+
+           
 
             let resobj = {
               success: true,
@@ -211,7 +499,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var subscription_product=[];
   var totalamount = 0;
   var product_orginal_price = 0;
-
   var refund_coupon_adjustment = 0;
   var coupon_discount_amount = 0;
   var isAvaliableItem = true;
@@ -235,6 +522,9 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var deliverydate_status = true;
   var Subdeliverydate_status = true;
   let delivery_date = [];
+  let community_user_status = false;
+  let cod_available = false;
+ 
  
 
     if (currenthour < 24) {
@@ -248,6 +538,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   // var orderlist = await query("Select * From Orders where userid = '" +req.userid +"' and orderstatus >= 6");
   var ordercount = 0
   var userdetails = await query("Select * From User where userid = '" +req.userid +"'");
+  var comunity_userdetails = await query("Select * From join_community where userid = '" +req.userid +"' and status=1");
+
+  if (comunity_userdetails.length !=0) {
+    userdetails[0].status=1
+    community_user_status = true;
+    cod_available = true;
+  }else{
+    userdetails[0].status=0;    
+  }
 
   if (userdetails.length !==0) {   
   
@@ -258,7 +557,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
         
         var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +orderitems[i].vpid +"' ");
       
-        delivery_date.push(orderitems[i].dayorderdate);
+        // console.log("delivery_date",orderitems[i].dayorderdate);
+        // delivery_date.push(orderitems[i].dayorderdate);
+        // console.log("delivery_date",delivery_date.length);
+
+        if (orderitems[i].dayorderdate) {
+          delivery_date.push(orderitems[i].dayorderdate);
+        }
+
+        // console.log("delivery_date",delivery_date.length);
         if (res1[0].live_status == 0) {
           // console.log("active_status");
           res1[0].availablity = false;
@@ -307,6 +614,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
         if (orderitems[i].dayorderdate) {
+          
           res1[0].deliverydate=orderitems[i].dayorderdate;
 
 
@@ -322,15 +630,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           }
 
         }else{
-              if (currenthour <=24) {
+          if (currenthour <=24) {
     
-                res1[0].deliverydate = tomorrow;
-                delivery_date.push( res1[0].deliverydate);
-              } else {
-                
-                res1[0].deliverydate= dayafertomorrow;
-                delivery_date.push( res1[0].deliverydate);
-              }
+            res1[0].deliverydate = tomorrow;
+               delivery_date.push( res1[0].deliverydate);
+          } else {
+            
+            res1[0].deliverydate= dayafertomorrow;
+             delivery_date.push( res1[0].deliverydate);
+          }
 
         }
         
@@ -357,10 +665,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
  
        date= delivery_date[i]
       //  date= i; 
-       console.log(date);
+    
        var dayorderdetails = await query("Select * From Dayorder where userid = '" +req.userid +"' and date ='"+date+"'  and dayorderstatus < 10");
  
-       console.log("dayorderdetails",dayorderdetails.length);
+     
        if (dayorderdetails.length !=0) {
         if ( dayorderdetails[0].delivery_charge !=0) {
          delivery_date.splice(i, 1);
@@ -375,7 +683,12 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
    
 
 
-    if (subscription) {
+    if (subscription)  {
+
+      // console.log(cod_available);
+        if (subscription !=0) {       
+          cod_available=false;
+        }
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
@@ -528,7 +841,11 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             
        
           res2[0].isAvaliablezone = isAvaliablezone;
+          res2[0].community_user_status=community_user_status;
+          res2[0].cod_available=cod_available;
+          res2[0].cod_unavailable_info ="Cash on delivery isn't available for subscription orders";
          
+          
           product_orginal_price = totalamount;
 
             //offer coupon amount detection algorithm
@@ -574,8 +891,14 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
               }
           }
           
+           if (userdetails[0].status==1) {
+          delivery_charge = 0;//if false don't show message           
+        }
+
          var gstcharge = (delivery_charge / 100) * constant.gst;
          gstcharge = Math.round(gstcharge);
+        
+
         
         
        var grandtotal = gstcharge + totalamount + delivery_charge + convenience_charge;
@@ -586,7 +909,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             
           }
           
-          if (userdetails[0].premium_user==1) {
+          if (userdetails[0].premium_user==1  ||  userdetails[0].status==1) {
             product_cost_limit_status = true;//if false don't show message           
           }
 
@@ -609,6 +932,15 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           calculationdetails.order_delivery_day_message = order_delivery_day_message;
           calculationdetails.order_delivery_day = order_delivery_day;
           calculationdetails.minimum_cart_value = constant.minimum_cart_value;
+          calculationdetails.show_delivery_text = false;
+          calculationdetails.delivery_text ="Delivery charges";
+          calculationdetails.delivery_charge  = "Free";
+          calculationdetails.exclusive_tag   = "DAILY LOCALLY EXCLUSIVE";
+
+          if (community_user_status==true || userdetails[0].premium_user==1 ) {
+            calculationdetails.show_delivery_text=true
+         
+          }
 
           //  console.log(calculationdetails.order_delivery_day);
           if (req.cid && couponstatus) {
@@ -680,11 +1012,13 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
             cartdetails.push(deliverychargeinfo);
           }    
           
-          if (delivery_charge) {      
+          if (delivery_charge!==0) {      
             other_charges_info.name="Delivery charge";
             other_charges_info.price=delivery_charge;
             deliverychargeinfo.infodetails.push(other_charges_info);
           }
+
+         
 
         
           res2[0].amountdetails = calculationdetails;
@@ -692,7 +1026,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           res2[0].subscription_item = subscription_product;
           res2[0].ordercount = ordercount;
           res2[0].cartdetails = cartdetails;
-          res2[0].first_tunnel = userdetails[0].first_tunnel;
           res2[0].minimum_cart_value = constant.minimum_cart_value;
          
 

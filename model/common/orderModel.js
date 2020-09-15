@@ -60,105 +60,110 @@ var Order = function(order) {
 
 
 Order.read_a_proceed_to_pay = async function read_a_proceed_to_pay(req,orderitems,subscription,result) {
-
-  console.log("req",req);
- var virtualkey = req.virtualkey || 0
-
+  // console.log("req",req);
+  var virtualkey = req.virtualkey || 0;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");;
   var currenthour  = moment(day).format("HH");
 
-
-  cur_hr = moment().format("HH:mm:ss");
-  if(cur_hr >= '06:45:00' && cur_hr < '09:00:00'){
-    console.log("1st slot -->",cur_hr);
-  }else if(cur_hr >= '11:45:00' && cur_hr < '14:00:00'){
-    console.log("2nd slot -->",cur_hr);
-  }else if(cur_hr >= '17:45:00' && cur_hr < '20:30:00'){
-    console.log("3rd slot -->",cur_hr);
-  }else{
-    console.log("no slot -->",cur_hr);
-  }
-
+  // cur_hr = moment().format("HH:mm:ss");
+  // if(cur_hr >= '06:45:00' && cur_hr < '09:00:00'){
+  //   console.log("1st slot -->",cur_hr);
+  // }else if(cur_hr >= '11:45:00' && cur_hr < '14:00:00'){
+  //   console.log("2nd slot -->",cur_hr);
+  // }else if(cur_hr >= '17:45:00' && cur_hr < '20:30:00'){
+  //   console.log("3rd slot -->",cur_hr);
+  // }else{
+  //   console.log("no slot -->",cur_hr);
+  // }
   
-    if (req.payment_type==1) {
-      
-        var address_data = await query("Select * from Address where aid = '" +req.aid +"' and userid = '" +req.userid +"'");
-        //console.log("address_data-->",address_data);
-        if(address_data.length === 0) { //address validation
-          let resobj = {
-            success: true,
-            status: false,
-            message: "Sorry your selected address wrong.Please select correct address."
-          };
-          result(null, resobj);
-        }else{
-  
-          req.lat = address_data[0].lat;
-          req.lon = address_data[0].lon;
-  
-            
-            Category.read_a_cartdetails(req, orderitems, subscription,async function(err,res3) {
-                  if (err) {
-                    result(err, null);
-                  } else {
-                    if (res3.status != true) {
-                      result(null, res3);
-                    } else {
-                      var amountdata = res3.result[0].amountdetails;
-
-                      if (virtualkey==1) {
-                        req.payment_status = 1;
-                      } 
-                      
-                      req.gst = amountdata.gstcharge;
-                      req.price = amountdata.grandtotal;    
-                      req.delivery_charge = amountdata.delivery_charge;
-                      req.zoneid =  res3.result[0].id;
-                      req.google_address = address_data[0].google_address;
-                      req.complete_address = address_data[0].complete_address;
-                      req.flat_house_no = address_data[0].flat_house_no;
-                      req.plot_house_no = address_data[0].plot_house_no;
-                      req.floor = address_data[0].floor;
-                      req.block_name = address_data[0].block_name;
-                      req.city = address_data[0].city;
-                      req.cus_lat = address_data[0].lat;
-                      req.cus_lon = address_data[0].lon;
-                      req.landmark = address_data[0].landmark;
-                      req.cus_pincode = address_data[0].pincode;
-                      req.apartment_name = address_data[0].apartment_name;
-                      req.address_type = address_data[0].address_type;
-                      req.coupon = req.cid || 0;
-                      req.discount_amount = amountdata.coupon_discount_amount;
-
-
-                      var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
-
-                      Order.OrderOnline(req,Other_Item_list,function(err,res){
-                        if (err) {
-                          result(err, null);
-                        } else {
-                          console.log("res",res);
-                          result(null, res);
-                        }
-                      });
-                    }
-                  }
-                });
- }
-  
-    } else {
-      
+  // if (req.payment_type==1) {
+    var address_data = await query("Select * from Address where aid = '" +req.aid +"' and userid = '" +req.userid +"'");
+    //console.log("address_data-->",address_data);
+    if(address_data.length === 0) { //address validation
       let resobj = {
         success: true,
         status: false,
-        message: "Sorry! Please make a Payment via online, Currently we are not accepting COD orders"
+        message: "Sorry your selected address wrong.Please select correct address."
       };
       result(null, resobj);
+    }else{  
 
+      req.lat = address_data[0].lat;
+      req.lon = address_data[0].lon;
+      Category.read_a_cartdetails(req, orderitems, subscription,async function(err,res3) {
+        if (err) {
+          result(err, null);
+        } else {
+          if (res3.status != true) {
+            result(null, res3);
+          } else {
+            var amountdata = res3.result[0].amountdetails;
+
+            if (virtualkey==1) {
+              req.payment_status = 1;
+            } 
+            
+            req.gst = amountdata.gstcharge;
+            req.price = amountdata.grandtotal;    
+            req.delivery_charge = amountdata.delivery_charge;
+            req.zoneid =  res3.result[0].id;
+            req.google_address = address_data[0].google_address;
+            req.complete_address = address_data[0].complete_address;
+            req.flat_house_no = address_data[0].flat_house_no;
+            req.plot_house_no = address_data[0].plot_house_no;
+            req.floor = address_data[0].floor;
+            req.block_name = address_data[0].block_name;
+            req.city = address_data[0].city;
+            req.cus_lat = address_data[0].lat;
+            req.cus_lon = address_data[0].lon;
+            req.landmark = address_data[0].landmark;
+            req.cus_pincode = address_data[0].pincode;
+            req.apartment_name = address_data[0].apartment_name;
+            req.address_type = address_data[0].address_type;
+            req.coupon = req.cid || 0;
+            req.discount_amount = amountdata.coupon_discount_amount;
+
+
+            var Other_Item_list =  res3.result[0].item.concat(res3.result[0].subscription_item);
+
+            if (req.payment_type == 0) {
+
+              Order.OrderInsert(req,Other_Item_list,true,false,async function(err,res){
+                if (err) {
+                  result(err, null);
+                } else {
+           
+                  ////Insert Order History////
+                          
+                  ////////////////////////////
+                  result(null, res);
+                }
+              });
+
+            }else if(req.payment_type == 1){
+              Order.OrderOnline(req,Other_Item_list,function(err,res){
+                if (err) {
+                  result(err, null);
+                } else {
+                  console.log("res",res);
+                  result(null, res);
+                }
+              });
+            }
+
+            
+          }
+        }
+      });
     }
-  
-  
-  
+  // } else {      
+  //   let resobj = {
+  //     success: true,
+  //     status: false,
+  //     message: "Sorry! Please make a Payment via online, Currently we are not accepting COD orders"
+  //   };
+  //   result(null, resobj);
+  // } 
 };
 
 Order.OrderOnline = async function OrderOnline(req,Other_Item_list,result) {
@@ -250,14 +255,14 @@ Order.OrderInsert = async function OrderInsert(req, Other_Item_list,isMobile,isO
          
           }
 
-       if (new_Order.payment_status == 1) {
+       if (new_Order.payment_status == 1 || new_Order.payment_type == 0) {
         var order_place = {};
         new_Order.orderid=orderid;
         var getproductdetails = "select ors.*,ors.delivery_charge,op.id,op.vpid,op.orderid,op.productname,op.quantity,op.price,op.deliverydate,op.starting_date,op.no_of_deliveries,op.subscription,op.mon,op.tue,op.wed,op.thur,op.fri,op.sat,op.sun,op.status,op.created_at,pm.hsn_code,pm.Productname,pm.image,pm.brand,pm.mrp,pm.basiccost,pm.targetedbaseprice,pm.discount_cost,pm.gst,pm.scl1_id,pm.scl2_id,pm.subscription as subscription1,pm.weight,pm.uom,pm.packetsize,pm.vegtype,pm.tag,pm.short_desc,pm.productdetails,pm.Perishable from Orderproducts as op left join Product_live as pl on pl.vpid=op.vpid left join ProductMaster as pm on pm.pid=pl.pid left join Orders ors on ors.orderid=op.orderid where op.status=0 and op.orderid="+orderid;
         var getproduct = await query(getproductdetails,);
         // console.log("getproduct==========>",getproduct);
         new_Order.virtualkey=1;
-        console.log("new_Order",new_Order);
+        // console.log("new_Order",new_Order);
         dayorder.checkdayorder(new_Order,getproduct);
 
        }
@@ -767,28 +772,21 @@ Order.order_list_calendar_by_day_wise = async function order_list_calendar_by_da
 
 
 Order.order_transaction_order_list = async function order_transaction_order_list(req,result) {
-
   var pagelimit = 20;
   var page = req.page || 1;
   var startlimit = (page - 1) * pagelimit;
-
-  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"' and ors.payment_status=1  " ;
-
-
+  var query1 = "select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order,ors.created_at from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"'  and ors.payment_status < 2  " ;
   if (req.starting_date && req.end_date) {
-    query1 = query1 + " and  (ors.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date +"')    group by ors.orderid order by ors.created_at desc limit " + startlimit + "," + pagelimit + " "
+    query1 = query1 + " and  (ors.created_at BETWEEN '"+req.starting_date +"' AND '"+req.end_date +"')    group by ors.orderid order by ors.created_at desc limit " + startlimit + "," + pagelimit + " ";
   }else{
-    query1 = query1 + " group by ors.orderid order by ors.created_at desc limit " + startlimit + "," + pagelimit + " "
-
+    query1 = query1 + " group by ors.orderid order by ors.orderid desc limit " + startlimit + "," + pagelimit + " ";
   }
 
   sql.query(query1,async function(err, res) {
       if (err) {
         result(err, null);
       } else {
-
-        var order_count = await query("select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"' and ors.payment_status=1 group by ors.orderid order by ors.created_at desc ");
-
+        var order_count = await query("select ors.*,us.*,JSON_LENGTH(JSON_ARRAYAGG(JSON_OBJECT('quantity', ops.quantity,'vpid',ops.vpid,'price',ops.price,'product_name',ops.productname,'product_name',ops.productname))) AS items,if(ors.payment_type=1,'true','false') as online_order  from Orders ors left join Orderproducts ops on ops.orderid=ors.orderid left join User as us on us.userid=ors.userid where ors.userid ='"+req.userid+"' and ors.payment_status <2 group by ors.orderid order by ors.created_at desc ");
         if (res.length === 0) {
           let resobj = {
             success: true,
@@ -798,22 +796,17 @@ Order.order_transaction_order_list = async function order_transaction_order_list
             message: "orders not found!"
           };
           result(null, resobj);
-        } else {
-           
-           
-           let resobj = {
-             success: true,
-             status: true,
-             empty_title:"No transactions found!",
-             empty_content:"Order or Subscribe and get your order delivered at your convenience",
-             total_count : order_count.length,
-             pagelimit:pagelimit,
-             result: res
+        } else {           
+            let resobj = {
+              success: true,
+              status: true,
+              empty_title:"No transactions found!",
+              empty_content:"Order or Subscribe and get your order delivered at your convenience",
+              total_count : order_count.length,
+              pagelimit:pagelimit,
+              result: res
            };
-
-           result(null, resobj);
-
-        
+           result(null, resobj);        
         }
       }
     }
@@ -822,10 +815,10 @@ Order.order_transaction_order_list = async function order_transaction_order_list
 
 
 Order.day_order_transaction_view_by_user = function day_order_transaction_view_by_user(req, result) {
-//,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items
+  //,JSON_ARRAYAGG(JSON_OBJECT('quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,true,false),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items
   // var orderquery =  "select ors.*,JSON_ARRAYAGG(JSON_OBJECT('quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',pm.weight*1000,'dayorderstatus',dor.dayorderstatus )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where ors.orderid  ='"+req.orderid+"' " ;//and dm.active_status=1
   var pkts='pkts';
-  var orderquery =  "select ors.*,us.*,JSON_ARRAYAGG(JSON_OBJECT('doid',dp.doid,'dayorderpid',dp.id,'pkts','"+pkts+"','packet_size',dp.product_packetsize,'quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',if(dp.product_uom=1 || dp.product_uom=7,dp.product_weight*1000,dp.product_weight),'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,false,true),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand left join User as us on us.userid=ors.userid where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
+  var orderquery =  "select ors.*,us.*,ors.created_at as created_at,JSON_ARRAYAGG(JSON_OBJECT('doid',dp.doid,'dayorderpid',dp.id,'pkts','"+pkts+"','packet_size',dp.product_packetsize,'quantity_info',dp.quantity+'pkts','quantity', dp.quantity,'vpid',dp.vpid,'price',dp.price,'product_name',dp.productname,'product_name',dp.productname,'unit',um.name,'brandname',br.brandname,'weight',if(dp.product_uom=1 || dp.product_uom=7,dp.product_weight*1000,dp.product_weight),'dayorderstatus',dor.dayorderstatus,'Cancel_available',IF(dp.scm_status <=5,false,true),'product_date',IF(dp.scm_status <=5,dor.date,IF(dp.scm_status =10,dp.delivery_date,IF(dp.scm_status =11,dp.product_cancel_time,dor.date))),'scm_status',dp.scm_status,'scm_status_name',IF(dp.scm_status <=5,'inprogress',IF(dp.scm_status =10 ,'Deliverd',IF(dp.scm_status =11 ,'cancelled','Waiting for delivery')))  )) AS items,if(payment_type=1,'true','false') as online_order from Orders ors left join Dayorder_products dp on dp.orderid=ors.orderid left join Dayorder dor on dor.id=dp.doid left join Product_live pl on pl.vpid=dp.vpid left join ProductMaster pm on pm.pid=pl.vpid left join UOM um on um.uomid=dp.product_uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = 3 left join Brand br on br.id=pm.brand left join User as us on us.userid=ors.userid where ors.orderid='"+req.orderid+"' " ;//and dm.active_status=1
   sql.query(orderquery,async function(err, res1) {
       if (err) {
         result(err, null);
@@ -839,17 +832,11 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
           };
           result(null, resobj);
         } else {
-
-
-
-     
                 if (res1[0].items) {
                   var items = JSON.parse(res1[0].items);
                   res1[0].items = items;
                    res1[0].itemscount = items.length;
-                }
-
-          
+                }          
                 var cartdetails = [];
                 var totalamountinfo = {};
                 var couponinfo = {};
@@ -859,10 +846,8 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
                 deliverychargeinfo.low_cost_status=false//show low cost 30
                 deliverychargeinfo.default_cost_status = false;//default cost 30
                 deliverychargeinfo.infostatus = true;
-                deliverychargeinfo.infodetails = [];
-      
-                //var grandtotalinfo = {};
-      
+                deliverychargeinfo.infodetails = [];      
+                //var grandtotalinfo = {};      
                 totalamountinfo.title = "Total Amount";
                 totalamountinfo.charges = res1[0].price;
                 totalamountinfo.status = true;
@@ -891,40 +876,33 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
       
                 if (res1[0].gst !==0) {
                   gstinfo.title = "Taxes ";//gst modified taxes 13-jan-2020
-                gstinfo.charges = res1[0].gst;
-                gstinfo.status = true;
-                gstinfo.infostatus = false;
-                gstinfo.color_code = "#ff444444";
-                gstinfo.low_cost_status = false;
-                gstinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
-                gstinfo.default_cost=constant.convenience_charge;
-                gstinfo.default_cost_status=false;
-                gstinfo.infodetails = [];
-                cartdetails.push(gstinfo);
-                }
-                
+                  gstinfo.charges = res1[0].gst;
+                  gstinfo.status = true;
+                  gstinfo.infostatus = false;
+                  gstinfo.color_code = "#ff444444";
+                  gstinfo.low_cost_status = false;
+                  gstinfo.low_cost_note = "No delivery charges for order values of more than Rs.70";
+                  gstinfo.default_cost=constant.convenience_charge;
+                  gstinfo.default_cost_status=false;
+                  gstinfo.infodetails = [];
+                  cartdetails.push(gstinfo);
+                }               
       
                 // //this code is modified 23-09-2019
-                if (res1[0].delivery_charge !==0) {
-                 
+                if (res1[0].delivery_charge !==0) {                 
                   deliverychargeinfo.title = "Delivery charge";
                   deliverychargeinfo.charges = res1[0].delivery_charge;
                   deliverychargeinfo.status = true;
                   cartdetails.push(deliverychargeinfo);
-                }    
-                
+                }               
                
-      
                 res1[0].cartdetails=cartdetails;
                   let resobj = {
                     success: true,
                     status: true,
                     result: res1
-                  };
-  
-                  result(null, resobj);  
-  
-                  
+                  };  
+                  result(null, resobj);                  
         }
       }
     }
@@ -1325,7 +1303,55 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
   });
 };
 
+Order.order_payment_status_by_moveituser = function(req, result) {
+  sql.query("Select * from Dayorder where id = ? ",[req.id],async function(err, res1) {
+      if (err) {
+        result(err, null);
+      } else {
+        if (res1.length > 0) {
+          // check the payment status - 1 is paid
+       
+          if (res1[0].payment_status == 0) {
 
+            req.moveitid = req.moveit_user_id;
+            req.status = 6
+            req.doid = req.id// order pickup by moveit
+            await Order.insert_order_status(req); 
+
+            sql.query("UPDATE Dayorder SET payment_status = ? WHERE id = ? ",[1, req.id],function(err, res) {
+                if (err) {
+                  result(err, null);
+                } else {
+                  let resobj = {
+                    success: true,
+                    status:true,
+                    message: "Cash received successfully"
+                  };
+                  result(null, resobj);
+                }
+              }
+            );
+          } else {
+            let resobj = {
+              success: true,
+              status:false,
+              message: "Already Payment has been paid!"
+            };
+            result(null, resobj);
+          }
+        } else {
+          let resobj = {
+            success: true,
+            status:false,
+            message: "Please check your orderid  / order values is null"
+          };
+
+          result(null, resobj);
+        }
+      }
+    }
+  );
+};
 
 Order.order_delivery_status_by_moveituser =async function(req, result) {
 
@@ -1340,6 +1366,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
       } else {
         if (res1.length !== 0) {
    
+          if (res1[0].payment_status == 1) {
 
           if (res1[0].dayorderstatus == 11) {
             let resobj = {
@@ -1430,6 +1457,15 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
            
           
         }
+
+      } else {
+        let resobj = {
+          success: true,
+          status:false,
+          message: "Sorry Payment not Paid!"
+        };
+        result(null, resobj);
+      }
         } else {
           let resobj = {
             success: true,
@@ -1511,5 +1547,26 @@ Order.dayorder_distance_calculation = async function dayorder_distance_calculati
   
   };
 
+
+  Order.moveit_delivery_cash_received_by_today_by_userid = async function moveit_delivery_cash_received_by_today_by_userid(req,result) {
+    req.startdate = req.startdate+" 00:00:00";
+    req.enddate = req.enddate+" 23:59:59";
+    var moveitquery = "select * from Orders where moveit_actual_delivered_time between '"+req.startdate+"' and '"+req.enddate+"' and orderstatus = 6  and payment_status = 1 and payment_type = 0  and lock_status = 0 and  moveit_user_id = '"+req.userid+"' ";
+    var moveitqueryamount = moveitquery+";"+"select sum(price) as totalamount from Orders where moveit_actual_delivered_time between '"+req.startdate+"' and '"+req.enddate+"' and orderstatus = 6  and payment_status = 1 and payment_type = 0  and lock_status = 0 and  moveit_user_id = '"+req.userid+"' ";
+    sql.query(moveitqueryamount,function(err, res) {
+        if (err) {
+          result(err, null);
+        } else{
+          let resobj = {
+            success: true,
+            status:true,
+            cod_amount:res[1][0].totalamount,
+            result: res[0]
+          };
+          result(null, resobj);
+        }
+      }
+    );
+  };
 
 module.exports = Order;

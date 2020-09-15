@@ -2,7 +2,7 @@
 
 var Dluser = require("../../model/dluser/DlUserModel");
 var constant = require("../../model/constant.js");
-
+var Community = require("../../model/common/CommunityModel");
 
 
 
@@ -71,24 +71,12 @@ exports.user_logout = function(req, res) {
 
 
 exports.edit_user = function(req, res) {
-  if (!req.body.name) {
-    res
-      .status(400)
-      .send({ error: true, status: false, message: "Please provide name" });
-  } else if (!req.body.gender) {
-    res
-      .status(400)
-      .send({
-        error: true,
-        status: false,
-        message: "Please provide phone_number"
-      });
-  } else {
+
     Dluser.edit_user(req.body, function(err, user) {
       if (err) res.send(err);
       res.json(user);
     });
-  }
+  
 };
 
 
@@ -160,6 +148,13 @@ exports.faq_by_type = function(req, res) {
 
 };
 
+exports.about_us= function(req, res) {
+  Dluser.about_us(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+
+};
 
 exports.dl_User_list = function(req, res) {
 
@@ -170,6 +165,15 @@ exports.dl_User_list = function(req, res) {
 
 };
 
+
+
+exports.community_dl_User_list = function(req, res) {
+  Dluser.community_dl_User_list(req.body, function(err, user) {
+    if (err) res.send(err);  
+    res.send(user);
+  });
+
+};
 exports.dl_user_send_message = function(req, res) {
 
   Dluser.dl_user_send_message(req.body, function(err, user) {
@@ -186,4 +190,121 @@ exports.zendesk_ticket_create = function(req, res) {
     res.send(user);
   });
 
+};
+
+
+
+exports.community_search = function(req, res) {
+  Community.community_search(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.community_list = function(req, res) {
+   if (!req.body.userid) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide userid"
+      });
+  }else if(!req.body.lat || !req.body.lon){
+    res
+    .status(400)
+    .send({
+      error: true,
+      status: false,
+      message: "Please provide lat/long"
+    });
+  } else {
+  Community.community_list(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+}
+};
+
+exports.join_new_community = function(req, res) {
+  Community.join_new_community(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.join_new_community_approval= function(req, res) {
+  Community.join_new_community_approval(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.new_community_registration= function(req, res) {
+  var new_community = new Community(req.body);
+   new_community.request_type= req.body.request_type || 1;
+  if (!new_community.requested_userid) {
+    res
+      .status(400)
+      .send({ error: true, status: false, message: "Please provide requested_userid" });
+  } else if (!new_community.communityname) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide communityname"
+      });
+  } else {
+    
+    Community.new_community_registration(new_community, function(err, user) {
+      if (err) res.send(err);
+      res.send(user);
+    });
+  }
+  
+};
+
+exports.communityuserdetails = function(req, res) {
+  Community.get_community_userdetails(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.homepage = function(req, res) {
+  Community.get_homepage(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.wapscreen = function(req, res) {
+  Community.get_wapscreen(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
+
+exports.admin_community_list = function(req, res) {
+ Community.admin_community_list(req.body, function(err, user) {
+   if (err) res.send(err);
+   res.send(user);
+ });
+
+};
+
+
+exports.community_edit = function(req, res) {
+  Community.admin_edit_community(req.body, function(err, user) {
+    if (err) res.send(err);  
+    res.send(user);
+  });
+
+};
+exports.user_based_notification = function(req, res) {
+  Dluser.user_based_notification(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.json(user);
+  });
 };

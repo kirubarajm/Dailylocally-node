@@ -193,6 +193,12 @@ exports.moveit_customer_location_reached = function(req, res) {
   });
 };
 
+exports.order_payment_status = function(req, res) {
+  Order.order_payment_status_by_moveituser(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};
 
 exports.order_delivery_status = function(req, res) {
  
@@ -212,4 +218,14 @@ exports.moveit_notification_time = function(req, res) {
     res.send(user);
   });
 
+};
+
+
+
+exports.moveit_delivery_cash_received_by_today = function(req, res) {
+  // console.log(req.body);
+  Order.moveit_delivery_cash_received_by_today_by_userid(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
 };

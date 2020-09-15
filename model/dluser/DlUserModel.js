@@ -112,24 +112,51 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
 
    if (newUser.otpcode) {
-   var otpurl =
-    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
-    newUser.phoneno +
-    "&msg=<%23>Your DailyLocally App OTP is " +
-    OTP +
-    ". Note: Please DO NOT SHARE this OTP with anyone. " +
-    newUser.otpcode +
+  //  var otpurl =
+  //   "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=DAILYL&dest=" +
+  //   newUser.phoneno +
+  //   "&msg=<%23>Your DailyLocally App OTP is " +
+  //   OTP +
+  //   ". Note: Please DO NOT SHARE this OTP with anyone. " +
+  //   newUser.otpcode +
     " ";
+  // var otpurl =
+  // "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
+  // newUser.phoneno +
+  // "&senderId=BEATDM&message=Your DailyLocally App OTP is " +
+  // OTP +
+  // ". Note: Please DO NOT SHARE this OTP with anyone. ";
+
+  var otpurl =
+  "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
+  newUser.phoneno +
+  "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
+  OTP +
+  ". Note: Please DO NOT SHARE this OTP with anyone. "+newUser.otpcode +" ";
   }else{
 
-   var otpurl =
-    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=CHOICB&dest=" +
+  //  var otpurl =
+  //   "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=DAILYL&dest=" +
+  //   newUser.phoneno +
+  //   "&msg=<%23>Your DailyLocally App OTP is " +
+  //   OTP +
+  //   ". Note: Please DO NOT SHARE this OTP with anyone. ";
+
+    // var otpurl =
+    // "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
+    // newUser.phoneno +
+    // "&senderId=BEATDM&message=Your DailyLocally App OTP is " +
+    // OTP +
+    // ". Note: Please DO NOT SHARE this OTP with anyone. ";
+    var otpurl =
+    "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
     newUser.phoneno +
-    "&msg=<%23>Your DailyLocally App OTP is " +
+    "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
     OTP +
     ". Note: Please DO NOT SHARE this OTP with anyone. ";
-  }
+   }
 
+  //  console.log("otpurl",otpurl);
   var virtualkey = newUser.virtualkey || 0;
 
   // var otpurl = "https://www.google.com/";
@@ -698,10 +725,17 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
 
 
 Dluser.edit_user = async function edit_user(req, result) {
- 
-req.email=req.email.trim()
-var pattern = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,6}$/; 
-var isValid = pattern.test(req.email);
+ let  isValid= true
+ if (req.email) {
+  req.email=req.email.trim()
+  var pattern = /^[a-z0-9._-]+@[a-z0-9.-]+\.[a-z]{2,6}$/; 
+   isValid = pattern.test(req.email);
+ }
+
+ if (req.name) {
+  req.name=req.name.charAt(0).toUpperCase() + req.name.slice(1);
+ }
+
 if (!isValid) {
 
   let resobj = {
@@ -5860,10 +5894,14 @@ Dluser.hub_based_userlist = async function hub_based_userlist(req, result) {
 /////user_based_notification
 Dluser.user_based_notification = async function user_based_notification(req, result) {
  
-  if (req.type==0) {
+  if (req.apptype==1) {
     var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
-  } else {
-    var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
+  } else  if(req.apptype==2){
+    var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
+  }else{
+    // var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios  ";
+
   }
 
   sql.query(getuserquery,async function(err, res) {
@@ -5871,17 +5909,20 @@ Dluser.user_based_notification = async function user_based_notification(req, res
       console.log("error: ", err);
       result(err, null);
     } else {
+
+
+     
    
-      var message="all";
-      if (req.type==1) {
-       var userlist = res.filter(re => re.with7day ===0);
-       message="without orders last 7 days users";
-     }else if(req.type==2){
-       var userlist = res.filter(re => re.with7day !==0);
-       message="with orders last 7 days users";
-     }else{
+    //   var message="all";
+    //   if (req.type==1) {
+    //    var userlist = res.filter(re => re.with7day ===0);
+    //    message="without orders last 7 days users";
+    //  }else if(req.type==2){
+    //    var userlist = res.filter(re => re.with7day !==0);
+    //    message="with orders last 7 days users";
+    //  }else{
        var userlist = res;
-     }
+    //  }
      
      var userid="";
       for (let i = 0; i < userlist.length; i++) {
@@ -5889,27 +5930,26 @@ Dluser.user_based_notification = async function user_based_notification(req, res
         user.userid = userlist[i].userid;
         user.user_message = req.user_message;
         user.title = req.title;
-        user.pushid_android = userlist[i].pushid_android;
+        user.pushid_android = userlist[i].pushid_android || 0;
+        user.pushid_ios = userlist[i].pushid_ios || 0;
         if (req.image) {
           user.image = req.image;
         }
+
+        // console.log(user);
         userid=userid+","+userlist[i].userid;
-        await Notification.orderEatBulkPushNotification(
-          null,
-          user,
-          PushConstant.Pageid_eat_send_notification
-        );
+        await Notification.dlBulkPushNotification(null,user,PushConstant.Pageid_dl_bulk_notification);
         
       } 
     
-    console.log("Notification Via Admin--->",message);
-    console.log("userquery--->",getuserquery);
-    console.log("User-ids--->",userid);
+    // console.log("Notification Via Admin--->",message);
+    // console.log("userquery--->",getuserquery);
+    // console.log("User-ids--->",userid);
   let resobj = {
     success: true,
     status: true,
     message: "notification sent successfully",
-    ms:message,
+    // ms:req.user_message,
     res:userid
   };
 
@@ -6052,13 +6092,22 @@ Dluser.new_zendesk_request_create = function new_zendesk_request_create(req) {
 
   var new_ZendeskRequestsModel= new Zendeskrequest(req);
   new_ZendeskRequestsModel.doid = req.orderid;
+  new_ZendeskRequestsModel.community_status =  req.community_status;
   Zendeskrequest.createZendeskrequest(new_ZendeskRequestsModel, function(err, res) {
     if (err) return err;
     else return res;
   });
 };
 
-Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
+Dluser.zendesk_request_create =async function zendesk_request_create(req, result) {
+
+  var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+
+  if (get_join_community.length !=0) {
+    req.community_status=1;
+  }else{
+    req.community_status=0;
+  }
 
   sql.query("Select * from User where  userid = ? ",req.userid,function(err, res) {
       if (err) {
@@ -6076,7 +6125,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
           user.phone=res[0].phoneno;
           userdetails.user = user;
          
-          console.log("userdetails----------->",userdetails);
+          // console.log("userdetails----------->",userdetails);
 
 
         var Username = 'dailylocally@gmail.com';
@@ -6111,16 +6160,16 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
        }else{
          var url = "https://dailylocallyapp.zendesk.com/api/v2/users/search.json?query=email:"+res[0].email+""
     
-         console.log("-------------------------------url",url);
+        //  console.log("-------------------------------url",url);
 
 
           request.get({headers: headers, url:url, method: 'GET'},async function (e, r, body) {
-            console.log("e--",e);
+            // console.log("e--",e);
             //console.log("r--",r);
-            console.log("-------------------------------body",body);
+            // console.log("-------------------------------body",body);
 
             const obj = JSON.parse(body);
-            console.log("-------------------------------body.user[0].id",obj.users[0]);
+            // console.log("-------------------------------body.user[0].id",obj.users[0]);
             if (obj.users[0].id) {
 
               req.zendeskuserid=obj.users[0].id;
@@ -6147,7 +6196,7 @@ Dluser.zendesk_request_create = function zendesk_request_create(req, result) {
 
           req.zendeskuserid=res[0].zendeskuserid;
 
-          console.log("req------------>",req);
+          // console.log("req------------>",req);
           Dluser.new_zendesk_request_create(req);
    
           let resobj = {
@@ -6760,6 +6809,23 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 };
 
 
+Dluser.about_us = async function about_us(id, result) {
+
+  sql.query("Select * from About_us ", function(err, res) {
+    if (err) {
+      result(err, null);
+    } else {
+      let resobj = {
+        success: true,
+        status:true,
+        result: res
+      };
+      result(null, resobj);
+    }
+  });
+
+};
+
 // Dluser.dl_User_list = function dl_User_list(req, result) {
 //   var pagelimit = 20;
 //   var page = req.page || 1;
@@ -7000,5 +7066,79 @@ Dluser.zendesk_ticket_create= async function zendesk_ticket_create(req,result) {
      result(null, resobj);
   }
 }
+
+
+Dluser.community_dl_User_list =async function community_dl_User_list(req, result) {
+  var pagelimit = 20;
+  var page = req.page || 1;
+  var startlimit = (page - 1) * pagelimit;
+  var where = "";
+  if(req.from_date  && req.to_date){
+    where = where+" and (date(jc.created_at) BETWEEN '"+req.from_date+"' AND '"+req.to_date+"')";
+ }
+
+
+  if(req.search){
+      where = where+" and (co.communityname LIKE  '%" +req.search+ "%' or us.name LIKE  '%" +req.search+ "%' ) ";
+  }
+
+  if(req.status==1){
+    where = where+" and  co.status=1 "; 
+  }
+  if(req.status==0){
+    where = where+" and  co.status=0 "; 
+  }
+  if(req.status==2){
+    where = where+" and  co.status=2 ";
+  }
+
+   
+  var zoneid = req.zoneid || 1;
+
+
+var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name,us.phoneno,us.email from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+" and jc.status=1  "+where+" group by jc.jcid order by jc.comid desc limit " +startlimit +"," +pagelimit +" ";
+
+    // console.log(admin_community_list);
+
+  var admin_community = await query(admin_community_list);
+
+  if (admin_community.length !=0) {
+
+    
+for (let i = 0; i < admin_community.length; i++) {
+  
+
+  var total_converted_user = await query("select count(userid)as total from join_community where comid='"+admin_community[i].comid+"' ");
+
+  admin_community[i].total_converted_user=total_converted_user[0].total || 0;
+
+  var total_revenue = await query("select sum(price)as total_Revenue,count(orderid)as total_orders from Orders where userid in(select userid from join_community where comid='"+admin_community[i].comid+"'  group by userid) and payment_status=1 ");
+
+  admin_community[i].total_Revenue=total_revenue[0].total_Revenue || 0;
+  admin_community[i].total_orders=total_revenue[0].total_orders || 0;
+}
+
+
+    let resobj = {
+      success: true,
+      status: true,
+      pagelimit:pagelimit,
+      total_count :admin_community.length,
+      result: admin_community
+    };
+    result(null, resobj);
+
+  }else{
+
+    let resobj = {
+      success: true,
+      status: false,
+      result: admin_community
+    };
+    result(null, resobj);
+  }
+};
+
+
 
 module.exports = Dluser;

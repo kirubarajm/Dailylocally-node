@@ -28,7 +28,12 @@ var Dayorder = function(Dayorder) {
   this.virtualkey=Dayorder.virtualkey ||0;
   this.gst=Dayorder.gst ||0;
   this.total_product_weight=Dayorder.total_product_weight ||0;
-  
+  this.cod_price=Dayorder.cod_price ||0;
+  this.online_price=Dayorder.online_price ||0;
+  this.payment_status=Dayorder.payment_status ||0;
+  this.community_name=Dayorder.community_name || '';
+  this.comid=Dayorder.comid ||0;
+  this.community_order_status=Dayorder.community_order_status ||0;
 };
 
 
@@ -38,32 +43,74 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
 
+  var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+Dayorder.userid+"' and jc.status=1");
+
+
   var Orderproductssdetails = await query("select count(*) as productcount,sum(pm.weight)as total_product_weight from  Orderproducts op left join Product_live pl on pl.vpid=op.vpid left join ProductMaster pm on pm.pid=pl.pid where op.orderid='"+Dayorder.orderid+"' ");
   // var noof_delivery = ordersdetails[0].delivery_charge  / Orderproductssdetails.length;
   // var gst_value = ordersdetails[0].gst  / Orderproductssdetails.length;
   var noof_delivery = ordersdetails[0].delivery_charge  ;
   var gst_value = ordersdetails[0].gst ;
   var total_product_weight = Orderproductssdetails[0].total_product_weight ;
+  var cod_price1 = 0;
+  var online_price1 = 0 ;
+  var payment_status = 0 ;
+  var community_name = '';
+  var comid= 0;
+  var community_order_status=0;
+
+
+
   
-  console.log("gst_value",gst_value);
+ if (get_join_community.length !=0) {
+   community_name = get_join_community[0].communityname;
+   comid= get_join_community[0].comid;
+   community_order_status=1;
+ } 
+  
+  
+  // console.log("gst_value",gst_value);
 
   for (let i = 0; i < getproduct.length; i++) {
 
+    if (ordersdetails[0].payment_type==0) {
+    
+      cod_price1 =  getproduct[i].quantity * getproduct[i].price || 0;
+      payment_status = 0;
+      
+   } else {
+      online_price1 = getproduct[i].quantity * getproduct[i].price || 0 ;
+      payment_status = 1;
+      
+   }
+ 
+   
+
     if (getproduct[i].subscription==0) {
 
-      var date  = moment(getproduct[i].deliverydate).format("YYYY-MM-DD");
+      
+      var date  = moment(getproduct[i].deliverydate ).format("YYYY-MM-DD 12:00:00");
 
-      var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");
+   
+      var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and Date(date)=Date('"+date+"') and dayorderstatus < 10");
 
       if (dayorders.length !=0) {
 
+
+        if (dayorders[0].payment_status==0) {
+          payment_status = 0;
+          // cod_price1=dayorders[0].cod_price
+        }
+
+        // console.log("cod_price",cod_price1);
+        // console.log("online_price",online_price1);
       
         if (dayorders[0].delivery_charge==0) {
           
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"',total_product_weight='"+total_product_weight+"' where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',delivery_charge='"+noof_delivery+"',gst='"+gst_value+"',total_product_weight='"+total_product_weight+"',cod_price=cod_price+'"+cod_price1+"',online_price=online_price+'"+online_price1+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
 
         }else{
-          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
+          var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"',cod_price=cod_price+'"+cod_price1+"',online_price=online_price+'"+online_price1+"',payment_status='"+payment_status+"'  where id="+dayorders[0].id;
 
         }
 
@@ -104,7 +151,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         var new_day_order={};
         new_day_order.userid=Dayorder.userid;
         new_day_order.zoneid=Dayorder.zoneid;
-        new_day_order.date=getproduct[i].deliverydate;  
+        new_day_order.date=  moment(getproduct[i].deliverydate).format("YYYY-MM-DD 12:00:00");  
         new_day_order.order_place_time=day;  
         new_day_order.virtualkey=Dayorder.virtualkey;  
         //address
@@ -125,10 +172,17 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_day_order.address_type=ordersdetails[0].address_type;
         new_day_order.gst=gst_value;
         new_day_order.total_product_weight=total_product_weight;
+        new_day_order.cod_price=cod_price1;
+        new_day_order.online_price=online_price1;
+        new_day_order.payment_status=payment_status;
+        new_day_order.community_name=community_name;
+        new_day_order.comid=comid;
+        new_day_order.community_order_status=community_order_status;
     
-        
+    
 
-        console.log("new_day_order===>1",new_day_order); 
+
+        //  console.log("new_day_order===>1",new_day_order); 
         sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
           if (err) {
             res(err, null);
@@ -397,9 +451,9 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
 
 
-   var curr = new Date(getproduct[i].starting_date);
+        var curr = new Date(getproduct[i].starting_date);
         var curr_condition= moment(curr).format("YYYY-MM-DD");
-        console.log("curr",curr);
+        // console.log("curr",curr);
         var today = moment().format("YYYY-MM-DD");
         var temp = 0;
 
@@ -492,7 +546,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         }
 
 
-         console.log(dates);
+        //  console.log(dates);
          // console.log("monday",monday);
         // console.log("tuesday",tuesday);
         // console.log("wednesday",wednesday);
@@ -516,11 +570,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (1 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (1 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 1 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -533,7 +587,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -549,11 +603,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (2 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (2 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (2 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (2 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 2 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -566,7 +620,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -583,11 +637,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (3 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (3 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (3 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (3 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 3 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -600,7 +654,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -616,11 +670,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (4 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (4 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (4 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (4 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 4 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -633,7 +687,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -649,11 +703,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (5 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (5 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (5 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (5 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 5 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -666,7 +720,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -681,11 +735,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (6 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (6 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (6 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (6 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 6 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -698,7 +752,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -713,11 +767,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", (7 + 7 - d.getDay()) % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (7 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", (7 + 7 - d.getDay()) % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (7 + 7 - d.getDay()) % 7);
                   
                   var nooddays = 7 + 7 - d.getDay() % 7;
                   if (nooddays==0) {
@@ -730,7 +784,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -751,11 +805,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     
                   // dates.push(moment(d).format("YYYY-MM-DD"));
     
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", 1 + 7 - d.getDay());
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", 1 + 7 - d.getDay());
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
     
                   d.setDate(d.getDate() + (1 + 7 - d.getDay()) % 7);
     
@@ -764,7 +818,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                     // current_date.setDate(current_date.getDate() + (day_in_week - 1 - current_date.getDay() + 7) % 7 + 1);
     
                   d1 = moment(d).format("YYYY-MM-DD")
-                  console.log("d1",d1);
+                  // console.log("d1",d1);
                   if (d1 > today && d1 >= curr_condition) {
                     dates.push(moment(d1).format("YYYY-MM-DD"));
                   }
@@ -791,11 +845,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
     
                 if(dates.length<getproduct[i].no_of_deliveries){
                   // dates.push(moment(d, "YYYY-MM-DD").add(3, 'days').format("YYYY-MM-DD"));
-                  console.log("current_date",d);
-                  console.log("d.getDate()",d.getDate());
-                  console.log("d.getDay()",d.getDay());
-                  console.log("---------->", 1 + 7 - d.getDay() % 7);
-                  console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
+                  // console.log("current_date",d);
+                  // console.log("d.getDate()",d.getDate());
+                  // console.log("d.getDay()",d.getDay());
+                  // console.log("---------->", 1 + 7 - d.getDay() % 7);
+                  // console.log("<<<<<<<<<<<<<<<<<<<---------->", d.getDate() + (1 + 7 - d.getDay()) % 7);
     
                   d.setDate(d.getDate() + (3 + 7 - d.getDay()) % 7);
                   d1 = moment(d).format("YYYY-MM-DD")
@@ -871,8 +925,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
           // console.log("dates ila",dates);
           for (let j = 0; j < getproduct[i].no_of_deliveries; j++) {
-          var date  = moment().add(j, "days").format("YYYY-MM-DD");; ////0-current date
-          var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10 ");
+          var date  = moment().add(j, "days").format("YYYY-MM-DD 12:00:00");; ////0-current date
+          var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and DATE(date)=DATE('"+date+"') and dayorderstatus < 10 ");
           if (dayorders.length !=0) {
             var updatedayorderstatus = "update Dayorder set dayorderstatus=0,order_place_time='"+day+"' where id="+dayorders[0].id;
             var updatedayorder = await query(updatedayorderstatus);
@@ -929,9 +983,11 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_day_order.delivery_charge=noof_delivery || 0;
             new_day_order.address_type=ordersdetails[0].address_type;
             new_day_order.total_product_weight=total_product_weight;
-            
+            new_day_order.community_name=community_name;
+            new_day_order.comid=comid;
+            new_day_order.community_order_status=community_order_status;
         
-            console.log("new_day_order===>2",new_day_order);    
+            // console.log("new_day_order===>2",new_day_order);    
             sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
@@ -989,7 +1045,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
           // console.log("dates iruku",dates);
           for (let j = 0; j < dates.length; j++) {           
             var date  =dates[j];  
-            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and date='"+date+"' and dayorderstatus < 10");  
+            var dayorders = await query("select * from Dayorder where userid='"+Dayorder.userid+"' and DATE(date)=DATE('"+date+"') and dayorderstatus < 10");  
             if (dayorders.length !=0) {   
               // console.log("dayorders iruku",dates);               
               var new_createDayorderproducts={};
@@ -1025,7 +1081,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               // console.log("day order ila",dates);                  
               var new_day_order={};
               new_day_order.userid=Dayorder.userid;
-              new_day_order.date=date;
+              new_day_order.date=moment(date).format("YYYY-MM-DD 12:00:00"); ;
               new_day_order.zoneid=Dayorder.zoneid;   
               new_day_order.order_place_time=day; 
                   //address
@@ -1044,7 +1100,10 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_day_order.delivery_charge=noof_delivery || 0;
               new_day_order.address_type = ordersdetails[0].address_type;
               new_day_order.total_product_weight=total_product_weight;
-    
+              new_day_order.community_name=community_name;
+              new_day_order.comid=comid;
+              new_day_order.community_order_status=community_order_status;
+
               sql.query("INSERT INTO Dayorder set ?", new_day_order,async function(err, result) {
                 if (err) {
                   res(err, null);
@@ -1143,12 +1202,9 @@ Dayorder.day_order_list =async function day_order_list(Dayorder,result) {
       where = where+" and drs.trip_id='"+Dayorder.trip_id+"' "
     }
 
-    // if(Dayorder.dayorderstatus !=null){
-    //     where = where+" and drs.dayorderstatus='"+Dayorder.dayorderstatus+"' ";
-    // }else{
-    //   where = where+" and drs.dayorderstatus=0 ";
-    // }
-    where = where+" and drs.dayorderstatus=0 ";
+    if(Dayorder.dayorderstatus !=null){
+        where = where+" and drs.dayorderstatus='"+Dayorder.dayorderstatus+"' ";
+    }
 
     if (Dayorder.usersearch) {
       where = where+" and (us.phoneno like '%"+Dayorder.usersearch+"%' or us.email like '%"+Dayorder.usersearch+"%' or us.name like '%"+Dayorder.usersearch+"%') ";
@@ -1241,7 +1297,7 @@ Dayorder.day_order_view =async function day_order_view(Dayorder,result) {
 ///// Day Order View ///////////
 Dayorder.crm_day_order_view =async function crm_day_order_view(Dayorder,result) {
   if(Dayorder.id){
-    var getdayorderquery = "select drs.*,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('qcchecklist','0','Transactionid',ors.tsid,'delivery_quantity',orp.received_quantity,'orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')),'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=8 then 'Moveit Pickup' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg,'' as qachecklist  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  left join Orders ors on ors.orderid=orp.orderid where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
+    var getdayorderquery = "select drs.*,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,mu.name as moveit_name,mu.phoneno as moveit_phoneno,sum(orp.quantity * orp.price) as total_product_price,sum(orp.received_quantity) as sorted_quantity,IF(drs.moveit_type=0,'Moveit','Dunzo') as delivery_type,JSON_OBJECT('userid',mu.userid,'name',mu.name,'phoneno',mu.phoneno,'email',mu.email,'Vehicle_no',mu.Vehicle_no) as moveitdetail, count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,JSON_ARRAYAGG(JSON_OBJECT('qcchecklist','0','Transactionid',ors.tsid,'delivery_quantity',orp.received_quantity,'orderid',orp.orderid,'scm_status',orp.scm_status,'id',orp.id,'quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')),'scm_status_msg',iF(orp.scm_status=6,'Ready to Dispatch',IF (orp.scm_status=11,'Product cancel',IF (orp.scm_status=10,'deliverd',IF(orp.scm_status=12,'Return','Inprogress') ))))) AS Products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus=1 then 'SCM In-Progress' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=8 then 'Moveit Pickup' when drs.dayorderstatus=12 then 'return' when drs.dayorderstatus=10 then 'Delivered' when drs.dayorderstatus=11 then 'cancel' end as dayorderstatus_msg,'' as qachecklist,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg   from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id  left join User us on us.userid=drs.userid  left join Moveit_trip mt on mt.tripid=drs.trip_id left join MoveitUser mu on mu.userid=mt.moveit_id  left join Orders ors on ors.orderid=orp.orderid where drs.id="+Dayorder.id+" group by drs.id,drs.userid";
     // console.log(getdayorderquery);
     var getdayorder = await query(getdayorderquery);
     if(getdayorder.length>0){
@@ -1403,13 +1459,11 @@ Dayorder.quality_day_order_view=async function quality_day_order_view(Dayorder,r
 
 //////Update Day Order Status ////
 Dayorder.update_scm_status = async function update_scm_status(Dayorder){
-   console.log("Dayorder ==>",Dayorder);
+  // console.log("Dayorder ==>",Dayorder);
   if(Dayorder){
     var getcountvaluequery = "select count(dop.id) as total_dop,count(case when dop.scm_status>=1 then dop.id end) as af1 from Dayorder_products as dop where dop.doid="+Dayorder;
     var getcountvalue = await query(getcountvaluequery);
     if(getcountvalue.length>0){
-      console.log("getcountvalue[0].total_dop ==>",getcountvalue[0].total_dop);
-      console.log("getcountvalue[0].af1 ==>",getcountvalue[0].af1);
       if(getcountvalue[0].total_dop == getcountvalue[0].af1){
         var updatescmstatusquery = "update Dayorder set dayorderstatus=1 where id="+Dayorder;
         var updatescmstatus = await query(updatescmstatusquery);
@@ -1423,8 +1477,8 @@ Dayorder.update_scm_status = async function update_scm_status(Dayorder){
 
 
 Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayorder,result) {
+    
     var now = moment().format("YYYY-MM-DD,h:mm:ss a");
-
     var product= await query("select * from Dayorder_products where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"' and scm_status <= 6");
     var dayorder= await query("select * from Dayorder where id='"+Dayorder.doid+"'");
 
@@ -1460,6 +1514,14 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
       };
       result(null, resobj);
     
+    }else if (dayorder[0].dayorderstatus >= 6) {
+      let resobj = {
+        success: true,
+        message: "Sorry you cannot cancel this product. Since it was already Packed and Ready to Dispatch!",
+        status: false
+      };
+      result(null, resobj);
+    
     }else{
 
     if (product.length !==0) {
@@ -1473,12 +1535,24 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
         Stock.cancel_product_quantity_update_Stock(req);
 
         var cancel_query = await query("update Dayorder_products set scm_status=11 ,product_cancel_time='"+now+"' where doid='"+Dayorder.doid+"' and id='"+Dayorder.id+"'");
-
-
+       
         var day_order_product = await query("select * from  Dayorder_products where doid='"+Dayorder.doid+"' and scm_status < 11 ");
 
         if (day_order_product.length ==0) {
-          var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"'");
+
+          var order_details = await query("select * from Orders where orderid=  "+product[0].orderid+" ");
+          // var status=1;
+          if (order_details[0].payment_type==0) {
+            var update_cod_price_order = await query("update Dayorder set cod_price=cod_price- "+product[0].price+" where id ='"+Dayorder.doid+"' ");
+
+          }
+
+          if (order_details[0].payment_type==1) {
+            var update_online_price_order = await query("update Dayorder set online_price=online_price- "+product[0].price+" where id ='"+Dayorder.doid+"' ");
+
+          }
+
+          var update_day_order = await query("update Dayorder set dayorderstatus=11 where id ='"+Dayorder.doid+"' ");
 
           var orders = await query("SELECT ors.*,us.pushid_ios,us.pushid_android,JSON_OBJECT('userid',us.userid,'pushid_ios',us.pushid_ios,'pushid_android',us.pushid_android,'name',us.name) as userdetail from Dayorder as ors left join User as us on ors.userid=us.userid where ors.id = '"+Dayorder.doid+"'" );
 
@@ -1490,7 +1564,7 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
         let resobj = {
           success: true,
           status: true,
-          message : 'Product cancel Sucessfully'
+          message : 'Product cancel Successfully'
         };
     
         result(null, resobj); 
@@ -1508,9 +1582,9 @@ Dayorder.day_order_product_cancel=async function day_order_product_cancel(Dayord
     }
   
   
-  }
+    }
      
-  };
+};
 
 
 ///// crm Day Order List ///////////
@@ -1595,9 +1669,9 @@ Dayorder.crm_day_order_list =async function crm_day_order_list(Dayorder,result) 
     // where =where +" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
 
     if(Dayorder.report && Dayorder.report==1){
-      var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=8 then 'Moveit Pickup'  when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)'  when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
+      var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=8 then 'Moveit Pickup'  when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)'  when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
     }else{
-      var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered'  when drs.dayorderstatus=8 then 'Moveit Pickup' when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg     from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
+      var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered'  when drs.dayorderstatus=8 then 'Moveit Pickup' when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)' when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc limit " +startlimit +"," +pagelimit +" ";
     }  
     
 
@@ -1680,6 +1754,14 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
     };
     result(null, resobj);
   
+  }else if (day_order[0].dayorderstatus >= 6) {
+    let resobj = {
+      success: true,
+      message: "Sorry you cannot cancel this product. Since it was already Packed and Ready to Dispatch!",
+      status: false
+    };
+    result(null, resobj);
+  
   }else{
 
 
@@ -1690,6 +1772,17 @@ Dayorder.admin_day_order_product_cancel=async function admin_day_order_product_c
     var product1= await query("select * from Dayorder_products where id ='"+vpid[i]+"' ");
       var dayorder= await query("select * from Dayorder where id='"+product1[0].doid+"'");
 
+      var order_details = await query("select * from Orders where orderid=  "+product1[0].orderid+" ");
+      // var status=1;
+      if (order_details[0].payment_type==0) {
+        var update_cod_price_order = await query("update Dayorder set cod_price=cod_price-"+product1[0].price+" where id ='"+Dayorder.doid+"' ");
+
+      }
+
+      if (order_details[0].payment_type==1) {
+        var update_online_price_order = await query("update Dayorder set online_price=online_price- "+product1[0].price+" where id ='"+Dayorder.doid+"' ");
+
+      }
         
         if (product1[0].scm_status >=1) {
           
@@ -2218,7 +2311,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
 
 
     const userdetails = await query("select * from User where userid ='" + dayorderdetails[0].userid + "'");
-    const dayproductdetails = await query("select orderid from Dayorder_products where id IN ('" + items + "') group by orderid ");
+    const dayproductdetails = await query("select orderid from Dayorder_products where id IN ('" + items + "') and refund_status !=1 group by orderid ");
 
    if (dayproductdetails.length !=0) {
 
@@ -2250,7 +2343,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
                         gst=  req.gst || 0
                         product_price = productdetails[0].product_price + delivery_charge + gst;
                   
-                        console.log(productdetails[0].orderid);
+                        // console.log(productdetails[0].orderid);
                         var refundDetail = {
                           orderid :  productdetails[0].orderid,
                           active_status : 0,
@@ -2320,7 +2413,7 @@ Dayorder.refund_create = async function refund_create(req,result) {
     let response = {
       success: true,
       status: false,
-      message: "Day Order Product is not available"
+      message: "Already refund created"
     };
     result(null, response);
    }
@@ -2439,5 +2532,31 @@ Dayorder.dayorder_distance_calculation = async function dayorder_distance_calcul
     );
   
   };
+
+
+  Dayorder.dayorder_cod_price_check=async function dayorder_cod_price_check(req,result) {
+
+      
+    var day = moment().format("YYYY-MM-DD HH:mm:ss");;
+  
+    var reasonquery = " select * from Day_Order_Return_reason"
+  
+    var reason_list = await query(reasonquery);
+   
+    let resobj = {
+      success: true,
+      status: true,
+      result:reason_list
+    };
+    result(null, resobj);
+  
+   
+  
+   
+  };
+
+
+
+
 
   module.exports = Dayorder;
