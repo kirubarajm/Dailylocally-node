@@ -438,6 +438,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     if (get_total_values.length !=0) {
       total_values = get_total_values[0].total / 100;
     }
+
     for (let i = 0; i < community.length; i++) {
       
 
@@ -449,15 +450,16 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].credits_text='DL Credits';
       community[i].welcome_name_title='Hi ';//+community[0].name
       community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
-      community[i].min_cart_text='Minimum Cart Value';
+      community[i].min_cart_text='minimum cart value';
       community[i].min_cart_value='Zero';
-      community[i].free_delivery_text='Free delivery across Chennai';
-      community[i].free_delivery_value='Free Home Delivery';
+      community[i].free_delivery_text='Zero';
+      community[i].free_delivery_value='delivery premium';
       community[i].cod_text='COD';
-      community[i].cod_value='Cash on Delivery on all orders';
+      community[i].cod_value='Cash on Delivery';
       community[i].show_credits_info =true;
-      community[i].credits_info  ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
-      
+      community[i].credits_info ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
+      community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
+
 
     }
 
