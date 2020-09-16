@@ -64,8 +64,8 @@ const calculate = {
 
   //EAT-Clone Demo Testing Razorpay Details
   ////01-aug-2020 commaded demo key
-  // razorpay_key_id : 'rzp_test_8ZBt2J9hAsxH9Q',
-  // razorpay_key_secret : 'hvaGojdH4IwolHeDh246ibjz',
+  razorpay_key_id : 'rzp_test_8ZBt2J9hAsxH9Q',
+  razorpay_key_secret : 'hvaGojdH4IwolHeDh246ibjz',
 
   razorpay_key_id : 'rzp_live_kelnGLZvTecvPV',
   razorpay_key_secret : 'GX0bqRNINZwCqp01M8p4xDQh',

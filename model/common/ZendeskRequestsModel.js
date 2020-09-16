@@ -18,7 +18,7 @@ var Zendeskrequest = function(zendeskrequest) {
 
 Zendeskrequest.createZendeskrequest =async function createZendeskrequest(req, result) {
 
-   console.log("---------------->new_zendesk_request_create",req);
+  //  console.log("---------------->new_zendesk_request_create",req);
 
 var get_zendesk= await query("select * from Zendesk_chat_requests where doid= "+req.doid+"  and issueid= "+req.issueid+" ")
 
@@ -28,7 +28,10 @@ var get_ticketid= await query("select * from Zendesk_chat_requests where doid= "
 
         if (get_ticketid.length !=0) {
             req.ticketid = get_ticketid[0].ticketid;
-            Zendeskrequest.update_tags(get_ticketid[0].ticketid,req.issueid);
+           
+      
+
+            Zendeskrequest.update_tags(get_ticketid[0].ticketid,req.issueid,req.community_status);
         }
 
         sql.query("INSERT INTO Zendesk_chat_requests  set ?", req, function(err, res) {
@@ -49,7 +52,7 @@ var get_ticketid= await query("select * from Zendesk_chat_requests where doid= "
   
 };
 
-Zendeskrequest.update_tags= async function update_tags(ticketid,issueid){
+Zendeskrequest.update_tags= async function update_tags(ticketid,issueid,community_status){
   var auth = "Basic " + Buffer.from(constant.Username + ":" + constant.Password).toString("base64");
   var headers= {
     'Content-Type': 'application/json',
@@ -60,17 +63,26 @@ Zendeskrequest.update_tags= async function update_tags(ticketid,issueid){
     var select_tags_query= "select zt.tag_name from Zendesk_issues zi left join Zendesk_tag zt on zt.tid=zi.tid where id ="+issueid
     var select_tags= await query(select_tags_query);
     request.get({headers: headers, url:ticketURL,method: 'GET'},async function (e, r, body) {
-      console.log("tags e--",e);
-      console.log("tags body--",body);
+      // console.log("tags e--",e);
+      // console.log("tags body--",body);
       var data = body;
       try {
          data = JSON.parse(body);
       } catch (e) {
-          console.log("e--",e);
+          // console.log("e--",e);
       }
       if(data.ticket){
         var tags= data.ticket.tags;
         tags=tags.concat(select_tags);
+      
+        if (community_status==1) {
+          dle_user = [
+            {
+                "dle_user": "dle_user",
+            }
+        ]
+          tags=tags.concat(dle_user);
+        }
         if(tags.length>0){
            var userdetails={
                ticket:{
@@ -78,8 +90,8 @@ Zendeskrequest.update_tags= async function update_tags(ticketid,issueid){
                }
            }
            request.put({headers: headers, url:ticketURL, json: userdetails,method: 'PUT'},async function (e, r, body) {
-            console.log("tags e--",e);
-            console.log("tags body--",body);
+            // console.log("tags e--",e);
+            // console.log("tags body--",body);
         });
         }
       }

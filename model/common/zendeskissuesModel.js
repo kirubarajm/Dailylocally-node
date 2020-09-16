@@ -1,6 +1,7 @@
 "user strict";
 var sql = require("../db.js");
-
+const util = require("util");
+const query = util.promisify(sql.query).bind(sql);
 //Task object constructor
 var Zendeskissues = function(zendeskissues) {
   this.active_status = zendeskissues.active_status;
@@ -25,8 +26,8 @@ Zendeskissues.createZendeskissues = function createZendeskissues(req, result) {
   });
 };
 
-Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,result) {
-    sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.id='"+req.id+"'", function(err, res) {
+Zendeskissues.getZendeskissuesDetails =async function getZendeskissuesDetails(req,result) {
+    sql.query("Select zi.id,zi.issues,zi.type,zi.department,zi.tid,zt.tag_name from Zendesk_issues zi join Zendesk_tag zt on zt.tid=zi.tid where zi.active_status=1 and zi.id='"+req.id+"'",async function(err, res) {
       if (err) {
         result(err, null);
       } else {
@@ -41,8 +42,24 @@ Zendeskissues.getZendeskissuesDetails = function getZendeskissuesDetails(req,res
         // }
 
         if (req.userid) {
-          note = note +' userid :'+req.userid+" ,"
-          }
+          note = note +' userid :'+req.userid+" ,"          
+          // var checkcommunityquery = "select * from join_community where userid="+req.userid+" and status=1";
+          // var checkcommunity = await query(checkcommunityquery);
+          // if(checkcommunity.length>0){
+          //   note = note +'\n'+"DLE user, ";
+          // }
+          // sql.query("",async function(err, res1) {
+          //   if (err) {
+          //     result(err, null);
+          //   } else {
+            var res1 = await query ("select * from join_community where userid="+req.userid+" and status=1 ");
+
+              if(res1.length>0){
+                note = note +'\n'+"DLE user, ";
+              }
+          //   }
+          // });          
+        }
 
         if (req.orderid) {
           note = note + "dayorderid :"+req.orderid+" ,"

@@ -205,5 +205,20 @@ app.route("/admin/brand/view").post(routesVersioning({"1.0.0":Brand.BrandModelvi
 app.route("/admin/brand/list").post(routesVersioning({"1.0.0":Brand.BrandModelList}));
 
 
+
+app.route("/admin/community/masterlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.admin_community_list}));
+
+app.route("/admin/community/userlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.community_dl_User_list}));
+
+app.route("/admin/community/edit").put(middleware.checkToken,routesVersioning({"1.0.0": dluser.community_edit}));
+
+app.route("/admin/communityapproval").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community_approval}));
+
+app.route("/admin/user/edit").put(middleware.checkToken,routesVersioning({"1.0.0":dluser.edit_user}));
+
+app.route("/admin/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration}));
+
+app.route("/admin/user/sendnotification").post(routesVersioning({"1.0.0":dluser.user_based_notification}));
+
 }
 

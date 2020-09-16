@@ -279,6 +279,28 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
               notification_type: "1"
             };
             break;
+
+            case PushConstant.Pageid_dl_community_approval_notification:
+              data = {
+                title: "Yay! you've got good news from Daily Locally!",
+                message: "Your community registration has been approved. Check out the app for an all new Exclusive experience",
+                pageid: "" +1,
+                userid: "" +orders[0].userid,
+                app: "Dl",
+                notification_type: "1"
+              };
+              break;
+            
+              case PushConstant.Pageid_dl_community_reject_notification:
+                data = {
+                  title: "You've got an update from Daily Locally",
+                  message: "We regret to inform that your community registration has been rejected. Kindly get in touch with our support to know more.",
+                  pageid: "" +1,
+                  userid: "" +orders[0].userid,
+                  app: "Dl",
+                  notification_type: "1"
+                };
+                break;
   }
   if (data == null) return;
 
@@ -294,132 +316,46 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
   }
 };
 
-// Notification.orderEatBulkPushNotification = async function(orderid,userid,pageid) {
-//   if (orderid) {
-//     var orders = await Notification.getPushOrderDetail(orderid);
-//     var user = JSON.parse(orders.userdetail);
-//     var makeituser = JSON.parse(orders.makeitdetail);
-//     var moveituser = JSON.parse(orders.moveitdetail);
-//   }else{
-//     var userdetails = await Notification.getEatUserDetail(userid.userid);
-//     var user = {};
-//     user.pushid_android=userdetails.pushid_android
-//     user.pushid_ios=userdetails.pushid_ios
-//   }
 
+Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
+ 
+  console.log("userid",userid);
 
-//   var data = null;
-//   switch (pageid) {
-//     case PushConstant.Pageid_eat_order_post:
-//       data = {
-//         title: "Order Post",
-//         message: "Hi! your Order posted successful.Your OrderID is#" + orderid,
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "1"
-//       };
-//       break;
-
-//     case PushConstant.Pageid_eat_order_accept:
-//       var mk_username=makeituser.brandName||""
-//       mk_username=mk_username?" by "+mk_username :""
-//       data = {
-//         title: "Your order has been accepted "+mk_username,
-//         message: "Your order will be delivered in approximately 30 minutes",
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "2"
-//       };
-//       break;
-
-//       case PushConstant.masteridOrder_Prepared:
-//       var mk_username=makeituser.brandName||""
-//       mk_username=mk_username?" by "+mk_username :""
-//       data = {
-//         title: "Your order has been prepared "+mk_username,
-//         message: "Your order will be delivered in approximately 30 minutes.",
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "2"
-//       };
-//       break;
-
-//     case PushConstant.Pageid_eat_order_pickedup:
-//         var mo_username=moveituser.name||""
-//         mo_username=mo_username?" by "+mo_username :""
-//       data = {
-//         title: "Your order has been picked up "+mo_username,
-//         message: "Call our delivery executive for further information.",
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "2"
-//       };
-//       break;
-
-//     case PushConstant.Pageid_eat_order_reached:
-//       data = {
-//         title: "Your order near to me",
-//         message: "Your Order Waiting.Please picked up",
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "1"
-//       };
-//       break;
-
-//     case PushConstant.Pageid_eat_order_delivered:
-//       data = {
-//         title: "Order Delivered",
-//         message: "Hi! your Order Delivered successfully",
-//         pageid: "" + pageid,
-//         app: "Eat",
-//         notification_type: "1"
-//       };
-//       break;
-
-//     case PushConstant.Pageid_eat_order_cancel:
-//       var  message = "We apologise for the inconvenience caused. Explore our gold members for uninterrupted service. Kindly contact us for more details.";
-//       if(orders.payment_type==="1"){
-//         message = "We apologise for the inconvenience caused. Your payment will be refunded within 2 - 4 working days. Kindly contact us for more details. ";
-//       }
-//       //COD
-//       // Content - We apologise for the inconvenience caused. Explore our gold members for uninterrupted service. Kindly contact us for for more details."
-//       //online
-//       //Content - We apologise for the inconvenience caused. Your payment will be refunded within 2 - 4 working days. Kindly contact us for more details. "
-//       data = {
-//         title: "Your order has been cancelled due to unforeseen circumstances.",
-//         message: message,
-//         pageid: "" + pageid,
-//         payment_type:orders.payment_type,
-//         app: "Eat",
-//         notification_type: "2"
-//       };
-
-//       break;
-//       case PushConstant.Pageid_eat_send_notification:
-//         data = {
-//           title: userid.title,
-//           message:userid.user_message,
-//           pageid: "" + pageid,
+  var data = null;
+  switch (pageid) {
+ 
+      case PushConstant.Pageid_dl_bulk_notification:
+        data = {
+          title: userid.title,
+          message:userid.user_message,
+          pageid: "" +1,
          
-//       //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
-//           app: "Eat",
-//           notification_type: "1"
-//         };
-//         if (userid.image) {
-//           data.image=userid.image;
-//          }
-//         break;
-//   }
-//   if (data == null) return;
+      //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
+          app: "Dl",
+          notification_type: "1"
+        };
+
+        if (userid.image) {
+          data.image=userid.image;
+         }
+        break;
+  }
+  if (data == null) return;
 
  
-//   //const user = await Notification.getEatUserDetail(userid);
-//   console.log("admin notification data->", data);
-//   if (user && user.pushid_android) {
-//     FCM_DL.sendNotificationAndroid(user.pushid_android, data,1 );
-//   }
+  //const user = await Notification.getEatUserDetail(userid);
+  console.log("admin notification data->", data);
+  console.log("admin notification data->", userid.pushid_android);
+  console.log("admin notification data->", userid.pushid_ios);
+  if (userid.pushid_android) {
+    FCM_DL.sendNotificationAndroid(userid.pushid_android, data,1 );
+  }
+ 
+  if (userid.pushid_ios) {
+    FCM_DL.sendNotificationAndroid(userid.pushid_ios, data,2);
+  }
   
-// };
+};
 
 
 
