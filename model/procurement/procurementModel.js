@@ -193,7 +193,7 @@ Procurement.procurement_list=async function procurement_list(req,result) {
 
     var where = "";    
     if(req.from_date && req.to_date){
-      wherecon = wherecon+" and (date(pro.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
+      where = where+" and (date(pro.created_at) between '"+req.from_date+"' and  '"+req.to_date+"') ";
     }
     if(req.productsearch){
         where = where+" and (pro.vpid LIKE '%"+req.productsearch+"%' or dop.Productname LIKE '%"+req.productsearch+"%') ";
