@@ -1375,14 +1375,14 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
               status:false
             };
             result(null, resobj);
-          }else if (res1[0].orderstatus == 12) {
+          }else if (res1[0].dayorderstatus == 12) {
             let resobj = {
               success: true,
               message: "Sorry!  order already returned.",
               status:false
             };
             result(null, resobj);
-          }else if (res1[0].orderstatus < 6) {
+          }else if (res1[0].dayorderstatus < 6) {
             let resobj = {
               success: true,
               message: "Sorry!  order not dispatched.",
@@ -1414,8 +1414,8 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
 
                  if (zone_details.length !=0) {
               
-                  console.log("distance",zone_details[0].lat);
-                  console.log("distance",zone_details[0].lon);
+                  // console.log("distance",zone_details[0].lat);
+                  // console.log("distance",zone_details[0].lon);
                     req.orglat = zone_details[0].lat;
                     req.orglon = zone_details[0].lon;
                     req.deslat = req.lat;
@@ -1458,14 +1458,14 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
           
         }
 
-      } else {
-        let resobj = {
-          success: true,
-          status:false,
-          message: "Sorry Payment not Paid!"
-        };
-        result(null, resobj);
-      }
+          } else {
+            let resobj = {
+              success: true,
+              status:false,
+              message: "Sorry Payment not Paid!"
+            };
+            result(null, resobj);
+          }
         } else {
           let resobj = {
             success: true,
