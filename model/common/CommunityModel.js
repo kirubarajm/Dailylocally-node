@@ -157,12 +157,12 @@ Community.join_new_community =async function join_new_community(req, result){
     new_community.userid = req.userid;
     new_community.comid = req.comid;
     new_community.status = 1;
-    new_community.profile_image = req.profile_image;
+    new_community.profile_image = req.profile_image || "";
     new_community.flat_no = req.flat_no;
     new_community.floor_no=req.floor_no;
     // Community.join_new_community();
     var image =req.profile_image || '';
-    var update_image = await query("update User set profile_image='"+image+"' where userid = '"+new_community.requested_userid+"'");
+    var update_image = await query("update User set profile_image='"+new_community.profile_image+"' where userid = '"+new_community.userid+"'");
 
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
@@ -441,7 +441,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
 
     for (let i = 0; i < community.length; i++) {
       
-
+      community[i].name = community[i].name.charAt(0).toUpperCase() + community[i].name.slice(1);
       var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status =1 ");
 
       community[i].members_count=get_count[0].members_count;
@@ -450,8 +450,8 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].credits_text='DL Credits';
       community[i].welcome_name_title='Hi ';//+community[0].name
       community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
-      community[i].min_cart_text='minimum cart value';
-      community[i].min_cart_value='Zero';
+      community[i].min_cart_text='Zero';
+      community[i].min_cart_value='minimum cart value';
       community[i].free_delivery_text='Zero';
       community[i].free_delivery_value='delivery premium';
       community[i].cod_text='COD';
