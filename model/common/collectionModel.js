@@ -8,13 +8,63 @@ var constant = require('../constant.js');
 var ZoneModel = require('../common/zoneModel');
 
 var Collection = function(collection) {
+  this.cid = collection.cid;
   this.name = collection.name;
   this.active_status = collection.active_status;
   this.query = collection.query;
   this.img_url = collection.img_url;
+  this.category_Position = collection.category_Position ||0;
+  this.tile_type = collection.tile_type;
+  this.clickable = collection.clickable ||true;
+  this.product_name = collection.product_name;
+  this.classification_type = collection.classification_type;
+  this.classification_id = collection.classification_id;
 }
 
+Collection.createCollection = async function createCollection(req, result) {   
+  req.active_status=0;
+  var insertdata = new Collection(req);
+  sql.query("INSERT INTO Collections set ?", insertdata,async function(err, res) {
+      if (err) {
+          let resobj = {
+              success: true,
+              status: false,
+              message: err
+          };
+          result(null, resobj);
+      } else {
+          let resobj = {
+              success: true,
+              status: true,
+              result: res
+          };
+          result(null, resobj);
+      }
+  });    
+};
 
+Collection.updateCollection =async function updateCollection(req, result) {
+  var updatedata = new Collection(req);
+  console.log("updatedataupdatedata==>",updatedata);
+  sql.query("UPDATE Collections SET ? WHERE cid = ?", [updatedata, updatedata.cid],async function(err, res) {
+      if (err) {
+          let resobj = {
+              success: true,
+              status: false,
+              message: err
+          };
+          result(null, resobj);
+      } else {
+          let resobj = {
+              success: true,
+              status: true,
+              result: res
+          };
+          result(null, resobj);
+      }
+    }
+  );
+};
 
 Collection.list_all_active_collection =async function list_all_active_collection(req,result) {
 
@@ -379,6 +429,232 @@ Collection.get_all_collection_by_cid_v2 = async function get_all_collection_by_c
 //};
 };
 
+/////Collection classification List/////////// 
+Collection.get_classification_list = async function get_classification_list(req,result) {
+  var classification = [];
+  classification.push({"id":1,"name":"type-1 [brand]"});
+  classification.push({"id":2,"name":"type-2 [catagory]"});
+  classification.push({"id":3,"name":"type-3 [L1 subcategory]"});
+  classification.push({"id":4,"name":"type-4 [L2 subcategory]"});
+  let resobj = {
+    success: true,
+    status: true,
+    result: classification
+  };
+  result(null, resobj);  
+};
 
+/////Collection classification Filter/////////// 
+Collection.classificationfilter = async function classificationfilter(req,result) {
+  var resultdata = "";
+  switch (req.type) {
+    case "1":
+      var getbrandquery = "select id,brandname as name from Brand"
+      var getbrand = await query(getbrandquery);
+      resultdata = getbrand;
+      break;
+    case "2":
+      var getbrandquery = "select catid as id,name from Category"
+      var getbrand = await query(getbrandquery);
+      resultdata = getbrand;
+      break;
+    case "3":
+      var getbrandquery = "select scl1_id as id,name from SubcategoryL1"
+      var getbrand = await query(getbrandquery);
+      resultdata = getbrand;
+      break;
+    case "4":
+      var getbrandquery = "select scl2_id as id,name from SubcategoryL2"
+      var getbrand = await query(getbrandquery);
+      resultdata = getbrand;
+      break;
+  
+    default:
+      break;
+  }
+
+  let resobj = {
+    success: true,
+    status: true,
+    result: resultdata
+  };
+  result(null, resobj);  
+};
+
+/////Collection Add/////////// 
+Collection.collection_add = async function collection_add(req,result) {
+  if(req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!='' && req.classification_id!='' ){
+    var resultdata = "";
+    var collectionquery = "";
+    var insertdata = [];
+    insertdata.push({"name":req.name,"tile_type":req.tile_type,"classification_type":req.classification_type,"img_url":req.img_url,"classification_id":req.classification_id,"query":""}) ;
+    
+    switch (req.classification_type) {
+      case "1":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand where pl.zoneid = ? and pl.live_status = ? and pm.brand="+req.classification_id+" ";
+        insertdata[0].query = collectionquery;
+        break;
+      case "2":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id left join Category as cat on cat.catid=l1scat.scl1_id where pl.zoneid = ? and pl.live_status = ? and cat.catid="+req.classification_id+" ";
+        insertdata[0].query = collectionquery;
+        break;
+      case "3":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl1_id ="+req.classification_id+" ";
+        insertdata[0].query = collectionquery;
+        break;
+      case "4":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl2_id ="+req.classification_id+" ";
+        insertdata[0].query = collectionquery;
+        break;
+    
+      default:
+        break;
+    }
+
+    await Collection.createCollection(insertdata[0], async function(err,collectionres){
+      if(collectionres.success==true){
+        let resobj = {
+          success: true,
+          status: true,
+          result: collectionres,
+          message: "collection Added Successfully"
+        };
+        result(null, resobj); 
+      }else{
+        let resobj = {
+          success: true,
+          status: false,
+          message: "something went wrong plz try again"
+        };
+        result(null, resobj); 
+      } 
+    });
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);  
+  }  
+};
+
+/////Collection Edit/////////// 
+Collection.collection_edit = async function collection_edit(req,result) {
+  if(req.cid!='' && req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!='' && req.classification_id!='' ){
+    var resultdata = "";
+    var collectionquery = "";
+    var updateddata = [];
+    updateddata.push({"cid":parseInt(req.cid),"name":req.name,"tile_type":req.tile_type,"classification_type":req.classification_type,"img_url":req.img_url,"classification_id":req.classification_id,"query":""}) ;
+    
+    switch (req.classification_type) {
+      case "1":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand where pl.zoneid = ? and pl.live_status = ? and pm.brand="+req.classification_id+" ";
+        updateddata[0].query = collectionquery;
+        break;
+      case "2":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id left join Category as cat on cat.catid=l1scat.scl1_id where pl.zoneid = ? and pl.live_status = ? and cat.catid="+req.classification_id+" ";
+        updateddata[0].query = collectionquery;
+        break;
+      case "3":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl1_id ="+req.classification_id+" ";
+        updateddata[0].query = collectionquery;
+        break;
+      case "4":
+        collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl2_id ="+req.classification_id+" ";
+        updateddata[0].query = collectionquery;
+        break;
+    
+      default:
+        break;
+    }
+
+    await Collection.updateCollection(updateddata[0], async function(err,collectionres){
+      if(collectionres.success==true){
+        let resobj = {
+          success: true,
+          status: true,
+          result: collectionres,
+          message: "collection updated Successfully"
+        };
+        result(null, resobj); 
+      }else{
+        let resobj = {
+          success: true,
+          status: false,
+          message: "something went wrong plz try again"
+        };
+        result(null, resobj); 
+      } 
+    });
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);  
+  }  
+};
+
+/////Collection View/////////// 
+Collection.collection_view = async function collection_view(req,result) {
+  if(req.cid!=''){
+    var getcollectionquery = "select * from Collections where cid="+req.cid;
+    var getcollection = await query(getcollectionquery);
+    if(getcollection.length>0){
+        let resobj = {
+          success: true,
+          status: true,
+          result: getcollection
+        };
+        result(null, resobj); 
+      }else{
+        let resobj = {
+          success: true,
+          status: false,
+          message: "no data"
+        };
+        result(null, resobj); 
+      } 
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);  
+  }  
+};
+
+/////Collection List/////////// 
+Collection.collection_list = async function collection_list(req,result) {
+  if(req.cid!=''){
+    var getcollectionquery = "select * from Collections";
+    var getcollection = await query(getcollectionquery);
+    if(getcollection.length>0){
+        let resobj = {
+          success: true,
+          status: true,
+          result: getcollection
+        };
+        result(null, resobj); 
+      }else{
+        let resobj = {
+          success: true,
+          status: false,
+          message: "no data"
+        };
+        result(null, resobj); 
+      } 
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);  
+  }  
+};
 
 module.exports = Collection;

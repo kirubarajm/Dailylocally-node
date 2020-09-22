@@ -20,6 +20,7 @@ module.exports = function(app) {
   var quicksearch = require("../controllers/common/QuickSearchController.js");
   var Vendor = require("../controllers/common/VendorController.js");
   var Brand = require("../controllers/common/BrandController.js");
+  var Collection = require("../controllers/common/CollectionController.js");
   
 
   //////// ==============> Admin Routes <================= /////////    
@@ -219,6 +220,14 @@ app.route("/admin/user/edit").put(middleware.checkToken,routesVersioning({"1.0.0
 app.route("/admin/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration}));
 
 app.route("/admin/user/sendnotification").post(routesVersioning({"1.0.0":dluser.user_based_notification}));
+
+/////////Collections////////////////
+app.route("/admin/collection/classificationlist").post(routesVersioning({"1.0.0":Collection.get_classification_list}));
+app.route("/admin/collection/classificationfilter").post(routesVersioning({"1.0.0":Collection.classificationfilter}));
+app.route("/admin/collection/add").post(routesVersioning({"1.0.0":Collection.collection_add}));
+app.route("/admin/collection/view").post(routesVersioning({"1.0.0":Collection.collection_view}));
+app.route("/admin/collection/edit").post(routesVersioning({"1.0.0":Collection.collection_edit}));
+app.route("/admin/collection/list").post(routesVersioning({"1.0.0":Collection.collection_list}));
 
 }
 

@@ -518,7 +518,8 @@ SCM.get_po_list =async function get_po_list(req,result) {
                 if(getpolist[i].po_status ==3 || getpolist[i].po_status == 4){
                     getpolist[i].close_flag=0;
                     getpolist[i].delete_flag=0;
-                }           
+                }    
+                getpolist[i].delete_flag=0;       
             }
             var totalcount = total_count.length;
             let resobj = {
