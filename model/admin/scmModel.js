@@ -518,6 +518,8 @@ SCM.get_po_list =async function get_po_list(req,result) {
                 if(getpolist[i].po_status ==3 || getpolist[i].po_status == 4){
                     getpolist[i].close_flag=0;
                     getpolist[i].delete_flag=0;
+                }else{
+                    getpolist[i].close_flag=1;
                 }           
             }
             var totalcount = total_count.length;
@@ -1523,7 +1525,7 @@ SCM.close_po =async function close_po(req,result) {
             switch (getpo[0].po_status) {
                 case 0:                    
                 case 1:
-                    if(getpo[0].close_flag==1){
+                    // if(getpo[0].close_flag==1){
                         //////Update PO///////////////
                         var updatepoquery = "update PO set po_status=3 where zoneid="+req.zoneid+" and poid="+req.poid;
                         var updatepo = await query(updatepoquery);
@@ -1554,14 +1556,14 @@ SCM.close_po =async function close_po(req,result) {
                             };
                             result(null, resobj);
                         }
-                    }else{
-                        resobj = {
-                            success: true,
-                            status: false,
-                            message: "no receiving products try to po delete"
-                        };
-                        result(null, resobj);
-                    }                                      
+                    // }else{
+                    //     resobj = {
+                    //         success: true,
+                    //         status: false,
+                    //         message: "no receiving products try to po delete"
+                    //     };
+                    //     result(null, resobj);
+                    // }                                      
                     break;
                 case 2:
                     /////Already UN-Received//////  
