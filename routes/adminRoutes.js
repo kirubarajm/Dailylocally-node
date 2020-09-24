@@ -228,6 +228,7 @@ app.route("/admin/collection/add").post(routesVersioning({"1.0.0":Collection.col
 app.route("/admin/collection/view").post(routesVersioning({"1.0.0":Collection.collection_view}));
 app.route("/admin/collection/edit").post(routesVersioning({"1.0.0":Collection.collection_edit}));
 app.route("/admin/collection/list").post(routesVersioning({"1.0.0":Collection.collection_list}));
+app.route("/admin/collection/live").put(routesVersioning({"1.0.0":Collection.collection_live}));
 
 }
 

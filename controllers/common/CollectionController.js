@@ -66,3 +66,11 @@ exports.collection_list= function(req, res) {
     res.json(result);
   });
 };
+
+/////Collection Live/////////// 
+exports.collection_live= function(req, res) {
+  Collection.collection_live(req.body, function(err, result) {
+    if (err) res.send(err);
+    res.json(result);
+  });
+};

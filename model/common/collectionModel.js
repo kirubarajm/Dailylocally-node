@@ -432,10 +432,10 @@ Collection.get_all_collection_by_cid_v2 = async function get_all_collection_by_c
 /////Collection classification List/////////// 
 Collection.get_classification_list = async function get_classification_list(req,result) {
   var classification = [];
-  classification.push({"id":1,"name":"type-1 [brand]"});
-  classification.push({"id":2,"name":"type-2 [catagory]"});
-  classification.push({"id":3,"name":"type-3 [L1 subcategory]"});
-  classification.push({"id":4,"name":"type-4 [L2 subcategory]"});
+  classification.push({"id":1,"name":"brand"});
+  classification.push({"id":2,"name":"category"});
+  classification.push({"id":3,"name":"L1 subcategory"});
+  classification.push({"id":4,"name":"L2 subcategory"});
   let resobj = {
     success: true,
     status: true,
@@ -600,9 +600,33 @@ Collection.collection_edit = async function collection_edit(req,result) {
 /////Collection View/////////// 
 Collection.collection_view = async function collection_view(req,result) {
   if(req.cid!=''){
-    var getcollectionquery = "select * from Collections where cid="+req.cid;
+    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections where cid="+req.cid;
     var getcollection = await query(getcollectionquery);
     if(getcollection.length>0){
+      for (let i = 0; i < getcollection.length; i++) {
+        var collectionnamequery = "";
+          switch (getcollection[i].classification_type) {
+            case 1:
+              collectionnamequery = "select *,brandname as name from brand where id="+getcollection[i].classification_id;
+              break;
+            case 2:
+              collectionnamequery = "select * from Category where catid="+getcollection[i].classification_id;
+              break;
+            case 3:
+              collectionnamequery = "select * from SubcategoryL1 where scl1_id="+getcollection[i].classification_id;
+              break;
+            case 4:
+              collectionnamequery = "select * from SubcategoryL2 where scl2_id="+getcollection[i].classification_id;
+              break;          
+            default:
+              break;
+          }
+          if(collectionnamequery!=''){
+            var collectionname = await query(collectionnamequery);
+            getcollection[i].classification_id_name = collectionname[0].name;
+          }
+      }
+
         let resobj = {
           success: true,
           status: true,
@@ -630,9 +654,33 @@ Collection.collection_view = async function collection_view(req,result) {
 /////Collection List/////////// 
 Collection.collection_list = async function collection_list(req,result) {
   if(req.cid!=''){
-    var getcollectionquery = "select * from Collections";
+    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections";
     var getcollection = await query(getcollectionquery);
     if(getcollection.length>0){
+      for (let i = 0; i < getcollection.length; i++) {
+        var collectionnamequery = "";
+          switch (getcollection[i].classification_type) {
+            case 1:
+              collectionnamequery = "select *,brandname as name from brand where id="+getcollection[i].classification_id;
+              break;
+            case 2:
+              collectionnamequery = "select * from Category where catid="+getcollection[i].classification_id;
+              break;
+            case 3:
+              collectionnamequery = "select * from SubcategoryL1 where scl1_id="+getcollection[i].classification_id;
+              break;
+            case 4:
+              collectionnamequery = "select * from SubcategoryL2 where scl2_id="+getcollection[i].classification_id;
+              break;          
+            default:
+              break;
+          }
+          if(collectionnamequery!=''){
+            var collectionname = await query(collectionnamequery);
+            getcollection[i].classification_id_name = collectionname[0].name;
+          }
+      }
+
         let resobj = {
           success: true,
           status: true,
@@ -647,6 +695,55 @@ Collection.collection_list = async function collection_list(req,result) {
         };
         result(null, resobj); 
       } 
+  }else{
+    let resobj = {
+      success: true,
+      status: false,
+      message: "check your post values"
+    };
+    result(null, resobj);  
+  }  
+};
+
+/////Collection Live/////////// 
+Collection.collection_live = async function collection_live(req,result) {
+  if(req.cid!=''){
+    var gatstatusquery = "select * from Collections where cid="+req.cid;
+    var gatstatus = await query(gatstatusquery);
+    if(gatstatus.length>0){
+      var updatestatus = 0;
+      if(gatstatus[0].active_status ==0 || gatstatus[0].active_status==''){
+          updatestatus = 1;
+      }
+
+      var statusupdatequery = "update Collections set active_status="+updatestatus+" where cid="+req.cid;
+      var statusupdate = await query(statusupdatequery);
+      if(statusupdate.affectedRows > 0){
+        var gatcollectionquery = "select * from Collections where cid="+req.cid;
+        var gatcollection = await query(gatcollectionquery);
+        let resobj = {
+          success: true,
+          status: true,
+          result: gatcollection,
+          message: "collection updated successfully"
+        };
+        result(null, resobj); 
+      }else{
+        let resobj = {
+          success: true,
+          status: false,
+          message: "something went wrong plz try again"
+        };
+        result(null, resobj); 
+      }
+    }else{
+      let resobj = {
+        success: true,
+        status: false,
+        message: "no data"
+      };
+      result(null, resobj);
+    }
   }else{
     let resobj = {
       success: true,
