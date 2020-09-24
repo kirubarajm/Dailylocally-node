@@ -607,7 +607,7 @@ Collection.collection_view = async function collection_view(req,result) {
         var collectionnamequery = "";
           switch (getcollection[i].classification_type) {
             case 1:
-              collectionnamequery = "select *,brandname as name from brand where id="+getcollection[i].classification_id;
+              collectionnamequery = "select *,brandname as name from Brand where id="+getcollection[i].classification_id;
               break;
             case 2:
               collectionnamequery = "select * from Category where catid="+getcollection[i].classification_id;
@@ -661,7 +661,7 @@ Collection.collection_list = async function collection_list(req,result) {
         var collectionnamequery = "";
           switch (getcollection[i].classification_type) {
             case 1:
-              collectionnamequery = "select *,brandname as name from brand where id="+getcollection[i].classification_id;
+              collectionnamequery = "select *,brandname as name from Brand where id="+getcollection[i].classification_id;
               break;
             case 2:
               collectionnamequery = "select * from Category where catid="+getcollection[i].classification_id;
