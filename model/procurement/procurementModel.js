@@ -120,7 +120,7 @@ Procurement.new_procurement_create=async function new_procurement_create(new_Pro
       var checkprocurement = await query(checkprocurementquery);
       if(checkprocurement.length>0){
         ////Update////
-        var qty = parseInt(checkprocurement[0].quantity) + parseInt(get_product[i].quantity);
+        let qty = parseInt(checkprocurement[0].quantity) + parseInt(get_product[i].quantity);
         var updateprocurmentquery = "update Procurement set quantity="+qty+" where prid="+checkprocurement[0].prid;
         var updateprocurment = await query(updateprocurmentquery);
         if(updateprocurment.affectedRows>0){

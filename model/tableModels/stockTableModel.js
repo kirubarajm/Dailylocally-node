@@ -8,6 +8,7 @@ var Stock = function(stock) {
   this.stockid = stock.stockid;
   this.vpid = stock.vpid;
   this.quantity = stock.quantity ||0;
+  this.quantity_mapping = stock.quantity_mapping ||0;
   this.zoneid = stock.zoneid;
   this.stock_status = stock.stock_status;
 }

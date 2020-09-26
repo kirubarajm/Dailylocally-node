@@ -405,8 +405,8 @@ SCM.create_po =async function create_po(req,result) {
                                                     }else{
                                                         ////Insert /////
                                                         var stockdata = [];
-                                                        stockdata.push({"vpid":vendor_polist[j].vpid,"quantity_mapping":vendor_polist[j].qty,"zoneid":req.zoneid});
-                                                        Stock.createStock(stockdata,async function(err,stockres){});
+                                                        stockdata.push({"vpid":vendor_polist[j].vpid,"quantity_mapping":parseInt(vendor_polist[j].qty),"zoneid":req.zoneid});
+                                                        Stock.createStock(stockdata[0],async function(err,stockres){});
                                                     }                                                    
                                                 }
                                             });
@@ -503,7 +503,7 @@ SCM.get_po_list =async function get_po_list(req,result) {
         if(req.report && req.report==1){
             var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc";
         }else{
-            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,if(sum(pop.received_quantity>0),1,0) as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc limit " +startlimit +"," +pagelimit +"";
+            var getpolistquery = "select po.poid,po.po_pdf_url, CONCAT('"+domainname+":"+port+"/uploads/po_pdf/',po.poid,'.pdf') as po_pdf,po.vid,ven.name,po.created_at,if(sum(pop.requested_quantity),sum(pop.requested_quantity),0) as total_quantity,if(sum(pop.requested_quantity-pop.received_quantity),sum(pop.requested_quantity-pop.received_quantity),0) as open_quqntity, if(sum(pop.received_quantity),sum(pop.received_quantity),0) as received_quantity,po.cost,pop.due_date,po.po_status,if(sum(pop.received_quantity>0),0,1) as delete_flag,'if(sum(pop.received_quantity>0),1,0)' as close_flag from PO as po left join POproducts as pop on pop.poid=po.poid left join Vendor as ven on ven.vid=po.vid where po.zoneid="+req.zoneid+" "+where+" group by po.poid order by po.poid desc limit " +startlimit +"," +pagelimit +"";
         }
         var getpolist = await query(getpolistquery);
 
@@ -1406,6 +1406,13 @@ SCM.delete_po =async function delete_po(req,result) {
                                         var updateproquery = "update Procurement set pr_status=1 where prid="+getpopbefore[i].prid;
                                         var updatepro = await query(updateproquery);
                                     }
+
+                                    /////Remove Mapping Stock Quantity//////////
+                                    var checkpoid= [];
+                                    checkpoid.push({"poid":req.poid});
+                                    await SCM.update_stock_mapping_quantity(checkpoid[0],async function(err,stockmappingres){ });
+                                    ////////////PO Log ////////////////
+                                    
                                     polog_data = [];
                                     polog_data.push({"poid":req.poid,"from_type":5,"zoneid":req.zoneid,"created_by":req.done_by});
                                     POLog.createPOlog(polog_data[0],async function(err,polog_datares){  }); 
@@ -1630,7 +1637,7 @@ SCM.update_stock_mapping_quantity =async function update_stock_mapping_quantity(
         if(popdatas.length>0){
             for (let i = 0; i < popdatas.length; i++) {
                 var reqqty = popdatas[i].requested_quantity;
-                var receivedqty =parseInt(popdatas[i].received_quantity) + parseInt(popdatas[i].ditional_quantity);                       
+                var receivedqty =parseInt(popdatas[i].received_quantity) + parseInt(popdatas[i].aditional_quantity);                       
                 if(reqqty>receivedqty){
                     var updatedqty = parseInt(reqqty) - parseInt(receivedqty);
                     var getstockmappingquery = "select * from Stock where vpid="+popdatas[i].vpid;
@@ -1641,7 +1648,7 @@ SCM.update_stock_mapping_quantity =async function update_stock_mapping_quantity(
                         if(upqty>0){
                             updatemappinqty = upqty;
                         }
-                        var updatestockmappingquery = "update Stock set quantity_mapping="+upqty+" where vpid="+popdatas[i].vpid;
+                        var updatestockmappingquery = "update Stock set quantity_mapping="+updatemappinqty+" where vpid="+popdatas[i].vpid;
                         var updatestockmapping = await query(updatestockmappingquery);
                         if(updatestockmapping.affectedRows>0){
                             let resobj = {
