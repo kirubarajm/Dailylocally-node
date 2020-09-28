@@ -484,7 +484,8 @@ var get_whatsup = await query("select co.* from join_community jd left join  Com
     {
       
         "event": {
-            "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599470824386-Community%20Event%20Thumb.jpg",
+            // "image_url": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599470824386-Community%20Event%20Thumb.jpg",
+            "image_url":"https://dailylocally.s3.ap-south-1.amazonaws.com/upload/moveit/1600441155234-Group%20535.jpg",
             "topic": "community_event",
             "title":"Community events",
             "home_community_topic":"home_page",
