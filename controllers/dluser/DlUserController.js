@@ -227,12 +227,43 @@ exports.community_list = function(req, res) {
 };
 
 exports.join_new_community = function(req, res) {
+  
   Community.join_new_community(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);
   });
 };
 
+exports.join_new_community_v2 = function(req, res) {
+  req.body.change_address = req.body.change_address || false;
+
+  if (!req.body.comid) {
+    res
+      .status(400)
+      .send({ error: true, status: false, message: "Please provide comid" });
+  } else if (!req.body.lat) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide lat"
+      });
+  }else if (!req.body.lon) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide lon"
+      });
+  } else {
+  Community.join_new_community_v2(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+}
+};
 exports.join_new_community_approval= function(req, res) {
   Community.join_new_community_approval(req.body, function(err, user) {
     if (err) res.send(err);
@@ -258,6 +289,33 @@ exports.new_community_registration= function(req, res) {
   } else {
     
     Community.new_community_registration(new_community, function(err, user) {
+      if (err) res.send(err);
+      res.send(user);
+    });
+  }
+  
+};
+
+
+exports.new_community_registration_v2= function(req, res) {
+  // var new_community = new Community(req.body);
+  //  new_community.request_type= req.body.request_type || 1;
+  //  new_community.change_address= req.body.change_address;
+  if (!req.body.requested_userid) {
+    res
+      .status(400)
+      .send({ error: true, status: false, message: "Please provide requested_userid" });
+  } else if (!req.body.communityname) {
+    res
+      .status(400)
+      .send({
+        error: true,
+        status: false,
+        message: "Please provide communityname"
+      });
+  } else {
+    
+    Community.new_community_registration_v2(req.body, function(err, user) {
       if (err) res.send(err);
       res.send(user);
     });
