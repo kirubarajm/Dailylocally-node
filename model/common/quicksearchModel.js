@@ -40,8 +40,8 @@ const day_order_address_update_cron = new CronJob("0 22 * * *", async function(s
 day_order_address_update_cron.start();
 
 ///// Procurement Qty Set To Zero ///////////
-const procurement_qty_cron = new CronJob("0 17 * * *", async function(search, result) {
-  console.log("Procurment Quantity Cron at 5 Pm ====>");
+const procurement_qty_cron = new CronJob("0 2 * * *", async function(search, result) {
+  console.log("Procurment Quantity Cron at 2 am ====>");
   var stockmapping = [];
   stockmapping.push({"zoneid":1});
   await SCM.remove_boh_mapping(stockmapping[0], async function(err,stockmappingres){
