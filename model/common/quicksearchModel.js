@@ -52,7 +52,7 @@ const procurement_qty_cron = new CronJob("0 17 * * *", async function(search, re
 
 ///// Create Invoice ///////////
 const create_invoice_cron = new CronJob("15 0 * * *", async function(search, result) {
-  console.log("Created Invoice Cron at 1 am ====>");
+  console.log("Created Invoice Cron at 12:15am ====>");
   var getdayordersquery = "select * from Dayorder where date(date)=CURDATE()";
   var getdayorders = await query(getdayordersquery);
   if(getdayorders.length>0){

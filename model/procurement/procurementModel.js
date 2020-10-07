@@ -111,16 +111,17 @@ Procurement.new_procurement_create_old=async function new_procurement_create_old
 
 //////// Create New Precurment //////////
 Procurement.new_procurement_create=async function new_procurement_create(new_Procurement,result) {
-  var get_product_query= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid,'"+new_Procurement.done_by+"' as created_by from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.vpid"
+  var get_product_query= "select dop.vpid,dop.productname,sum(dop.quantity) as quantity,dayo.zoneid,dop.id as dopid,'"+new_Procurement.done_by+"' as created_by from Dayorder_products as dop left join Dayorder as dayo on dayo.id=dop.doid where dop.doid IN("+new_Procurement.doid+") and dop.scm_status=0 group by dop.vpid";
   var get_product = await query(get_product_query);
 
-  if (get_product.length !=0) {
+  if (get_product.length>0) {
     for (let i = 0; i < get_product.length; i++) {
       var checkprocurementquery = "select * from Procurement where vpid="+get_product[i].vpid+" and pr_status=1";
       var checkprocurement = await query(checkprocurementquery);
       if(checkprocurement.length>0){
         ////Update////
-        let qty = parseInt(checkprocurement[0].quantity) + parseInt(get_product[i].quantity);
+        var qty = 0;
+        qty = parseInt(checkprocurement[0].quantity) + parseInt(get_product[i].quantity);
         var updateprocurmentquery = "update Procurement set quantity="+qty+" where prid="+checkprocurement[0].prid;
         var updateprocurment = await query(updateprocurmentquery);
         if(updateprocurment.affectedRows>0){

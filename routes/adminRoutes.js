@@ -20,7 +20,7 @@ module.exports = function(app) {
   var quicksearch = require("../controllers/common/QuickSearchController.js");
   var Vendor = require("../controllers/common/VendorController.js");
   var Brand = require("../controllers/common/BrandController.js");
-  
+  var Collection = require("../controllers/common/CollectionController.js");
 
   //////// ==============> Admin Routes <================= /////////    
   ///////// Search /////////////
@@ -203,6 +203,15 @@ app.route("/admin/brand/add").post(routesVersioning({"1.0.0":Brand.createBrandMo
 app.route("/admin/brand/edit").post(routesVersioning({"1.0.0":Brand.updateBrandModel}));
 app.route("/admin/brand/view").post(routesVersioning({"1.0.0":Brand.BrandModelview}));
 app.route("/admin/brand/list").post(routesVersioning({"1.0.0":Brand.BrandModelList}));
+
+/////////Collections////////////////
+app.route("/admin/collection/classificationlist").post(routesVersioning({"1.0.0":Collection.get_classification_list}));
+app.route("/admin/collection/classificationfilter").post(routesVersioning({"1.0.0":Collection.classificationfilter}));
+app.route("/admin/collection/add").post(routesVersioning({"1.0.0":Collection.collection_add}));
+app.route("/admin/collection/view").post(routesVersioning({"1.0.0":Collection.collection_view}));
+app.route("/admin/collection/edit").post(routesVersioning({"1.0.0":Collection.collection_edit}));
+app.route("/admin/collection/list").post(routesVersioning({"1.0.0":Collection.collection_list}));
+app.route("/admin/collection/live").put(routesVersioning({"1.0.0":Collection.collection_live}));
 
 
 
