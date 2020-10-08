@@ -150,20 +150,31 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
 
   var get_collection = await query("select * from  Collections where cid='"+req.cid+"'");
 
-  // console.log(get_collection[0].product_name);
+  
+  if (get_collection[0].classification_type=1) {
+    var sub_category_query = "select sub1.* from ProductMaster as pm  left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id  where zl1.active_status=1 and pm.brand= '"+get_collection[0].classification_id+"' and pl.live_status=1 group by pm.scl1_id";
 
-  var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
-   console.log(brand_list)
-  var sub_category_query = "select sub1.* from ProductMaster as pm  left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id  where zl1.active_status=1 and pm.brand= '"+brand_list[0].id+"' and pl.live_status=1 group by pm.scl1_id";
+  } else if(get_collection[0].classification_type=2) {
+    var sub_category_query = "select sub1.* from ProductMaster as pm  left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid join SubcategoryL1 as sub1 on sub1.scl1_id=pm.scl1_id left join Category cat on cat.catid=sub1.catid  left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =sub1.scl1_id  where cat.catid='"+get_collection[0].classification_id+"' and zl1.active_status=1 and  pl.live_status=1 group by pm.scl1_id";
 
-console.log(sub_category_query)
+   }else if(get_collection[0].classification_type=3) {
+    var sub_category_query = "Select l1.* from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' and l1.scl1_id=  '"+get_collection[0].classification_id+"'  ";
+
+  }else if(get_collection[0].classification_type=4) {
+    var sub_category_query = "Select l1.* from SubcategoryL2 as l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id left join Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id where l2.scl2_id='"+get_collection[0].classification_id+"'  and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"' group by l1.scl1_id";
+  }
+
+  // var brand_list = await query("select * from Brand where brandname = '"+get_collection[0].product_name+"' ");
+
+
+// console.log(sub_category_query)
 sql.query(sub_category_query,async function(err, res) {
   if (err) {
     result(err, null);
   } else {
 
 
-    console.log(res.length);
+    // console.log(res.length);
     // var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
     var get_sub_cat_images = await query("select *,image as image_url from Category where catid='"+res[0].catid+"'");
    

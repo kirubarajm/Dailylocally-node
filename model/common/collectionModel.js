@@ -54,7 +54,7 @@ if (get_nearby_zone.length !=0) {
             res[i].clickable=false;
           }
 
-          console.log("res[i].classification_type",res[i].classification_type);
+
           if (res[i].classification_type==1) { 
             //brand
            product_query = "select pm.*,pl.*  from  ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.id = '"+res[i].classification_id+"' and pl.live_status=1"
@@ -173,8 +173,6 @@ Collection.getcollectionlist = async function getcollectionlist(res2,req,result)
 
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
 
-  console.log("------------------------req.query",req.query);
-  console.log("------------------------------------",req.cid);
     await sql.query(req.query,[req.cid],async function(err, res1) {
       if (err) {
         result(err, null);
