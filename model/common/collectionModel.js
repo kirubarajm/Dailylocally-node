@@ -173,8 +173,6 @@ Collection.getcollectionlist = async function getcollectionlist(res2,req,result)
 
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
 
-  console.log("------------------------req.query",req.query);
-  console.log("------------------------------------",req.cid);
     await sql.query(req.query,[req.cid],async function(err, res1) {
       if (err) {
         result(err, null);
