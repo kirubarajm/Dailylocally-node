@@ -895,7 +895,7 @@ ProductMaster.get_collection_brand_list = async function get_collection_brand_li
     var brand_list_query = "select br.id as brand,br.brandname from Brand as br left join ProductMaster as pm on pm.brand=br.id left join SubcategoryL2  as sub2 on sub2.scl2_id=pm.scl2_id where sub2.scl2_id='"+get_collection[0].classification_id+"' group by br.id";
   }
 
-  console.log(brand_list_query);
+  // console.log(brand_list_query);
   sql.query(brand_list_query,async function(err, res) {
     if (err) {
       result(err, null);
