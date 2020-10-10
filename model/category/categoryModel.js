@@ -214,10 +214,9 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
   //var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
-  userdetails[0].cluid = userdetails[0].cluid || 1;
+    
   // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
   var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
-  // console.log("category_query",category_query);
   sql.query(category_query,async function(err, res) {
     if (err) {
       result(err, null);
@@ -262,7 +261,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         "approval_status": true,
         "join_status": true,
         "show_video":true
-      }];
+    }];
 
 
       var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2 order by comid desc limit 1");
@@ -367,7 +366,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         } else {
         
        
-             console.log(res3.status);
+          //  console.log(res3.status);
             if (res3.status==true) {
               var collectionlist        = {};
               collectionlist.collection = res3.collection;
@@ -379,9 +378,9 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               const landscape_collectionlist  = collection.filter(collection => collection.tile_type > 1);
 
 
-              console.log(collection.length);
-              console.log(potrate_collectionlist.length);
-              console.log(landscape_collectionlist.length);
+              // console.log(collection.length);
+              // console.log(potrate_collectionlist.length);
+              // console.log(landscape_collectionlist.length);
            
               for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
@@ -440,11 +439,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
             // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
 
-       
-
-
-
-           
+        
 
             let resobj = {
               success: true,
@@ -491,7 +486,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 //cart details for ear user
 Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,subscription,result) {
-console.log("req",req);
+// console.log("req",req);
   var tempmessage = "";
   var coupon__error_message = "";
   var gst = 0;

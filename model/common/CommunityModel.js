@@ -962,8 +962,16 @@ Community.admin_community_list =async function admin_community_list(req, result)
    
   var zoneid = req.zoneid || 1;
 
+  if(req.report && req.report==1){
+    var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc  ";
+    // var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=8 then 'Moveit Pickup'  when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)'  when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
+  
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+  }else{
+        var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+      }
+
+// var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
     //  console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
@@ -972,7 +980,7 @@ var admin_community = await query(admin_community_list);
 var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc");
 
 
-
+console.log("req.report",admin_community.length); 
   if (admin_community.length !=0) {
 
     
@@ -1014,7 +1022,7 @@ var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(
       admin_community[i].total_orders=total_revenue[0].total_orders || 0;
     }
 
-
+    console.log("req.report",admin_community.length); 
     let resobj = {
       success: true,
       status: true,
