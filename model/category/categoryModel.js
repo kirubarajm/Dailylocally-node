@@ -366,7 +366,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         } else {
         
        
-            // console.log(res3.status);
+          //  console.log(res3.status);
             if (res3.status==true) {
               var collectionlist        = {};
               collectionlist.collection = res3.collection;
@@ -439,11 +439,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
             // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
 
-       
-
-
-
-           
+        
 
             let resobj = {
               success: true,
@@ -490,7 +486,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 //cart details for ear user
 Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,subscription,result) {
-console.log("req",req);
+// console.log("req",req);
   var tempmessage = "";
   var coupon__error_message = "";
   var gst = 0;

@@ -7,7 +7,7 @@ var constant = require('../constant.js');
 var Notification = require("../../model/common/notificationModel.js");
 var sendsms =  require("../common/smsModel");
 var PushConstant = require("../../push/PushConstant.js");
-
+var moment = require("moment");
 
 //Task object constructor
 var Community = function(Community) {
@@ -190,6 +190,194 @@ Community.join_new_community =async function join_new_community(req, result){
 
 };
 
+
+Community.join_new_community_v2 =async function join_new_community_v2(req, result){
+
+
+  let order_available = false;
+  let alert_title = "";
+  let alert_message = "";
+
+  if (req.change_address ==false) {
+    
+    // let querycommunity = "select ( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where comid='"+req.comid+"'";
+    // //    console.log("queryaddress",queryaddress);
+    //     var community_details=  await query(querycommunity);
+
+    //     if (community_details.length !=0) {
+
+    //       community_details[0].distance  = community_details[0].distance  * 1.6;
+    //       console.log(community_details[0].distance);
+    //         if (community_details[0].distance < 0.5) {
+    //           show_alert=true;
+    //            alert_title = "Cannot complete registration as you have upcoming orders";
+    //            alert_message = "Please cancel your upcoming orders or get in touch with our support to complete registration."
+    //         }
+    //     } 
+
+        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+req.userid+"' ");
+
+        if (orderslist.length !=0) {
+          order_available=true;
+          alert_title = "Cannot complete registration as you have upcoming orders";
+          alert_message = "Please cancel your upcoming orders or get in touch with our support to complete registration."
+    
+        } else{
+          alert_title = "Your delivery address will be changed";
+          alert_message = "All your upcoming orders will be delivered to the registered apartment address."
+        }
+
+
+        let resobj = {
+          success: true,
+          status: false,
+          alert_title : alert_title || '',
+          alert_message:alert_message || '',
+          order_available:order_available,
+          show_alert:true
+        };
+        result(null, resobj);
+    
+  }else{
+
+
+    var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
+
+  if (join_community.length !=0) {
+
+    if (join_community[0].status==0) {
+      
+
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Sorry, Already you request!"
+      };
+      result(null, resobj);
+
+    } else if(join_community[0].status==1) {
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Sorry! Already Joined Community"
+      };
+      result(null, resobj);
+    }else if(join_community[0].status==2) {
+      let resobj = {
+        success: true,
+        status: false,
+        message: "Already Your Request rejected."
+      };
+      result(null, resobj);
+    }
+
+    
+  }else{
+
+    var new_community = {};
+    new_community.userid = req.userid;
+    new_community.comid = req.comid;
+    new_community.status = 1;
+    new_community.profile_image = req.profile_image || "";
+    new_community.flat_no = req.flat_no;
+    new_community.floor_no=req.floor_no;
+    var image =req.profile_image || '';
+
+
+    var get_community_details = await query("select * from Community where comid='"+req.comid+"' and status=1");
+
+
+    var update_image = await query("update User set profile_image='"+new_community.profile_image+"' where userid = '"+req.userid+"'");
+    var update_address= await query("update Address set flat_house_no='"+req.flat_no+"',block_name='"+req.floor_no+"',pincode='"+get_community_details[0].pincode+"',lat='"+get_community_details[0].lat+"',lon='"+get_community_details[0].lon+"',landmark='"+get_community_details[0].communityname+"',address_type=1,address_default=1,city='"+get_community_details[0].area+"',google_address='"+get_community_details[0].area+"',complete_address='"+get_community_details[0].community_address+"',block_name='"+req.floor_no+"',apartment_name='"+get_community_details[0].communityname+"' where userid = '"+req.userid+"' and address_default=1 ");
+
+    sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
+      if(err) {
+          console.log("error: ", err);
+          result(null, err);
+      }
+      else{
+
+        sql.query("Select * from User where userid = '"+req.userid+"' ",async function(err, userdetails) {
+          if (err) {
+            result(err, null);
+          } else {
+  
+
+  
+           var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
+ 
+           if (address_details.length !=0) {
+             //  userdetails = userdetails.push(address_details[0]);
+ 
+              userdetails[0].aid= address_details[0].aid;
+              userdetails[0].lat= address_details[0].lat;
+              userdetails[0].lon= address_details[0].lon;
+              userdetails[0].city=address_details[0].city;
+            userdetails[0].address_type= address_details[0].address_type;
+            userdetails[0].delete_status=address_details[0].delete_status;
+            userdetails[0].address_default=address_details[0].address_default;
+            userdetails[0].flat_house_no=address_details[0].flat_house_no;
+            userdetails[0].plot_house_no=address_details[0].plot_house_no;
+            userdetails[0].floor=address_details[0].floor;
+            userdetails[0].block_name=address_details[0].block_name;
+            userdetails[0].apartment_name=address_details[0].apartment_name;
+            userdetails[0].google_address=address_details[0].google_address;
+            userdetails[0].complete_address=address_details[0].complete_address;
+ 
+ 
+ 
+
+           }else{
+             userdetails[0].aid=  0;
+             userdetails[0].lat= 0.0;
+             userdetails[0].lon= 0.0;
+             userdetails[0].city='';
+           userdetails[0].address_type= 0;
+           userdetails[0].delete_status= 0;
+           userdetails[0].address_default= 0;
+           userdetails[0].flat_house_no='';
+           userdetails[0].plot_house_no='';
+           userdetails[0].floor='';
+           userdetails[0].block_name='';
+           userdetails[0].apartment_name='';
+           userdetails[0].google_address='';
+           userdetails[0].complete_address='';
+   
+ 
+            }
+         
+        
+  
+ 
+            let resobj = {
+              success: true,
+              status: true,
+              result : userdetails,
+              message: "Thanks for your Request!"
+            };
+            result(null, resobj);
+          }
+        });
+      }
+        
+
+      //   let resobj = {  
+      //     success: true,
+      //     status: true,
+      //     message: "Thanks for your Request!"
+      //     }; 
+    
+      //  result(null, resobj);
+
+      }); 
+
+  }
+
+
+  }
+
+};
+
 Community.join_new_community_approval=async function join_new_community_approval(req, result){
 
   var community = await query("select * from Community where  comid='"+req.comid+"' ");
@@ -213,6 +401,13 @@ Community.join_new_community_approval=async function join_new_community_approval
 
       if (community[0].request_type=1) {
         var orders = await query("SELECT * from User where userid ='" +community[0].requested_userid+"'" );
+
+        var get_community_details = await query("select * from Community where comid='"+req.comid+"' and status=1");
+
+
+    var update_image = await query("update User set profile_image='"+new_community.profile_image+"' where userid = '"+req.userid+"'");
+    var update_address= await query("update Address set flat_house_no='"+get_community_details[0].flat_no+"',block_name='"+get_community_details[0].floor_no+"',pincode='"+get_community_details[0].pincode+"',lat='"+get_community_details[0].lat+"',lon='"+get_community_details[0].lon+"',landmark='"+get_community_details[0].communityname+"',address_type=1,address_default=1,city='"+get_community_details[0].area+"',google_address='"+get_community_details[0].area+"',complete_address='"+get_community_details[0].community_address+"',block_name='"+req.floor_no+"',apartment_name='"+get_community_details[0].communityname+"' where userid = '"+req.userid+"' and address_default=1 ");
+
 
       await Notification.orderdlPushNotification(orders,null,PushConstant.Pageid_dl_community_approval_notification);
       sendsms.community_send_sms(1,orders[0].phoneno);   
@@ -379,6 +574,115 @@ Community.new_community_registration =async function new_community_registration(
 
 };
 
+
+Community.new_community_registration_v2 =async function new_community_registration_v2(new_community, result){
+
+
+  // var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
+
+  let order_available = false;
+  let alert_title = "";
+  let alert_message = "";
+
+  if (new_community.change_address ==false) {
+    
+    // let querycommunity = "select ( 3959 * acos( cos( radians('"+req.lat+"') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('"+req.lon+"') ) + sin( radians('"+req.lat+"') ) * sin(radians(lat)) ) ) AS distance from Community where comid='"+req.comid+"'";
+    // //    console.log("queryaddress",queryaddress);
+    //     var community_details=  await query(querycommunity);
+
+    //     if (community_details.length !=0) {
+
+    //       community_details[0].distance  = community_details[0].distance  * 1.6;
+    //       console.log(community_details[0].distance);
+    //         if (community_details[0].distance < 0.5) {
+    //           show_alert=true;
+    //            alert_title = "Cannot complete registration as you have upcoming orders";
+    //            alert_message = "Please cancel your upcoming orders or get in touch with our support to complete registration."
+    //         }
+    //     } 
+
+        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+new_community.userid+"' ");
+
+        if (orderslist.length !=0) {
+          order_available=true;
+          alert_title = "Cannot complete registration as you have upcoming orders";
+          alert_message = "Please cancel your upcoming orders or get in touch with our support to complete registration."
+    
+        } else{
+          alert_title = "Your delivery address will be changed";
+          alert_message = "All your upcoming orders will be delivered to the registered apartment address."
+        }
+
+
+        let resobj = {
+          success: true,
+          status: false,
+          alert_title : alert_title || '',
+          alert_message:alert_message || '',
+          order_available:order_available,
+          show_alert:true
+        };
+        result(null, resobj);
+    
+  }else{
+
+  var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+  new_community.lat +
+  "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+  new_community.lon +
+  "') ) + sin( radians('" +
+  new_community.lat +
+  "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+
+
+// if (get_nearby_zone.length !=0) {
+  
+
+  // if (get_nearby_zone[0].distance > radiuslimit) {
+    new_community.zoneid =1
+  // }
+// }
+
+// console.log("new_community",new_community);
+
+var community = new Community(new_community);
+//  new_community.request_type= req.body.request_type || 1;
+//  new_community.change_address= req.body.change_address;
+  sql.query("INSERT INTO Community set ?", community,async function (err, res) {            
+    if(err) {
+        console.log("error: ", err);
+        result(null, err);
+    }
+    else{
+
+      // res.insertId
+      if (new_community.request_type==1) {
+        var image =new_community.image|| '';
+        var update_image = await query("update User set profile_image='"+image+"' where userid = '"+new_community.requested_userid+"'");
+
+        var join_community = {};
+        join_community.userid = new_community.requested_userid;
+        join_community.comid = res.insertId;
+        join_community.status = 0;
+        join_community.profile_image = new_community.image;
+        join_community.flat_no = new_community.flat_no;
+        join_community.floor_no=new_community.floor_no;
+       Community.join_new_community1(join_community);
+      }
+ 
+
+      let resobj = {  
+        success: true,
+        status: true,
+        message: "Thanks for your Request!"
+        }; 
+  
+     result(null, resobj);
+    }
+    }); 
+  
+  }
+};
 Community.new_community_approval=async function new_community_approval(req, result){
 
   var community = await query("select * from Community where comid='"+req.comid+"'  ");
@@ -432,6 +736,72 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     
   }else{
 
+    // sql.query("Select * from User where userid = '"+req.userid+"' ",async function(err, userdetails) {
+    //   if (err) {
+    //     result(err, null);
+    //   } else {
+
+        var userdetails = await query("Select * from User where userid = '"+req.userid+"' ");
+
+
+       var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
+
+       if (address_details.length !=0) {
+         //  userdetails = userdetails.push(address_details[0]);
+
+          userdetails[0].aid= address_details[0].aid;
+          userdetails[0].lat= address_details[0].lat;
+          userdetails[0].lon= address_details[0].lon;
+          userdetails[0].city=address_details[0].city;
+        userdetails[0].address_type= address_details[0].address_type;
+        userdetails[0].delete_status=address_details[0].delete_status;
+        userdetails[0].address_default=address_details[0].address_default;
+        userdetails[0].flat_house_no=address_details[0].flat_house_no;
+        userdetails[0].plot_house_no=address_details[0].plot_house_no;
+        userdetails[0].floor=address_details[0].floor;
+        userdetails[0].block_name=address_details[0].block_name;
+        userdetails[0].apartment_name=address_details[0].apartment_name;
+        userdetails[0].google_address=address_details[0].google_address;
+        userdetails[0].complete_address=address_details[0].complete_address;
+
+
+
+
+       }else{
+         userdetails[0].aid=  0;
+         userdetails[0].lat= 0.0;
+         userdetails[0].lon= 0.0;
+         userdetails[0].city='';
+       userdetails[0].address_type= 0;
+       userdetails[0].delete_status= 0;
+       userdetails[0].address_default= 0;
+       userdetails[0].flat_house_no='';
+       userdetails[0].plot_house_no='';
+       userdetails[0].floor='';
+       userdetails[0].block_name='';
+       userdetails[0].apartment_name='';
+       userdetails[0].google_address='';
+       userdetails[0].complete_address='';
+
+
+         }
+     
+    
+
+
+    //     let resobj = {
+    //       success: true,
+    //       status: true,
+    //       result : userdetails,
+    //       message: "Thanks for your Request!"
+    //     };
+    //     result(null, resobj);
+    //   }
+    // });
+  
+
+
+
 
     var get_total_values = await query("select sum(cod_price + online_price) as total from Dayorder where userid='"+req.userid+"' and dayorderstatus=10");
     var total_values= 0;
@@ -467,6 +837,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     let resobj = {
       success: true,
       status: true,
+      userdetails:userdetails,
       result: community
     };
     result(null, resobj);
@@ -594,8 +965,16 @@ Community.admin_community_list =async function admin_community_list(req, result)
    
   var zoneid = req.zoneid || 1;
 
+  if(req.report && req.report==1){
+    var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc  ";
+    // var getdayorderquery = "select drs.*,if(drs.invoice_no!='',CONCAT('"+domainname+":"+port+"/uploads/invoice_pdf/',drs.id,'.pdf'),'') as invoice_url,if(drs.virtualkey=1,'Virtual Order','Real Order')  as Virtual_msg,us.name,us.phoneno,us.email,sum(orp.quantity * orp.price) as total_product_price,count(DISTINCT orp.vpid) u_product_count,sum(orp.quantity) as order_quantity,sum(orp.received_quantity) as sorted_quantity,JSON_ARRAYAGG(JSON_OBJECT('quantity', orp.quantity,'vpid',orp.vpid,'price',orp.price,'productname',orp.productname,'refund_status',orp.refund_status,'refund_status_msg',if(orp.refund_status=0,'Not refunded',if(orp.refund_status=1,'Refund requested','Refunded')))) AS products,case when drs.dayorderstatus=0 then 'open' when drs.dayorderstatus < 5 then 'SCM In-Progress'  when drs.dayorderstatus=5 then 'Qc' when drs.dayorderstatus=6 then 'Ready to Dispatch' when drs.dayorderstatus=10 then 'delivered' when drs.dayorderstatus=8 then 'Moveit Pickup'  when drs.dayorderstatus=7 then 'Moveit Assign' when drs.dayorderstatus=6 then 'Ready to Dispatch(QA)'  when drs.dayorderstatus=11 then 'Cancelled' when drs.dayorderstatus=12 then 'Return' end as dayorderstatus_msg,CASE WHEN (drs.reorder_status=0 || drs.reorder_status=null)then(select id from Dayorder where reorder_id=drs.id order by id desc limit 1) else 0 END as  Reorderid,if(HOUR(drs.order_place_time) <= 19,1,2) as slot,if(HOUR(drs.order_place_time) <= 19,'Slot 1','Slot 2') as slot_msg,if(drs.payment_status=1,'Paid','Not paid')  as payment_status_msg  from Dayorder drs left join Dayorder_products orp on orp.doid=drs.id left join User us on us.userid=drs.userid where zoneid="+Dayorder.zoneid+" "+where+" group by drs.id,drs.userid order by drs.id desc";
+  
 
-var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+  }else{
+        var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
+      }
+
+// var admin_community_list = "select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,us.name,us.profile_image from Community co left outer join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where co.zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc limit " +startlimit +"," +pagelimit +" ";
 
     //  console.log("admin_community_list",admin_community_list);
 var admin_community = await query(admin_community_list);  
