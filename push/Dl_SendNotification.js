@@ -26,17 +26,17 @@ exports.sendNotificationAndroid = function(token,dat,app_type) {
     priority: "high",
     timeToLive: 60 * 60 * 24 // 1 day
   };
- // dat.content_available = '1';
- console.log(token);
- console.log(dat);
- console.log(app_type);
+// dat.content_available = '1';
+//  console.log(token);
+ console.log("dat",dat);
+//  console.log(app_type);
   var payload = {
     data: dat,
-    // notification: {
-    //   title: dat.title,
-    //   body: dat.message, // <= CHANGE
-    //   sound : "default"
-    // }
+    notification: {
+      title: dat.title,
+      body: dat.message, // <= CHANGE
+      sound : "default"
+    }
   };
   if (app_type===2) {
     dat.app_type=''+app_type;

@@ -71,6 +71,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
                 else{
 
                     var address=  await query("select * from Address WHERE userid='"+res.insertId+"'");
+                    var update_addr = await query("update User set address_created=1 where userid = '"+new_address.userid+"'"); 
                   let sucobj=true;
                   let mesobj = "Address Created successfully";
                   let resobj = {  

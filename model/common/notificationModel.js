@@ -319,7 +319,7 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 
 Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
  
-  console.log("userid",userid);
+  // console.log("userid",userid);
 
   var data = null;
   switch (pageid) {
@@ -344,9 +344,9 @@ Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
 
  
   //const user = await Notification.getEatUserDetail(userid);
-  console.log("admin notification data->", data);
-  console.log("admin notification data->", userid.pushid_android);
-  console.log("admin notification data->", userid.pushid_ios);
+  // console.log("admin notification data->", data);
+  // console.log("admin notification data->", userid.pushid_android);
+  // console.log("admin notification data->", userid.pushid_ios);
   if (userid.pushid_android) {
     FCM_DL.sendNotificationAndroid(userid.pushid_android, data,1 );
   }
