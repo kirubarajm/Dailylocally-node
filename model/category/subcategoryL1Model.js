@@ -167,15 +167,21 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
       sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id left join Category  as ca on l1.catid=ca.catid where l2.scl2_id='"+get_collection[0].classification_id+"'   and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid";
      
       // var productlist = await query(product_query);
+    }else if(get_collection[0].classification_type==5){
+      //console.log("sub-category 2");
+      sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Collection_mapping_product cmp on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid=1 and cmp.cid='"+get_collection[0].cid+"'  group by ca.catid";
+     
+      // var productlist = await query(product_query);
     }
 
-    console.log(sub_category_query)
+
+    // console.log(sub_category_query)
     sql.query(sub_category_query,async function(err, res) {
       if (err) {
         result(err, null);
       } else {
-        console.log("res",res);
-        console.log(res.length);
+        // console.log("res",res);
+        // console.log(res.length);
         // var get_sub_cat_images = await query("select * from Sub_category_images where type=2");
         var get_sub_cat_images = await query("select *,image as image_url from Category where catid='"+res[0].catid+"'");
         for (let i = 0; i < res.length; i++) {    
