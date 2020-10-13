@@ -32,11 +32,11 @@ exports.sendNotificationAndroid = function(token,dat,app_type) {
 //  console.log(app_type);
   var payload = {
     data: dat,
-    notification: {
-      title: dat.title,
-      body: dat.message, // <= CHANGE
-      sound : "default"
-    }
+    // notification: {
+    //   title: dat.title,
+    //   body: dat.message, // <= CHANGE
+    //   sound : "default"
+    // }
   };
   if (app_type===2) {
     dat.app_type=''+app_type;
