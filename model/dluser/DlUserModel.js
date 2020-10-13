@@ -5898,19 +5898,19 @@ Dluser.hub_based_userlist = async function hub_based_userlist(req, result) {
 
 
 /////user_based_notification
-Dluser.user_based_notification = async function user_based_notification(req, result) { 
+Dluser.user_based_notification = async function user_based_notification(req, result) {
   if(req.apptype==1){
-    // var getuserquery ="select userid,name,pushid_android from User where (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null)";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=22";
+    var getuserquery ="select userid,name,pushid_android from User where (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null)";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }else if (req.apptype==2) {
-    // var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+    var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   } else  if(req.apptype==3){
-    // var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+    var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }else{
-    // var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+    var getuserquery ="select us.* from User as us  where us.userid!='' and (us.pushid_android NOT IN ( '0' ) and us.pushid_ios IS null) or (us.pushid_ios NOT IN ( '0' ) and us.pushid_android IS null) and us.userid NOT IN(select userid from Dayorder where userid group by userid)  group by us.userid order by us.userid desc";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }
 
   sql.query(getuserquery,async function(err, res) {
