@@ -786,7 +786,7 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     if (community && community.length >0) {
       community_status = true;      
     }else{
-      var community = await query("Select * from User where userid = '"+req.userid+"' ");
+      var community = await query("Select *,0 as join_status from User where userid = '"+req.userid+"' ");
     }
 
     for (let i = 0; i < community.length; i++) { 

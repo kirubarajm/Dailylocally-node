@@ -5909,10 +5909,9 @@ Dluser.user_based_notification = async function user_based_notification(req, res
     var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }else{
-    var getuserquery ="select us.* from User as us  where us.userid!='' and (us.pushid_android NOT IN ( '0' ) and us.pushid_ios IS null) or (us.pushid_ios NOT IN ( '0' ) and us.pushid_android IS null) and us.userid NOT IN(select userid from Dayorder where userid group by userid)  group by us.userid order by us.userid desc";
+    var getuserquery ="select * from User where userid and userid NOT IN(select DISTINCT userid from Dayorder where userid) and (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null) group by userid";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }
-
   sql.query(getuserquery,async function(err, res) {
     if (err) {
       console.log("error: ", err);
