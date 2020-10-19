@@ -949,35 +949,26 @@ Dluser.user_logout = async function user_logout(req, result) {
     if (err) {
       console.log("error: ", err);
       result(null, err);
-    } else {
-
-       
-      if (userdetails.length !==0) {
-        
-        updatequery = await query ("Update User set pushid_android = '' and pushid_ios=' ' where userid = '"+req.userid+"'");
-
-
+    } else {       
+      if (userdetails.length !==0) {        
+        updatequery = await query ("Update User set pushid_android =null,pushid_ios=null where userid = '"+req.userid+"'");
         let resobj = {
           success: true,
           status: true,
           message: 'Logout Successfully!'  
-        };
-  
+        };  
         result(null, resobj);
       }else{
-
         let resobj = {
           success: true,
           status: false,
           // message:mesobj,
           message: 'Please check userid'  
-        };
-  
+        };  
         result(null, resobj);
       }     
     }
-  });   
- 
+  });    
 };
 
 
@@ -5900,18 +5891,19 @@ Dluser.hub_based_userlist = async function hub_based_userlist(req, result) {
 /////user_based_notification
 Dluser.user_based_notification = async function user_based_notification(req, result) {
   if(req.apptype==0){
-    var getuserquery ="select userid,name,pushid_android from User where (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null)";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null)";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }else if (req.apptype==1) {
-    var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where pushid_android NOT IN ( '0' ) and pushid_android IS NOT null";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   } else  if(req.apptype==2){
-    var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_ios IS NOT null";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }else if(req.apptype==3){
-    var getuserquery ="select * from User where userid and userid NOT IN(select DISTINCT userid from Dayorder where userid) and (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null) group by userid";
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid and userid NOT IN(select DISTINCT userid from Dayorder where userid) and (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null) group by userid";
     // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
   }
+  // console.log("getuserquery==>",getuserquery);
   sql.query(getuserquery,async function(err, res) {
     if (err) {
       console.log("error: ", err);

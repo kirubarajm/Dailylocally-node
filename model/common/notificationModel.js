@@ -317,44 +317,39 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
 };
 
 
-Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
- 
+Notification.dlBulkPushNotification = async function(orderid,userid,pageid) { 
   // console.log("userid",userid);
-
   var data = null;
-  switch (pageid) {
- 
-      case PushConstant.Pageid_dl_bulk_notification:
-        data = {
-          title: userid.title,
-          message:userid.user_message,
-          pageid: "" +1,
-         
-      //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
-          app: "Dl",
-          notification_type: "1"
-        };
+  switch (pageid) { 
+    case PushConstant.Pageid_dl_bulk_notification:
+      data = {
+        title: userid.title,
+        message:userid.user_message,
+        pageid: "" +1,         
+    //    image : "https://eattovo.s3.amazonaws.com/upload/admin/makeit/product/1580901027983-promotion_ff.jpg",
+        app: "Dl",
+        notification_type: "1"
+      };
 
-        if (userid.image) {
-          data.image=userid.image;
-         }
-        break;
+      if (userid.image) {
+        data.image=userid.image;
+      }
+    break;
   }
-  if (data == null) return;
 
- 
+  if (data == null) return; 
   //const user = await Notification.getEatUserDetail(userid);
   // console.log("admin notification data->", data);
   // console.log("admin notification data->", userid.pushid_android);
   // console.log("admin notification data->", userid.pushid_ios);
+  // console.log("admin notification data->", userid);
   if (userid.pushid_android) {
     FCM_DL.sendNotificationAndroid(userid.pushid_android, data,1 );
   }
  
   if (userid.pushid_ios) {
     FCM_DL.sendNotificationAndroid(userid.pushid_ios, data,2);
-  }
-  
+  }  
 };
 
 
