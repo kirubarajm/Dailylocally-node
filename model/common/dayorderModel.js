@@ -39,7 +39,7 @@ var Dayorder = function(Dayorder) {
 
 Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
 
-  var day = moment().format("YYYY-MM-DD");
+  var day = moment().format("YYYY-MM-DD ,HH:mm:ss");
 
   var ordersdetails = await query("select * from Orders where orderid='"+Dayorder.orderid+"'");
 

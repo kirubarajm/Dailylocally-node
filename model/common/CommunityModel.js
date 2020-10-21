@@ -722,7 +722,7 @@ Community.new_community_approval=async function new_community_approval(req, resu
 
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
 
-  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1 ");
 
   if (community.length ==0) {
 
@@ -829,8 +829,16 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].show_credits_info =true;
       community[i].credits_info ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
       community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
+      community[i].cat_page_content ="What can we get you tomorrow morning?";
+      community[i].cat_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
+      community[i].home_page_content="Welcome to the Daily Locally";
+      community[i].home_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
 
-
+      if(community.length !==0){
+        community[i].home_page_content= "Welcome to the Daily Locally."
+        }else{
+          community[i].home_page_content= "Welcome to the Daily Locally Exclusive Club."
+        }
     }
 
 

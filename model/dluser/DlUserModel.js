@@ -112,13 +112,13 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
 
 
    if (newUser.otpcode) {
-  //  var otpurl =
-  //   "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=DAILYL&dest=" +
-  //   newUser.phoneno +
-  //   "&msg=<%23>Your DailyLocally App OTP is " +
-  //   OTP +
-  //   ". Note: Please DO NOT SHARE this OTP with anyone. " +
-  //   newUser.otpcode +
+   var otpurl =
+    "https://www.instaalerts.zone/SendSMS/sendmsg.php?uname=EATotp1&pass=abc321&send=DAILYL&dest=" +
+    newUser.phoneno +
+    "&msg=<%23>Your DailyLocally App OTP is " +
+    OTP +
+    ". Note: Please DO NOT SHARE this OTP with anyone. " +
+    newUser.otpcode +
     " ";
   // var otpurl =
   // "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
@@ -127,12 +127,12 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
   // OTP +
   // ". Note: Please DO NOT SHARE this OTP with anyone. ";
 
-  var otpurl =
-  "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
-  newUser.phoneno +
-  "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
-  OTP +
-  ". Note: Please DO NOT SHARE this OTP with anyone. "+newUser.otpcode +" ";
+  // var otpurl =
+  // "https://bulksmsapi.vispl.in/?username=tovootp1&password=tovootp1@123&messageType=text&mobile=" +
+  // newUser.phoneno +
+  // "&senderId=BEATDM&message=<%23>Your DailyLocally App OTP is " +
+  // OTP +
+  // ". Note: Please DO NOT SHARE this OTP with anyone. "+newUser.otpcode +" ";
   }else{
 
   //  var otpurl =
@@ -156,7 +156,7 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
     ". Note: Please DO NOT SHARE this OTP with anyone. ";
    }
 
-  //  console.log("otpurl",otpurl);
+    console.log("otpurl",otpurl);
   var virtualkey = newUser.virtualkey || 0;
 
   // var otpurl = "https://www.google.com/";
