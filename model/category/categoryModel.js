@@ -266,7 +266,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
       var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2 order by comid desc limit 1");
-      var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+      var get_join_community = await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
     // console.log("get_community_list",get_join_community.length);
 
       if (get_join_community.length !=0) {
@@ -274,7 +274,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         // console.log("test");
         get_join_community.forEach(i => {
               
-         
+         console.log("test");
           i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
           i.servicable_status=servicable_status;
           i.category=true,
