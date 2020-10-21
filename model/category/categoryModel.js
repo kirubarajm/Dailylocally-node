@@ -382,7 +382,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               // console.log(collection.length);
               // console.log(potrate_collectionlist.length);
               // console.log(landscape_collectionlist.length);
-           
+              potrate_collectionlist.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
               for (let i = 0; i < potrate_collectionlist.length; i++) {
                 
                 potrate_collectionlist[i].category=true;
@@ -410,9 +410,10 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
               res = res.concat(potrate_collectionlist); 
               var temp1 = 0
+              landscape_collectionlist.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
 
               if (landscape_collectionlist.length !=0) {
-                landscape_collectionlist.sort((a, b) => parseFloat(a.category_Position) - parseFloat(b.category_Position));
+                // landscape_collectionlist.sort((a, b) => parseFloat(a.category_Position) - parseFloat(b.category_Position));
                 landscape_collectionlist.forEach(i => {
                 
                   // console.log(i.cid);

@@ -27,7 +27,7 @@ var UserAddress = function(useraddress){
 
 
 UserAddress.createUserAddress = function createUserAddress(new_address, result) {   
-    
+    console.log();
     sql.query("Select * from Address where userid = '"+new_address.userid+"' and  address_type = '"+new_address.address_type+"' and delete_status=0", function (err, res) {
                 
         if(err) {

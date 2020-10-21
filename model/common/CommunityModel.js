@@ -280,7 +280,7 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
 
 
     var get_community_details = await query("select * from Community where comid='"+req.comid+"' and status=1");
-    var get_address = await query("select * from Address where where userid = '"+req.userid+"' and address_default=1");
+    var get_address = await query("select * from Address where  userid = '"+req.userid+"' and address_default=1");
     var addressdetails = {};
 
     if (get_address.length !=0) {
@@ -302,8 +302,18 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
       addressdetails.apartment_name=get_community_details[0].apartmentname;
       addressdetails.google_address=get_community_details[0].google_address;
       addressdetails.complete_address=get_community_details[0].complete_address
-      var update_address = await query("update User set address_created=1 where userid = '"+req.userid+"'");
-      UserAddress.createUserAddress(addressdetails);
+      addressdetails.userid=req.userid
+      
+      getresult =  UserAddress.createUserAddress(addressdetails);
+
+      UserAddress.createUserAddress(new_address,async function(err, user) {
+        if (err){
+          console.log(err);
+        }else{
+          var update_address = await query("update User set address_created=1 where userid = '"+req.userid+"'");
+
+        }
+      });
     }
     
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
@@ -828,10 +838,10 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
       community[i].cat_page_content ="What can we get you tomorrow morning?";
       community[i].cat_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
-      community[i].home_page_content="Welcome to the Daily Locally";
+      // community[i].home_page_content="Welcome to the Daily Locally";
       community[i].home_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
 
-      if(community.length !==0){
+      if(community_status==true){
         community[i].home_page_content= "Welcome to the Daily Locally Exclusive Club."
         }else{
           community[i].home_page_content= "Welcome to the Daily Locally."

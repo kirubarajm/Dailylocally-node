@@ -170,7 +170,7 @@ if (get_nearby_zone.length !=0) {
 }
   if (userdetails.length !==0) {
     userdetails[0].cluid = userdetails[0].cluid || 1;
-    var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name,cs.classification_type,cs.classification_id from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid=1 group by cs.cid order by cs.layout_position ASC";
+    var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name,cs.classification_type,cs.classification_id,cs.layout_position from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid=1 group by cs.cid order by cs.layout_position ASC";
     
     sql.query(collection_query,async function(err, res) {
       if (err) {
@@ -233,6 +233,10 @@ if (get_nearby_zone.length !=0) {
       
          res  =  res.filter(re => re.collection_status ==true);
         //  console.log(res.length);
+        // res.sort(function(a, b){return a.layout_position-b.layout_position});
+        res.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
+
+        console.log(res);
       if (res.length != 0 ) {
         
         let resobj = {
