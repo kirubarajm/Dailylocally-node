@@ -202,11 +202,11 @@ SCM.product_vendor_assign =async function product_vendor_assign(req,result) {
             var getpotemp = await query(getpotempquery); 
 
             if(getpotemp.length>0){
-                if(getpotemp[0].requested_quantity > 0){
+                if(getpotemp[0].requested_quantity && getpotemp[0].requested_quantity > 0){
                     var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"' where tempid in("+req.tempid[i]+")";
                     var updatepotemp = await query(updatepotempquery); 
                 }else{
-                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',requested_quantity=0,vendor_assigned_by='"+req.done_by+"' where tempid in("+req.tempid[i]+")";
+                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"',requested_quantity="+getpotemp[0].actual_quantity+" where tempid in("+req.tempid[i]+")";
                     var updatepotemp = await query(updatepotempquery);
                 }
             }

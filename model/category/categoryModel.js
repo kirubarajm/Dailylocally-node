@@ -70,7 +70,6 @@ sql.query(category_query, function(err, res) {
     result(err, null);
   } else {
 
-
     for (let i = 0; i < res.length; i++) {
    
       res[i].servicable_status=servicable_status;
@@ -138,7 +137,6 @@ sql.query(category_query, function(err, res) {
 
         
           } 
-
           let resobj = {
             success: true,
             status:true,
@@ -221,7 +219,6 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
     if (err) {
       result(err, null);
     } else {
-
 
       for (let i = 0; i < res.length; i++) {
      
@@ -439,8 +436,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
             // var get_community = await query("select co.* from Community co left join join_community jc on jc.comid=co.comid where jc.userid='"+req.userid+"' and jc.status=1 and co.status=1");
 
-        
-
+            
             let resobj = {
               success: true,
               status:true,
