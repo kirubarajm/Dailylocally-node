@@ -227,7 +227,6 @@ exports.community_list = function(req, res) {
 };
 
 exports.join_new_community = function(req, res) {
-  
   Community.join_new_community(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);

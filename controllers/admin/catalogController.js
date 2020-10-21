@@ -329,3 +329,13 @@ exports.search_catalog_data_mobile = function(req, res) {
         res.send(ress);
     });    
 };
+
+
+exports.update_category_collection_list = function(req, res) {    
+    catalog.update_category_collection_list(req.body, function(err, ress) {
+        //console.log("get_category_list controller");
+        if (err) res.send(err);
+        //console.log("res", ress);
+        res.send(ress);
+    });    
+};

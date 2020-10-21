@@ -8,6 +8,8 @@ var Notification = require("../../model/common/notificationModel.js");
 var sendsms =  require("../common/smsModel");
 var PushConstant = require("../../push/PushConstant.js");
 var moment = require("moment");
+var UserAddress = require("../../model/dluser/DlUserAddressModel.js");
+
 
 //Task object constructor
 var Community = function(Community) {
@@ -238,38 +240,34 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
   }else{
 
 
-    var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
+  //   var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
 
-  if (join_community.length !=0) {
+  // if (join_community.length !=0) {
 
-    if (join_community[0].status==0) {
+  //   if (join_community[0].status==0) {
       
 
-      let resobj = {
-        success: true,
-        status: false,
-        message: "Sorry, Already you request!"
-      };
-      result(null, resobj);
+  //     let resobj = {
+  //       success: true,
+  //       status: false,
+  //       message: "Sorry, Already you request!"
+  //     };
+  //     result(null, resobj);
 
-    } else if(join_community[0].status==1) {
-      let resobj = {
-        success: true,
-        status: false,
-        message: "Sorry! Already Joined Community"
-      };
-      result(null, resobj);
-    }else if(join_community[0].status==2) {
-      let resobj = {
-        success: true,
-        status: false,
-        message: "Already Your Request rejected."
-      };
-      result(null, resobj);
-    }
+  //   } else if(join_community[0].status==2) {
+  //     let resobj = {
+  //       success: true,
+  //       status: false,
+  //       message: "Already Your Request rejected."
+  //     };
+  //     result(null, resobj);
+  //   }
 
     
-  }else{
+  // }else{
+
+
+    var update_image = await query("update join_community set status=2 where userid = '"+req.userid+"'");
 
     var new_community = {};
     new_community.userid = req.userid;
@@ -282,11 +280,32 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
 
 
     var get_community_details = await query("select * from Community where comid='"+req.comid+"' and status=1");
+    var get_address = await query("select * from Address where where userid = '"+req.userid+"' and address_default=1");
+    var addressdetails = {};
 
-
-    var update_image = await query("update User set profile_image='"+new_community.profile_image+"' where userid = '"+req.userid+"'");
-    var update_address= await query("update Address set flat_house_no='"+req.flat_no+"',block_name='"+req.floor_no+"',pincode='"+get_community_details[0].pincode+"',lat='"+get_community_details[0].lat+"',lon='"+get_community_details[0].lon+"',landmark='"+get_community_details[0].communityname+"',address_type=1,address_default=1,city='"+get_community_details[0].area+"',google_address='"+get_community_details[0].area+"',complete_address='"+get_community_details[0].community_address+"',block_name='"+req.floor_no+"',apartment_name='"+get_community_details[0].communityname+"' where userid = '"+req.userid+"' and address_default=1 ");
-
+    if (get_address.length !=0) {
+      var update_image = await query("update User set profile_image='"+new_community.profile_image+"' where userid = '"+req.userid+"'");
+      var update_address= await query("update Address set flat_house_no='"+req.flat_no+"',block_name='"+req.floor_no+"',pincode='"+get_community_details[0].pincode+"',lat='"+get_community_details[0].lat+"',lon='"+get_community_details[0].lon+"',landmark='"+get_community_details[0].communityname+"',address_type=1,address_default=1,city='"+get_community_details[0].area+"',google_address='"+get_community_details[0].area+"',complete_address='"+get_community_details[0].community_address+"',block_name='"+req.floor_no+"',apartment_name='"+get_community_details[0].communityname+"' where userid = '"+req.userid+"' and address_default=1 ");
+    } else {
+      
+      
+      addressdetails.lat= get_community_details[0].lat;
+      addressdetails.lon= get_community_details[0].lon;
+      addressdetails.city=get_community_details[0].city;
+      addressdetails.address_type= 1;
+      addressdetails.delete_status=0;
+      addressdetails.address_default=1;
+      addressdetails.flat_house_no=get_community_details[0].flat_no;
+      addressdetails.plot_house_no=0;
+      addressdetails.floor=get_community_details[0].floor_no;
+      addressdetails.block_name=get_community_details[0].block_name;
+      addressdetails.apartment_name=get_community_details[0].apartmentname;
+      addressdetails.google_address=get_community_details[0].google_address;
+      addressdetails.complete_address=get_community_details[0].complete_address
+      var update_address = await query("update User set address_created=1 where userid = '"+req.userid+"'");
+      UserAddress.createUserAddress(addressdetails);
+    }
+    
     sql.query("INSERT INTO join_community set ?", new_community,async function (err, res) {            
       if(err) {
           console.log("error: ", err);
@@ -368,7 +387,7 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
 
       }); 
 
-  }
+  // }
 
 
   }
@@ -807,6 +826,16 @@ Community.get_community_userdetails=async function get_community_userdetails(req
       community[i].show_credits_info =true;
       community[i].credits_info ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
       community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
+      community[i].cat_page_content ="What can we get you tomorrow morning?";
+      community[i].cat_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
+      community[i].home_page_content="Welcome to the Daily Locally";
+      community[i].home_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
+
+      if(community.length !==0){
+        community[i].home_page_content= "Welcome to the Daily Locally Exclusive Club."
+        }else{
+          community[i].home_page_content= "Welcome to the Daily Locally."
+        }
       community[i].community_status = community_status;
     }        
 
@@ -963,7 +992,7 @@ var admin_community = await query(admin_community_list);
 var totalcount = await query("select co.comid,co.*,if(co.status=1,'Approved',if(co.status=2,'Rejected','Waiting for approval'))as status_msg,jc.*,us.name from Community co left join join_community jc on jc.comid=co.comid left join User us on us.userid=jc.userid where zoneid="+zoneid+"   "+where+" group by co.comid order by co.comid desc");
 
 
-console.log("req.report",admin_community.length); 
+///console.log("req.report",admin_community.length); 
   if (admin_community.length !=0) {
 
     
@@ -1005,7 +1034,7 @@ console.log("req.report",admin_community.length);
       admin_community[i].total_orders=total_revenue[0].total_orders || 0;
     }
 
-    console.log("req.report",admin_community.length); 
+   // console.log("req.report",admin_community.length); 
     let resobj = {
       success: true,
       status: true,

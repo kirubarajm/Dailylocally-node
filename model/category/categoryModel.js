@@ -216,7 +216,8 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
   //var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Usercluster_category uc on uc.catid=ca.catid where uc.enable=1 and uc.userclusterid="+userdetails[0].userclusterid+" order by uc.positions ";
     
   // var category_query= "select ca.catid,ca.name,ca.image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id where ca.active_status=1 and ccm.active_status=1 and sub1.active_status=1 and ccm.cluid='"+userdetails[0].cluid+"' group by ca.catid order by ccm.orderby_category";
-  var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
+  // var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ccm.orderby_category";
+  var category_query= "select ca.catid,ca.name,ca.image as header_image,ca.thumbimage as image,ca.layout_position from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid=1 and pl.live_status=1 and zl1sub.active_status=1 and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and zl1sub.zoneid='"+get_nearby_zone[0].id+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and zcm.zoneid='"+get_nearby_zone[0].id+"' group by ca.catid order by ca.layout_position ASC";
   sql.query(category_query,async function(err, res) {
     if (err) {
       result(err, null);
@@ -237,11 +238,11 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
       var get_community = [{
         "comid": 1,
-        "communityname": "Soundarya Apartment",
+        "communityname": " Apartment",
         "lat": "13.0418",
         "long": "80.2341",
-        "apartmentname": "Soundarya Apartment",
-        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
+        "apartmentname": " Apartment",
+        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1603257823992-community_tile.png",
         "created_at": "2020-08-25 15:41:42",
         "status": 0,
         "requested_userid": null,
@@ -265,7 +266,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
 
 
       var get_community_list = await query("select * from Community  where requested_userid='"+req.userid+"' and  request_type = 1 and status < 2 order by comid desc limit 1");
-      var get_join_community= await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
+      var get_join_community = await query("select co.*,jc.* from join_community jc left join Community co on co.comid=jc.comid where  jc.userid='"+req.userid+"' and jc.status =1");
     // console.log("get_community_list",get_join_community.length);
 
       if (get_join_community.length !=0) {

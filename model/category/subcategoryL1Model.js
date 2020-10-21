@@ -149,12 +149,12 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
     var sub_category_query ="";
     if (get_collection[0].classification_type==1) { 
       //console.log("brand");
-      sub_category_query = "select pm.*,pl.*,l1.catid from  ProductMaster pm left join SubcategoryL1  as l1 on l1.catid=pm.scl1_id left join Category  as ca on l1.catid=ca.catid left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.id = '"+get_collection[0].classification_id+"' and pl.live_status=1 group by ca.catid";
+      sub_category_query = "select l1.*,ca.image as cat_header_image from  ProductMaster pm left join SubcategoryL1  as l1 on pm.scl1_id=l1.scl1_id left join Category  as ca on l1.catid=ca.catid left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand where br.id = '"+get_collection[0].classification_id+"' and pl.live_status=1 group by ca.catid";
      //Select l1.*,ca.image as cat_header_image from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where l1.catid=  '"+req.catid+"' and pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' group by l1.scl1_id
     // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==2){
        //console.log("category");
-       sub_category_query = "select l1.*,ca.image as cat_header_image  from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as l1 on l1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=l1.scl1_id left join ProductMaster as pm on pm.scl1_id=l1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and ca.catid='"+get_collection[0].classification_id+"'  group by ca.catid order by ccm.orderby_category";
+       sub_category_query = "select l1.*,ca.image as cat_header_image  from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as l1 on l1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=l1.scl1_id left join ProductMaster as pm on pm.scl1_id=l1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and ca.catid='"+get_collection[0].classification_id+"'  order by ccm.orderby_category group by ca.catid";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==3){

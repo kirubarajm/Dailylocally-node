@@ -21,14 +21,19 @@ var Sub_Category_L2 = require("../../model/category/subcategoryL2Model");
 var Productlist = require("../../model/category/productmasterModel");
 var ClusterCategoryMapping = require("../tableModels/clustercategorymappingTableModel.js");
 var CatalogLog = require('../tableModels/cataloglogTableModel.js');
+//var layoutconstant= require('../constant1.json');
+// const file = require(layoutconstant);
+
 
 
 var Catalog = function(catalog) {};
+
 
 var AWS_ACCESS_KEY = "AKIAJJQUEYLIU23E63OA";
 var AWS_SECRET_ACCESS_KEY = "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";
 const fs = require("fs");
 const AWS = require("aws-sdk");
+const { json } = require("body-parser");
 const s3 = new AWS.S3({
     accessKeyId: AWS_ACCESS_KEY,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
@@ -1726,6 +1731,61 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
     //     };
     //     result(null, resobj);
     // }
+};
+
+///////// update_category_collection_list///////////
+Catalog.update_category_collection_list =async function update_category_collection_list(req,result) {
+    // layoutconstant.layout_rowcount = req.layout_rowcount
+
+    // console.log("layoutconstant",req.layout_rowcount);
+    // const newObj = {
+    //     layout_rowcount: '2'
+    // }
+
+    // console.log("newObj",newObj);
+
+    // let student = { 
+    //     name: 'Mike',
+    //     age: 23, 
+    //     gender: 'Male',
+    //     department: 'English',
+    //     car: 'Honda' 
+    // };
+     
+    //  let data = JSON.stringify(student, null, 2);
+    // console.log("data",data);
+    // fs.writeFileSync('student-3.json', data);
+
+    // fs.writeFile('student-3.json', data, (err) => {
+    //     if (err) throw err;
+    //     console.log('Data written to file');
+    // });
+    
+    // console.log('This is after the write call');
+
+
+    let category = req.categorylist || [] ;
+    let collection = req.collectionlist || [] ;
+    
+    for (let i = 0; i < category.length; i++) {
+        var updatequery = "update Category set  layout_position='"+category[i].layout_position+"' where catid = '"+category[i].catid+"' ";
+        var updatequeryids = await query(updatequery);
+       
+    }
+
+    for (let j = 0; j < collection.length; j++) {
+      
+        var updatequery = "update Collections set  layout_position='"+collection[j].layout_position+"' where cid = '"+collection[j].cid+"' ";
+        var updatequeryids = await query(updatequery);
+    }
+
+
+    let resobj = {
+                success: true,
+                status: true,
+                message: "layout has been changed successfully"
+            };
+            result(null, resobj);
 };
 
 module.exports = Catalog;
