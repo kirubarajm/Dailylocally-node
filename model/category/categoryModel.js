@@ -242,7 +242,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         "lat": "13.0418",
         "long": "80.2341",
         "apartmentname": " Apartment",
-        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg",
+        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1603257823992-community_tile.png",
         "created_at": "2020-08-25 15:41:42",
         "status": 0,
         "requested_userid": null,
