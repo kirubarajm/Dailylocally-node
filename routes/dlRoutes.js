@@ -132,7 +132,7 @@ app.route("/user/faqs/:id").get(routesVersioning({"1.0.0":dluser.faq_by_type}));
 //Community API list
 app.route("/user/communitysearch").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.community_search}));
 app.route("/user/communitylist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.community_list}));
-app.route("/user/joincommunity").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community,"2":dluser.join_new_community_v2}));
+app.route("/user/joincommunity").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community,"2":dluser.join_new_community_v2,"3": dluser.join_new_community}));
 app.route("/user/communityapproval").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community_approval}));
 app.route("/user/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration,"2": dluser.new_community_registration_v2}));
 app.route("/user/communityuserdetails").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.communityuserdetails}));
