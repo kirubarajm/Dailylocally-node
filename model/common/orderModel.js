@@ -836,7 +836,9 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
                   var items = JSON.parse(res1[0].items);
                   res1[0].items = items;
                    res1[0].itemscount = items.length;
-                }          
+                }    
+                const totalvalue = await query("select IF(subscription =1,quantity*price*no_of_deliveries,quantity*price)sumamount from Orderproducts where orderid= '"+req.orderid+"'  ");
+                
                 var cartdetails = [];
                 var totalamountinfo = {};
                 var couponinfo = {};
@@ -849,7 +851,7 @@ Order.day_order_transaction_view_by_user = function day_order_transaction_view_b
                 deliverychargeinfo.infodetails = [];      
                 //var grandtotalinfo = {};      
                 totalamountinfo.title = "Total Amount";
-                totalamountinfo.charges = res1[0].price;
+                totalamountinfo.charges = totalvalue[0].sumamount;
                 totalamountinfo.status = true;
                 totalamountinfo.infostatus = false;
                 totalamountinfo.color_code = "#ff444444";

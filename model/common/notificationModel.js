@@ -153,9 +153,15 @@ Notification.orderdlPushNotification = async function(orders,userid,pageid) {
         break;
 
     case PushConstant.Pageid_dl_order_cancel:
+
+    if (orders[0].product_cancel_reason==undefined) {
+      message='Your order has been cancelled'
+    } else {
+      message="Apologies! Your order has been cancelled due to the following reason " +orders[0].product_cancel_reason
+    }
         data = {
         title: "Your Order #"+orders[0].id+" has been cancelled!.",
-        message: "Apologies! Your order has been cancelled due to the following reason " + orders[0].product_cancel_reason,
+        message: message,
         pageid: "" +29,
         date:orders[0].date,
         app: "Dl",
