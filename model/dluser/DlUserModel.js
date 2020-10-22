@@ -552,11 +552,10 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
   var emailstatus = false;
   var otpstatus = false;
   var genderstatus = false;
+  var address_created = 0;
 
   var userdetails = await query ("Select us.*,ad.* from User  us left join Address ad on ad.userid=us.userid where us.userid = 3 ");
-
-  if (req.phoneno == '9500313689' && req.otp == 12345) {
-    
+  if (req.phoneno == '9500313689' && req.otp == 12345) {    
     let resobj = {
       success: true,
        status: true,
@@ -566,23 +565,18 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
       genderstatus: true,
       registrationstatus:true,
       userid: 3,
-      result: userdetails
+      result: userdetails,
+      address_created: address_created
     };
-
     result(null, resobj);
-
   }else{
-
-  sql.query("Select * from Otp where oid = " +req.oid+ "", function(err,res) {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-    } else {
-
-
-      if (res[0].otp == req.otp) {
-       
-        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
+    sql.query("Select * from Otp where oid = " +req.oid+ "", function(err,res) {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+      } else {
+        if (res[0].otp == req.otp) {       
+          sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
             if (err) {
               console.log("error: ", err);
               result(err, null);
@@ -590,64 +584,57 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
               if (res1.length == 0) {
                 var new_user = new Dluser(req);
                 new_user.otp_status = 1;
-
                 sql.query("INSERT INTO User set ?", new_user, function(err,res2) {
                   if (err) {
                     console.log("error: ", err);
                     result(null, err);
                   } else {
-
                     let token = jwt.sign({username: req.phoneno},
                       config.secret
                       // ,
                       // { //expiresIn: '24h' // expires in 24 hours
                       // }
                      );
-
                      var user = {};
                      user.userid= res2.insertId
 
                       var new_cluster = new clusteruser(user);
                       new_cluster.userid= res2.insertId;
                       clusteruser.create_a_cluster_user(new_cluster);
-                    let resobj = {
-                      success: true,
-                      status: true,
-                      message: 'Authentication successful!',
-                      token: token,
-                      otpstatus: true,
-                      genderstatus: genderstatus,
-                      registrationstatus:registrationstatus,
-                      userid: user.userid,
-                      result: res1
-                    };
-
+                      let resobj = {
+                        success: true,
+                        status: true,
+                        message: 'Authentication successful!',
+                        token: token,
+                        otpstatus: true,
+                        genderstatus: genderstatus,
+                        registrationstatus:registrationstatus,
+                        userid: user.userid,
+                        result: res1,
+                        address_created: address_created
+                      };
                     result(null, resobj);
                   }
                 });
               } else {
-            
-
                 if (res1[0].email !== "" && res1[0].email !== null) {
                   emailstatus = true;
                 }
-
                 if (res1[0].gender !== "" &&res1[0].gender !== null &&res1[0].name !== "" &&res1[0].name !== null) {
                   genderstatus = true;
                   registrationstatus=true;
                   otpstatus = true;
                 }
-
-              //  console.log(res1[0].userid);
+                //  console.log(res1[0].userid);
                 sql.query("Select * from Address where userid = '" +res1[0].userid+"'  and delete_status=0",function(err, res3) {
-                    if (err) {
-                      console.log("error: ", err);
-                      result(err, null);
-                    } else {
-                      responce = [];
+                  if (err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                  } else {
+                    responce = [];
 
-                     // console.log(res3.length);
-                      if (res3.length !== 0) {
+                    // console.log(res3.length);
+                    if (res3.length !== 0) {
                         responce.push(res3[0]);
                         responce[0].razer_customerid = res1[0].razer_customerid
                         responce[0].userid = res1[0].userid
@@ -655,9 +642,8 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         responce[0].email = res1[0].email 
                         responce[0].phoneno = res1[0].phoneno
                         responce[0].referalcode = res1[0].referalcode
-                        responce[0].gender = res1[0].gender
-                       
-                        
+                        responce[0].gender = res1[0].gender   
+                        address_created = 1;
                       }else{
                         res1[0].aid=0;
                         res1[0].lat=0.0;
@@ -694,7 +680,8 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         token: token,
                         userid: res1[0].userid,
                         razer_customerid : res1[0].razer_customerid,
-                        result: responce
+                        result: responce,
+                        address_created :address_created
                       };
 
                       result(null, resobj);
@@ -703,24 +690,19 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                 );
               }
             }
-          }
-        );
-      } else {
-     
-        
-
-        let resobj = {
-          success: true,
-          status: false,
-          message: "OTP is not valid!, Try once again"
-        };
-
-        result(null, resobj);
+          });
+        } else {   
+          let resobj = {
+            success: true,
+            status: false,
+            message: "OTP is not valid!, Try once again",
+            address_created: address_created
+          };
+          result(null, resobj);
+        }
       }
-    }
-  });
-
-}
+    });
+  }
 };
 
 
