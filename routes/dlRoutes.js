@@ -136,7 +136,7 @@ app.route("/user/communitylist").post(middleware.checkToken,routesVersioning({"1
 app.route("/user/joincommunity").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community,"2.0.0":dluser.join_new_community_v2,"3.0.0": dluser.join_new_community}));
 app.route("/user/communityapproval").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.join_new_community_approval}));
 app.route("/user/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration,"2": dluser.new_community_registration_v2}));
-app.route("/user/communityuserdetails").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.communityuserdetails}));
+app.route("/user/communityuserdetails").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.communityuserdetails,"2.0.0": dluser.communityuserdetailsv2}));
 app.route("/user/Community/homepage").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.homepage}));
 app.route("/user/Community/wapscreen").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.wapscreen}));
 app.route("/user/Community/aboutus").post(routesVersioning({"1.0.0":dluser.about_us}));

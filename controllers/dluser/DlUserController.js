@@ -331,6 +331,12 @@ exports.communityuserdetails = function(req, res) {
   });
 };
 
+exports.communityuserdetailsv2 = function(req, res) {
+  Community.get_community_userdetails_v2(req.body, function(err, user) {
+    if (err) res.send(err);
+    res.send(user);
+  });
+};
 exports.homepage = function(req, res) {
   Community.get_homepage(req.body, function(err, user) {
     if (err) res.send(err);

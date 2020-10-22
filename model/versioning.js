@@ -104,7 +104,7 @@ function routesVersioning() {
   * or req.version property
   **/
  function getVersion(req) {
-     console.log(req.headers);
+    //  console.log(req.headers);
     var version;
     if (!req.version) {
        if (req.headers && req.headers['accept-version']) {

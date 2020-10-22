@@ -790,7 +790,246 @@ Community.new_community_approval=async function new_community_approval(req, resu
 };
 
 
+// Community.get_community_userdetails=async function get_community_userdetails(req, result){
+//   var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
+
+//   var community_status = false;
+
+//   // if (community.length ==0) {
+//   //   let resobj = {
+//   //     success: true,
+//   //     status: false,
+//   //     message: "No Request Found!"
+//   //   };
+//   //   result(null, resobj);    
+//   // }else{
+//     // sql.query("Select * from User where userid = '"+req.userid+"' ",async function(err, userdetails) {
+//     //   if (err) {
+//     //     result(err, null);
+//     //   } else {
+//         var userdetails = await query("Select * from User where userid = '"+req.userid+"' ");
+//         var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
+//         if (address_details.length !=0) {
+//          //  userdetails = userdetails.push(address_details[0]);
+//           userdetails[0].aid= address_details[0].aid;
+//           userdetails[0].lat= address_details[0].lat;
+//           userdetails[0].lon= address_details[0].lon;
+//           userdetails[0].city=address_details[0].city;
+//           userdetails[0].address_type= address_details[0].address_type;
+//           userdetails[0].delete_status=address_details[0].delete_status;
+//           userdetails[0].address_default=address_details[0].address_default;
+//           userdetails[0].flat_house_no=address_details[0].flat_house_no;
+//           userdetails[0].plot_house_no=address_details[0].plot_house_no;
+//           userdetails[0].floor=address_details[0].floor;
+//           userdetails[0].block_name=address_details[0].block_name;
+//           userdetails[0].apartment_name=address_details[0].apartment_name;
+//           userdetails[0].google_address=address_details[0].google_address;
+//           userdetails[0].complete_address=address_details[0].complete_address;
+//         }else{
+//           userdetails[0].aid=  0;
+//           userdetails[0].lat= 0.0;
+//           userdetails[0].lon= 0.0;
+//           userdetails[0].city='';
+//           userdetails[0].address_type= 0;
+//           userdetails[0].delete_status= 0;
+//           userdetails[0].address_default= 0;
+//           userdetails[0].flat_house_no='';
+//           userdetails[0].plot_house_no='';
+//           userdetails[0].floor='';
+//           userdetails[0].block_name='';
+//           userdetails[0].apartment_name='';
+//           userdetails[0].google_address='';
+//           userdetails[0].complete_address='';
+//          }   
+//     //     let resobj = {
+//     //       success: true,
+//     //       status: true,
+//     //       result : userdetails,
+//     //       message: "Thanks for your Request!"
+//     //     };
+//     //     result(null, resobj);
+//     //   }
+//     // });
+//     var get_total_values = await query("select sum(cod_price + online_price) as total from Dayorder where userid='"+req.userid+"' and dayorderstatus=10");
+//     var total_values= 0;
+//     if (get_total_values.length !=0) {
+//       total_values = get_total_values[0].total / 100;
+//     }
+
+//     if (community && community.length >0) {
+//       community_status = true;      
+//     }else{
+//       var community = await query("Select *,0 as join_status from User where userid = '"+req.userid+"' ");
+//     }
+
+//     for (let i = 0; i < community.length; i++) { 
+//       community[i].name = community[i].name.charAt(0).toUpperCase() + community[i].name.slice(1);
+//       var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status =1 ");
+//       community[i].members_count=get_count[0].members_count;
+//       community[i].members='Members';
+//       community[i].total_credits= total_values;
+//       community[i].credits_text='DL Credits';
+//       community[i].welcome_name_title='Hi ';//+community[0].name
+//       community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
+//       community[i].min_cart_text='Zero';
+//       community[i].min_cart_value='Minimum cart value';
+//       community[i].free_delivery_text='Zero';
+//       community[i].free_delivery_value='Delivery premium';
+//       community[i].cod_text='COD';
+//       community[i].cod_value='Cash on Delivery';
+//       community[i].show_credits_info =true;
+//       community[i].credits_info ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
+//       community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
+//       community[i].cat_page_content ="What can we get you tomorrow morning?";
+//       community[i].cat_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
+//       // community[i].home_page_content="Welcome to the Daily Locally";
+//       community[i].home_page_subcontent="Order or Subscribe before 12 midnight & get it delivered before 12 noon everyday";
+
+//       if(community_status==true){
+//         community[i].home_page_content= "Welcome to the Daily Locally Exclusive Club."
+//         }else{
+//           community[i].home_page_content= "Welcome to the Daily Locally."
+//         }
+//       community[i].community_status = community_status;
+//     }        
+
+//     let resobj = {
+//       success: true,
+//       status: true,
+//       userdetails:userdetails,
+//       result: community
+//     };
+//     result(null, resobj);
+//   // }
+// };
+
 Community.get_community_userdetails=async function get_community_userdetails(req, result){
+
+  var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
+
+  if (community.length ==0) {
+
+    let resobj = {
+      success: true,
+      status: false,
+      message: "No Request Found!"
+    };
+    result(null, resobj);
+
+    
+  }else{
+
+    // sql.query("Select * from User where userid = '"+req.userid+"' ",async function(err, userdetails) {
+    //   if (err) {
+    //     result(err, null);
+    //   } else {
+
+        var userdetails = await query("Select * from User where userid = '"+req.userid+"' ");
+
+
+       var address_details = await query("Select * from Address where userid = '" +req.userid+"'  and delete_status=0");
+
+       if (address_details.length !=0) {
+         //  userdetails = userdetails.push(address_details[0]);
+
+          userdetails[0].aid= address_details[0].aid;
+          userdetails[0].lat= address_details[0].lat;
+          userdetails[0].lon= address_details[0].lon;
+          userdetails[0].city=address_details[0].city;
+        userdetails[0].address_type= address_details[0].address_type;
+        userdetails[0].delete_status=address_details[0].delete_status;
+        userdetails[0].address_default=address_details[0].address_default;
+        userdetails[0].flat_house_no=address_details[0].flat_house_no;
+        userdetails[0].plot_house_no=address_details[0].plot_house_no;
+        userdetails[0].floor=address_details[0].floor;
+        userdetails[0].block_name=address_details[0].block_name;
+        userdetails[0].apartment_name=address_details[0].apartment_name;
+        userdetails[0].google_address=address_details[0].google_address;
+        userdetails[0].complete_address=address_details[0].complete_address;
+
+
+
+
+       }else{
+         userdetails[0].aid=  0;
+         userdetails[0].lat= 0.0;
+         userdetails[0].lon= 0.0;
+         userdetails[0].city='';
+       userdetails[0].address_type= 0;
+       userdetails[0].delete_status= 0;
+       userdetails[0].address_default= 0;
+       userdetails[0].flat_house_no='';
+       userdetails[0].plot_house_no='';
+       userdetails[0].floor='';
+       userdetails[0].block_name='';
+       userdetails[0].apartment_name='';
+       userdetails[0].google_address='';
+       userdetails[0].complete_address='';
+
+
+         }
+     
+    
+
+
+    //     let resobj = {
+    //       success: true,
+    //       status: true,
+    //       result : userdetails,
+    //       message: "Thanks for your Request!"
+    //     };
+    //     result(null, resobj);
+    //   }
+    // });
+  
+
+
+
+
+    var get_total_values = await query("select sum(cod_price + online_price) as total from Dayorder where userid='"+req.userid+"' and dayorderstatus=10");
+    var total_values= 0;
+    if (get_total_values.length !=0) {
+      total_values = get_total_values[0].total / 100;
+    }
+
+    for (let i = 0; i < community.length; i++) {
+      
+      community[i].name = community[i].name.charAt(0).toUpperCase() + community[i].name.slice(1);
+      var get_count = await query("select count(jc.userid)as members_count from join_community jc left join Community co on jc.comid=co.comid where co.comid ='"+community[i].comid+"' and jc.status =1 ");
+
+      community[i].members_count=get_count[0].members_count;
+      community[i].members='Members';
+      community[i].total_credits= total_values;
+      community[i].credits_text='DL Credits';
+      community[i].welcome_name_title='Hi ';//+community[0].name
+      community[i].welcome_name_content='Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get it delivered before 12 noon everyday';
+      community[i].min_cart_text='Zero';
+      community[i].min_cart_value='Minimum cart value';
+      community[i].free_delivery_text='Zero';
+      community[i].free_delivery_value='Delivery premium';
+      community[i].cod_text='COD';
+      community[i].cod_value='Cash on Delivery';
+      community[i].show_credits_info =true;
+      community[i].credits_info ="DL Credits are calculated based on your order history with DL. Stay tuned for surprise rewards based on your DL Credits";
+      community[i].welcome_text="Hi, Welcome to the Daily Locally community Exclusive club, order before 12 midnight & get delivered before 12 noon everyday";
+
+
+    }
+
+
+    let resobj = {
+      success: true,
+      status: true,
+      userdetails:userdetails,
+      result: community
+    };
+    result(null, resobj);
+  }
+  
+
+};
+
+Community.get_community_userdetails_v2=async function get_community_userdetails_v2(req, result){
   var community = await query("Select *,'Hi, Welcome to the Daily Locally community Exclusive club' as welcome_text,if(jc.status=1,true,false)as join_status,us.* From User us left join join_community jc on jc.userid=us.userid left join Community co on co.comid=jc.comid where us.userid ='"+req.userid+"' and jc.status =1  ");
 
   var community_status = false;
@@ -902,8 +1141,6 @@ Community.get_community_userdetails=async function get_community_userdetails(req
     result(null, resobj);
   // }
 };
-
-
 Community.get_homepage=async function get_homepage(req, result){
   var get_whatsup = await query("select co.* from join_community jd left join  Community co on co.comid=jd.comid where jd.userid='"+req.userid+"' and jd.status=1");
 
