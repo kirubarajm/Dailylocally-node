@@ -558,6 +558,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
   var emailstatus = false;
   var otpstatus = false;
   var genderstatus = false;
+  var address_created =0;
 
   var userdetails = await query ("Select us.*,ad.* from User  us left join Address ad on ad.userid=us.userid where us.userid = 3 ");
 
@@ -572,7 +573,8 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
       genderstatus: true,
       registrationstatus:true,
       userid: 3,
-      result: userdetails
+      result: userdetails,
+      address_created : address_created
     };
 
     result(null, resobj);
@@ -588,7 +590,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
 
       if (res[0].otp == req.otp) {
        
-        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
+        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid,address_created from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
             if (err) {
               console.log("error: ", err);
               result(err, null);
@@ -662,7 +664,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         responce[0].phoneno = res1[0].phoneno
                         responce[0].referalcode = res1[0].referalcode
                         responce[0].gender = res1[0].gender
-                       
+                        responce[0].address_created=1;
                         
                       }else{
                         res1[0].aid=0;
@@ -700,7 +702,8 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         token: token,
                         userid: res1[0].userid,
                         razer_customerid : res1[0].razer_customerid,
-                        result: responce
+                        result: responce,
+                        address_created: res1[0].address_created || 0
                       };
 
                       result(null, resobj);

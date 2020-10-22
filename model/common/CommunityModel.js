@@ -214,7 +214,7 @@ Community.join_new_community_v2 =async function join_new_community_v2(req, resul
     //         }
     //     } 
 
-        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+req.userid+"' ");
+        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+req.userid+"'  and dayorderstatus < 10 ");
 
         if (orderslist.length !=0) {
           order_available=true;
