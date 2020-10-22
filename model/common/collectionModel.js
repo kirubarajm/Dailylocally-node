@@ -148,6 +148,126 @@ Collection.updateCollection =async function updateCollection(req, result) {
 
 
 
+// Collection.list_all_active_collection =async function list_all_active_collection(req,result) {
+
+//   var radiuslimit         = constant.radiuslimit;
+//   var userdetails  = await query("select * from User as us left join Cluster_user_table as uc on uc.userid=us.userid where us.userid = "+req.userid+" ");
+//   var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+//   req.lat +
+//   "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+//   req.lon +
+//   "') ) + sin( radians('" +
+//   req.lat +
+//   "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+
+
+// if (get_nearby_zone.length !=0) {
+  
+
+//   if (get_nearby_zone[0].distance > radiuslimit) {
+//     servicable_status =false;
+//   }
+// }
+//   if (userdetails.length !==0) {
+//     userdetails[0].cluid = userdetails[0].cluid || 1;
+//     var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name,cs.classification_type,cs.classification_id,cs.layout_position from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid=1 group by cs.cid order by cs.layout_position ASC";
+    
+//     sql.query(collection_query,async function(err, res) {
+//       if (err) {
+//         result(err, null);
+//       } else {
+      
+//         //  console.log("res",res.length);
+//         for (let i = 0; i < res.length; i++) {
+        
+//           if (res[i].clickable=1) {
+//             res[i].clickable=true;
+//           } else {
+//             res[i].clickable=false;
+//           }
+
+//           // console.log("res[i].classification_type",res[i].classification_type);
+//           if (res[i].classification_type==1) { 
+//             //brand
+//            product_query = "select pm.*,pl.*  from  ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.id = '"+res[i].classification_id+"' and pl.live_status=1"
+           
+//           var productlist = await query(product_query);
+//           }else if(res[i].classification_type==2){
+//              //category
+//             product_query = "select pm.*,pl.*  from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as sub1 on sub1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=sub1.scl1_id left join ProductMaster as pm on pm.scl1_id=sub1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid where zcm.active_status=1 and ccm.active_status=1  and ccm.cluid='"+userdetails[0].cluid+"' and pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and ca.catid='"+res[i].classification_id+"'  order by ccm.orderby_category"
+           
+//             var productlist = await query(product_query);
+//           }else if(res[i].classification_type==3){
+//             //sub-category 1
+//             product_query = "Select pm.*,pl.* from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' and l1.scl1_id=  '"+res[i].classification_id+"'  "
+           
+//             var productlist = await query(product_query);
+//           }else if(res[i].classification_type==4){
+//             //sub-category 2
+//             product_query = "Select pm.*,pl.*  from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id where l2.scl2_id='"+res[i].classification_id+"'   and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"'"
+           
+//             var productlist = await query(product_query);
+//           }else if(res[i].classification_type==5){
+//             //sub-category 2
+//             product_query = "select * from Collection_mapping_product cmp left join Product_live pl on pl.pid=cmp.pid where cmp.cid= '"+res[i].cid+"'  and pl.live_status=1 group by pl.pid"
+           
+//             var productlist = await query(product_query);
+//             // console.log("productlist",productlist);
+//           }else{
+//             product_query = "select pm.*,br.brandname from  ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.id = '"+res[i].classification_id+"' and pl.live_status=1"
+           
+//             var productlist = await query(product_query);
+//           }
+  
+//           // console.log("productlist[0]",productlist[0].brand);
+     
+   
+//           if (productlist.length !=0) {
+//             res[i].collection_status = true;
+//             // console.log(" res[i].collection_status", res[i].name);
+          
+//           }else{
+//             res[i].collection_status = false;
+//           }
+//         }
+      
+//          res  =  res.filter(re => re.collection_status ==true);
+//         //  console.log(res.length);
+//         // res.sort(function(a, b){return a.layout_position-b.layout_position});
+//         res.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
+
+//      //   console.log(res);
+//       if (res.length != 0 ) {
+        
+//         let resobj = {
+//           success: true,
+//           status:true,
+//           collection: res
+//         };
+//         result(null, resobj);
+//       } else {
+//         let resobj = {
+//           success: true,
+//           status: false,
+//           message: "Sorry there no active collections"
+//         };
+//         result(null, resobj);
+//        } 
+        
+           
+//       }
+//     });
+//   } else {
+//     let resobj = {
+//       success: true,
+//       status:false,
+//       message: "user not found"
+//     };
+//     result(null, resobj);
+//   }
+ 
+// };
+
 Collection.list_all_active_collection =async function list_all_active_collection(req,result) {
 
   var radiuslimit         = constant.radiuslimit;
@@ -312,8 +432,6 @@ Collection.getcollectionlist = async function getcollectionlist(res2,req,result)
 
 Collection.get_all_collection_by_cid = async function get_all_collection_by_cid(req,result) {  
 
-  console.log("------------------------req.query",req.query);
-  console.log("------------------------------------",req.cid);
     await sql.query(req.query,[req.cid],async function(err, res1) {
       if (err) {
         result(err, null);

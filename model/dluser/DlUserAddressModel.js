@@ -27,7 +27,7 @@ var UserAddress = function(useraddress){
 
 
 UserAddress.createUserAddress = function createUserAddress(new_address, result) {   
-    
+ //   console.log();
     sql.query("Select * from Address where userid = '"+new_address.userid+"' and  address_type = '"+new_address.address_type+"' and delete_status=0", function (err, res) {
                 
         if(err) {
@@ -71,6 +71,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
                 else{
 
                     var address=  await query("select * from Address WHERE userid='"+res.insertId+"'");
+                    var update_addr = await query("update User set address_created=1 where userid = '"+new_address.userid+"'"); 
                   let sucobj=true;
                   let mesobj = "Address Created successfully";
                   let resobj = {  
@@ -194,6 +195,7 @@ UserAddress.updateById =async function updateById(req, result){
             else {
 
                   var address=  await query("select * from Address WHERE userid='"+req.userid+"'");
+                  var update_addr = await query("update User set address_created=1 where userid = '"+req.userid+"'"); 
          
                 let resobj = {
                     success: true,

@@ -227,6 +227,7 @@ exports.community_list = function(req, res) {
 };
 
 exports.join_new_community = function(req, res) {
+  console.log("1");
   Community.join_new_community(req.body, function(err, user) {
     if (err) res.send(err);
     res.send(user);
@@ -234,6 +235,7 @@ exports.join_new_community = function(req, res) {
 };
 
 exports.join_new_community_v2 = function(req, res) {
+  console.log("2");
   req.body.change_address = req.body.change_address || false;
 
   if (!req.body.comid) {

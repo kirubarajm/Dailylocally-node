@@ -86,6 +86,11 @@ Dluser.user_app_version_check_vid= async function user_app_version_check_vid(req
     }
 
   }
+  var address_created = 0;
+  if(req.userid && req.userid!=''){
+    var getaddr = await query("select * from User where userid="+req.userid);
+    address_created = getaddr[0].address_created;
+  }
 
   updatestatus.versionstatus = versionstatus;
   updatestatus.dluserforceupdatestatus = dluserforceupdatestatus;
@@ -93,6 +98,7 @@ Dluser.user_app_version_check_vid= async function user_app_version_check_vid(req
       let resobj = {
           success: true,
           status:true,
+          address_created:address_created,
           result:updatestatus
       };
 
@@ -552,10 +558,12 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
   var emailstatus = false;
   var otpstatus = false;
   var genderstatus = false;
-  var address_created = 0;
+  var address_created =0;
 
   var userdetails = await query ("Select us.*,ad.* from User  us left join Address ad on ad.userid=us.userid where us.userid = 3 ");
-  if (req.phoneno == '9500313689' && req.otp == 12345) {    
+
+  if (req.phoneno == '9500313689' && req.otp == 12345) {
+    
     let resobj = {
       success: true,
        status: true,
@@ -566,17 +574,23 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
       registrationstatus:true,
       userid: 3,
       result: userdetails,
-      address_created: address_created
+      address_created : address_created
     };
+
     result(null, resobj);
+
   }else{
-    sql.query("Select * from Otp where oid = " +req.oid+ "", function(err,res) {
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-      } else {
-        if (res[0].otp == req.otp) {       
-          sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
+
+  sql.query("Select * from Otp where oid = " +req.oid+ "", function(err,res) {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+    } else {
+
+
+      if (res[0].otp == req.otp) {
+       
+        sql.query("Select userid,name,email,phoneno,referalcode,gender,razer_customerid,address_created from User where phoneno = '" + req.phoneno + "'",function(err, res1) {
             if (err) {
               console.log("error: ", err);
               result(err, null);
@@ -584,57 +598,64 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
               if (res1.length == 0) {
                 var new_user = new Dluser(req);
                 new_user.otp_status = 1;
+
                 sql.query("INSERT INTO User set ?", new_user, function(err,res2) {
                   if (err) {
                     console.log("error: ", err);
                     result(null, err);
                   } else {
+
                     let token = jwt.sign({username: req.phoneno},
                       config.secret
                       // ,
                       // { //expiresIn: '24h' // expires in 24 hours
                       // }
                      );
+
                      var user = {};
                      user.userid= res2.insertId
 
                       var new_cluster = new clusteruser(user);
                       new_cluster.userid= res2.insertId;
                       clusteruser.create_a_cluster_user(new_cluster);
-                      let resobj = {
-                        success: true,
-                        status: true,
-                        message: 'Authentication successful!',
-                        token: token,
-                        otpstatus: true,
-                        genderstatus: genderstatus,
-                        registrationstatus:registrationstatus,
-                        userid: user.userid,
-                        result: res1,
-                        address_created: address_created
-                      };
+                    let resobj = {
+                      success: true,
+                      status: true,
+                      message: 'Authentication successful!',
+                      token: token,
+                      otpstatus: true,
+                      genderstatus: genderstatus,
+                      registrationstatus:registrationstatus,
+                      userid: user.userid,
+                      result: res1
+                    };
+
                     result(null, resobj);
                   }
                 });
               } else {
+            
+
                 if (res1[0].email !== "" && res1[0].email !== null) {
                   emailstatus = true;
                 }
+
                 if (res1[0].gender !== "" &&res1[0].gender !== null &&res1[0].name !== "" &&res1[0].name !== null) {
                   genderstatus = true;
                   registrationstatus=true;
                   otpstatus = true;
                 }
-                //  console.log(res1[0].userid);
-                sql.query("Select * from Address where userid = '" +res1[0].userid+"'  and delete_status=0",function(err, res3) {
-                  if (err) {
-                    console.log("error: ", err);
-                    result(err, null);
-                  } else {
-                    responce = [];
 
-                    // console.log(res3.length);
-                    if (res3.length !== 0) {
+              //  console.log(res1[0].userid);
+                sql.query("Select * from Address where userid = '" +res1[0].userid+"'  and delete_status=0",function(err, res3) {
+                    if (err) {
+                      console.log("error: ", err);
+                      result(err, null);
+                    } else {
+                      responce = [];
+
+                     // console.log(res3.length);
+                      if (res3.length !== 0) {
                         responce.push(res3[0]);
                         responce[0].razer_customerid = res1[0].razer_customerid
                         responce[0].userid = res1[0].userid
@@ -642,8 +663,9 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         responce[0].email = res1[0].email 
                         responce[0].phoneno = res1[0].phoneno
                         responce[0].referalcode = res1[0].referalcode
-                        responce[0].gender = res1[0].gender   
-                        address_created = 1;
+                        responce[0].gender = res1[0].gender
+                        responce[0].address_created=1;
+                        
                       }else{
                         res1[0].aid=0;
                         res1[0].lat=0.0;
@@ -681,7 +703,7 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                         userid: res1[0].userid,
                         razer_customerid : res1[0].razer_customerid,
                         result: responce,
-                        address_created :address_created
+                        address_created: res1[0].address_created || 0
                       };
 
                       result(null, resobj);
@@ -690,19 +712,24 @@ Dluser.user_otp_verification =async function user_otp_verification(req,result) {
                 );
               }
             }
-          });
-        } else {   
-          let resobj = {
-            success: true,
-            status: false,
-            message: "OTP is not valid!, Try once again",
-            address_created: address_created
-          };
-          result(null, resobj);
-        }
+          }
+        );
+      } else {
+     
+        
+
+        let resobj = {
+          success: true,
+          status: false,
+          message: "OTP is not valid!, Try once again"
+        };
+
+        result(null, resobj);
       }
-    });
-  }
+    }
+  });
+
+}
 };
 
 
@@ -925,35 +952,26 @@ Dluser.user_logout = async function user_logout(req, result) {
     if (err) {
       console.log("error: ", err);
       result(null, err);
-    } else {
-
-       
-      if (userdetails.length !==0) {
-        
-        updatequery = await query ("Update User set pushid_android = '' and pushid_ios=' ' where userid = '"+req.userid+"'");
-
-
+    } else {       
+      if (userdetails.length !==0) {        
+        updatequery = await query ("Update User set pushid_android =null,pushid_ios=null where userid = '"+req.userid+"'");
         let resobj = {
           success: true,
           status: true,
           message: 'Logout Successfully!'  
-        };
-  
+        };  
         result(null, resobj);
       }else{
-
         let resobj = {
           success: true,
           status: false,
           // message:mesobj,
           message: 'Please check userid'  
-        };
-  
+        };  
         result(null, resobj);
       }     
     }
-  });   
- 
+  });    
 };
 
 
@@ -5875,26 +5893,25 @@ Dluser.hub_based_userlist = async function hub_based_userlist(req, result) {
 
 /////user_based_notification
 Dluser.user_based_notification = async function user_based_notification(req, result) {
- 
-  // if (req.apptype==1) {
-  //   var getuserquery ="select userid,name,pushid_android from User where pushid_android NOT IN ( '0' ) and pushid_ios IS null";
-  // } else  if(req.apptype==2){
-  //   var getuserquery ="select userid,name,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_android IS null";
-  // }else{
-    // var getuserquery ="select u.userid,u.name,u.email,u.phoneno,ord.orderid,u.pushid_android,u.pushid_ios,u.Locality,(CASE WHEN (DATE(ord.created_at) BETWEEN DATE_SUB(CURDATE(),INTERVAL "+constant.interval_days+" DAY) AND  CURDATE()) THEN ord.orderid ELSE 0 END) as with7day from User as u join Orders as ord on ord.userid=u.userid join MakeitUser as mk on mk.userid=ord.makeit_user_id  join Makeit_hubs as mh on mh.makeithub_id=mk.makeithub_id where u.pushid_android NOT IN ( '0' ) and u.pushid_ios IS null and u.userid!='' and mh.makeithub_id="+req.makeithub_id+"  and ord.orderstatus < 8 and orderid in (SELECT max(orderid) FROM Orders  GROUP BY userid) order by ord.created_at desc";
-    var getuserquery ="select userid,name,pushid_android,pushid_ios where userid=1 ";
-
-  // }
-
+  if(req.apptype==0){
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null)";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+  }else if (req.apptype==1) {
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where pushid_android NOT IN ( '0' ) and pushid_android IS NOT null";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+  } else  if(req.apptype==2){
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where pushid_ios NOT IN ( '0' ) and pushid_ios IS NOT null";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+  }else if(req.apptype==3){
+    var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid and userid NOT IN(select DISTINCT userid from Dayorder where userid) and (pushid_android NOT IN ( '0' ) and pushid_ios IS null) or (pushid_ios NOT IN ( '0' ) and pushid_android IS null) group by userid";
+    // var getuserquery ="select userid,name,pushid_android,pushid_ios from User where userid=1";
+  }
+  // console.log("getuserquery==>",getuserquery);
   sql.query(getuserquery,async function(err, res) {
     if (err) {
       console.log("error: ", err);
       result(err, null);
-    } else {
-
-
-     
-   
+    } else {   
     //   var message="all";
     //   if (req.type==1) {
     //    var userlist = res.filter(re => re.with7day ===0);
@@ -5905,7 +5922,7 @@ Dluser.user_based_notification = async function user_based_notification(req, res
     //  }else{
        var userlist = res;
     //  }
-     
+    //  console.log("res ==>",res);
      var userid="";
       for (let i = 0; i < userlist.length; i++) {
         user={};
@@ -5920,23 +5937,21 @@ Dluser.user_based_notification = async function user_based_notification(req, res
 
         // console.log(user);
         userid=userid+","+userlist[i].userid;
-        await Notification.dlBulkPushNotification(null,user,PushConstant.Pageid_dl_bulk_notification);
-        
+        await Notification.dlBulkPushNotification(null,user,PushConstant.Pageid_dl_bulk_notification);        
       } 
     
-    // console.log("Notification Via Admin--->",message);
-    // console.log("userquery--->",getuserquery);
-    // console.log("User-ids--->",userid);
-  let resobj = {
-    success: true,
-    status: true,
-    message: "notification sent successfully",
-    // ms:req.user_message,
-    res:userid
-  };
-
-  result(null, resobj);
-   }
+      // console.log("Notification Via Admin--->",message);
+      // console.log("userquery--->",getuserquery);
+      // console.log("User-ids--->",userid);
+      let resobj = {
+        success: true,
+        status: true,
+        message: "notification sent successfully",
+        // ms:req.user_message,
+        res:userid
+      };
+      result(null, resobj);
+    }
   });
 };
 
@@ -6791,9 +6806,20 @@ Dluser.faq_by_type = async function faq_by_type(id, result) {
 };
 
 
-Dluser.about_us = async function about_us(id, result) {
+Dluser.about_us = async function about_us(req, result) {
+  var aboutquery = ""
+  if(req.userid && req.userid!=''){
+    var join_community = await query("select * from join_community where userid='"+req.userid+"'  and status=1");
+    if(join_community.length>0){
+      aboutquery = "Select * from About_us where type=1";
+    }else{
+      aboutquery = "Select * from About_us where type=0";
+    }
+  }else{
+    aboutquery = "Select * from About_us where type=1";
+  }
 
-  sql.query("Select * from About_us ", function(err, res) {
+  sql.query(aboutquery, function(err, res) {
     if (err) {
       result(err, null);
     } else {

@@ -21,6 +21,7 @@ module.exports = function(app) {
   var Vendor = require("../controllers/common/VendorController.js");
   var Brand = require("../controllers/common/BrandController.js");
   var Collection = require("../controllers/common/CollectionController.js");
+  var category = require("../controllers/category/CategoryController");
 
   //////// ==============> Admin Routes <================= /////////    
   ///////// Search /////////////
@@ -204,15 +205,6 @@ app.route("/admin/brand/edit").post(routesVersioning({"1.0.0":Brand.updateBrandM
 app.route("/admin/brand/view").post(routesVersioning({"1.0.0":Brand.BrandModelview}));
 app.route("/admin/brand/list").post(routesVersioning({"1.0.0":Brand.BrandModelList}));
 
-/////////Collections////////////////
-app.route("/admin/collection/classificationlist").post(routesVersioning({"1.0.0":Collection.get_classification_list}));
-app.route("/admin/collection/classificationfilter").post(routesVersioning({"1.0.0":Collection.classificationfilter}));
-app.route("/admin/collection/add").post(routesVersioning({"1.0.0":Collection.collection_add}));
-app.route("/admin/collection/view").post(routesVersioning({"1.0.0":Collection.collection_view}));
-app.route("/admin/collection/edit").post(routesVersioning({"1.0.0":Collection.collection_edit}));
-app.route("/admin/collection/list").post(routesVersioning({"1.0.0":Collection.collection_list}));
-app.route("/admin/collection/live").put(routesVersioning({"1.0.0":Collection.collection_live}));
-
 
 
 app.route("/admin/community/masterlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.admin_community_list}));
@@ -228,5 +220,12 @@ app.route("/admin/user/edit").put(middleware.checkToken,routesVersioning({"1.0.0
 app.route("/admin/new_community_registration").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.new_community_registration}));
 
 app.route("/admin/sendnotification").post(routesVersioning({"1.0.0":dluser.user_based_notification}));
+
+
+//layout changes for category and collection
+
+app.route("/admin/layout").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.update_category_collection_list}));
+
+app.route("/admin/categorylist").post(middleware.checkToken,routesVersioning({"2":category.get_category_list_v2}));
 
 }
