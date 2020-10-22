@@ -671,7 +671,7 @@ Community.new_community_registration_v2 =async function new_community_registrati
     //         }
     //     } 
 
-        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+new_community.userid+"' ");
+        var orderslist = await query("SELECT * FROM Dayorder WHERE DATE(date) > CURDATE() and userid='"+new_community.userid+"' and dayorderstatus < 10");
 
         if (orderslist.length !=0) {
           order_available=true;

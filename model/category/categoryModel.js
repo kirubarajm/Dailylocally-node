@@ -242,7 +242,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         "lat": "13.0418",
         "long": "80.2341",
         "apartmentname": " Apartment",
-        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1603257823992-community_tile.png",
+        "image": "https://dailylocally.s3.amazonaws.com/upload/moveit/1603368928309-Group%20541%403x%20%281%29.png",
         "created_at": "2020-08-25 15:41:42",
         "status": 0,
         "requested_userid": null,
@@ -261,7 +261,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         "type": 3,
         "approval_status": true,
         "join_status": true,
-        "show_video":true
+        "show_video":false
     }];
 
 
@@ -275,7 +275,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
         get_join_community.forEach(i => {
               
          
-          i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+          i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1603368928309-Group%20541%403x%20%281%29.png";
           i.servicable_status=servicable_status;
           i.category=true,
           i.clickable= true;
@@ -284,7 +284,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
           i.category=true;
           i.catid = i.comid;
           i.type= 3;
-          i.show_video=true;
+          i.show_video=false;
           // i.approval_status= true;
           // i.join_status= true;
          
@@ -318,7 +318,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               i.join_status= true;
             }
 
-            i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1599494008474-Home%20-%20DLE.jpg";
+            i.image= "https://dailylocally.s3.amazonaws.com/upload/moveit/1603368928309-Group%20541%403x%20%281%29.png";
             i.servicable_status=servicable_status;
             i.category=true,
             i.clickable= true;
@@ -327,7 +327,7 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
             i.category=true;
             i.catid = 0;
             i.type= 3;
-            i.show_video=true;
+            i.show_video=false;
             // i.approval_status= false;
             // i.join_status= false;
             // console.log("22222",i);
