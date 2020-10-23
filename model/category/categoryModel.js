@@ -409,7 +409,9 @@ Category.get_category_list_v2 =async function get_category_list_v2(req,result) {
               // });
 
               res = res.concat(potrate_collectionlist); 
-              var temp1 = 0
+              var temp1 = 0;
+              res.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
+
               landscape_collectionlist.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
 
               if (landscape_collectionlist.length !=0) {
