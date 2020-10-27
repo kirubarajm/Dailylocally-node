@@ -1736,6 +1736,7 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
 ///////// update_category_collection_list///////////
 Catalog.update_category_collection_list =async function update_category_collection_list(req,result) {
     // layoutconstant.layout_rowcount = req.layout_rowcount
+    console.log(req)
 
     // console.log("layoutconstant",req.layout_rowcount);
     // const newObj = {
@@ -1767,17 +1768,23 @@ Catalog.update_category_collection_list =async function update_category_collecti
     let category = req.categorylist || [] ;
     let collection = req.collectionlist || [] ;
     
-    for (let i = 0; i < category.length; i++) {
-        var updatequery = "update Category set  layout_position='"+category[i].layout_position+"' where catid = '"+category[i].catid+"' ";
-        var updatequeryids = await query(updatequery);
-       
-    }
+        for (let i = 0; i < category.length; i++) {
+            if (category[i].type==1) {
+                var updatequery = "update Category set  layout_position='"+category[i].layout_position+"' where catid = '"+category[i].catid+"' ";
+                var updatequeryids = await query(updatequery);
+            } else {
+                var updatequery = "update Collections set  layout_position='"+category[i].layout_position+"' where cid = '"+category[i].catid+"' ";
+                var updatequeryids = await query(updatequery);
+            }
+        
+        
+        }
 
-    for (let j = 0; j < collection.length; j++) {
-      
-        var updatequery = "update Collections set  layout_position='"+collection[j].layout_position+"' where cid = '"+collection[j].cid+"' ";
-        var updatequeryids = await query(updatequery);
-    }
+        for (let j = 0; j < collection.length; j++) {
+        
+            var updatequery = "update Collections set  layout_position='"+collection[j].layout_position+"' where cid = '"+collection[j].cid+"' ";
+            var updatequeryids = await query(updatequery);
+        }
 
 
     let resobj = {
