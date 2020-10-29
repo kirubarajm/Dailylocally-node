@@ -1126,8 +1126,10 @@ Community.get_community_userdetails_v2=async function get_community_userdetails_
 
       if(community_status==true){
         community[i].home_page_content= "Welcome to the Daily Locally Exclusive Club."
+        community[i].group_url= community[i].whatsapp_group_link;
         }else{
           community[i].home_page_content= "Welcome to the Daily Locally."
+          community[i].group_url= ""
         }
       community[i].community_status = community_status;
     }        
