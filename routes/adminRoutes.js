@@ -205,7 +205,14 @@ app.route("/admin/brand/edit").post(routesVersioning({"1.0.0":Brand.updateBrandM
 app.route("/admin/brand/view").post(routesVersioning({"1.0.0":Brand.BrandModelview}));
 app.route("/admin/brand/list").post(routesVersioning({"1.0.0":Brand.BrandModelList}));
 
-
+/////////Collections////////////////
+app.route("/admin/collection/classificationlist").post(routesVersioning({"1.0.0":Collection.get_classification_list}));
+app.route("/admin/collection/classificationfilter").post(routesVersioning({"1.0.0":Collection.classificationfilter}));
+app.route("/admin/collection/add").post(routesVersioning({"1.0.0":Collection.collection_add}));
+app.route("/admin/collection/view").post(routesVersioning({"1.0.0":Collection.collection_view}));
+app.route("/admin/collection/edit").post(routesVersioning({"1.0.0":Collection.collection_edit}));
+app.route("/admin/collection/list").post(routesVersioning({"1.0.0":Collection.collection_list}));
+app.route("/admin/collection/live").put(routesVersioning({"1.0.0":Collection.collection_live}));
 
 app.route("/admin/community/masterlist").post(middleware.checkToken,routesVersioning({"1.0.0": dluser.admin_community_list}));
 
