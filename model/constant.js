@@ -32,9 +32,9 @@ const calculate = {
   dliosversionforceupdate: 8, //forceupdate version
   dliosforceupdate: 7,
 
-  dlversioncodenew: 17, 
-  dlversionforceupdate: 17, //forceupdate version
-  dlforceupdate: 17,
+  dlversioncodenew: 22, 
+  dlversionforceupdate: 22, //forceupdate version
+  dlforceupdate: 22,
   
 
   eat_delivery_min: 60,

@@ -53,6 +53,9 @@ Dluser.user_app_version_check_vid= async function user_app_version_check_vid(req
   var versionstatus = false;
   var dluserforceupdatestatus =false;
   
+  req.dlversioncode = req.dlversioncode || req.eatversioncode
+
+  console.log("eatversioncode",req.dlversioncode);
   if (headers.apptype === '1' || headers.apptype === 1) {
   
 
@@ -64,6 +67,7 @@ Dluser.user_app_version_check_vid= async function user_app_version_check_vid(req
     versionstatus = true;
     dluserforceupdatestatus = false;
   }else{
+    console.log("eatversioncode",req.dlversioncode);
     versionstatus = false;
     dluserforceupdatestatus = false;
   }
