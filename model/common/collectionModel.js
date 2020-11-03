@@ -7,6 +7,7 @@ var moment = require("moment");
 var constant = require('../constant.js');
 var ZoneModel = require('../common/zoneModel');
 var ClusterCollectionMapping = require('../tableModels/clustercollectionmappingTableModel.js');
+var CollectionMappingProduct = require('../common/collectionmappingproductModel.js');
 
 var Collection = function(collection) {
   this.cid = collection.cid;
@@ -20,6 +21,8 @@ var Collection = function(collection) {
   this.product_name = collection.product_name;
   this.classification_type = collection.classification_type;
   this.classification_id = collection.classification_id;
+  this.start_price = collection.start_price;
+  this.end_price = collection.end_price;
 }
 
 Collection.createCollection = async function createCollection(req, result) {   
@@ -695,6 +698,8 @@ Collection.get_classification_list = async function get_classification_list(req,
   classification.push({"id":2,"name":"category"});
   classification.push({"id":3,"name":"L1 subcategory"});
   classification.push({"id":4,"name":"L2 subcategory"});
+  classification.push({"id":5,"name":"custom"});
+  classification.push({"id":6,"name":"price"});
   let resobj = {
     success: true,
     status: true,
@@ -727,6 +732,14 @@ Collection.classificationfilter = async function classificationfilter(req,result
       var getbrand = await query(getbrandquery);
       resultdata = getbrand;
       break;
+    case "5":
+      var getproductquery = "select pid as id,Productname as name from ProductMaster where delete_status=0"
+      var getproduct = await query(getproductquery);
+      resultdata = getproduct;
+      break;
+    case "6":
+      resultdata = [];
+    break;
   
     default:
       break;
@@ -742,7 +755,9 @@ Collection.classificationfilter = async function classificationfilter(req,result
 
 /////Collection Add/////////// 
 Collection.collection_add = async function collection_add(req,result) {
-  if(req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!='' && req.classification_id!='' ){
+  // console.log("req==>",req);
+  if(req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!=''){
+    if(req.classification_id && req.classification_id!=''){ }else{  req.classification_id=0;  }
     var resultdata = "";
     var collectionquery = "";
     var insertdata = [];
@@ -765,15 +780,53 @@ Collection.collection_add = async function collection_add(req,result) {
         collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl2_id ="+req.classification_id+" ";
         insertdata[0].query = collectionquery;
         break;
+      case "5":
+        collectionquery = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? where  pl.live_status=1 and zl1.zoneid=?  and cmp.cid=? ";
+        insertdata[0].query = collectionquery;
+        break;
+      case "6":
+        collectionquery = "select * from ProductMaster where delete_status=0 and mrp>= ? and mrp<= ?";
+        insertdata[0].query = collectionquery;
+        break;
     
       default:
         break;
+    }
+
+    if(req.classification_type==6 && req.start_price!='' && req.end_price!=''){
+      insertdata[0].start_price = req.start_price;
+      insertdata[0].end_price = req.end_price;
     }
 
     await Collection.createCollection(insertdata[0], async function(err,collectionres){
       if(collectionres.success==true){
         var updatepossitionquery = "update Collections set category_Position="+collectionres.result.insertId+" where cid="+collectionres.result.insertId+"";
         var updatepossition = await query(updatepossitionquery);
+
+        if(req.classification_type==5 && req.products && req.products.length>0){
+          for (let i = 0; i < req.products.length; i++) {
+            var insertcmp = [];
+            insertcmp.push({"cid":collectionres.result.insertId,"pid":req.products[i]})
+              await CollectionMappingProduct.createCollectionMappingProduct(insertcmp[0], async function(err,cmpres){
+                if(cmpres.success==true){
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    result: cmpres,
+                    message: "collection mapping producted inserted Successfully"
+                  };
+                }else{
+                  let resobj = {
+                    success: true,
+                    status: false,
+                    message: "something went wrong plz try again"
+                  };
+                } 
+              });
+          }
+        }
+
+        
 
         let resobj = {
           success: true,
@@ -803,7 +856,8 @@ Collection.collection_add = async function collection_add(req,result) {
 
 /////Collection Edit/////////// 
 Collection.collection_edit = async function collection_edit(req,result) {
-  if(req.cid!='' && req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!='' && req.classification_id!='' ){
+  if(req.cid!='' && req.name!='' && req.tile_type!='' && req.classification_type!='' && req.img_url!=''){
+    if(req.classification_id && req.classification_id!=''){ }else{  req.classification_id=0;  }
     var resultdata = "";
     var collectionquery = "";
     var updateddata = [];
@@ -826,13 +880,54 @@ Collection.collection_edit = async function collection_edit(req,result) {
         collectionquery = "select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? left join Brand br on br.id=pm.brand left join SubcategoryL1 as l1scat on l1scat.catid= pm.scl1_id where pl.zoneid = ? and pl.live_status = ? and pm.scl2_id ="+req.classification_id+" ";
         updateddata[0].query = collectionquery;
         break;
-    
+      case "5":
+        collectionquery = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = ? where  pl.live_status=1 and zl1.zoneid=?  and cmp.cid=? ";
+        updateddata[0].query = collectionquery;
+        break;
+      case "6":
+        collectionquery = "select * from ProductMaster where delete_status=0 and mrp>= ? and mrp<= ?";
+        updateddata[0].query = collectionquery;
+        break;
+
       default:
         break;
     }
-console.log("updateddata[0] ===>",updateddata[0]);
+
+    if(req.classification_type==6 && req.start_price!='' && req.end_price!=''){
+      updateddata[0].start_price = req.start_price;
+      updateddata[0].end_price = req.end_price;
+    }
+
+// console.log("updateddata[0] ===>",updateddata[0]);
     await Collection.updateCollection(updateddata[0], async function(err,collectionres){
       if(collectionres.success==true){
+
+        if(req.classification_type==5 && req.products && req.products.length>0){
+          updatequery = "update Collection_mapping_product set active_status=0 where cid="+updateddata[0].cid;
+          await query(updatequery);
+
+          for (let i = 0; i < req.products.length; i++) {
+            var insertcmp = [];
+            insertcmp.push({"cid":updateddata[0].cid,"pid":req.products[i]})
+              await CollectionMappingProduct.createCollectionMappingProduct(insertcmp[0], async function(err,cmpres){
+                if(cmpres.success==true){
+                  let resobj = {
+                    success: true,
+                    status: true,
+                    result: cmpres,
+                    message: "collection mapping producted inserted Successfully"
+                  };
+                }else{
+                  let resobj = {
+                    success: true,
+                    status: false,
+                    message: "something went wrong plz try again"
+                  };
+                } 
+              });
+          }
+        }
+
         let resobj = {
           success: true,
           status: true,
@@ -862,11 +957,12 @@ console.log("updateddata[0] ===>",updateddata[0]);
 /////Collection View/////////// 
 Collection.collection_view = async function collection_view(req,result) {
   if(req.cid!=''){
-    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections where cid="+req.cid;
+    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory'  when classification_type=5 then 'custom'  when classification_type=6 then 'price' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections where cid="+req.cid;
     var getcollection = await query(getcollectionquery);
     if(getcollection.length>0){
       for (let i = 0; i < getcollection.length; i++) {
         var collectionnamequery = "";
+        var collectionproductsquery  = "";
           switch (getcollection[i].classification_type) {
             case 1:
               collectionnamequery = "select *,brandname as name from Brand where id="+getcollection[i].classification_id;
@@ -879,13 +975,20 @@ Collection.collection_view = async function collection_view(req,result) {
               break;
             case 4:
               collectionnamequery = "select * from SubcategoryL2 where scl2_id="+getcollection[i].classification_id;
-              break;          
+              break;
+            case 5:
+              collectionproductsquery = "select cmp.pid as id,pm.Productname as name from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid where cmp.cid='"+req.cid+"' and cmp.active_status=1 group by cmp.pid";
+              break;         
             default:
               break;
           }
           if(collectionnamequery!=''){
             var collectionname = await query(collectionnamequery);
             getcollection[i].classification_id_name = collectionname[0].name;
+          }
+          if(collectionproductsquery!=''){
+            var collectionproducts = await query(collectionproductsquery);
+            getcollection[i].collectionproducts = collectionproducts;
           }
       }
 
@@ -916,11 +1019,12 @@ Collection.collection_view = async function collection_view(req,result) {
 /////Collection List/////////// 
 Collection.collection_list = async function collection_list(req,result) {
   if(req.cid!=''){
-    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections order by cid desc";
+    var getcollectionquery = "select *,case when classification_type=1 then 'brand' when classification_type=2 then 'category' when classification_type=3 then 'L1 subcategory' when classification_type=4 then 'L2 subcategory' when classification_type=5 then 'custom'  when classification_type=6 then 'price' end as classification_type_name,'' as classification_id_name,if(tile_type=1,'vertical','horizontal') as tile_type_name from Collections order by cid desc";
     var getcollection = await query(getcollectionquery);
     if(getcollection.length>0){
       for (let i = 0; i < getcollection.length; i++) {
         var collectionnamequery = "";
+        var collectionproductsquery = "";
           switch (getcollection[i].classification_type) {
             case 1:
               collectionnamequery = "select *,brandname as name from Brand where id="+getcollection[i].classification_id;
@@ -933,7 +1037,10 @@ Collection.collection_list = async function collection_list(req,result) {
               break;
             case 4:
               collectionnamequery = "select * from SubcategoryL2 where scl2_id="+getcollection[i].classification_id;
-              break;          
+              break;
+            case 5:
+              collectionproductsquery = "select cmp.pid as id,pm.Productname as name from Collection_mapping_product as cmp left join ProductMaster as pm on pm.pid=cmp.pid where cmp.cid='"+getcollection[i].cid+"' and cmp.active_status=1 group by cmp.pid";
+              break;         
             default:
               break;
           }
@@ -944,6 +1051,10 @@ Collection.collection_list = async function collection_list(req,result) {
             }else{
               getcollection[i].classification_id_name = '';
             }            
+          }
+          if(collectionproductsquery && collectionproductsquery!=''){
+            var collectionproducts = await query(collectionproductsquery);
+            getcollection[i].collectionproducts = collectionproducts;
           }
       }
 

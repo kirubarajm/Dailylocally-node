@@ -144,6 +144,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
         new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
         new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
         new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+        new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;
         Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
 
       }else{
@@ -232,6 +233,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
             new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
             new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+            new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;
             Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
           }
         });
@@ -960,6 +962,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
             new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
             new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
             new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+            new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;
             Dayorderproducts.createDayorderproducts(new_createDayorderproducts);
           }else{                 
             var new_day_order={};
@@ -1036,6 +1039,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                   new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
                   new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
                   new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+                  new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                 }
               });  
@@ -1075,7 +1079,8 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
               new_createDayorderproducts.product_tag = getproduct[i].tag;
               new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
               new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
-              new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;            
+              new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+              new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;           
               Dayorderproducts.createDayorderproducts(new_createDayorderproducts);  
             }else{   
               // console.log("day order ila",dates);                  
@@ -1153,6 +1158,7 @@ Dayorder.checkdayorder =async function checkdayorder(Dayorder,getproduct){
                   new_createDayorderproducts.product_short_desc = getproduct[i].short_desc;
                   new_createDayorderproducts.product_productdetails = getproduct[i].productdetails;
                   new_createDayorderproducts.product_Perishable = getproduct[i].Perishable;
+                  new_createDayorderproducts.product_combo_flag = getproduct[i].combo_flag;
                   Dayorderproducts.createDayorderproducts(new_createDayorderproducts)
                 }
               });  

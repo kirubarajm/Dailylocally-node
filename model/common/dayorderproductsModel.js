@@ -35,6 +35,7 @@ var Dayorderproducts = function(Dayorderproducts) {
   this.product_short_desc = Dayorderproducts.product_short_desc;
   this.product_productdetails = Dayorderproducts.product_productdetails;
   this.product_Perishable = Dayorderproducts.product_Perishable;
+  this.product_combo_flag = Dayorderproducts.product_combo_flag;
 };
 
 //////////Create DayOrderProduct//////////////////////

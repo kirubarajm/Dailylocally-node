@@ -665,7 +665,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==5){
       //console.log("sub-category 2");
-      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"'  and cmp.cid='"+get_collection[0].cid+"'  ";
+      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"'  and cmp.cid='"+get_collection[0].cid+"' and cmp.active_status=1 ";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==6){
