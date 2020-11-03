@@ -1018,6 +1018,7 @@ Collection.collection_list = async function collection_list(req,result) {
     if(getcollection.length>0){
       for (let i = 0; i < getcollection.length; i++) {
         var collectionnamequery = "";
+        var collectionproductsquery = "";
           switch (getcollection[i].classification_type) {
             case 1:
               collectionnamequery = "select *,brandname as name from Brand where id="+getcollection[i].classification_id;
@@ -1045,7 +1046,7 @@ Collection.collection_list = async function collection_list(req,result) {
               getcollection[i].classification_id_name = '';
             }            
           }
-          if(collectionproductsquery!=''){
+          if(collectionproductsquery && collectionproductsquery!=''){
             var collectionproducts = await query(collectionproductsquery);
             getcollection[i].collectionproducts = collectionproducts;
           }
