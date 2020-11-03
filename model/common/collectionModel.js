@@ -336,6 +336,12 @@ if (get_nearby_zone.length !=0) {
            
             var productlist = await query(product_query);
             // console.log("productlist",productlist);
+          }else if(res[i].classification_type==6){
+            //sub-category 2
+            product_query = "Select pm.*,pl.*  from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id where pm.mrp BETWEEN  '"+res[i].start_price+"' and pm.mrp '"+res[i].end_price+"'  and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"'";
+           
+            var productlist = await query(product_query);
+            // console.log("productlist",productlist);
           }else{
             product_query = "select pm.*,br.brandname from  ProductMaster pm left join Product_live pl on pl.pid=pm.pid left join Brand br on br.id=pm.brand  where br.id = '"+res[i].classification_id+"' and pl.live_status=1"
            

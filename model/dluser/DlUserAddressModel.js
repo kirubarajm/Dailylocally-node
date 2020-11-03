@@ -212,56 +212,133 @@ UserAddress.updateById =async function updateById(req, result){
         });
 };
 
-UserAddress.check_address =async function check_address(req, result){
+// UserAddress.check_address =async function check_address(req, result){
 
-    var servicable_status = true;
+//     var servicable_status = true;
    
-    var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
-    req.lat +
-    "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
-    req.lon +
-    "') ) + sin( radians('" +
-    req.lat +
-    "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+//     var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+//     req.lat +
+//     "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+//     req.lon +
+//     "') ) + sin( radians('" +
+//     req.lat +
+//     "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
    
    
-   if (get_nearby_zone.length !=0) {
+//    if (get_nearby_zone.length !=0) {
+//     console.log(get_nearby_zone);
+//     console.log(get_nearby_zone[0].distance);
+//     console.log(constant.radiuslimit);
+  
+//     if (get_nearby_zone[0].distance > constant.radiuslimit) {
+//       servicable_status =false;
+//     }
+//    }
+//    console.log(servicable_status);
+//    var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
+   
+//    if (user_day_order_details.length !=0) {
+//      if (!servicable_status) {
+//        let resobj = {
+//            success: true,
+//            status: servicable_status,
+//            servicable_status:servicable_status,
+//            title : 'Area unserviceable!',
+//            message: "Please cancel your upcoming orders or get in touch with our customer support to process the request",
+//        };
+   
+//        result(null, resobj);
+//      }else{
+//         let resobj = {
+//             success: true,
+//             status: servicable_status,
+//             title : 'Alert',
+//             servicable_status:servicable_status,
+//             message: "Your current selected location is serviceable",
+//         };
     
-    if (get_nearby_zone[0].distance > constant.radiuslimit) {
-      servicable_status =false;
-    }
-   }
+//         result(null, resobj);
+//      }
    
+//    } else {
+//     let resobj = {
+//         success: true,
+//         status: true,
+//         message: "Your Have Orders",
+//         servicable_status: servicable_status
+//     };
+
+//     result(null, resobj);
+//    }
+   
+ 
+//    };
+
+
+   UserAddress.check_address =async function check_address(req, result){
+
+//     var servicable_status = true;
+   
+//     var get_nearby_zone = await query("select *, ROUND( 3959 * acos( cos( radians('" +
+//     req.lat +
+//     "') ) * cos( radians( lat ) )  * cos( radians( lon ) - radians('" +
+//     req.lon +
+//     "') ) + sin( radians('" +
+//     req.lat +
+//     "') ) * sin(radians(lat)) ) , 2) AS distance from Zone  order by distance asc limit 1");
+   
+   
+//    if (get_nearby_zone.length !=0) {
+//     console.log(get_nearby_zone);
+//     console.log(get_nearby_zone[0].distance);
+//     console.log(constant.radiuslimit);
+  
+//     if (get_nearby_zone[0].distance > constant.radiuslimit) {
+//       servicable_status =false;
+//     }
+//    }
+//    console.log(servicable_status);
    var user_day_order_details = await query("select * from Dayorder WHERE userid = '"+req.userid+"' and dayorderstatus < 10");
    
    if (user_day_order_details.length !=0) {
-     if (!servicable_status) {
-       let resobj = {
-           success: true,
-           status: servicable_status,
-           servicable_status:servicable_status,
-           title : 'Area unserviceable!',
-           message: "Please cancel your upcoming orders or get in touch with our customer support to process the request",
-       };
+
+    //  if (!servicable_status) {
+    //    let resobj = {
+    //        success: true,
+    //        status: servicable_status,
+    //        servicable_status:servicable_status,
+    //        title : 'Area unserviceable!',
+    //        message: "Please cancel your upcoming orders or get in touch with our customer support to process the request",
+    //    };
    
-       result(null, resobj);
-     }else{
-        let resobj = {
-            success: true,
-            status: servicable_status,
-            title : 'Alert',
-            servicable_status:servicable_status,
-            message: "Your current selected location is serviceable",
-        };
+    //    result(null, resobj);
+    //  }else{
+    //     let resobj = {
+    //         success: true,
+    //         status: servicable_status,
+    //         title : 'Alert',
+    //         servicable_status:servicable_status,
+    //         message: "Your current selected location is serviceable",
+    //     };
     
-        result(null, resobj);
-     }
+    //     result(null, resobj);
+    //  }
+
+     let resobj = {
+        success: true,
+        status: true,
+        servicable_status:false,
+        title : 'Area unserviceable!',
+        message: "Please cancel your upcoming orders or get in touch with our customer support to process the request",
+    };
+
+    result(null, resobj);
    
    } else {
     let resobj = {
         success: true,
         status: true,
-        message: "Your Have Orders",
+        message: "Your current selected location is serviceable",
         servicable_status: true
     };
 
@@ -270,7 +347,6 @@ UserAddress.check_address =async function check_address(req, result){
    
  
    };
-
 UserAddress.remove = function(id, result){
      sql.query("DELETE FROM User WHERE userid = ?", [id], function (err, res) {
 
