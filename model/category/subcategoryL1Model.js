@@ -174,13 +174,13 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==6){
       //console.log("sub-category 2");
-      sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Collection_mapping_product cmp on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid=1 and pm.mrp BETWEEN  '"+get_collection[i].start_price+"' and '"+get_collection[i].end_price+"'  group by ca.catid";
+      sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Collection_mapping_product cmp on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid=1 and pm.mrp BETWEEN  '"+get_collection[0].start_price+"' and '"+get_collection[0].end_price+"'  group by ca.catid";
      
       // var productlist = await query(product_query);
     }
 
 
-     console.log(sub_category_query)
+    //  console.log(sub_category_query)
     sql.query(sub_category_query,async function(err, res) {
       if (err) {
         result(err, null);

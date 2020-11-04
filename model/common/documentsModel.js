@@ -7,6 +7,8 @@ var AWS_ACCESS_KEY = "AKIAJJQUEYLIU23E63OA";
 var AWS_SECRET_ACCESS_KEY = "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";
 const fs = require("fs");
 const AWS = require("aws-sdk");
+var pdf = require('html-pdf');
+
 const util = require("util");
 const query = util.promisify(sql.query).bind(sql);
 
@@ -418,6 +420,7 @@ Documents.makeit_product_upload_a_document = function makeit_product_upload_a_do
   // });
   Documents.documentUpload(params,result);
 };
+
 
 Documents.documentUpload = function documentUpload(params,result) {
   s3.upload(params, (err, data) => {

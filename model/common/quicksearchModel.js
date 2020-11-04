@@ -26,7 +26,7 @@ const day_order_address_update_cron = new CronJob("0 22 * * *", async function(s
   var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '"+tomorrow+"'");
   if (get_day_orderlist.length !=0) {    
     for (let i = 0; i < get_day_orderlist.length; i++) {
-      sql.query("Select * from Address where userid = '"+get_day_orderlist[0].userid+"' and address_default=1  ",async function(err, res) {
+      sql.query("Select * from Address where userid = '"+get_day_orderlist[0].userid+"' order by aid desc limit 1 ",async function(err, res) {
         if (err) {
           console.log("error: ", err);
           //result(err, null);

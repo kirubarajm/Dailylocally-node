@@ -22,6 +22,7 @@ module.exports = function(app) {
   var Brand = require("../controllers/common/BrandController.js");
   var Collection = require("../controllers/common/CollectionController.js");
   var category = require("../controllers/category/CategoryController");
+  var documents = require("../controllers/common/DocumentsController");
 
   //////// ==============> Admin Routes <================= /////////    
   ///////// Search /////////////
@@ -234,5 +235,7 @@ app.route("/admin/sendnotification").post(routesVersioning({"1.0.0":dluser.user_
 app.route("/admin/layout").post(middleware.checkToken,routesVersioning({"1.0.0": catalog.update_category_collection_list}));
 
 app.route("/admin/categorylist").post(middleware.checkToken,routesVersioning({"2":category.get_category_list_v2}));
+
+
 
 }

@@ -134,16 +134,5 @@ exports.makeit_upload_a_documents = function(req, res) {
   }
 };
 
-exports.makeit_product_upload_a_document = function(req, res) {
-  var new_documents = new Document(req.body);
-  if (!new_documents) {
-    res
-      .status(400)
-      .send({ error: true, message: "Please provide documents name" });
-  } else {
-    Document.makeit_product_upload_a_document(req, function(err, documents) {
-      if (err) res.send(err);
-      res.json(documents);
-    });
-  }
-};
+
+
