@@ -293,7 +293,7 @@ if (get_nearby_zone.length !=0) {
 }
   if (userdetails.length !==0) {
     userdetails[0].cluid = userdetails[0].cluid || 1;
-    var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name,cs.classification_type,cs.classification_id,cs.layout_position from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid=1 group by cs.cid order by cs.layout_position ASC";
+    var collection_query = "Select cs.cid,cs.name,cs.active_status,cs.img_url as image,cs.category_Position,cs.tile_type,cs.clickable,cs.product_name,cs.classification_type,cs.classification_id,cs.layout_position,cs.start_price,cs.end_price from Collections as cs left join Cluster_Collection_mapping ccm on ccm.cid=cs.cid where cs.active_status=1 and ccm.cluid=1 group by cs.cid order by cs.layout_position ASC";
     
     sql.query(collection_query,async function(err, res) {
       if (err) {
@@ -338,8 +338,8 @@ if (get_nearby_zone.length !=0) {
             // console.log("productlist",productlist);
           }else if(res[i].classification_type==6){
             //sub-category 2
-            product_query = "Select pm.*,pl.*  from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id where pm.mrp BETWEEN  '"+res[i].start_price+"' and pm.mrp '"+res[i].end_price+"'  and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"'";
-           
+            product_query = "Select pm.*,pl.*  from SubcategoryL2 as  l2 left join ProductMaster pm on pm.scl2_id=l2.scl2_id  left join  Product_live pl on pl.pid=pm.pid left join Zone_l2_subcategory_mapping zl2 on zl2.master_l2_subcatid =l2.scl2_id left join SubcategoryL1 l1 on l1.scl1_id=l2.scl1_id where pm.mrp BETWEEN  '"+res[i].start_price+"' and '"+res[i].end_price+"' and pl.live_status=1 and zl2.zoneid='"+get_nearby_zone[0].id+"'";
+          //  console.log("product_query",product_query);
             var productlist = await query(product_query);
             // console.log("productlist",productlist);
           }else{
@@ -365,7 +365,7 @@ if (get_nearby_zone.length !=0) {
         // res.sort(function(a, b){return a.layout_position-b.layout_position});
         res.sort((a, b) => parseFloat(a.layout_position) - parseFloat(b.layout_position));
 
-       // console.log(res);
+        // console.log("res==",res);
       if (res.length != 0 ) {
         
         let resobj = {

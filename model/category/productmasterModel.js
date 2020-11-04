@@ -674,13 +674,13 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
      
       // var productlist = await query(product_query);
     }
-
+    
     var scl1_id = '';
 
     if (req.scl1_id !=0) {
       product_list = product_list+ " and l1.scl1_id='"+req.scl1_id+"'"
     } 
-
+    console.log("product_list==>",product_list);
     if (req.sortid==1) {  
       product_list = product_list+ " group by pl.vpid ORDER BY pm.Productname ASC ";   
     }else if (req.sortid==2) {  
@@ -691,12 +691,13 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
       product_list = product_list+ " group by pl.vpid ORDER BY pm.mrp DESC ";
     }
 
-console.log(product_list);
+// console.log(product_list);
 
     sql.query(product_list,async function(err, res) {
       if (err) {
         result(err, null);
       } else {  
+        console.log("res=>",res);
         for (let i = 0; i < res.length; i++) {      
           if (res[i].uom== 1 || res[i].uom==7) {
             res[i].weight = res[i].weight * 1000;
