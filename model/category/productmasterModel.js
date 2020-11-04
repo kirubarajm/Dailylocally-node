@@ -640,7 +640,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
     
     var get_collection = await query("select * from  Collections where cid='"+req.cid+"'");
 
-    
+    console.log(get_collection[0].classification_type);
 
     var product_list ="";
     if (get_collection[0].classification_type==1) { 
@@ -650,12 +650,12 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
     // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==2){
        //console.log("category");
-       product_list = "select pm.*,pl.*,l1.catid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as l1 on l1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=l1.scl1_id left join ProductMaster as pm on pm.scl1_id=l1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where zcm.active_status=1 and ccm.active_status=1  and pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and ca.catid='"+get_collection[0].classification_id+"' ";
+       product_list = "select pm.*,pl.*,l1.catid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from Category ca left join Cluster_Category_mapping as ccm on ccm.catid=ca.catid left join SubcategoryL1  as l1 on l1.catid=ca.catid left join Zone_l1_subcategory_mapping as zl1sub on zl1sub.master_l1_subcatid=l1.scl1_id left join ProductMaster as pm on pm.scl1_id=l1.scl1_id left join Product_live as pl on pl.pid=pm.pid left join Zone_category_mapping as zcm on zcm.master_catid=ca.catid left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where zcm.active_status=1 and ccm.active_status=1  and pl.zoneid='"+get_nearby_zone[0].id+"' and pl.live_status=1 and ca.catid='"+get_collection[0].classification_id+"' group by pm.pid";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==3){
       //console.log("sub-category 1");
-      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' and l1.scl1_id=  '"+get_collection[0].classification_id+"' ";
+      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"' and l1.scl1_id=  '"+get_collection[0].classification_id+"' group by pm.pid";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==4){
@@ -665,7 +665,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==5){
       //console.log("sub-category 2");
-      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"'  and cmp.cid='"+get_collection[0].cid+"' and cmp.active_status=1 ";
+      product_list = "Select pm.*,pl.*,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join  Collection_mapping_product cmp  on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id left join Brand br on br.id=pm.brand left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' where  pl.live_status=1 and zl1.zoneid='"+get_nearby_zone[0].id+"'  and cmp.cid='"+get_collection[0].cid+"' and cmp.active_status=1 group by  pm.pid ";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==6){
@@ -680,7 +680,7 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
     if (req.scl1_id !=0) {
       product_list = product_list+ " and l1.scl1_id='"+req.scl1_id+"'"
     } 
-    console.log("product_list==>",product_list);
+    // console.log("product_list==>",product_list);
     if (req.sortid==1) {  
       product_list = product_list+ " group by pl.vpid ORDER BY pm.Productname ASC ";   
     }else if (req.sortid==2) {  
@@ -691,13 +691,13 @@ ProductMaster.get_collection_product_list = async function get_collection_produc
       product_list = product_list+ " group by pl.vpid ORDER BY pm.mrp DESC ";
     }
 
-// console.log(product_list);
+ console.log(product_list);
 
     sql.query(product_list,async function(err, res) {
       if (err) {
         result(err, null);
       } else {  
-        console.log("res=>",res);
+        // console.log("res=>",res);
         for (let i = 0; i < res.length; i++) {      
           if (res[i].uom== 1 || res[i].uom==7) {
             res[i].weight = res[i].weight * 1000;
