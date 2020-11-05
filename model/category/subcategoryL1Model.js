@@ -169,7 +169,7 @@ Sub_Category_L1.get_collection_Sub_Category_L1_list = async function get_collect
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==5){
       //console.log("sub-category 2");
-      sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Collection_mapping_product cmp on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid=1 and cmp.cid='"+get_collection[0].cid+"'  group by ca.catid";
+      sub_category_query = "Select l1.*,ca.image as cat_header_image  from SubcategoryL1 as  l1 left join ProductMaster pm on pm.scl1_id=l1.scl1_id  left join  Product_live pl on pl.pid=pm.pid left join Collection_mapping_product cmp on cmp.pid=pl.pid left join Category  as ca on l1.catid=ca.catid left join Zone_l1_subcategory_mapping zl1 on zl1.master_l1_subcatid =l1.scl1_id where  pl.live_status=1 and zl1.zoneid=1 and cmp.cid='"+get_collection[0].cid+"' and  cmp.active_status=1 group by ca.catid";
      
       // var productlist = await query(product_query);
     }else if(get_collection[0].classification_type==6){

@@ -893,7 +893,7 @@ ProductMaster.get_collection_brand_list = async function get_collection_brand_li
 
   // var brand_list_query = " select pm.brand,br.brandname from ProductMaster as pm left join Brand br on br.id=pm.brand left join Product_live pl on pl.pid=pm.pid  where pl.live_status=1 and pm.brand='"+brand_list[0].id+"' "+query1+" ";
   var brand_list_query="";
-
+  console.log(get_collection[0].classification_type)
   if(get_collection[0].classification_type==1){ 
     var brand_list_query = "select br.id as brand,br.brandname from Brand as br where br.id='"+get_collection[0].classification_id+"' group by  br.id";
   }else if(get_collection[0].classification_type==2){
@@ -903,12 +903,12 @@ ProductMaster.get_collection_brand_list = async function get_collection_brand_li
   }else if(get_collection[0].classification_type==4){
     var brand_list_query = "select br.id as brand,br.brandname from Brand as br left join ProductMaster as pm on pm.brand=br.id left join SubcategoryL2  as sub2 on sub2.scl2_id=pm.scl2_id where sub2.scl2_id='"+get_collection[0].classification_id+"' group by br.id";
   }else if(get_collection[0].classification_type==5){
-    var brand_list_query = "select br.id as brand,br.brandname from Collection_mapping_product cmp left join Product_live pl on pl.pid=cmp.pid left join ProductMaster as pm on pm.pid=pl.pid  left join Brand br on pm.brand=br.id  where cmp.cid='"+get_collection[0].classification_id+"'  and pl.live_status=1 group by br.id";
+    var brand_list_query = "select br.id as brand,br.brandname from Collection_mapping_product cmp left join Product_live pl on pl.pid=cmp.pid left join ProductMaster as pm on pm.pid=pl.pid  left join Brand br on pm.brand=br.id  where cmp.cid='"+get_collection[0].cid+"'  and pl.live_status=1 and cmp.active_status=1 group by br.id";
   }else if(get_collection[0].classification_type==6){
     var brand_list_query = "select br.id as brand,br.brandname from Brand as br left join ProductMaster as pm on pm.brand=br.id left join SubcategoryL2  as sub2 on sub2.scl2_id=pm.scl2_id where pm.mrp BETWEEN  '"+get_collection[0].start_price+"' and '"+get_collection[0].end_price+"'  group by br.id";
   }
 
-  // console.log(brand_list_query);
+   console.log(brand_list_query);
   sql.query(brand_list_query,async function(err, res) {
     if (err) {
       result(err, null);
