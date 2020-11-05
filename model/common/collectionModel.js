@@ -800,7 +800,12 @@ Collection.collection_add = async function collection_add(req,result) {
 
     await Collection.createCollection(insertdata[0], async function(err,collectionres){
       if(collectionres.success==true){
-        var updatepossitionquery = "update Collections set category_Position="+collectionres.result.insertId+" where cid="+collectionres.result.insertId+"";
+        var layoutcount = 0;
+        var getallcollectionquery = "select * from Collections where tile_type="+req.tile_type;
+        var getallcollection = await query(getallcollectionquery);
+        layoutcount = (getallcollection.length)+1;
+
+        var updatepossitionquery = "update Collections set category_Position="+collectionres.result.insertId+",layout_position="+layoutcount+" where cid="+collectionres.result.insertId+"";
         var updatepossition = await query(updatepossitionquery);
 
         if(req.classification_type==5 && req.products && req.products.length>0){
