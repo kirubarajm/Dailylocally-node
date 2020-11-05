@@ -1736,7 +1736,6 @@ Catalog.search_catalog_data_mobile =async function search_catalog_data_mobile(re
 ///////// update_category_collection_list///////////
 Catalog.update_category_collection_list =async function update_category_collection_list(req,result) {
     // layoutconstant.layout_rowcount = req.layout_rowcount
-    console.log(req)
 
     // console.log("layoutconstant",req.layout_rowcount);
     // const newObj = {

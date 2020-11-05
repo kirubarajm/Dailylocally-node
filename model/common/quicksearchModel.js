@@ -31,7 +31,7 @@ const day_order_address_update_cron = new CronJob("0 22 * * *", async function(s
           console.log("error: ", err);
           //result(err, null);
         } else {         
-          update_day_order_query = await query("update Dayorder set cus_lat= '"+res[0].lat+"', cus_lon='"+res[0].lon+"',cus_pincode='"+res[0].pincode+"',google_address='"+res[0].google_address+"',complete_address='"+res[0].complete_address+"',flat_house_no='"+res[0].flat_house_no+"',plot_house_no='"+res[0].plot_house_no+"',floor='"+res[0].floor+"',block_name='"+res[0].block_name+"',city="+res[0].city+"'   where id='"+get_day_orderlist[i].id+"'");
+          update_day_order_query = await query("update Dayorder set cus_lat= '"+res[0].lat+"', cus_lon='"+res[0].lon+"',cus_pincode='"+res[0].pincode+"',google_address='"+res[0].google_address+"',complete_address='"+res[0].complete_address+"',flat_house_no='"+res[0].flat_house_no+"',plot_house_no='"+res[0].plot_house_no+"',floor='"+res[0].floor+"',block_name='"+res[0].block_name+"',city='"+res[0].city+"'   where id='"+get_day_orderlist[i].id+"'");
         }
       });
     }   

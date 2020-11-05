@@ -40,6 +40,19 @@ exports.update_a_user_address = function(req, res) {
 
   if (!req.body.lat || !req.body.lon) {
     res.status(400).send({ error: true, message: "Please provide lat/lon" });
+  }else if (!req.body.aid || req.body.aid==0) {
+
+    var new_address = new UserAddress(req.body);
+      //handles null error
+      if (!new_address.lat || !new_address.lon) {
+        res.status(400).send({ error: true, message: "Please provide lat/lon" });
+      } else {
+        UserAddress.createUserAddress(new_address, function(err, user) {
+          if (err) res.send(err);
+          res.json(user);
+        });
+      }
+
   } else {
   UserAddress.updateById(req.body, function(err, user) {
     if (err) res.send(err);

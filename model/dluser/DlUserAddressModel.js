@@ -233,7 +233,8 @@ UserAddress.updateById =async function updateById(req, result){
         
                 });
         } else {
-            
+            var update_addr = await query("update User set address_created=1 where userid = '"+req.userid+"'"); 
+
             var address=  await query("select * from Address WHERE userid='"+req.userid+"'");
    
           let resobj = {
