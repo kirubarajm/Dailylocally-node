@@ -38,7 +38,7 @@ var QuickSearch   = function(QuickSearch) {
 //   }  
 // });
 
-const day_order_address_update_cron = new CronJob("*/1 * * * *", async function(search, result) {
+const day_order_address_update_cron = new CronJob("0 22 * * *", async function(search, result) {
   console.log("day_order_address_update_cron Cron at 22 am ====>");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
   var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '2020-11-08'");
