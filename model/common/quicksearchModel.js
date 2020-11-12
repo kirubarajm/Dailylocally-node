@@ -20,18 +20,40 @@ var QuickSearch   = function(QuickSearch) {
 // QuickSearch.eat_explore_store_data_by_cron = async function eat_explore_store_data_by_cron(search, result) { };
 
 // This cron is to running all day order address edit
+// const day_order_address_update_cron = new CronJob("0 22 * * *", async function(search, result) {
+//   console.log("day_order_address_update_cron Cron at 22 am ====>");
+//   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
+//   var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '"+tomorrow+"'");
+//   if (get_day_orderlist.length !=0) {    
+//     for (let i = 0; i < get_day_orderlist.length; i++) {
+//       sql.query("Select * from Address where userid = '"+get_day_orderlist[0].userid+"' order by aid desc limit 1 ",async function(err, res) {
+//         if (err) {
+//           console.log("error: ", err);
+//           //result(err, null);
+//         } else {         
+//           update_day_order_query = await query("update Dayorder set cus_lat= '"+res[0].lat+"', cus_lon='"+res[0].lon+"',cus_pincode='"+res[0].pincode+"',google_address='"+res[0].google_address+"',complete_address='"+res[0].complete_address+"',flat_house_no='"+res[0].flat_house_no+"',plot_house_no='"+res[0].plot_house_no+"',floor='"+res[0].floor+"',block_name='"+res[0].block_name+"',city='"+res[0].city+"'   where id='"+get_day_orderlist[i].id+"'");
+//         }
+//       });
+//     }   
+//   }  
+// });
+
 const day_order_address_update_cron = new CronJob("0 22 * * *", async function(search, result) {
   console.log("day_order_address_update_cron Cron at 22 am ====>");
   var tomorrow = moment().add(1, "days").format("YYYY-MM-DD");
-  var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '"+tomorrow+"'");
+  var get_day_orderlist = await query("SELECT * FROM Dayorder WHERE date = '2020-11-08'");
   if (get_day_orderlist.length !=0) {    
     for (let i = 0; i < get_day_orderlist.length; i++) {
-      sql.query("Select * from Address where userid = '"+get_day_orderlist[0].userid+"' order by aid desc limit 1 ",async function(err, res) {
+      // console.log(get_day_orderlist[i].userid);
+      sql.query("Select * from Address where userid = '"+get_day_orderlist[i].userid+"' order by aid desc limit 1 ",async function(err, res) {
         if (err) {
           console.log("error: ", err);
           //result(err, null);
-        } else {         
-          update_day_order_query = await query("update Dayorder set cus_lat= '"+res[0].lat+"', cus_lon='"+res[0].lon+"',cus_pincode='"+res[0].pincode+"',google_address='"+res[0].google_address+"',complete_address='"+res[0].complete_address+"',flat_house_no='"+res[0].flat_house_no+"',plot_house_no='"+res[0].plot_house_no+"',floor='"+res[0].floor+"',block_name='"+res[0].block_name+"',city='"+res[0].city+"'   where id='"+get_day_orderlist[i].id+"'");
+        } else {       
+          // console.log(get_day_orderlist[i].id);
+          get_update_query= "update Dayorder set cus_lat= '"+res[0].lat+"', cus_lon='"+res[0].lon+"',cus_pincode='"+res[0].pincode+"',google_address='"+res[0].google_address+"',complete_address='"+res[0].complete_address+"',flat_house_no='"+res[0].flat_house_no+"',plot_house_no='"+res[0].plot_house_no+"',floor='"+res[0].floor+"',block_name='"+res[0].block_name+"',city='"+res[0].city+"'   where id='"+get_day_orderlist[i].id+"'";  
+          // console.log(get_update_query);
+          update_day_order_query = await query(get_update_query);
         }
       });
     }   
