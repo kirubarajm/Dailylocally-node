@@ -219,7 +219,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
             if(updatedayorder.affectedRows>0){
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":2,"done_type":1});
+                insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":2,"done_type":1});
                 DayOrderComment.create_OrderComments_crm(insertlogdata); 
                 
                 //////// Customer App Notification //////////
@@ -1119,6 +1119,10 @@ Logistics.dunzo_assign =async function dunzo_assign(req,result) {
                                     var dunzohistorydata = [];
                                     dunzohistorydata.push({"doid":req.doid[i],"type":1,"created_by":req.done_by,"zoneid":req.zoneid});
                                     await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
+                                    ////////Create Day order Log ////////////
+                                    var insertlogdata = [];
+                                    insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":req.doid[i],"type":2,"done_type":1});
+                                    DayOrderComment.create_OrderComments_crm(insertlogdata); 
                                     let resobj = {
                                         success: true,
                                         status: true,
@@ -1258,6 +1262,10 @@ Logistics.dunzo_delivered =async function dunzo_delivered(req,result) {
                     var dunzohistorydata = [];
                     dunzohistorydata.push({"doid":req.doid,"type":4,"created_by":req.done_by,"zoneid":req.zoneid});
                     await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
+                    ////////Create Day order Log ////////////
+                    var insertlogdata = [];
+                    insertlogdata.push({"comments":"Order Delivered","done_by":req.done_by,"doid":req.doid[i],"type":2,"done_type":1});
+                    DayOrderComment.create_OrderComments_crm(insertlogdata); 
                     updatedids.push(dayorders[i]);
                 }else{
                     errorids.push(dayorders[i]);

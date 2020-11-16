@@ -2451,7 +2451,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 
         //////Create Day order Log ////////////
         var insertlogdata = [];
-        insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+        insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         //////// Customer App Notification //////////
