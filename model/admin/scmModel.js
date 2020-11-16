@@ -2289,17 +2289,17 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
 
                 if(getdop[0].revoke_flag==1){
                     var updateDO_revoke = await query("update Dayorder set revoke_flag=0 where id = '"+getdop[0].doid+"'");
-                }
-
-                ////////Create Day order Log ////////////
-                var insertlogdata = [];
-                insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments_crm(insertlogdata);  
-                //////// change po status from 0 to 1 ///////////
+                }                
             }else{
                 error_poid.push(req.dopid_list[i]);
             }       
         }
+
+        ////////Create Day order Log ////////////
+        var insertlogdata = [];
+        insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments_crm(insertlogdata);  
+        //////// change po status from 0 to 1 ///////////
 
         if(error_poid.length>0){
             error_poid_msg= error_poid+" plz sort this dayorder products";
