@@ -764,7 +764,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                 let resobj = {
                     success: true,
                     status: true,
-                    message: "trip created Successfully 1"
+                    message: "trip created Successfully"
                 };
                 result(null, resobj);
             }else{
@@ -783,7 +783,8 @@ Logistics.trip_create =async function trip_create(req,result) {
                 await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
                     if(moveittripres.status==true){                
                         for (let i = 0; i < dayorderids.length; i++) {
-                            var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
+                            var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+                            var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7,moveit_assigned_time='"+currentdate+"' where id="+dayorderids[i];
                             var updatedayorder = await query(updatedayorderquery);    
                             
                             var historydata = [];
@@ -812,7 +813,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                         let resobj = {
                             success: true,
                             status: true,
-                            message: "trip created Successfully 2"
+                            message: "trip created Successfully"
                         };
                         result(null, resobj);
                     }else{
