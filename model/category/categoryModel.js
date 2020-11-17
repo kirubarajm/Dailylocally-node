@@ -871,7 +871,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < orderitems.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +orderitems[i].vpid +"' ");
+        var res1 = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname,sub1.name as sub_cat1,sub2.name as sub_cat2,cat.name as cat_name From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom  left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand  left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join  Category cat on cat.catid=sub1.catid left join SubcategoryL2 sub2 on sub2.scl2_id=pm.scl2_id  where pl.vpid = '" +orderitems[i].vpid +"' ");
       
         // console.log("delivery_date",orderitems[i].dayorderdate);
         // delivery_date.push(orderitems[i].dayorderdate);
@@ -1008,7 +1008,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
       for (let i = 0; i < subscription.length; i++) {
         // const res1 = await query("Select pt.*,cu.cuisinename From Product pt left join Cuisine cu on cu.cuisineid = pt.cuisine where pt.productid = '" +orderitems[i].productid +"'  ");
         
-        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand where pl.vpid = '" +subscription[i].vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,faa.favid,IF(faa.favid,'1','0') as isfav,br.brandname,sub1.name as sub_cat1,sub2.name as sub_cat2,cat.name as cat_name  From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join Fav faa on faa.vpid = pl.vpid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pm.brand left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join  Category cat on cat.catid=sub1.catid left join SubcategoryL2 sub2 on sub2.scl2_id=pm.scl2_id   where pl.vpid = '" +subscription[i].vpid +"' ");
     
   
         if (subscription_product_list[0].live_status == 0) {
@@ -1425,7 +1425,7 @@ Category.subscribeplan_by_pid = async function subscribeplan_by_pid(req,result) 
     if (req.vpid ) {
 
         
-        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,if(pm.uom=1 || pm.uom=7,pm.weight*1000,pm.weight) as  weight From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom where pl.vpid = '" +req.vpid +"' ");
+        var subscription_product_list = await query("Select pm.*,pl.*,um.name as unit,if(pm.uom=1 || pm.uom=7,pm.weight*1000,pm.weight) as  weight,sub1.name as sub_cat1,sub2.name as sub_cat2,cat.name as cat_name From ProductMaster as pm left join Product_live pl on pl.pid=pm.pid left join UOM um on um.uomid=pm.uom left join SubcategoryL1 sub1 on sub1.scl1_id=pm.scl1_id left join  Category cat on cat.catid=sub1.catid left join SubcategoryL2 sub2 on sub2.scl2_id=pm.scl2_id where pl.vpid = '" +req.vpid +"' ");
         if (subscription_product_list[0].live_status == 0) {
           subscription_product_list[0].availablity = false;
           tempmessage = tempmessage + subscription_product_list[0].Productname + ",";

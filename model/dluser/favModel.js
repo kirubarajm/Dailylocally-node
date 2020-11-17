@@ -134,7 +134,7 @@ Fav.read_a_product_by_userid = function read_a_product_by_userid(req,result) {
               brandquery = brandquery.slice(0, -2) + ")";
 
             //   if (req.catid !=0) {
-                var product_list = "Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  Fav fa  left join Product_live pl on fa.vpid = pl.vpid left join ProductMaster pt on pt.pid=pl.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand "
+                var product_list = "Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname,sub1.name as sub_cat1,sub2.name as sub_cat2,cat.name as cat_name from  Fav fa  left join Product_live pl on fa.vpid = pl.vpid left join ProductMaster pt on pt.pid=pl.pid left join SubcategoryL1 sub1 on sub1.scl1_id=pt.scl1_id left join Category cat on cat.catid=sub1.catid left join SubcategoryL2 sub2 on sub2.scl2_id=pt.scl2_id  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand "
 
             //   } else {
             //     var product_list = "   Select pt.*,fa.vpid,faa.favid,IF(faa.favid,'1','0') as isfav,um.name as unit,br.brandname from  ProductMaster pt left join Fav fa on fa.vpid = pt.pid  left join UOM um on um.uomid=pt.uom left join Fav faa on faa.vpid = pt.pid and faa.userid = '"+req.userid+"' left join Brand br on br.id=pt.brand  "

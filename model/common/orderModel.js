@@ -1152,7 +1152,7 @@ sql.query("select * from Dayorder  where id = ?", [req.id],async function(err,re
               New_comments.comments=cancel_comments;
               New_comments.done_by=req.moveit_userid;
               New_comments.type=4;
-              New_comments.done_type=0;
+              New_comments.done_type=2;
               // console.log(New_comments);
               OrderComments.create_OrderComments_crm(New_comments)
 
@@ -1217,14 +1217,14 @@ Order.moveit_kitchen_reached_status = function(req, result) {
             } else {
 
 
-              var cancel_comments = ' Zone reached by moveit'
+              var cancel_comments = 'Zone reached by moveit'
               var New_comments  ={};
               New_comments.doid=req.id;
               // New_comments.vpid=vpid[i];
               New_comments.comments=cancel_comments
               New_comments.done_by=req.moveit_user_id
               New_comments.type=4
-              New_comments.done_type=0
+              New_comments.done_type=2
 
         // console.log(New_comments);
 
@@ -1282,7 +1282,7 @@ Order.moveit_customer_location_reached_by_userid = function(req, result) {
               New_comments.comments=cancel_comments
               New_comments.done_by=req.moveit_user_id
               New_comments.type=4
-              New_comments.done_type=0
+              New_comments.done_type=2
                OrderComments.create_OrderComments_crm(New_comments)
 
               let resobj = {
@@ -1434,7 +1434,7 @@ Order.order_delivery_status_by_moveituser =async function(req, result) {
                 New_comments.comments=cancel_comments
                 New_comments.done_by=req.moveit_user_id
                 New_comments.type=4
-                New_comments.done_type=0
+                New_comments.done_type=2
                  OrderComments.create_OrderComments_crm(New_comments)
 
                 let resobj = {
