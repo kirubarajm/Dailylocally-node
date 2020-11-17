@@ -339,6 +339,7 @@ Notification.dlBulkPushNotification = async function(orderid,userid,pageid) {
 
       if (userid.image) {
         data.image=userid.image;
+        data.url=userid.image;
       }
     break;
   }

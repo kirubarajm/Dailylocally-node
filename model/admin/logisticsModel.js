@@ -219,7 +219,7 @@ Logistics.submit_qa_checklist =async function submit_qa_checklist(req,result) {
             if(updatedayorder.affectedRows>0){
                 ////////Create Day order Log ////////////
                 var insertlogdata = [];
-                insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":2,"done_type":1});
+                insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":2,"done_type":1});
                 DayOrderComment.create_OrderComments_crm(insertlogdata); 
                 
                 //////// Customer App Notification //////////
@@ -734,8 +734,8 @@ Logistics.trip_create =async function trip_create(req,result) {
             for (let k = 0; k < getoldorders.length; k++) {
                 oldorders.push(getoldorders[k].id);                
             }
-
-            var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7,zoneid="+req.zoneid+" where id IN("+dayorderids+")";
+            var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+            var updatedayorderquery = "update Dayorder set trip_id="+req.trip_id+",moveit_type=1,dayorderstatus=7,zoneid="+req.zoneid+",moveit_assigned_time='"+currentdate+"' where id IN("+dayorderids+")";
             var updatedayorder = await query(updatedayorderquery);  
             if(updatedayorder.affectedRows>0){
                 var updatedonebyquery = "update Moveit_trip set done_by="+req.done_by+" where tripid="+req.trip_id;
@@ -764,7 +764,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                 let resobj = {
                     success: true,
                     status: true,
-                    message: "trip created Successfully 1"
+                    message: "trip created Successfully"
                 };
                 result(null, resobj);
             }else{
@@ -783,7 +783,8 @@ Logistics.trip_create =async function trip_create(req,result) {
                 await MoveitTrip.createMovietTrip(moveittripdata[0],async function(err,moveittripres){
                     if(moveittripres.status==true){                
                         for (let i = 0; i < dayorderids.length; i++) {
-                            var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7 where id="+dayorderids[i];
+                            var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+                            var updatedayorderquery = "update Dayorder set trip_id="+moveittripres.result.insertId+",moveit_type=1,dayorderstatus=7,moveit_assigned_time='"+currentdate+"' where id="+dayorderids[i];
                             var updatedayorder = await query(updatedayorderquery);    
                             
                             var historydata = [];
@@ -812,7 +813,7 @@ Logistics.trip_create =async function trip_create(req,result) {
                         let resobj = {
                             success: true,
                             status: true,
-                            message: "trip created Successfully 2"
+                            message: "trip created Successfully"
                         };
                         result(null, resobj);
                     }else{
@@ -1108,40 +1109,36 @@ Logistics.dunzo_assign =async function dunzo_assign(req,result) {
             if(getdayorder.length>0){
                 if(getdayorder[0].dayorderstatus==6){
                     if(!getdayorder[0].moveit_type){
-                        var updatedayorderquery = "update Dayorder set moveit_type=2,dayorderstatus=7 where id="+req.doid[i];
-                        var updatedayorder = await query(updatedayorderquery);
-                        if(updatedayorder.affectedRows>0){
-                            var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
-                            var dunzodata = [];
-                            dunzodata.push({"doid":req.doid[i],"assigned_by":req.done_by,"assigned_at":currentdate,"zoneid":req.zoneid});
-                            await DunzoTrip.createDunzoTrip(dunzodata[0],async function(err,dunzodatares){ 
-                                if(dunzodatares.status==true){
-                                    var dunzohistorydata = [];
-                                    dunzohistorydata.push({"doid":req.doid[i],"type":1,"created_by":req.done_by,"zoneid":req.zoneid});
-                                    await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
-                                    let resobj = {
-                                        success: true,
-                                        status: true,
-                                        message: "Order successfully assigned to dunzo"
-                                    };
-                                   // result(null, resobj);
-                                }else{
-                                    let resobj = {
-                                        success: true,
-                                        status: false,
-                                        message: "something went wrong plz try again 1"
-                                    };
-                                   // result(null, resobj);
-                                }
-                            });                        
-                        }else{
-                            let resobj = {
-                                success: true,
-                                status: false,
-                                message: "something went wrong plz try again 2"
-                            };
-                           // result(null, resobj);
-                        }
+                        var currentdate = moment().format("YYYY-MM-DD HH:mm:ss");
+                        var dunzodata = [];
+                        dunzodata.push({"doid":req.doid[i],"assigned_by":req.done_by,"assigned_at":currentdate,"zoneid":req.zoneid});
+                        await DunzoTrip.createDunzoTrip(dunzodata[0],async function(err,dunzodatares){ 
+                            if(dunzodatares.status==true){
+                                var updatedayorderquery = "update Dayorder set trip_id="+dunzodatares.result.insertId+",moveit_type=2,dayorderstatus=7,moveit_assigned_time='"+currentdate+"' where id="+req.doid[i];
+                                var updatedayorder = await query(updatedayorderquery);
+
+                                var dunzohistorydata = [];
+                                dunzohistorydata.push({"doid":req.doid[i],"type":1,"created_by":req.done_by,"zoneid":req.zoneid});
+                                await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
+                                ////////Create Day order Log ////////////
+                                var insertlogdata = [];
+                                insertlogdata.push({"comments":"Moveit Assigned","done_by":req.done_by,"doid":req.doid[i],"type":2,"done_type":1});
+                                DayOrderComment.create_OrderComments_crm(insertlogdata); 
+                                let resobj = {
+                                    success: true,
+                                    status: true,
+                                    message: "Order successfully assigned to dunzo"
+                                };
+                                // result(null, resobj);
+                            }else{
+                                let resobj = {
+                                    success: true,
+                                    status: false,
+                                    message: "something went wrong plz try again 1"
+                                };
+                                // result(null, resobj);
+                            }
+                        });
                     }else{
                         let resobj = {
                             success: true,
@@ -1258,6 +1255,10 @@ Logistics.dunzo_delivered =async function dunzo_delivered(req,result) {
                     var dunzohistorydata = [];
                     dunzohistorydata.push({"doid":req.doid,"type":4,"created_by":req.done_by,"zoneid":req.zoneid});
                     await DunzoTripHistory.createDunzoTripHistory(dunzohistorydata[0],async function(err,dunzohistorydatares){ });
+                    ////////Create Day order Log ////////////
+                    var insertlogdata = [];
+                    insertlogdata.push({"comments":"Order Delivered","done_by":req.done_by,"doid":req.doid[i],"type":2,"done_type":1});
+                    DayOrderComment.create_OrderComments_crm(insertlogdata); 
                     updatedids.push(dayorders[i]);
                 }else{
                     errorids.push(dayorders[i]);

@@ -70,26 +70,39 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
         var whercon = "";
 
         if(req.categorysearch){
-            whercon = " and (cat.name LIKE '%"+req.categorysearch+"%' or cat.catid LIKE '"+req.categorysearch+"') ";
+            whercon = whercon+" and (cat.name LIKE '%"+req.categorysearch+"%' or cat.catid LIKE '"+req.categorysearch+"') ";
         }
         if(req.L1subcategorysearch){
-            whercon = " and (scl1.name LIKE '%"+req.L1subcategorysearch+"%' or scl1.scl1_id LIKE '"+req.L1subcategorysearch+"') ";
+            whercon = whercon+" and (scl1.name LIKE '%"+req.L1subcategorysearch+"%' or scl1.scl1_id LIKE '"+req.L1subcategorysearch+"') ";
         }
         if(req.l2subcategorysearch){
-            whercon = " and (scl2.name LIKE '%"+req.l2subcategorysearch+"%' or scl2.scl2_id LIKE '"+req.l2subcategorysearch+"') ";
+            whercon = whercon+" and (scl2.name LIKE '%"+req.l2subcategorysearch+"%' or scl2.scl2_id LIKE '"+req.l2subcategorysearch+"') ";
         }
         if(req.productsearch){
-            whercon = " and (dop.Productname LIKE '%"+req.productsearch+"%' or dop.vpid LIKE '"+req.productsearch+"') ";
+            whercon = whercon+" and (dop.Productname LIKE '%"+req.productsearch+"%' or dop.vpid LIKE '"+req.productsearch+"') ";
+        }
+        if(req.supplier_id){
+            whercon = whercon+" and supplier.vid="+req.supplier_id+" ";
         }
 
-        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pl.pid,dop.Productname,dop.product_productdetails,dop.product_uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as rate,pot.due_date,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+((vpm.base_price*vpm.other_charges)/100))) as amount from POtemp as pot left join Dayorder_products as dop on dop.prid=pot.prid left join SubcategoryL2 as scl2 on scl2.scl2_id=dop.product_scl1_id left join SubcategoryL1 as scl1 on scl1.scl1_id=dop.product_scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=dop.product_uom left join Vendor as ven on ven.vid=pot.vid left join Product_live as pl on pl.vpid=pot.vpid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid  where pot.delete_status=0 and pot.zoneid="+req.zoneid+" "+whercon+" group by pot.tempid";
-        console.log(getwaitingpouery);
+        var getwaitingpouery = "select pot.tempid,pot.prid,cat.catid,cat.name as catagory_name,scl1.scl1_id,scl1.name as subcatL1name,scl2.scl2_id,scl2.name as subcatL2name,pot.vpid,pl.pid,group_concat(supplier.vid) as supplier_id,group_concat(supplier.name) as supplier_name,dop.Productname,dop.product_productdetails,dop.product_uom as uomid,uom.name as uom_name,pot.actual_quantity,pot.requested_quantity,pot.vid,ven.name as vendor_name,(vpm.base_price+((vpm.base_price*vpm.other_charges)/100)) as rate,pot.due_date,vpm.other_charges,pot.buyer_comment,(pot.requested_quantity*(vpm.base_price+((vpm.base_price*vpm.other_charges)/100))) as amount from POtemp as pot left join Dayorder_products as dop on dop.prid=pot.prid left join SubcategoryL2 as scl2 on scl2.scl2_id=dop.product_scl1_id left join SubcategoryL1 as scl1 on scl1.scl1_id=dop.product_scl1_id left join Category as cat on cat.catid=scl1.catid left join UOM as uom on uom.uomid=dop.product_uom left join Vendor as ven on ven.vid=pot.vid left join Product_live as pl on pl.vpid=pot.vpid left join Vendor_products_mapping as vpm on vpm.pid=pl.pid left join Vendor as supplier on supplier.vid=vpm.vid where pot.delete_status=0 and pot.zoneid="+req.zoneid+" "+whercon+" group by pot.tempid";
+        // console.log(getwaitingpouery);
 
         var getwaitingpo = await query(getwaitingpouery);
         if(getwaitingpo.length > 0){
+            var vendorids = [];
+            for (let i = 0; i < getwaitingpo.length; i++) {
+                vendorids.push(getwaitingpo[i].pid);                
+            }
+            
+            var getvendorlistqouery = "select ven.vid,ven.name from Vendor as ven left join Vendor_products_mapping as vpm on vpm.vid=ven.vid left join ProductMaster as pm on pm.pid=vpm.pid where pm.pid in("+vendorids+") group by ven.vid";
+            var getvendorlist = await query(getvendorlistqouery);
+
+
             let resobj = {
                 success: true,
                 status: true,
+                vendorlist:getvendorlist,
                 result: getwaitingpo
             };
             result(null, resobj);
@@ -97,6 +110,7 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
             let resobj = {
                 success: true,
                 status: false,
+                vendorlist: [],
                 message: "no records found"
             };
             result(null, resobj);
@@ -105,6 +119,7 @@ SCM.waiting_po_list =async function waiting_po_list(req,result) {
         let resobj = {
             success: true,
             status: false,
+            vendorlist: [],
             message: "check your post values"
         };
         result(null, resobj);
@@ -2289,17 +2304,17 @@ SCM.move_to_qa =async function move_to_qa(req,result) {
 
                 if(getdop[0].revoke_flag==1){
                     var updateDO_revoke = await query("update Dayorder set revoke_flag=0 where id = '"+getdop[0].doid+"'");
-                }
-
-                ////////Create Day order Log ////////////
-                var insertlogdata = [];
-                insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
-                DayOrderComment.create_OrderComments_crm(insertlogdata);  
-                //////// change po status from 0 to 1 ///////////
+                }                
             }else{
                 error_poid.push(req.dopid_list[i]);
             }       
         }
+
+        ////////Create Day order Log ////////////
+        var insertlogdata = [];
+        insertlogdata.push({"comments":"moved from sorting to qc","done_by":req.done_by,"doid":getdop[0].doid,"type":1,"done_type":1});
+        DayOrderComment.create_OrderComments_crm(insertlogdata);  
+        //////// change po status from 0 to 1 ///////////
 
         if(error_poid.length>0){
             error_poid_msg= error_poid+" plz sort this dayorder products";
@@ -2451,7 +2466,7 @@ SCM.quality_check_product =async function quality_check_product(req,result) {
 
         //////Create Day order Log ////////////
         var insertlogdata = [];
-        insertlogdata.push({"comments":"QA Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
+        insertlogdata.push({"comments":"QC Completed","done_by":req.done_by,"doid":req.doid,"type":1,"done_type":1});
         DayOrderComment.create_OrderComments_crm(insertlogdata);  
 
         //////// Customer App Notification //////////
