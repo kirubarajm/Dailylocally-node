@@ -91,7 +91,7 @@ OrderComments.day_order_log_list = function day_order_log_list(req, result) {
 
             res1[i].usertype =  "L4 - Super admin"
             if (get_details.length !=0) {
-            res1[i].name= "Dhanesh"
+            // res1[i].name= "Dhanesh"
             }
           }else{
 
