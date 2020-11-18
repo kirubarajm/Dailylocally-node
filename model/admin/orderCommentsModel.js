@@ -89,9 +89,10 @@ OrderComments.day_order_log_list = function day_order_log_list(req, result) {
 
             let get_details = await query(" select au.name,aur.usertype from Admin_users au left join Admin_user_roles aur on aur.userroleid=au.user_roleid where au.admin_userid='"+res1[i].done_by+"' ");
 
-            res1[i].usertype =  "L4 - Super admin"
+            
             if (get_details.length !=0) {
-            res1[i].name= "Dhanesh"
+              res1[i].usertype =  get_details[0].usertype;
+            res1[i].name= get_details[0].name;
             }
           }else{
 
