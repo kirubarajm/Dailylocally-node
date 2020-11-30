@@ -228,13 +228,17 @@ SCM.product_vendor_assign =async function product_vendor_assign(req,result) {
             var getpotemp = await query(getpotempquery); 
 
             if(getpotemp.length>0){
-                if(getpotemp[0].requested_quantity && getpotemp[0].requested_quantity > 0){
-                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"' where tempid in("+req.tempid[i]+")";
-                    var updatepotemp = await query(updatepotempquery); 
-                }else{
-                    var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"',requested_quantity="+getpotemp[0].actual_quantity+" where tempid in("+req.tempid[i]+")";
-                    var updatepotemp = await query(updatepotempquery);
-                }
+                var checkvendorquery = "select * from Vendor_products_mapping where pid=(select pid from Product_live where vpid=(select distinct vpid from POtemp where tempid="+req.tempid[i]+")) and vid="+req.vid+" ";
+                var checkvendor = await query(checkvendorquery);
+                if(checkvendor.length>0){
+                    if(getpotemp[0].requested_quantity && getpotemp[0].requested_quantity > 0){
+                        var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"' where tempid in("+req.tempid[i]+")";
+                        var updatepotemp = await query(updatepotempquery); 
+                    }else{
+                        var updatepotempquery = "update POtemp set vid="+req.vid+",due_date='"+due_date+"',buyer_comment='"+buyer_comment+"',vendor_assigned_by='"+req.done_by+"',requested_quantity="+getpotemp[0].actual_quantity+" where tempid in("+req.tempid[i]+")";
+                        var updatepotemp = await query(updatepotempquery);
+                    }
+                }                
             }
         }
         
@@ -1185,7 +1189,7 @@ SCM.po_pdf= async function po_pdf(req,result) {
         }       
         sumof = parseInt(sumof);
         var sumofvalue = converter.toWords(sumof);
-    
+    // console.log("sumof==>"+sumof+"sumofvalue==>"+sumofvalue);
         if(getchecklist.length != 0){
             var options = {
                 format: "A4",
