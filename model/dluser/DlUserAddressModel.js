@@ -113,7 +113,7 @@ UserAddress.createUserAddress = function createUserAddress(new_address, result) 
 };
 
 UserAddress.getaddressById = function getaddressById(userId, result) {
-    sql.query("Select * from Address where userid = ? and delete_status = 0", userId,async function (err, res) {             
+    sql.query("Select * from Address where userid = ? and delete_status = 0 and address_default=1", userId,async function (err, res) {             
         if(err) {
             console.log("error: ", err);
             result(err, null);
