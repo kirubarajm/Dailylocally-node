@@ -821,7 +821,6 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   var isAvaliableSubscriptionItem = true;
   var calculationdetails = {};
   var couponstatus = true;
-  var isAvaliablekitchen = true;
   var isAvaliablezone = true;
   var day = moment().format("YYYY-MM-DD HH:mm:ss");
   var startdate =  moment().format("YYYY-MM-DD");
@@ -840,7 +839,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
   let delivery_date = [];
   let community_user_status = false;
   let cod_available = false;
- 
+  let enable_cod = true;
  
 
     if (currenthour < 24) {
@@ -862,6 +861,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
     cod_available = true;
   }else{
     userdetails[0].status=0;    
+    cod_available = true;
   }
 
   if (userdetails.length !==0) {   
@@ -1000,9 +1000,10 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
 
 
     if (subscription)  {
-
-      // console.log(cod_available);
-        if (subscription !=0) {       
+      // console.log(cod_available);  
+      // console.log(subscription.length);  
+        if (subscription.length !=0) {   
+           
           cod_available=false;
         }
       for (let i = 0; i < subscription.length; i++) {
@@ -1160,7 +1161,7 @@ Category.read_a_cartdetails = async function read_a_cartdetails(req,orderitems,s
           res2[0].community_user_status=community_user_status;
           res2[0].cod_available=cod_available;
           res2[0].cod_unavailable_info ="Cash on delivery isn't available for subscription orders";
-         
+          res2[0].enable_cod = enable_cod
           
           product_orginal_price = totalamount;
 
