@@ -166,8 +166,8 @@ Dluser.dl_user_send_otp = function dl_user_send_otp(newUser, result) {
     ". Note: Please DO NOT SHARE this OTP with anyone. ";
    }
 
-    console.log("otpurl",otpurl);
-  var virtualkey = newUser.virtualkey || 0;0.,
+ 
+  var virtualkey = newUser.virtualkey || 0;
   // var otpurl = "https://www.google.com/";
   if (virtualkey==1) {
 
